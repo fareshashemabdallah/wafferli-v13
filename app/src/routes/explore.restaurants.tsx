@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Field, NativeSelect } from "@/components/Field";
 import { filterPlaces, searchAreas, type OpenPlace } from "@/lib/openPlaces";
 import { getGeoapifyPlaces, googleMapsSearchUrl } from "@/lib/freePlaces";
+import { getCuisine, getCuisineQuery, getVisibleCuisines } from "@/lib/cuisines";
 
 export const Route = createFileRoute("/explore/restaurants")({
   head: () => ({
@@ -37,6 +38,8 @@ function Restaurants() {
   const [area, setArea] = useState("abdoun");
   const [kind, setKind] = useState("all");
   const [cuisine, setCuisine] = useState("all");
+  const [cuisineSearch, setCuisineSearch] = useState("");
+  const [customCuisine, setCustomCuisine] = useState("");
   const [words, setWords] = useState("");
   const [shisha, setShisha] = useState(false);
   const [manual, setManual] = useState("");
@@ -49,10 +52,14 @@ function Restaurants() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [keyMessage, setKeyMessage] = useState("");
-  const shown = useMemo(()=>filterPlaces(loaded,words,kind,cuisine),[loaded,words,kind,cuisine]);
-  const mapUrl = googleMapsSearchUrl(area,kind,cuisine,words,shisha);
+  const cuisineTerm = cuisine === "custom" ? customCuisine.trim() : cuisine === "all" ? "all" : getCuisineQuery(cuisine);
+  const cuisineGroups = useMemo(()=>getVisibleCuisines(cuisineSearch),[cuisineSearch]);
+  const shown = useMemo(()=>filterPlaces(loaded,words,kind,cuisineTerm.toLowerCase()),[loaded,words,kind,cuisineTerm]);
+  const mapUrl = googleMapsSearchUrl(area,kind,cuisine,words,shisha,customCuisine);
+  const jordanUrl = googleMapsSearchUrl("jordan",kind,cuisine,words,shisha,customCuisine);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (area === "jordan") { setError("For in-app listings, please choose a neighborhood. Google Maps supports searching across all Jordan."); return; }
     if (!apiKey) { setError("Connect a free Geoapify key below for in-app listings, or choose Open Google Maps."); return; }
     setBusy(true); setError(""); setSearched(false);
     try {
@@ -83,23 +90,40 @@ function Restaurants() {
         Search Google Maps without any API key, or connect a personal free Geoapify key to show actual mapped venues <strong>inside</strong> Dabberna. This is place lookup, not yet AI.
       </Notice>
       <div className="card-soft mt-4 space-y-3 p-4">
-        <Field label="Neighborhood">
+        <Field label="Location">
           <NativeSelect value={area} onChange={e=>{setArea(e.target.value);setLoaded([]);setSearched(false);}}>
             {searchAreas.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}
+            <option value="jordan">All Jordan · كل الأردن (Google Maps)</option>
           </NativeSelect>
         </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Place type">
-            <NativeSelect value={kind} onChange={e=>setKind(e.target.value)}>
-              <option value="all">Restaurants & cafés</option><option value="restaurant">Restaurants</option><option value="cafe">Cafés</option>
-            </NativeSelect>
-          </Field>
-          <Field label="Tagged cuisine">
-            <NativeSelect value={cuisine} onChange={e=>setCuisine(e.target.value)}>
-              <option value="all">Any cuisine</option><option value="lebanese">Lebanese</option><option value="arab">Arabic</option><option value="italian">Italian</option>
-            </NativeSelect>
-          </Field>
-        </div>
+        <Field label="Place type">
+          <NativeSelect value={kind} onChange={e=>setKind(e.target.value)}>
+            <option value="all">Restaurants & cafés</option><option value="restaurant">Restaurants</option><option value="cafe">Cafés</option>
+          </NativeSelect>
+        </Field>
+        <Field label="Find a cuisine or food type · ابحث عن المطبخ">
+          <Input value={cuisineSearch} onChange={e=>{setCuisineSearch(e.target.value);setCuisine("all");}}
+            maxLength={45} placeholder="e.g. Yemeni, كوري, sushi, مشاوي" />
+        </Field>
+        <Field label="Cuisine / food type · نوع المطبخ">
+          <NativeSelect value={cuisine} onChange={e=>setCuisine(e.target.value)}>
+            <option value="all">All cuisines · جميع المطابخ</option>
+            {cuisineGroups.map(group=><optgroup key={group.label} label={group.label}>
+              {group.options.map(option=><option key={option.id} value={option.id}>{option.en} · {option.ar}</option>)}
+            </optgroup>)}
+            <option value="custom">Other / type your own · غير ذلك</option>
+          </NativeSelect>
+        </Field>
+        {cuisine==="custom" && <Field label="Your cuisine or food request · اكتب نوع الأكل">
+          <Input value={customCuisine} onChange={e=>setCustomCuisine(e.target.value)}
+            maxLength={80} placeholder="e.g. Tibetan, مقلوبة, gluten-free cake" />
+        </Field>}
+        <p className="text-xs text-muted-foreground">
+          {cuisine==="all" ? "Choose any cuisine or search the 140+ Jordan directory cuisine and dining categories." :
+          cuisine==="custom" ? "Your custom cuisine will be included in the live Google Maps search." :
+          `Selected: ${getCuisine(cuisine)?.en ?? ""} · ${getCuisine(cuisine)?.ar ?? ""}. Google Maps will search for this in the chosen area.`}
+          {" "}These categories reflect Jordan food directories, but no individual venue is guaranteed.
+        </p>
         <Field label="Name or search words">
           <Input value={words} onChange={e=>setWords(e.target.value)} maxLength={70} placeholder="Lebanese restaurant, mezze, shisha, ..." />
         </Field>
@@ -111,7 +135,10 @@ function Restaurants() {
           className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 text-center font-semibold text-primary-foreground">
           <MapPin className="size-4"/> Open real Google Maps results <ExternalLink className="size-4"/>
         </a>
-        <p className="text-xs text-muted-foreground">Free and no API key. This opens Google Maps; ratings and details stay there, not inside Dabberna.</p>
+        {area !== "jordan" && <a href={jordanUrl} target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold text-brand">
+          <Search className="size-4" /> Search this cuisine across all Jordan <ExternalLink className="size-3.5"/>
+        </a>}
+        <p className="text-xs text-muted-foreground">No API key needed for Google Maps. If a cuisine has no results in a neighborhood, search all Jordan. Restaurant availability and descriptions come from Google Maps, not from a verified Dabberna catalogue.</p>
       </div>
 
       <section className="card-soft mt-4 space-y-3 p-4">
@@ -132,12 +159,12 @@ function Restaurants() {
         </div>
         {keyMessage && <p className="text-xs text-brand" role="status">{keyMessage}</p>}
         <form onSubmit={submit}>
-          <Button type="submit" className="h-11 w-full" disabled={busy || !apiKey}>
-            <Search className="size-4"/>{busy?"Searching Geoapify…":apiKey?"Find inside Dabberna":"Add free key to enable in-app search"}
+          <Button type="submit" className="h-11 w-full" disabled={busy || !apiKey || area==="jordan"}>
+            <Search className="size-4"/>{busy?"Searching Geoapify…":area==="jordan"?"Choose a neighborhood for in-app results":apiKey?"Find inside Dabberna":"Add free key to enable in-app search"}
           </Button>
         </form>
         <p className="text-xs text-muted-foreground">
-          Filters apply to returned places. Cuisine and argeeleh may be missing from map records; a blank match doesn't prove a venue doesn't offer them.
+          Cuisine filters rely on venue tags, which are often missing; a blank match doesn't prove the cuisine is unavailable. For best cuisine-specific discovery, choose Google Maps above.
           Results are cached for 24 hours to minimize free API usage.
         </p>
       </section>
