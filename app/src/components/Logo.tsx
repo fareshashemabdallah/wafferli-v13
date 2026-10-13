@@ -1,19 +1,16 @@
+import { useI18n } from "@/lib/i18n";
+
+/** Dabberna — Arabic-first identity, also readable in English. */
 export function Logo({ className = "" }: { className?: string }) {
+  const { lang } = useI18n();
   return (
     <span className={`inline-flex items-center gap-2 ${className}`} dir="ltr">
-      <svg viewBox="0 0 40 40" className="size-8" aria-hidden>
+      <svg viewBox="0 0 40 40" className="size-8 shrink-0" aria-hidden="true">
         <rect width="40" height="40" rx="12" className="fill-brand" />
-        <path
-          d="M9 14l4.5 13 4-9.5 4 9.5L26 14"
-          className="stroke-lime"
-          strokeWidth="3.2"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx="30.5" cy="14" r="2.4" className="fill-lime" />
+        <path d="M12 10v20h7c7 0 11-4.5 11-10s-4-10-11-10h-7z" className="stroke-lime" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="30.7" cy="10.5" r="2.2" className="fill-lime" />
       </svg>
-      <span className="font-display text-xl font-semibold tracking-tight text-brand">dabberna</span>
+      <span className="font-display text-xl font-semibold tracking-tight text-brand" dir={lang === "ar" ? "rtl" : "ltr"}>{lang === "ar" ? "دبّرنا" : "dabberna"}</span>
     </span>
   );
 }
