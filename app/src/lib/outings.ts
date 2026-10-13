@@ -58,6 +58,6 @@ export async function getAdmin(token: string): Promise<VoteView | null> {
   return (data as VoteView | null) ?? null;
 }
 
-export const voteUrl = (t: string) => `${window.location.origin}/vote/${t}`;
+export const voteUrl = (t: string) => `${window.location.origin}${import.meta.env.BASE_URL}#/vote/${encodeURIComponent(t)}`;
 export const waLink = (title: string, url: string) =>
   `https://wa.me/?text=${encodeURIComponent(`Vote for where we go: ${title}\n${url}`)}`;

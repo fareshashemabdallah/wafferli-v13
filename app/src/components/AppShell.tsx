@@ -31,7 +31,7 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
     <div className="min-h-dvh md:flex">
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-e bg-sidebar p-5 md:flex">
-        <Link to="/" aria-label="wafferli home"><Logo /></Link>
+        <Link to="/" aria-label="dabberna home"><Logo /></Link>
         <nav className="mt-8 flex flex-col gap-1" aria-label="Main">
           {tabs.map(({ to, key, icon: Icon, exact }) => (
             <Link
@@ -56,7 +56,7 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="pt-safe sticky top-0 z-30 border-b bg-background/85 backdrop-blur md:hidden">
           <div className="flex h-14 items-center justify-between px-4">
-            <Link to="/" aria-label="wafferli home"><Logo /></Link>
+            <Link to="/" aria-label="dabberna home"><Logo /></Link>
             <div className="flex items-center gap-2">
               <Link to="/about" aria-label={t("about")} className="grid size-10 place-items-center rounded-full border bg-card">
                 <Info className="size-4" />

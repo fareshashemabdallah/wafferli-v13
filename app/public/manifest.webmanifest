@@ -1,1 +1,9 @@
-{"name":"Wafferli V13 — Personal Pilot","short_name":"Wafferli","start_url":"/","display":"standalone","background_color":"#f6f8f6","theme_color":"#145b4d","icons":[{"src":"/favicon.ico","sizes":"64x64","type":"image/x-icon"}]}
+{
+  "name": "Dabberna | دبّرنا — Personal Pilot",
+  "short_name": "Dabberna",
+  "start_url": "/wafferli-v13/",
+  "display": "standalone",
+  "background_color": "#f6f8f6",
+  "theme_color": "#145b4d",
+  "icons": []
+}

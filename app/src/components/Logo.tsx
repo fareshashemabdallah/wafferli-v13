@@ -13,7 +13,7 @@ export function Logo({ className = "" }: { className?: string }) {
         />
         <circle cx="30.5" cy="14" r="2.4" className="fill-lime" />
       </svg>
-      <span className="font-display text-xl font-semibold tracking-tight text-brand">wafferli</span>
+      <span className="font-display text-xl font-semibold tracking-tight text-brand">dabberna</span>
     </span>
   );
 }
