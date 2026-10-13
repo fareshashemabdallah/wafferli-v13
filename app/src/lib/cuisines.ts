@@ -1,6 +1,6 @@
 /**
  * Jordan-specific place discovery options. Covers cuisine and restaurant/food style
- * labels found in Jordanian delivery directories; availability varies by area.
+ * labels found in Jordanian delivery directories; availability varies by area; a directory category does not guarantee an active venue.
  * This taxonomy is NOT a list of verified restaurants or venue cuisine tags.
  */
 export type CuisineOption = { id: string; en: string; ar: string; query: string };
@@ -409,166 +409,10 @@ export const cuisineGroups: CuisineGroup[] = [
     "label": "Dish, dining & dietary styles · أكلات وأنواع الطعام",
     "options": [
       {
-        "id": "grills",
-        "en": "Grills / BBQ",
-        "ar": "مشاوي",
-        "query": "BBQ grills"
-      },
-      {
-        "id": "kebab",
-        "en": "Kebab",
-        "ar": "كباب",
-        "query": "Kebab"
-      },
-      {
-        "id": "shawarma",
-        "en": "Shawarma",
-        "ar": "شاورما",
-        "query": "Shawarma"
-      },
-      {
-        "id": "falafel",
-        "en": "Falafel",
-        "ar": "فلافل",
-        "query": "Falafel"
-      },
-      {
-        "id": "foul",
-        "en": "Foul / beans",
-        "ar": "فول",
-        "query": "Foul"
-      },
-      {
-        "id": "mandi",
-        "en": "Mandi",
-        "ar": "مندي",
-        "query": "Mandi"
-      },
-      {
-        "id": "machboos",
-        "en": "Machboos",
-        "ar": "مكبوس",
-        "query": "Machboos"
-      },
-      {
-        "id": "biryani",
-        "en": "Biryani",
-        "ar": "برياني",
-        "query": "Biryani"
-      },
-      {
-        "id": "mezze",
-        "en": "Mezze",
-        "ar": "مقبلات",
-        "query": "Mezze"
-      },
-      {
-        "id": "manaqeesh",
-        "en": "Manaqeesh",
-        "ar": "مناقيش",
-        "query": "Manaqeesh"
-      },
-      {
-        "id": "saj",
-        "en": "Saj",
-        "ar": "صاج",
-        "query": "Saj"
-      },
-      {
-        "id": "burger",
-        "en": "Burgers",
-        "ar": "برغر",
-        "query": "Burgers"
-      },
-      {
-        "id": "pizza",
-        "en": "Pizza",
-        "ar": "بيتزا",
-        "query": "Pizza"
-      },
-      {
-        "id": "pasta",
-        "en": "Pasta",
-        "ar": "باستا",
-        "query": "Pasta"
-      },
-      {
-        "id": "sandwich",
-        "en": "Sandwiches",
-        "ar": "ساندويشات",
-        "query": "Sandwiches"
-      },
-      {
-        "id": "wraps",
-        "en": "Wraps",
-        "ar": "راب",
-        "query": "Wraps"
-      },
-      {
-        "id": "fried-chicken",
-        "en": "Fried chicken",
-        "ar": "دجاج مقلي",
-        "query": "Fried chicken"
-      },
-      {
-        "id": "chicken-wings",
-        "en": "Chicken wings",
-        "ar": "أجنحة دجاج",
-        "query": "Chicken wings"
-      },
-      {
-        "id": "steak",
-        "en": "Steakhouse",
-        "ar": "ستيك",
-        "query": "Steakhouse"
-      },
-      {
-        "id": "seafood",
-        "en": "Seafood",
-        "ar": "مأكولات بحرية",
-        "query": "Seafood"
-      },
-      {
-        "id": "fish-and-chips",
-        "en": "Fish & chips",
-        "ar": "سمك وبطاطا",
-        "query": "Fish and chips"
-      },
-      {
-        "id": "breakfast",
-        "en": "Breakfast & brunch",
-        "ar": "فطور وبرنش",
-        "query": "Breakfast & brunch"
-      },
-      {
-        "id": "bakery",
-        "en": "Bakery",
-        "ar": "مخبوزات",
-        "query": "Bakery"
-      },
-      {
-        "id": "pies",
-        "en": "Pies",
-        "ar": "فطائر",
-        "query": "Pies"
-      },
-      {
-        "id": "cafe",
-        "en": "Café / Coffeehouse",
-        "ar": "مقهى",
-        "query": "Cafe"
-      },
-      {
-        "id": "coffee",
-        "en": "Coffee & tea",
-        "ar": "قهوة وشاي",
-        "query": "Coffee shop"
-      },
-      {
-        "id": "desserts",
-        "en": "Desserts",
-        "ar": "حلويات",
-        "query": "Desserts"
+        "id": "acai",
+        "en": "Açaí bowls",
+        "ar": "أساي",
+        "query": "Açaí bowls"
       },
       {
         "id": "arabic-sweets",
@@ -577,22 +421,112 @@ export const cuisineGroups: CuisineGroup[] = [
         "query": "Arabic sweets"
       },
       {
+        "id": "bagel",
+        "en": "Bagels",
+        "ar": "بيغل",
+        "query": "Bagels"
+      },
+      {
+        "id": "baked-potatoes",
+        "en": "Baked potatoes",
+        "ar": "بطاطا مشوية",
+        "query": "Baked potatoes"
+      },
+      {
+        "id": "bakery",
+        "en": "Bakery",
+        "ar": "مخبوزات",
+        "query": "Bakery"
+      },
+      {
+        "id": "drinks",
+        "en": "Beverages",
+        "ar": "مشروبات",
+        "query": "Beverages"
+      },
+      {
+        "id": "biryani",
+        "en": "Biryani",
+        "ar": "برياني",
+        "query": "Biryani"
+      },
+      {
+        "id": "breakfast",
+        "en": "Breakfast & brunch",
+        "ar": "فطور وبرنش",
+        "query": "Breakfast & brunch"
+      },
+      {
+        "id": "bubble-tea",
+        "en": "Bubble tea",
+        "ar": "بابل تي",
+        "query": "Bubble tea"
+      },
+      {
+        "id": "burger",
+        "en": "Burgers",
+        "ar": "برغر",
+        "query": "Burgers"
+      },
+      {
+        "id": "burrito",
+        "en": "Burritos",
+        "ar": "بوريتو",
+        "query": "Burritos"
+      },
+      {
+        "id": "cafe",
+        "en": "Café / Coffeehouse",
+        "ar": "مقهى",
+        "query": "Cafe"
+      },
+      {
+        "id": "cafeteria",
+        "en": "Cafeteria",
+        "ar": "كافتيريا",
+        "query": "Cafeteria"
+      },
+      {
         "id": "cakes",
         "en": "Cakes",
         "ar": "كيك",
         "query": "Cakes"
       },
       {
-        "id": "ice-cream",
-        "en": "Ice cream / Gelato",
-        "ar": "آيس كريم",
-        "query": "Ice cream"
+        "id": "calzone",
+        "en": "Calzone",
+        "ar": "كالزوني",
+        "query": "Calzone"
       },
       {
-        "id": "waffles",
-        "en": "Waffles",
-        "ar": "وافل",
-        "query": "Waffles"
+        "id": "chicken",
+        "en": "Chicken",
+        "ar": "دجاج",
+        "query": "Chicken"
+      },
+      {
+        "id": "chicken-wings",
+        "en": "Chicken wings",
+        "ar": "أجنحة دجاج",
+        "query": "Chicken wings"
+      },
+      {
+        "id": "chocolate",
+        "en": "Chocolate desserts",
+        "ar": "حلويات شوكولاتة",
+        "query": "Chocolate desserts"
+      },
+      {
+        "id": "churros",
+        "en": "Churros",
+        "ar": "تشوروز",
+        "query": "Churros"
+      },
+      {
+        "id": "coffee",
+        "en": "Coffee & tea",
+        "ar": "قهوة وشاي",
+        "query": "Coffee shop"
       },
       {
         "id": "crepes",
@@ -601,28 +535,88 @@ export const cuisineGroups: CuisineGroup[] = [
         "query": "Crepes"
       },
       {
-        "id": "salad",
-        "en": "Salads",
-        "ar": "سلطات",
-        "query": "Salads"
+        "id": "curry",
+        "en": "Curry",
+        "ar": "كاري",
+        "query": "Curry"
       },
       {
-        "id": "healthy",
-        "en": "Healthy",
-        "ar": "طعام صحي",
-        "query": "Healthy food"
+        "id": "desserts",
+        "en": "Desserts",
+        "ar": "حلويات",
+        "query": "Desserts"
       },
       {
-        "id": "vegan",
-        "en": "Vegan",
-        "ar": "نباتي صرف",
-        "query": "Vegan restaurant"
+        "id": "doner",
+        "en": "Döner",
+        "ar": "دونر",
+        "query": "Döner"
       },
       {
-        "id": "vegetarian",
-        "en": "Vegetarian",
-        "ar": "نباتي",
-        "query": "Vegetarian restaurant"
+        "id": "donuts",
+        "en": "Donuts",
+        "ar": "دونات",
+        "query": "Donuts"
+      },
+      {
+        "id": "dumplings",
+        "en": "Dumplings / Dim sum",
+        "ar": "دامبلينغ",
+        "query": "Dumplings"
+      },
+      {
+        "id": "falafel",
+        "en": "Falafel",
+        "ar": "فلافل",
+        "query": "Falafel"
+      },
+      {
+        "id": "fast-food",
+        "en": "Fast food",
+        "ar": "وجبات سريعة",
+        "query": "Fast food"
+      },
+      {
+        "id": "fish",
+        "en": "Fish",
+        "ar": "سمك",
+        "query": "Fish"
+      },
+      {
+        "id": "fish-and-chips",
+        "en": "Fish & chips",
+        "ar": "سمك وبطاطا",
+        "query": "Fish and chips"
+      },
+      {
+        "id": "foul",
+        "en": "Foul / beans",
+        "ar": "فول",
+        "query": "Foul"
+      },
+      {
+        "id": "juices",
+        "en": "Fresh juices",
+        "ar": "عصائر",
+        "query": "Fresh juices"
+      },
+      {
+        "id": "fried-chicken",
+        "en": "Fried chicken",
+        "ar": "دجاج مقلي",
+        "query": "Fried chicken"
+      },
+      {
+        "id": "frozen-yogurt",
+        "en": "Frozen yogurt",
+        "ar": "لبن مثلج",
+        "query": "Frozen yogurt"
+      },
+      {
+        "id": "gelato",
+        "en": "Gelato",
+        "ar": "جيلاتو",
+        "query": "Gelato"
       },
       {
         "id": "gluten-free",
@@ -631,10 +625,76 @@ export const cuisineGroups: CuisineGroup[] = [
         "query": "Gluten-free restaurant"
       },
       {
+        "id": "grills",
+        "en": "Grills / BBQ",
+        "ar": "مشاوي",
+        "query": "BBQ grills"
+      },
+      {
+        "id": "healthy",
+        "en": "Healthy",
+        "ar": "طعام صحي",
+        "query": "Healthy food"
+      },
+      {
+        "id": "hot-dogs",
+        "en": "Hot dogs",
+        "ar": "هوت دوغ",
+        "query": "Hot dogs"
+      },
+      {
+        "id": "ice-cream",
+        "en": "Ice cream / Gelato",
+        "ar": "آيس كريم",
+        "query": "Ice cream"
+      },
+      {
+        "id": "kebab",
+        "en": "Kebab",
+        "ar": "كباب",
+        "query": "Kebab"
+      },
+      {
         "id": "keto",
         "en": "Keto",
         "ar": "كيتو",
         "query": "Keto food"
+      },
+      {
+        "id": "koshary",
+        "en": "Koshary",
+        "ar": "كشري",
+        "query": "Koshary"
+      },
+      {
+        "id": "machboos",
+        "en": "Machboos",
+        "ar": "مكبوس",
+        "query": "Machboos"
+      },
+      {
+        "id": "manaqeesh",
+        "en": "Manaqeesh",
+        "ar": "مناقيش",
+        "query": "Manaqeesh"
+      },
+      {
+        "id": "mandi",
+        "en": "Mandi",
+        "ar": "مندي",
+        "query": "Mandi"
+      },
+      {
+        "id": "mezze",
+        "en": "Mezze",
+        "ar": "مقبلات",
+        "query": "Mezze"
+      },
+      {
+        "id": "milkshakes",
+        "en": "Milkshakes",
+        "ar": "ميلك شيك",
+        "query": "Milkshakes"
       },
       {
         "id": "noodles",
@@ -643,16 +703,136 @@ export const cuisineGroups: CuisineGroup[] = [
         "query": "Noodles"
       },
       {
+        "id": "organic",
+        "en": "Organic food",
+        "ar": "أكل عضوي",
+        "query": "Organic food"
+      },
+      {
+        "id": "paleo",
+        "en": "Paleo",
+        "ar": "باليو",
+        "query": "Paleo"
+      },
+      {
+        "id": "pancakes",
+        "en": "Pancakes",
+        "ar": "بان كيك",
+        "query": "Pancakes"
+      },
+      {
+        "id": "pasta",
+        "en": "Pasta",
+        "ar": "باستا",
+        "query": "Pasta"
+      },
+      {
+        "id": "pastries",
+        "en": "Pastries",
+        "ar": "معجنات",
+        "query": "Pastries"
+      },
+      {
+        "id": "pies",
+        "en": "Pies",
+        "ar": "فطائر",
+        "query": "Pies"
+      },
+      {
+        "id": "pizza",
+        "en": "Pizza",
+        "ar": "بيتزا",
+        "query": "Pizza"
+      },
+      {
+        "id": "poke",
+        "en": "Poke bowls",
+        "ar": "بوكي",
+        "query": "Poke bowls"
+      },
+      {
         "id": "ramen",
         "en": "Ramen",
         "ar": "رامن",
         "query": "Ramen"
       },
       {
-        "id": "dumplings",
-        "en": "Dumplings / Dim sum",
-        "ar": "دامبلينغ",
-        "query": "Dumplings"
+        "id": "rice-bowls",
+        "en": "Rice bowls",
+        "ar": "أطباق أرز",
+        "query": "Rice bowls"
+      },
+      {
+        "id": "roastery",
+        "en": "Roastery",
+        "ar": "محمصة",
+        "query": "Roastery"
+      },
+      {
+        "id": "saj",
+        "en": "Saj",
+        "ar": "صاج",
+        "query": "Saj"
+      },
+      {
+        "id": "salad",
+        "en": "Salads",
+        "ar": "سلطات",
+        "query": "Salads"
+      },
+      {
+        "id": "sandwich",
+        "en": "Sandwiches",
+        "ar": "ساندويشات",
+        "query": "Sandwiches"
+      },
+      {
+        "id": "seafood",
+        "en": "Seafood",
+        "ar": "مأكولات بحرية",
+        "query": "Seafood"
+      },
+      {
+        "id": "shawarma",
+        "en": "Shawarma",
+        "ar": "شاورما",
+        "query": "Shawarma"
+      },
+      {
+        "id": "sliders",
+        "en": "Sliders",
+        "ar": "سلايدرز",
+        "query": "Sliders"
+      },
+      {
+        "id": "smoothies",
+        "en": "Smoothies",
+        "ar": "سموذي",
+        "query": "Smoothies"
+      },
+      {
+        "id": "snacks",
+        "en": "Snacks",
+        "ar": "سناكات",
+        "query": "Snacks"
+      },
+      {
+        "id": "soup",
+        "en": "Soup",
+        "ar": "شوربات",
+        "query": "Soup"
+      },
+      {
+        "id": "steak",
+        "en": "Steakhouse",
+        "ar": "ستيك",
+        "query": "Steakhouse"
+      },
+      {
+        "id": "street-food",
+        "en": "Street food",
+        "ar": "طعام الشارع",
+        "query": "Street food"
       },
       {
         "id": "sushi",
@@ -667,52 +847,34 @@ export const cuisineGroups: CuisineGroup[] = [
         "query": "Tacos"
       },
       {
-        "id": "burrito",
-        "en": "Burritos",
-        "ar": "بوريتو",
-        "query": "Burritos"
+        "id": "tea",
+        "en": "Tea",
+        "ar": "شاي",
+        "query": "Tea"
       },
       {
-        "id": "poke",
-        "en": "Poke bowls",
-        "ar": "بوكي",
-        "query": "Poke bowls"
+        "id": "vegan",
+        "en": "Vegan",
+        "ar": "نباتي صرف",
+        "query": "Vegan restaurant"
       },
       {
-        "id": "rice-bowls",
-        "en": "Rice bowls",
-        "ar": "أطباق أرز",
-        "query": "Rice bowls"
+        "id": "vegetarian",
+        "en": "Vegetarian",
+        "ar": "نباتي",
+        "query": "Vegetarian restaurant"
       },
       {
-        "id": "street-food",
-        "en": "Street food",
-        "ar": "طعام الشارع",
-        "query": "Street food"
+        "id": "waffles",
+        "en": "Waffles",
+        "ar": "وافل",
+        "query": "Waffles"
       },
       {
-        "id": "fast-food",
-        "en": "Fast food",
-        "ar": "وجبات سريعة",
-        "query": "Fast food"
-      },
-      {
-        "id": "doner",
-        "en": "Döner",
-        "ar": "دونر",
-        "query": "Döner"
-      },
-      {
-        "id": "curry",
-        "en": "Curry",
-        "ar": "كاري",
-        "query": "Curry"
-      },
-      {
-        "id": "koshary",
-        "en": "Koshary",
-        "ar": "كشري",
-        "query": "Koshary"
+        "id": "wraps",
+        "en": "Wraps",
+        "ar": "راب",
+        "query": "Wraps"
       }
     ]
   }
