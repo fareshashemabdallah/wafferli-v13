@@ -1,0 +1,35 @@
+name: Build Dabberna full app
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/dabberna-build.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        working-directory: app
+        run: bun install
+      - name: TypeScript check
+        working-directory: app
+        run: bun run typecheck
+        continue-on-error: true
+      - name: Build full web application
+        working-directory: app
+        run: bun run build
+      - name: Upload build artifact for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: dabberna-react-site
+          path: react-dist/
+          if-no-files-found: error
