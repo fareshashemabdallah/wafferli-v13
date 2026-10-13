@@ -22,7 +22,20 @@ type Element = { type: "node" | "way" | "relation"; id: number; lat?: number; lo
 const PREFIX = "dabberna.osm.pilot.2026-10.";
 const HOURS = 24;
 const LIMIT = 5; // per device per day: keeps this opt-in pilot intentionally small
-const METERS = 2300;
+// Smaller bounds make substantially lighter Overpass queries than a 2.3km-radius scan.
+const RADIUS_KM = 1.65;
+const COOLDOWN_MS = 90000;
+const MAX_ATTEMPTS = 8; // Failed searches are not counted toward five successful results.
+const OVERPASS_SERVERS = [
+  "https://overpass.private.coffee/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+] as const;
+function bbox(lat: number,lon: number) {
+  const dLat = RADIUS_KM / 111.32;
+  const dLon = RADIUS_KM / (111.32 * Math.cos(lat * Math.PI / 180));
+  return [lat-dLat,lon-dLon,lat+dLat,lon+dLon].map(n=>n.toFixed(5)).join(",");
+}
+
 const validHttps = (raw?: string) => {
   if (!raw) return null;
   try {
@@ -43,37 +56,77 @@ export function filterPlaces(items: OpenPlace[], name: string, kind: string, cui
     .filter(p => cuisine === "all" || p.cuisine.toLowerCase().includes(cuisine))
     .sort((a,b) => a.distanceKm - b.distanceKm).slice(0, 35);
 }
-export async function lookupOpenPlaces(areaId: string): Promise<{places: OpenPlace[]; updatedAt: number; cached: boolean }> {
+export async function lookupOpenPlaces(areaId: string): Promise<{places: OpenPlace[]; updatedAt: number; cached: boolean; stale?: boolean }> {
   const area = searchAreas.find(a => a.id === areaId) || searchAreas[0];
   const key = PREFIX + "area." + area.id;
+  let previous: { places: OpenPlace[]; updatedAt: number } | null = null;
   try {
-    const cached = JSON.parse(localStorage.getItem(key) || "null");
-    if (cached && Date.now() - cached.updatedAt < HOURS * 3600000 && Array.isArray(cached.places)) {
-      return { ...cached, cached: true };
+    const stored: unknown = JSON.parse(localStorage.getItem(key) || "null");
+    if (stored && typeof stored === "object" && "places" in stored && Array.isArray(stored.places) && "updatedAt" in stored && typeof stored.updatedAt === "number") {
+      previous = { places: stored.places as OpenPlace[], updatedAt: stored.updatedAt };
+      if (Date.now() - previous.updatedAt < HOURS * 3600000) return { ...previous, cached: true };
     }
-  } catch { /* storage unavailable or invalid */ }
+  } catch { /* browser storage disabled */ }
 
-  // No automatic network requests. Only an explicit tap triggers a fresh lookup.
-  const day = new Date().toISOString().slice(0,10);
-  const capKey = PREFIX + "count." + day;
-  let count = 0;
-  try { count = Number(localStorage.getItem(capKey)) || 0; } catch {}
-  if (count >= LIMIT) throw new Error("Pilot limit reached: five map searches per device per day. Try a cached area or return tomorrow.");
-  try { localStorage.setItem(capKey, String(count + 1)); } catch {}
+  const day = new Date().toISOString().slice(0, 10);
+  const successesKey = PREFIX + "count." + day;
+  const attemptsKey = PREFIX + "attempts." + day;
+  const cooldownKey = PREFIX + "lastAttempt." + area.id;
+  const localNumber = (key: string) => {
+    try { return Number(localStorage.getItem(key)) || 0; } catch { return 0; }
+  };
+  const storeNumber = (key: string, count: number) => {
+    try { localStorage.setItem(key, String(count)); } catch {}
+  };
+  if (localNumber(successesKey) >= LIMIT || localNumber(attemptsKey) >= MAX_ATTEMPTS) {
+    if (previous) return { ...previous, cached: true, stale: true };
+    throw new Error("Pilot search limit reached. Try again tomorrow; public map servers are shared community resources.");
+  }
+  if (Date.now() - localNumber(cooldownKey) < COOLDOWN_MS) {
+    if (previous) return { ...previous, cached: true, stale: true };
+    throw new Error("Please wait 90 seconds before searching this area again. This protects the free map service.");
+  }
+  storeNumber(cooldownKey,Date.now());
+  storeNumber(attemptsKey,localNumber(attemptsKey)+1);
 
-  const query = `[out:json][timeout:18];nwr["amenity"~"^(restaurant|cafe)$"](around:${METERS},${area.lat},${area.lon});out center 210;`;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 19000);
-  let data: { elements?: Element[] };
-  try {
-    const url = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
-    const res = await fetch(url, { signal: controller.signal });
-    if (!res.ok) throw new Error(res.status === 429 ? "Open map service is busy. Please try later." : "Map service unavailable (HTTP " + res.status + ").");
-    data = await res.json();
-  } catch (e) {
-    throw new Error(e instanceof Error && e.name === "AbortError" ? "Map search timed out. Please try later." : e instanceof Error ? e.message : "Map search unavailable.");
-  } finally { clearTimeout(timeout); }
+  // Bounding box rather than 'around', short timeout, and a hard results limit.
+  const query = `[out:json][timeout:14];nwr["amenity"~"^(restaurant|cafe)$"](${bbox(area.lat,area.lon)});out center 100;`;
+  let data: { elements?: Element[] } | undefined;
+  let failure = "Map service temporarily unavailable";
+  // Only one alternative for transient upstream errors. Never retry rate-limit responses.
+  for (let i = 0; i < OVERPASS_SERVERS.length; i++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 16500);
+    try {
+      const res = await fetch(OVERPASS_SERVERS[i] + "?data=" + encodeURIComponent(query), {
+        method: "GET", signal: controller.signal, headers: { "Accept": "application/json" },
+      });
+      if (res.status === 429 || res.status === 403 || res.status === 406) {
+        failure = "The public map server is limiting requests. Please wait before trying again.";
+        break; // Do not circumvent rate limits by trying another server.
+      }
+      if (!res.ok) {
+        failure = "Map server returned HTTP " + res.status;
+        if (res.status === 502 || res.status === 503 || res.status === 504 || res.status === 408) continue;
+        break;
+      }
+      const body: unknown = await res.json();
+      if (!body || typeof body !== "object" || !("elements" in body) || !Array.isArray(body.elements)) {
+        failure = "Map service sent an unexpected response";
+        continue;
+      }
+      data = body as { elements: Element[] };
+      break;
+    } catch (err) {
+      failure = err instanceof Error && err.name === "AbortError" ? "Map request timed out" : "The map service could not be reached";
+      // Single fallback for network errors/timeouts.
+    } finally { clearTimeout(timer); }
+  }
 
+  if (!data) {
+    if (previous) return { ...previous, cached: true, stale: true };
+    throw new Error(failure + ". Please try again later; don't keep refreshing.");
+  }
   const places: OpenPlace[] = (data.elements || []).flatMap(el => {
     const tags = el.tags || {};
     const lat = el.lat ?? el.center?.lat;
@@ -93,5 +146,6 @@ export async function lookupOpenPlaces(areaId: string): Promise<{places: OpenPla
   places.sort((a,b)=>a.distanceKm-b.distanceKm);
   const result = { places, updatedAt: Date.now() };
   try { localStorage.setItem(key, JSON.stringify(result)); } catch {}
-  return { ...result, cached: false };
+  storeNumber(successesKey,localNumber(successesKey)+1);
+  return { ...result, cached: false, stale: false };
 }
