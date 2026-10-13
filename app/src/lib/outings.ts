@@ -13,7 +13,14 @@ export type VoteView = {
   vote_token?: string;
   options: VoteOption[];
 };
-export type SavedOuting = { admin_token: string; vote_token: string; title: string; budget?: string; whoPays?: string; created: string };
+export type SavedOuting = {
+  admin_token: string; vote_token: string; title: string; budget?: string; whoPays?: string; created: string;
+  /** Organizer-only planning data. Do not transmit children's ages/counts in public vote links. */
+  activity?: "food" | "family" | "entertainment" | "outdoors" | "sports" | "culture" | "trip" | "other";
+  childrenAttendance?: "no" | "yes" | "unsure";
+  childrenFocus?: "children" | "mixed" | "adults";
+  childCount?: number; ageBands?: string[]; stroller?: boolean; quiet?: boolean;
+};
 
 export function voterKey(): string {
   let k = readLocal<string>("voterKey", "");
