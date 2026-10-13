@@ -47,11 +47,22 @@ function AdminPage() {
         <div className="mt-2"><Tally options={d.options} total={d.total_votes} friends={d.friend_count} showVoters /></div>
         <p className="mt-3 text-xs text-muted-foreground">Updates every 5 seconds.</p>
       </section>
-      {local && (local.budget || local.whoPays) && (
+      {local && (
         <section className="card-soft mt-4 p-4 text-sm">
-          <h2 className="font-semibold">Private notes (this device only)</h2>
-          {local.budget && <p className="mt-1">Budget: {local.budget}</p>}
+          <h2 className="font-semibold">Organizer-only planning notes</h2>
+          <p className="mt-1 text-xs text-muted-foreground">These details are stored on this device and are not included in the shared vote.</p>
+          {local.activity && <p className="mt-2">Outing type: {{food:"Food & cafés",family:"Family & kids",entertainment:"Entertainment & events",outdoors:"Outdoor adventures",sports:"Sports & games",culture:"Culture & learning",trip:"Trips & experiences",other:"Other / undecided"}[local.activity]}</p>}
+          {local.budget && <p>Adult budget per person: {local.budget}</p>}
           {local.whoPays && <p>Who pays: {pays[local.whoPays]}</p>}
+          {local.childrenAttendance && <p>Children attending: {{no:"No",yes:"Yes",unsure:"Not decided"}[local.childrenAttendance]}</p>}
+          {local.childrenAttendance === "yes" && <>
+            {local.childrenFocus && <p>Focus: {{children:"Children-focused",mixed:"Family / mixed",adults:"Adult-focused with children"}[local.childrenFocus]}</p>}
+            {local.childCount !== undefined && <p>Estimated children: {local.childCount}</p>}
+            {local.ageBands && local.ageBands.length > 0 && <p>Age groups: {local.ageBands.join(", ")}</p>}
+            {(local.stroller || local.quiet) && <p>Needs: {[local.stroller && "Stroller / step-free access", local.quiet && "Quiet environment"].filter(Boolean).join("; ")}</p>}
+            <p className="mt-2 rounded-lg bg-muted p-2 text-xs">Check age restrictions, smoke exposure, safe play areas, suitable facilities, travel needs and children's pricing before confirming.</p>
+          </>}
+          {local.childrenAttendance === "unsure" && <p className="mt-2 rounded-lg bg-muted p-2 text-xs">Confirm whether children will attend before selecting an adults-only or age-restricted venue.</p>}
         </section>
       )}
     </AppShell>
