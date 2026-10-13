@@ -8,9 +8,9 @@ import { budgetLabel, sampleRestaurants } from "@/lib/restaurants";
 export const Route = createFileRoute("/explore/restaurants")({
   head: () => ({
     meta: [
-      { title: "Restaurant Discovery — Wafferli" },
+      { title: "Restaurant Discovery — Dabberna" },
       { name: "description", content: "Filter sample Amman restaurant listings by cuisine, argeeleh, budget and area." },
-      { property: "og:title", content: "Restaurant Discovery — Wafferli" },
+      { property: "og:title", content: "Restaurant Discovery — Dabberna" },
       { property: "og:description", content: "Sample listings for planning outings in Amman." },
     ],
   }),

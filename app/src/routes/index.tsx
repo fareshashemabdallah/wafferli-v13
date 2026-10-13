@@ -9,9 +9,9 @@ import { routeIntent, type Intent } from "@/lib/intent";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Wafferli — Your everyday money & decisions assistant" },
-      { name: "description", content: "Ask once, Wafferli routes you to budgeting, smart buying, shopping lists or a friends' restaurant vote in Amman." },
-      { property: "og:title", content: "Wafferli — Personal Pilot" },
+      { title: "Dabberna — Your everyday money & decisions assistant" },
+      { name: "description", content: "Ask once, Dabberna routes you to budgeting, smart buying, shopping lists or a friends' restaurant vote in Amman." },
+      { property: "og:title", content: "Dabberna — Personal Pilot" },
       { property: "og:description", content: "Household budgeting, smart buying and group restaurant votes for Amman." },
     ],
   }),

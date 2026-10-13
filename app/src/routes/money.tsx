@@ -15,9 +15,9 @@ import { fmtJOD, parseAmount, uid, useLocalState } from "@/lib/storage";
 export const Route = createFileRoute("/money")({
   head: () => ({
     meta: [
-      { title: "My Money — Wafferli" },
+      { title: "My Money — Dabberna" },
       { name: "description", content: "Plan your household budget, log expenses and see your real remaining allowance and savings projection." },
-      { property: "og:title", content: "My Money — Wafferli" },
+      { property: "og:title", content: "My Money — Dabberna" },
       { property: "og:description", content: "Household budget, actual spending and savings projection." },
     ],
   }),

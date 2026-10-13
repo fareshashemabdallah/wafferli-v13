@@ -15,7 +15,7 @@ export const Route = createFileRoute("/vote/$token")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Vote: where should we go? — Wafferli Together" },
+      { title: "Vote: where should we go? — Dabberna Together" },
       { name: "description", content: "Pick one place for our outing. No account needed." },
       { property: "og:title", content: "Where should we go? Vote now" },
       { property: "og:description", content: "Pick one restaurant for our outing — takes 10 seconds, no account." },

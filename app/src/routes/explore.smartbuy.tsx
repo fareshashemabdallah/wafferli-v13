@@ -10,9 +10,9 @@ import { fmtJOD, uid, useLocalState } from "@/lib/storage";
 export const Route = createFileRoute("/explore/smartbuy")({
   head: () => ({
     meta: [
-      { title: "Smart Buy — Wafferli" },
+      { title: "Smart Buy — Dabberna" },
       { name: "description", content: "Compare buying options by total cost including delivery or travel, against your budget." },
-      { property: "og:title", content: "Smart Buy — Wafferli" },
+      { property: "og:title", content: "Smart Buy — Dabberna" },
       { property: "og:description", content: "Honest manual price comparison with total cost." },
     ],
   }),
@@ -51,7 +51,7 @@ function SmartBuy() {
 
   return (
     <AppShell title="Smart Buy">
-      <Notice>Enter prices you've seen yourself. Wafferli doesn't fetch live prices yet, so there are no automatic "savings" claims.</Notice>
+      <Notice>Enter prices you've seen yourself. Dabberna doesn't fetch live prices yet, so there are no automatic "savings" claims.</Notice>
       <div className="card-soft mt-4 grid gap-3 p-4 sm:grid-cols-2">
         <Field label="What are you buying?"><Input className={inputCls} maxLength={60} value={s.product} onChange={(e) => setS({ ...s, product: e.target.value })} /></Field>
         <Field label="Your budget (JOD)"><Input className={inputCls} inputMode="decimal" value={s.budget} onChange={(e) => setS({ ...s, budget: e.target.value })} /></Field>

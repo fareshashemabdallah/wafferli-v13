@@ -19,7 +19,7 @@ const dict = {
   shopList: { en: "Shopping list", ar: "قائمة التسوق" },
   smartBuy: { en: "Smart Buy", ar: "الشراء الذكي" },
   restaurants: { en: "Restaurants", ar: "المطاعم" },
-  together: { en: "Wafferli Together", ar: "وفّرلي سوا" },
+  together: { en: "Dabberna Together", ar: "وفّرلي سوا" },
   routerNote: { en: "Keyword routing (no AI connected)", ar: "توجيه بالكلمات المفتاحية (بدون ذكاء اصطناعي)" },
   // vote page
   voteFor: { en: "Pick one place", ar: "اختر مكاناً واحداً" },

@@ -13,9 +13,9 @@ import { fmtJOD, parseAmount, uid, useLocalState } from "@/lib/storage";
 export const Route = createFileRoute("/explore/shopping")({
   head: () => ({
     meta: [
-      { title: "Shopping List — Wafferli" },
+      { title: "Shopping List — Dabberna" },
       { name: "description", content: "Grocery list with quantities, prices and basket total, saved on your device." },
-      { property: "og:title", content: "Shopping List — Wafferli" },
+      { property: "og:title", content: "Shopping List — Dabberna" },
       { property: "og:description", content: "Build your grocery basket and record the spend." },
     ],
   }),

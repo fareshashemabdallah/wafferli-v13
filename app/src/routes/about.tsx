@@ -4,9 +4,9 @@ import { AppShell } from "@/components/AppShell";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About this pilot — Wafferli V13" },
-      { name: "description", content: "What works in the Wafferli V13 personal pilot, what isn't live yet, and privacy notes." },
-      { property: "og:title", content: "About the Wafferli V13 pilot" },
+      { title: "About this pilot — Dabberna V13" },
+      { name: "description", content: "What works in the Dabberna V13 personal pilot, what isn't live yet, and privacy notes." },
+      { property: "og:title", content: "About the Dabberna V13 pilot" },
       { property: "og:description", content: "Working features, limitations and how to test." },
     ],
   }),
@@ -19,7 +19,7 @@ const working = [
   "Shopping list with totals and 'record as expense' (this device only)",
   "Smart Buy — manual price + delivery comparison vs budget",
   "My Space — household member profiles (this device only)",
-  "Wafferli Together — shared vote links stored in the cloud, usable across phones without an account",
+  "Dabberna Together — shared vote links stored in the cloud, usable across phones without an account",
 ];
 const notLive = [
   "AI assistant / AI receipt or product photo extraction",
@@ -40,7 +40,7 @@ function About() {
       </section>
       <section className="card-soft mt-4 p-4 text-sm">
         <h2 className="text-lg font-semibold">How to test</h2>
-        <ol className="mt-1 list-decimal space-y-1 ps-5"><li>Explore → Wafferli Together → create a vote.</li><li>Copy the vote link or send via WhatsApp.</li><li>Open it on another phone, vote, then watch your organizer page update.</li></ol>
+        <ol className="mt-1 list-decimal space-y-1 ps-5"><li>Explore → Dabberna Together → create a vote.</li><li>Copy the vote link or send via WhatsApp.</li><li>Open it on another phone, vote, then watch your organizer page update.</li></ol>
       </section>
     </AppShell>
   );

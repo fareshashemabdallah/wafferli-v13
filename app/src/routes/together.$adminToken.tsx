@@ -12,7 +12,7 @@ import { readLocal } from "@/lib/storage";
 
 export const Route = createFileRoute("/together/$adminToken")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Organizer results — Wafferli Together" }, { name: "robots", content: "noindex" }, { name: "description", content: "Private organizer dashboard for your outing vote." }] }),
+  head: () => ({ meta: [{ title: "Organizer results — Dabberna Together" }, { name: "robots", content: "noindex" }, { name: "description", content: "Private organizer dashboard for your outing vote." }] }),
   component: AdminPage,
 });
 

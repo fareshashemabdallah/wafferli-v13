@@ -12,9 +12,9 @@ import { useLocalState } from "@/lib/storage";
 export const Route = createFileRoute("/explore/together")({
   head: () => ({
     meta: [
-      { title: "Wafferli Together — Friends' restaurant vote" },
+      { title: "Dabberna Together — Friends' restaurant vote" },
       { name: "description", content: "Create a restaurant vote for your friends in Amman and share one link on WhatsApp." },
-      { property: "og:title", content: "Wafferli Together" },
+      { property: "og:title", content: "Dabberna Together" },
       { property: "og:description", content: "Plan an outing and let friends vote — no account needed." },
     ],
   }),
@@ -54,7 +54,7 @@ function TogetherPage() {
   };
 
   return (
-    <AppShell title="Wafferli Together">
+    <AppShell title="Dabberna Together">
       <Notice>Create an outing, share one link, friends vote without an account. Restaurant names are examples — edit freely and verify details with the venue.</Notice>
 
       {saved.length > 0 && (
