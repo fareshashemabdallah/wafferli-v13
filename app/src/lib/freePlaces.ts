@@ -1,11 +1,16 @@
 import { searchAreas, type OpenPlace } from "./openPlaces";
+import { getCuisineQuery } from "./cuisines";
 
 /** Free-tier Geoapify lookup (requires user's own browser-restricted API key).
  * This browser-only pilot makes requests directly to Geoapify. Do not enter server secrets.
  */
-export function googleMapsSearchUrl(areaId: string, kind: string, cuisine: string, name: string, shisha: boolean): string {
-  const area = searchAreas.find(a => a.id === areaId) ?? searchAreas[0];
-  const terms = [name.trim(), cuisine !== "all" ? cuisine : "", kind === "cafe" ? "cafes" : kind === "restaurant" ? "restaurants" : "restaurants cafes", shisha ? "shisha argileh" : "", area.name.split(" · ")[0], "Amman Jordan"];
+/** Builds a human-readable Google Maps search for every cuisine, including Arabic custom terms. */
+export function googleMapsSearchUrl(areaId: string, kind: string, cuisine: string, name: string, shisha: boolean, customCuisine = ""): string {
+  const area = searchAreas.find(a => a.id === areaId);
+  const cuisineTerm = cuisine === "custom" ? customCuisine.trim() : cuisine === "all" ? "" : getCuisineQuery(cuisine);
+  const categoryTerm = kind === "cafe" ? "cafes" : kind === "restaurant" ? "restaurants" : "restaurants cafes";
+  const placeTerm = areaId === "jordan" ? "Jordan" : area ? area.name.split(" · ")[0] + " Amman Jordan" : "Amman Jordan";
+  const terms = [name.trim(), cuisineTerm, categoryTerm, shisha ? "shisha argileh" : "", placeTerm];
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(terms.filter(Boolean).join(" "));
 }
 type GeoFeature = { properties?: Record<string, unknown>; geometry?: { coordinates?: unknown } };
