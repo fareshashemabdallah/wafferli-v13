@@ -64,11 +64,15 @@ function TogetherPage() {
   const [quiet, setQuiet] = useState(false);
   const [shareTheme, setShareTheme] = useState(true);
   const lookupSuggestion = [
-    children === "yes" && childFocus === "children" ? "kids children age-appropriate" :
-    children === "yes" && childFocus === "mixed" ? "family friendly children welcome" :
-    children === "yes" ? "children welcome family suitable" : "adults",
+    children === "yes" && childFocus === "children" ? "kids activities age appropriate" :
+    children === "yes" && childFocus === "mixed" ? "family friendly adults and children" :
+    children === "yes" ? "children welcome family suitable" :
+    children === "unsure" ? "family friendly" : "adults",
+    children === "yes" && ageBands.length > 0 ? "ages " + ageBands.join(" ") : "",
+    children === "yes" && stroller ? "stroller accessible" : "",
+    children === "yes" && quiet ? "quiet low noise" : "",
     activityTypes[f.activity].query, f.neighborhood.trim() || "Amman", "Jordan"
-  ].join(" ");
+  ].filter(Boolean).join(" ");
   const googleActivitiesLink = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(lookupSuggestion);
   const [opts, setOpts] = useState(() => {
     // Share selected real venues between the Places and Together screens, on this device only.
