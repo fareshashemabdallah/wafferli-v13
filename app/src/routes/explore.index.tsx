@@ -5,9 +5,9 @@ import { AppShell } from "@/components/AppShell";
 export const Route = createFileRoute("/explore/")({
   head: () => ({
     meta: [
-      { title: "Explore — Wafferli" },
-      { name: "description", content: "Smart Buy, shopping list, restaurant discovery and group votes in Amman." },
-      { property: "og:title", content: "Explore — Wafferli" },
+      { title: "Explore — Dabberna" },
+      { name: "description", content: "Explore places and experiences; plan child-aware family or friends outings; compare shopping choices." },
+      { property: "og:title", content: "Explore — Dabberna" },
       { property: "og:description", content: "Decide what to buy and where to go." },
     ],
   }),
@@ -15,10 +15,10 @@ export const Route = createFileRoute("/explore/")({
 });
 
 const items = [
-  { to: "/explore/together" as const, title: "Wafferli Together", desc: "Create a restaurant vote and share one link with friends.", icon: Users, live: "Live shared voting" },
+  { to: "/explore/together" as const, title: "Dabberna Together", desc: "Plan any outing. Choose whether children are joining and who the activity is for, then vote as a group.", icon: Users, live: "Child-aware planning & group voting" },
   { to: "/explore/smartbuy" as const, title: "Smart Buy", desc: "Compare options by total cost incl. delivery or travel.", icon: ShoppingBag, live: "Manual comparison" },
   { to: "/explore/shopping" as const, title: "Shopping List", desc: "Grocery basket with quantities and running total.", icon: ListChecks, live: "Saved on device" },
-  { to: "/explore/restaurants" as const, title: "Restaurant Discovery", desc: "Filter by cuisine, argeeleh, budget and area.", icon: UtensilsCrossed, live: "Sample listings" },
+  { to: "/explore/restaurants" as const, title: "Food & Café Discovery", desc: "Explore real place searches and cuisines across Jordan.", icon: UtensilsCrossed, live: "Google Maps links / optional Geoapify" },
 ];
 
 function Explore() {
