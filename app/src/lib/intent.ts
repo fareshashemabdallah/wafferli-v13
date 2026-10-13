@@ -7,11 +7,11 @@ export type Intent = {
 const rules: { words: string[]; intent: Intent }[] = [
   {
     words: ["vote", "friends", "outing", "argeeleh", "arguileh", "shisha", "hangout", "together", "اصدقاء", "أصدقاء", "طلعة", "اركيلة", "أرجيلة", "شباب"],
-    intent: { to: "/explore/together", label: "Open Wafferli Together", reply: "Sounds like a group plan. Create a vote and share one link with your friends — they don't need an account." },
+    intent: { to: "/explore/together", label: "Open Dabberna Together", reply: "Sounds like a group plan. Create a vote and share one link with your friends — they don't need an account." },
   },
   {
     words: ["restaurant", "dinner", "lunch", "eat", "food", "cafe", "مطعم", "عشاء", "غداء", "أكل", "اكل", "كافيه"],
-    intent: { to: "/explore/restaurants", label: "Browse restaurants", reply: "Let's look at places to eat. Listings are samples for now — always verify with the restaurant." },
+    intent: { to: "/explore/restaurants", label: "Browse restaurants", reply: "Let's look at places to eat. Browse actual OpenStreetMap entries in Amman. Ratings, argeeleh, prices and opening hours are not verified." },
   },
   {
     words: ["budget", "spend", "spent", "salary", "income", "save", "saving", "expense", "bill", "money", "ميزانية", "مصروف", "راتب", "توفير", "فاتورة", "مصاريف"],
