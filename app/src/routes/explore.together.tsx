@@ -31,7 +31,18 @@ function TogetherPage() {
   const navigate = useNavigate();
   const [saved, setSaved] = useLocalState<SavedOuting[]>("outings", []);
   const [f, setF] = useState({ title: "Friends night out", event_at: "", neighborhood: "Abdoun", friends: "6", organizer: "", budget: "", whoPays: "later" });
-  const [opts, setOpts] = useState(defaults);
+  const [opts, setOpts] = useState(() => {
+    // Share selected real venues between the Places and Together screens, on this device only.
+    try {
+      const saved = JSON.parse(localStorage.getItem("dabberna.v13.restaurantSelections") || "[]");
+      if (!Array.isArray(saved) || !saved.length) return defaults;
+      const names = saved.filter((n): n is string => typeof n === "string" && !!n.trim()).slice(0,10);
+      return Array.from({ length: Math.max(3, names.length) }, (_, i) => ({
+        name: names[i] || "",
+        note: names[i] ? "OpenStreetMap listing — verify venue details before booking" : "",
+      }));
+    } catch { return defaults; }
+  });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -55,7 +66,7 @@ function TogetherPage() {
 
   return (
     <AppShell title="Dabberna Together">
-      <Notice>Create an outing, share one link, friends vote without an account. Restaurant names are examples — edit freely and verify details with the venue.</Notice>
+      <Notice>Create an outing, share one link, friends vote without an account. Choose places from Real Places or enter your own. All venue details must be verified before you invite friends.</Notice>
 
       {saved.length > 0 && (
         <section className="card-soft mt-4 p-4">
