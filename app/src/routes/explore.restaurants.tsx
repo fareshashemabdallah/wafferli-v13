@@ -28,6 +28,7 @@ function Restaurants() {
   const [searched, setSearched] = useState(false);
   const [updatedAt, setUpdatedAt] = useState(0);
   const [cached, setCached] = useState(false);
+  const [stale, setStale] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const shown = useMemo(() => filterPlaces(loaded,words,kind,cuisine),[loaded,words,kind,cuisine]);
@@ -36,9 +37,9 @@ function Restaurants() {
     try {
       const result = await lookupOpenPlaces(area);
       setLoaded(result.places); setCached(result.cached);
-      setUpdatedAt(result.updatedAt); setSearched(true);
+      setUpdatedAt(result.updatedAt); setStale(result.stale === true); setSearched(true);
     } catch (e) {
-      setLoaded([]); setError(e instanceof Error ? e.message : "Unable to search mapped places.");
+      setStale(false); setLoaded([]); setError(e instanceof Error ? e.message : "Unable to search mapped places.");
     } finally { setBusy(false); }
   };
   const select = (place: OpenPlace) => {
@@ -79,12 +80,12 @@ function Restaurants() {
           <Input value={words} onChange={e=>setWords(e.target.value)} maxLength={60} placeholder="Restaurant name, café, Lebanese..." />
         </Field>
         <Button type="submit" disabled={busy} className="h-11 w-full"><Search className="size-4"/>{busy?"Searching mapped places…":"Find real places"}</Button>
-        <p className="text-xs text-muted-foreground">Tap to load nearby venues. Results are cached for 24 hours, with a five-new-area-searches-per-day pilot cap. No background polling.</p>
+        <p className="text-xs text-muted-foreground">Tap to load nearby venues. Results are cached for 24 hours, with a five-successful-searches-per-day pilot cap and a 90-second retry cooldown. No background polling.</p>
       </form>
-      {error && <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm" role="alert">{error} Try another day or open Google Maps separately.</div>}
+      {error && <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm" role="alert">{error} You can also search independently on OpenStreetMap while the service recovers.</div>}
       {searched && <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm">
         <strong>{shown.length} place{shown.length===1?"":"s"} shown</strong>
-        <span className="text-xs text-muted-foreground"><Clock3 className="mr-1 inline size-3"/>{cached?"Cached":"Live lookup"} · Updated {new Date(updatedAt).toLocaleDateString()}</span>
+        <span className="text-xs text-muted-foreground"><Clock3 className="mr-1 inline size-3"/>{stale?"Older cached results (server unavailable)":cached?"Cached":"Live lookup"} · Updated {new Date(updatedAt).toLocaleDateString()}</span>
       </div>}
       {searched && shown.length===0 && <p className="mt-4 rounded-xl bg-muted p-4 text-sm text-muted-foreground">No tagged places matched. Try removing the cuisine or name filter. OpenStreetMap does not cover every venue.</p>}
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
