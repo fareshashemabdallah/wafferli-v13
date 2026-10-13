@@ -1,0 +1,42 @@
+name: Deploy Dabberna Full App
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/dabberna-deploy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: dabberna-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        working-directory: app
+        run: bun install
+      - name: Validate full app
+        working-directory: app
+        run: bun run typecheck
+      - name: Build static React app
+        working-directory: app
+        run: bun run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: react-dist
+      - id: deployment
+        uses: actions/deploy-pages@v4
