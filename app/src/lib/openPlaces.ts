@@ -69,7 +69,7 @@ export async function lookupOpenPlaces(areaId: string): Promise<{places: OpenPla
   } catch { /* browser storage disabled */ }
 
   const day = new Date().toISOString().slice(0, 10);
-  const successesKey = PREFIX + "count." + day;
+  const successesKey = PREFIX + "successes." + day; // ignore failures counted by the previous buggy pilot build
   const attemptsKey = PREFIX + "attempts." + day;
   const cooldownKey = PREFIX + "lastAttempt." + area.id;
   const localNumber = (key: string) => {
