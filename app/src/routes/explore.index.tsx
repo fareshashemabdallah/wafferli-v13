@@ -1,0 +1,41 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ListChecks, ShoppingBag, Users, UtensilsCrossed } from "lucide-react";
+import { AppShell } from "@/components/AppShell";
+
+export const Route = createFileRoute("/explore/")({
+  head: () => ({
+    meta: [
+      { title: "Explore — Wafferli" },
+      { name: "description", content: "Smart Buy, shopping list, restaurant discovery and group votes in Amman." },
+      { property: "og:title", content: "Explore — Wafferli" },
+      { property: "og:description", content: "Decide what to buy and where to go." },
+    ],
+  }),
+  component: Explore,
+});
+
+const items = [
+  { to: "/explore/together" as const, title: "Wafferli Together", desc: "Create a restaurant vote and share one link with friends.", icon: Users, live: "Live shared voting" },
+  { to: "/explore/smartbuy" as const, title: "Smart Buy", desc: "Compare options by total cost incl. delivery or travel.", icon: ShoppingBag, live: "Manual comparison" },
+  { to: "/explore/shopping" as const, title: "Shopping List", desc: "Grocery basket with quantities and running total.", icon: ListChecks, live: "Saved on device" },
+  { to: "/explore/restaurants" as const, title: "Restaurant Discovery", desc: "Filter by cuisine, argeeleh, budget and area.", icon: UtensilsCrossed, live: "Sample listings" },
+];
+
+function Explore() {
+  return (
+    <AppShell title="Explore">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {items.map(({ to, title, desc, icon: Icon, live }) => (
+          <Link key={to} to={to} className="card-soft flex gap-4 p-4 transition hover:-translate-y-0.5">
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-mint text-brand"><Icon className="size-6" /></span>
+            <span>
+              <span className="block font-semibold">{title}</span>
+              <span className="block text-sm text-muted-foreground">{desc}</span>
+              <span className="mt-1 inline-block rounded-full bg-lime px-2 text-[11px] font-semibold text-ink">{live}</span>
+            </span>
+          </Link>
+        ))}
+      </div>
+    </AppShell>
+  );
+}
