@@ -78,13 +78,14 @@ export async function lookupOpenPlaces(areaId: string): Promise<{places: OpenPla
     const tags = el.tags || {};
     const lat = el.lat ?? el.center?.lat;
     const lon = el.lon ?? el.center?.lon;
-    const name = tags["name:en"] || tags.name || tags["name:ar"];
-    if (!name || lat === undefined || lon === undefined || (tags.amenity !== "restaurant" && tags.amenity !== "cafe")) return [];
+    const name = tags["name:en"] || tags["name"] || tags["name:ar"];
+    const amenity = tags["amenity"];
+    if (!name || lat === undefined || lon === undefined || (amenity !== "restaurant" && amenity !== "cafe")) return [];
     const address = [tags["addr:street"], tags["addr:housenumber"], tags["addr:suburb"], tags["addr:city"]].filter(Boolean).join(", ");
     return [{id: el.type + "/" + el.id, name,
-      kind: tags.amenity, lat, lon, cuisine: tags.cuisine || "",
-      address, website: validHttps(tags.website || tags["contact:website"]),
-      phone: tags.phone || tags["contact:phone"] || null,
+      kind: amenity, lat, lon, cuisine: tags['cuisine'] || "",
+      address, website: validHttps(tags['website'] || tags["contact:website"]),
+      phone: tags['phone'] || tags["contact:phone"] || null,
       distanceKm: distKm(area.lat, area.lon, lat, lon),
       osmUrl: "https://www.openstreetmap.org/" + el.type + "/" + el.id
     }];
