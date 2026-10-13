@@ -37,7 +37,7 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
             <Link
               key={to}
               to={to}
-              activeOptions={{ exact }}
+              activeOptions={exact ? { exact: true } : {}}
               className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted data-[status=active]:bg-mint data-[status=active]:text-brand"
             >
               <Icon className="size-5" /> {t(key)}
@@ -81,7 +81,7 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
             <Link
               key={to}
               to={to}
-              activeOptions={{ exact }}
+              activeOptions={exact ? { exact: true } : {}}
               className="flex min-h-14 flex-col items-center justify-center gap-0.5 pt-2 text-[11px] font-medium text-muted-foreground data-[status=active]:text-brand"
             >
               <Icon className="size-6" /> {t(key)}

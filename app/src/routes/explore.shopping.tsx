@@ -47,7 +47,7 @@ function Shopping() {
   };
 
   const record = () => {
-    if (total <= 0) return toast.error("Basket total is zero");
+    if (total <= 0) { toast.error("Basket total is zero"); return; }
     setMoney((m) => {
       const cat = m.categories.find((c) => /grocer/i.test(c.name)) ?? m.categories[0];
       if (!cat) return m;

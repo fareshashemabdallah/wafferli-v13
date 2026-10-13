@@ -289,7 +289,7 @@ function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Ex
         if (amount === null) return setErr("Amount must be a positive number up to 50,000.");
         if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) return setErr("Please pick a valid date.");
         const { amountStr: _a, ...rest } = f;
-        onSave({ ...rest, amount, note: f.note?.slice(0, 60) });
+        onSave({ ...rest, amount, note: (f.note ?? "").slice(0, 60) });
       }}
     >
       <Field label="Amount (JOD)"><Input className={inputCls} inputMode="decimal" autoFocus value={f.amountStr} onChange={(e) => setF({ ...f, amountStr: e.target.value })} /></Field>
@@ -300,7 +300,7 @@ function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Ex
         </NativeSelect>
       </Field>
       <Field label="Owner (optional)">
-        <NativeSelect value={f.owner ?? ""} onChange={(e) => setF({ ...f, owner: e.target.value || undefined })}>
+        <NativeSelect value={f.owner ?? ""} onChange={(e) => setF((previous) => { const { owner: _owner, ...withoutOwner } = previous; return e.target.value ? { ...withoutOwner, owner: e.target.value } : withoutOwner; })}>
           <option value="">—</option>
           <option value="Household">Household</option>
           {members.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}

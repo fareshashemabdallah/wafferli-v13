@@ -45,7 +45,7 @@ function TogetherPage() {
     setErr(""); setBusy(true);
     try {
       const r = await createOuting({ title: f.title.trim(), event_at: f.event_at, neighborhood: f.neighborhood, friend_count: n, organizer_name: f.organizer, options: clean });
-      setSaved((s) => [{ ...r, title: f.title.trim(), budget: f.budget || undefined, whoPays: f.whoPays, created: new Date().toISOString() }, ...s].slice(0, 20));
+      setSaved((s) => [{ ...r, title: f.title.trim(), ...(f.budget ? { budget: f.budget } : {}), whoPays: f.whoPays, created: new Date().toISOString() }, ...s].slice(0, 20));
       toast.success("Vote created");
       navigate({ to: "/together/$adminToken", params: { adminToken: r.admin_token } });
     } catch (x) {
