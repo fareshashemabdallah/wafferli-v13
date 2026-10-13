@@ -34,6 +34,10 @@ jobs:
       - name: Build static React app
         working-directory: app
         run: bun run build
+      - name: Verify compiled Dabberna entry page
+        run: |
+          test -s react-dist/index.html
+          grep -qi 'Dabberna' react-dist/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
