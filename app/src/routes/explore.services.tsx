@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ExternalLink, Search, ShieldAlert, Stethoscope } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ExternalLink, MessagesSquare, Search, ShieldAlert, Stethoscope } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
@@ -65,6 +65,7 @@ function Services() {
         {ar?"افتح نتائج خرائط Google":"Open Google Maps results"} <ExternalLink className="size-4"/>
       </a>}
     </form>
+    <div className="card-soft mt-4 p-4"><h2 className="flex items-center gap-2 font-semibold"><MessagesSquare className="size-5 text-brand"/>{ar?"تجارب الناس الذين تعرفهم":"Ask people you trust"}</h2><p className="mt-2 text-sm text-muted-foreground">{ar?"إذا كان لديك اسم مقدم خدمة محدد، اعرض تجارب أعضاء مجموعتك الخاصة بذلك الاسم فقط.":"Looking at a specific provider? Read experiences for that exact name within your private group, or ask group members."}</p><Link to="/community" search={{kind:"advice",topic:"Service suggestions",invite:undefined,category:category==="doctor"?"doctor":category==="school"?"school":"service",item:detail.trim(),area:city.trim()}} className="mt-3 inline-block rounded-xl border border-brand/20 bg-mint px-4 py-2 text-sm font-semibold text-brand">{ar?"اسأل مجموعتي أو شاهد تجاربهم":"Ask my network / view experiences"} ↗</Link></div>
     <div className="card-soft mt-4 p-4 text-sm">
       <p className="flex gap-2 font-semibold"><ShieldAlert className="size-5 text-brand"/>{ar?"المصادر والمراجعات":"Sources and reviews"}</p>
       <p className="mt-2 text-muted-foreground">{ar
