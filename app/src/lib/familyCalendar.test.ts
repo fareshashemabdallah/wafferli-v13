@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {dateKey,isJordanWeekend,monthCells,nextJordanWeekend,occurrencesForDate,parseCalendarDate,shiftDays,upcomingMoments,type FamilyMoment} from "./familyCalendar";
+import {calendarWithMemberBirthdays,dateKey,isJordanWeekend,monthCells,nextJordanWeekend,occurrencesForDate,parseCalendarDate,shiftDays,upcomingMoments,type FamilyMoment} from "./familyCalendar";
 
 const birthday:FamilyMoment={id:"one",kind:"birthday",title:"Birthday",date:"2024-11-02",annual:true};
 describe("Family calendar",()=>{
@@ -35,4 +35,31 @@ describe("Family calendar",()=>{
   const out=upcomingMoments([meeting,birthday],new Date(2026,9,20,16),20);
   expect(out.map(x=>x.occursOn)).toEqual(["2026-10-21","2026-11-02"]);
  });
+ it("derives an annual birthday from a family profile without saving a second event",()=>{
+  const members=[{id:"m1",name:"Sophia",birthday:"2021-10-20"}];
+  const events=calendarWithMemberBirthdays([],members,"en");
+  expect(events).toHaveLength(1);
+  expect(events[0]).toMatchObject({id:"member-birthday:m1",title:"Sophia's birthday",date:"2021-10-20",annual:true,source:"member"});
+  expect(occurrencesForDate(events,"2026-10-20")).toHaveLength(1);
+  expect(calendarWithMemberBirthdays([],members,"ar")[0]?.title).toBe("عيد ميلاد Sophia");
+ });
+ it("updates profile birthdays dynamically and removes them when the member no longer has a date",()=>{
+  const before=calendarWithMemberBirthdays([],[{id:"m1",name:"Faris",birthday:"2022-06-12"}],"en");
+  const after=calendarWithMemberBirthdays([],[{id:"m1",name:"Faris",birthday:"2022-06-15"}],"en");
+  expect(occurrencesForDate(before,"2027-06-12")).toHaveLength(1);
+  expect(occurrencesForDate(after,"2027-06-12")).toHaveLength(0);
+  expect(occurrencesForDate(after,"2027-06-15")).toHaveLength(1);
+  expect(calendarWithMemberBirthdays([],[{id:"m1",name:"Faris"}],"en")).toHaveLength(0);
+ });
+ it("does not duplicate an existing manually entered birthday for the same name and day",()=>{
+  const manual:FamilyMoment={id:"old",title:"Sophia birthday",date:"2021-10-20",kind:"birthday",annual:true};
+  const events=calendarWithMemberBirthdays([manual],[{id:"m1",name:"Sophia",birthday:"2021-10-20"}],"en");
+  expect(occurrencesForDate(events,"2026-10-20")).toHaveLength(1);
+ });
+ it("keeps separately entered annual wedding anniversaries and older nonbirthday events",()=>{
+  const anniversary:FamilyMoment={id:"wedding",title:"Wedding anniversary",date:"2015-07-07",kind:"anniversary",annual:true};
+  const events=calendarWithMemberBirthdays([anniversary],[{id:"m1",name:"Faris",birthday:"2022-07-07"}],"en");
+  expect(occurrencesForDate(events,"2027-07-07").map(x=>x.kind).sort()).toEqual(["anniversary","birthday"]);
+ });
+
 });
