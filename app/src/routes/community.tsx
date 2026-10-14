@@ -128,7 +128,7 @@ function Community(){
       <button type="button" className="mt-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-brand" onClick={()=>{setContext(linkedOccasion.goal==="outing"?"outing":"advice");setTopic(linkedOccasion.occasionTitle.slice(0,120));}}>
        {ar?"أضف المناسبة كموضوع للنقاش":"Use occasion as discussion topic"}
       </button>
-     </div>
+     </div>}
      <div className="grid gap-2 sm:grid-cols-2">
       <label className="text-xs">{ar?"نوع النقاش":"Discussion type"}<select className="mt-1 w-full rounded-xl border bg-card p-2" value={context} onChange={e=>setContext(e.target.value as typeof context)}><option value="general">{ar?"سؤال عام":"General"}</option><option value="outing">{ar?"نزهة":"Outing"}</option><option value="advice">{ar?"طلب توصية":"Advice request"}</option></select></label>
       <label className="text-xs">{ar?"عنوان الموضوع (اختياري)":"Topic (optional)"}<Input className="mt-1" maxLength={120} value={topic} onChange={e=>setTopic(e.target.value)}/></label>
