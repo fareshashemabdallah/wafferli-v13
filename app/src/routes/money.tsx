@@ -30,7 +30,9 @@ const today = localToday;
 
 function MoneyPage() {
   const { tr } = useI18n();
-  const { t } = useI18n();
+  const { lang } = useI18n();
+  const ar=lang==="ar";
+  const [section,setSection]=useState<"overview"|"spending"|"planning">("overview");
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
   const c = useMemo(() => computeMoney(s), [s]);
@@ -46,7 +48,8 @@ function MoneyPage() {
 
   return (
     <AppShell title={tr("Our Finances")}>
-      <p className="mb-4 text-sm text-muted-foreground">{tr("Plan for financial confidence and a good family life—not saving for its own sake.")}</p>
+      <p className="mb-4 text-sm text-muted-foreground">{ar?"أنفق بذكاء وراجع التفاصيل وقت الحاجة.":"Make confident choices, one step at a time."}</p>
+      <div role="tablist" aria-label={ar?"أقسام المالية":"Money sections"} className="mb-4 grid grid-cols-3 gap-2">{([{id:"overview",en:"Overview",ar:"لمحة"},{id:"spending",en:"Spending",ar:"مصاريف"},{id:"planning",en:"Bills & plan",ar:"الفواتير"}] as const).map(v=><button role="tab" aria-selected={section===v.id} key={v.id} type="button" onClick={()=>setSection(v.id)} className={"min-h-12 rounded-xl px-2 text-xs font-semibold sm:text-sm "+(section===v.id?"bg-brand text-white":"border border-border bg-white text-brand")}>{ar?v.ar:v.en}</button>)}</div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
         <span className="text-xs text-muted-foreground">{tr("Saved on this device only. Use fictional figures during the pilot.")}</span>
