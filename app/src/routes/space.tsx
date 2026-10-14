@@ -38,7 +38,7 @@ function Space() {
     if (edit.birthday && (!parseCalendarDate(edit.birthday) || edit.birthday>dateKey(new Date()))) {
       return setErr(ar ? "يرجى إدخال تاريخ ميلاد صحيح لا يتجاوز اليوم." : "Please enter a valid date of birth that is not in the future.");
     }
-    const m = { ...edit, name: edit.name.trim().slice(0, 30), prefs: edit.prefs.slice(0, 120), birthday:edit.birthday||undefined };
+    const m = { ...edit, name: edit.name.trim().slice(0, 30), prefs: edit.prefs.slice(0, 120), birthday:edit.birthday??"" };
     setMembers(m.id ? members.map((x) => (x.id === m.id ? m : x)) : [...members, { ...m, id: uid() }]);
     setEdit(null); setErr("");
   };
