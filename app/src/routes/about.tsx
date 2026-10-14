@@ -15,18 +15,18 @@ export const Route = createFileRoute("/about")({
 });
 
 const working = [
-  "Home ask box — keyword-based routing (not AI)",
-  "My Money — income, savings %, categories, expenses, live calculations (this device only)",
-  "Shopping list with totals and 'record as expense' (this device only)",
-  "Smart Buy — manual price + delivery comparison vs budget",
-  "My Space — household member profiles (this device only)",
-  "Dabberna Together — shared vote links stored in the cloud, usable across phones without an account",
+  "My Day — financial snapshot, weather and helpful family suggestions",
+  "Our Finances — income, commitments, expenses and cash-flow planning (this device only)",
+  "My Basket — plan quantities, review totals and record an expense (this device only)",
+  "Compare & Choose — manual total-cost comparison; quality must be evaluated separately",
+  "My Family — household profiles and preferences (this device only)",
+  "Plan Together — share outing votes and organize child-aware experiences",
 ];
 const notLive = [
   "AI assistant / AI receipt or product photo extraction",
   "Live online prices or real savings figures",
-  "Real restaurant data, reviews, prices or reservations (listings are samples)",
-  "Accounts, cloud sync of money data, multi-user household sharing",
+  "Automated provider reviews, verified prices or bookings (third-party directory links are available)",
+  "Shared family financial accounts and cross-device sync (group accounts are separate)",
   "Payments of any kind",
 ];
 
@@ -42,7 +42,7 @@ function About() {
       </section>
       <section className="card-soft mt-4 p-4 text-sm">
         <h2 className="text-lg font-semibold">{tr("How to test")}</h2>
-        <ol className="mt-1 list-decimal space-y-1 ps-5"><li>{tr("Explore → Dabberna Together → create a vote.")}</li><li>{tr("Copy the vote link or send via WhatsApp.")}</li><li>{tr("Open it on another phone, vote, then watch your organizer page update.")}</li></ol>
+        <ol className="mt-1 list-decimal space-y-1 ps-5"><li>{tr("Discover → Plan Together → create a vote.")}</li><li>{tr("Copy the vote link or send via WhatsApp.")}</li><li>{tr("Open it on another phone, vote, then watch your organizer page update.")}</li></ol>
       </section>
     </AppShell>
   );
