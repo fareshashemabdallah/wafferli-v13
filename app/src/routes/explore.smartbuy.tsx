@@ -49,7 +49,7 @@ function SmartBuy() {
   const budget = Number(s.budget) || 0;
   const rows = s.alts.map((a) => ({ ...a, total: (Number(a.price) || 0) + (Number(a.extra) || 0) }));
   const valid = rows.filter((r) => Number(r.price) > 0);
-  const best = valid.length ? valid.reduce((a, b) => {tr("(b.total")} < a.total ? b : a)) : null;
+  const best = valid.length ? valid.reduce((a, b) => (b.total < a.total ? b : a)) : null;
   const setAlt = (id: string, p: Partial<Alt>) => setS({ ...s, alts: s.alts.map((a) => (a.id === id ? { ...a, ...p } : a)) });
 
   return (
