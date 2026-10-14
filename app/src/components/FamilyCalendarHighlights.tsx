@@ -1,17 +1,21 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, CalendarDays, Cake, ChevronRight, Gift, Heart, Plus, Sun } from "lucide-react";
 import { useMemo } from "react";
-import { dateKey,formatMomentDate,kindNames,nextJordanWeekend,shiftDays,upcomingMoments,type FamilyMoment } from "@/lib/familyCalendar";
+import { allFamilyMoments, dateKey,formatMomentDate,kindNames,nextJordanWeekend,shiftDays,upcomingMoments,occurrencesForDate,type FamilyMoment } from "@/lib/familyCalendar";
+import { sampleMembers } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
 import { useLocalState } from "@/lib/storage";
 
 export function FamilyCalendarHighlights() {
  const {lang}=useI18n();
  const ar=lang==="ar";
- const [events,,ready]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const [events,,eventsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const [members,,membersReady]=useLocalState("members",sampleMembers());
+ const ready=eventsReady&&membersReady;
+ const combined=useMemo(()=>allFamilyMoments(events,members,ar),[events,members,ar]);
  const now=useMemo(()=>new Date(),[]);
  const today=dateKey(now);
- const upcoming=useMemo(()=>upcomingMoments(events,now,35).slice(0,3),[events,now]);
+ const upcoming=useMemo(()=>upcomingMoments(combined,now,35).slice(0,3),[combined,now]);
  const friday=dateKey(nextJordanWeekend(now));
  const weekdays=Array.from({length:7},(_,i)=>shiftDays(now,i));
  const fmt=(d:Date)=>new Intl.DateTimeFormat(ar?"ar-JO":"en-US",{weekday:"short"}).format(d);
@@ -30,7 +34,7 @@ export function FamilyCalendarHighlights() {
     {weekdays.map(d=>{
      const key=dateKey(d);
      const todayCell=key===today,weekend=d.getDay()===5||d.getDay()===6;
-     const hasEvent=events.some(e=>e.annual?e.date.slice(5)===key.slice(5)&&key>=e.date:e.date===key);
+     const hasEvent=occurrencesForDate(combined,key).length>0;
      return <Link key={key} to="/calendar" aria-label={(ar?"عرض يوم ":"View day ")+key}
         className={"flex min-h-[4.25rem] flex-col items-center justify-center gap-1 rounded-xl border text-center transition hover:border-brand/40 " + (todayCell?"border-brand bg-mint text-brand":"border-transparent "+(weekend?"bg-[#FCF4E7] text-ink":"bg-muted/40 text-ink"))}>
        <span className="text-[10px] font-medium text-muted-foreground">{fmt(d)}</span>
@@ -54,7 +58,7 @@ export function FamilyCalendarHighlights() {
     {!ready ? <p className="mt-2 text-sm text-muted-foreground">{ar?"جارٍ تحميل التقويم...":"Loading your calendar…"}</p>
     :upcoming.length===0 ? <div className="mt-2 flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 p-3">
       <Gift className="size-5 shrink-0 text-[#C28A70]"/>
-      <p className="text-sm text-muted-foreground">{ar?"لا توجد مناسبات محفوظة بعد. ابدأ بأعياد الميلاد أو مواعيد المدرسة أو المناسبات العائلية.":"Nothing saved yet. Add a birthday, a school event or a special family day."}</p>
+      <p className="text-sm text-muted-foreground">{ar?"لا توجد مناسبات بعد. أضف أعياد الميلاد من صفحة عائلتي أو مناسبة خاصة من التقويم.":"Nothing saved yet. Add family birthdays in My Family or add a special occasion."}</p>
      </div>
     : <div className="mt-2 space-y-2">{upcoming.map(item=><div key={item.id+item.occursOn} className="flex items-center gap-3 rounded-xl border border-border/70 px-3 py-2.5">
        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-mint text-brand">{item.kind==="birthday"?<Cake className="size-4"/>:item.kind==="celebration"?<Heart className="size-4"/>:<CalendarDays className="size-4"/>}</span>

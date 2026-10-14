@@ -1,5 +1,6 @@
 /** Device-only family occasions. Public holidays are not populated by a remote calendar. */
-export type MomentKind = "birthday" | "holiday" | "celebration" | "school" | "activity" | "other";
+import type { Member } from "./money";
+export type MomentKind = "birthday" | "anniversary" | "holiday" | "celebration" | "school" | "activity" | "other";
 export type FamilyMoment = {
   id: string;
   title: string;
@@ -10,8 +11,30 @@ export type FamilyMoment = {
   time?: string; // HH:mm or empty
 };
 export type MomentOccurrence = FamilyMoment & { occursOn: string };
+
+export const memberBirthdayPrefix = "member-birthday:";
+/** Derived from profiles on each read: editing or deleting a member updates their birthday everywhere automatically. */
+export function memberBirthdayMoments(members: Member[], arabic = false): FamilyMoment[] {
+  return members
+    .filter(m => !!m.id && !!m.name.trim() && !!m.birthday && !!parseCalendarDate(m.birthday))
+    .map(m => ({
+      id: memberBirthdayPrefix + m.id,
+      title: arabic ? "عيد ميلاد " + m.name.trim() : m.name.trim() + "'s birthday",
+      date: m.birthday!,
+      kind: "birthday" as const,
+      annual: true,
+    }));
+}
+export function allFamilyMoments(events: FamilyMoment[], members: Member[], arabic = false): FamilyMoment[] {
+  return [...events, ...memberBirthdayMoments(members, arabic)];
+}
+export function isMemberBirthday(item: FamilyMoment): boolean {
+  return item.id.startsWith(memberBirthdayPrefix);
+}
+
 export const kindNames: Record<MomentKind,{en:string;ar:string}> = {
   birthday:{en:"Birthday",ar:"عيد ميلاد"},
+  anniversary:{en:"Wedding anniversary",ar:"ذكرى الزواج"},
   holiday:{en:"Holiday",ar:"عطلة / مناسبة"},
   celebration:{en:"Special occasion",ar:"مناسبة خاصة"},
   school:{en:"School event",ar:"مناسبة مدرسية"},
