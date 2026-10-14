@@ -7,6 +7,7 @@ const labels:Record<string,string> = {
   "Plan together with your circle": "خططوا مع مجموعتكم",
   "Invite school parents or friends to a private discussion about activities and choices.": "ادعُ أهالي المدرسة أو أصدقاءك لنقاش خاص عن الأنشطة والخيارات.",
   "Open group chat": "افتح دردشة المجموعة",
+  "Family & Friends Circles": "دوائر العائلة والأصدقاء",
   "Home": "الرئيسية",
   "Explore": "استكشف",
   "My Money": "أموالي",
