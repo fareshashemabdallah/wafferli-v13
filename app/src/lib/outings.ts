@@ -20,6 +20,14 @@ export type SavedOuting = {
   childrenAttendance?: "no" | "yes" | "unsure";
   childrenFocus?: "children" | "mixed" | "adults";
   childCount?: number; ageBands?: string[]; stroller?: boolean; quiet?: boolean;
+  /** All budget figures are private, user-entered JOD estimates; never sent to public vote RPC. */
+  adultCount?: number;
+  adultCostPerPerson?: number;
+  childCostPerPerson?: number;
+  travelCost?: number;
+  otherCost?: number;
+  totalBudget?: number;
+  estimatedTotal?: number;
 };
 
 export function voterKey(): string {
