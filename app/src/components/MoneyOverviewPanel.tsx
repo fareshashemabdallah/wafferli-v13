@@ -1,4 +1,4 @@
-import {AlertCircle,ArrowRight,CalendarClock,CheckCircle2,Info,Landmark,Plus,ShieldCheck,Wallet} from "lucide-react";
+import {AlertCircle,ArrowRight,CalendarClock,Info,Landmark,Plus,Wallet} from "lucide-react";
 import {fmtJOD} from "@/lib/storage";
 import type {MoneyState} from "@/lib/money";
 import {emptyRealMoney,getMoneyOverview} from "@/lib/moneyOverview";
@@ -11,7 +11,6 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
  const v=getMoneyOverview(state);
  const f=v.forecast,c=v.month;
  const cash=state.cashOnHand;
- const hasEnoughInputs=v.cashSet&&v.hasBillSchedule&&v.dateProblems===0&&!state.demo;
  const needReview=f.overdueCount>0||(f.minimumBalance!==null&&f.minimumBalance<0);
  const resetToActual=()=>{
    const message=ar?"هذا سيستبدل بيانات المالية التجريبية أو المسجلة على هذا الجهاز بصفحة مالية فارغة. لن تتغير معلومات العائلة أو التقويم. هل تريد المتابعة؟":"Start your own finances? This will replace the saved Money sample and any financial entries on this device with a blank Money plan. Family profiles and calendar will stay unchanged.";
@@ -60,6 +59,7 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
         <p className="mt-1 text-sm font-semibold tabular-nums">{v.hasIncomeSchedule?fmtJOD(f.expectedIncome):(ar?"لم يُجدول":"Not scheduled")}</p>
        </div>
      </div>
+     {state.cashUpdatedAt&&<p className="mt-3 text-xs font-medium text-brand">{ar?"آخر تحديث للرصيد: ":"Balance last updated: "}{state.cashUpdatedAt}</p>}
      <p className="mt-3 text-xs text-muted-foreground">{ar?"الدخل المتوقع يظهر للمعلومية فقط؛ لا يُضاف إلى رصيد اليوم حتى تستلمه وتحدّث الرصيد يدوياً.":"Expected income is informational only; it isn't included in today's cash. Update cash yourself when it arrives."}</p>
      {!v.hasBillSchedule&&<div className="mt-4 flex items-start gap-2 rounded-xl bg-[#FFF3E5] p-3 text-sm text-[#835C39]">
        <Info className="mt-0.5 size-4 shrink-0"/><span>{ar?"لا توجد فواتير مجدولة بعد؛ لذلك لا يمكن اعتبار المتبقي متاحاً للإنفاق.":"No bills have been scheduled yet. The number above cannot represent a reliable spending limit."}</span>
