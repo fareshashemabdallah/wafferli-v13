@@ -15,6 +15,7 @@ import { Route as MoneyRouteImport } from './routes/money'
 import { Route as SpaceRouteImport } from './routes/space'
 import { Route as ExploreIndexRouteImport } from './routes/explore.index'
 import { Route as ExploreRestaurantsRouteImport } from './routes/explore.restaurants'
+import { Route as ExploreServicesRouteImport } from './routes/explore.services'
 import { Route as ExploreShoppingRouteImport } from './routes/explore.shopping'
 import { Route as ExploreSmartbuyRouteImport } from './routes/explore.smartbuy'
 import { Route as ExploreTogetherRouteImport } from './routes/explore.together'
@@ -44,6 +45,11 @@ const SpaceRoute = SpaceRouteImport.update({
 const ExploreIndexRoute = ExploreIndexRouteImport.update({
   id: '/explore/',
   path: '/explore/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExploreServicesRoute = ExploreServicesRouteImport.update({
+  id: '/explore/services',
+  path: '/explore/services',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExploreRestaurantsRoute = ExploreRestaurantsRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
+  '/explore/services': typeof ExploreServicesRoute
   '/explore/restaurants': typeof ExploreRestaurantsRoute
   '/explore/shopping': typeof ExploreShoppingRoute
   '/explore/smartbuy': typeof ExploreSmartbuyRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
+  '/explore/services': typeof ExploreServicesRoute
   '/explore/restaurants': typeof ExploreRestaurantsRoute
   '/explore/shopping': typeof ExploreShoppingRoute
   '/explore/smartbuy': typeof ExploreSmartbuyRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
+  '/explore/services': typeof ExploreServicesRoute
   '/explore/restaurants': typeof ExploreRestaurantsRoute
   '/explore/shopping': typeof ExploreShoppingRoute
   '/explore/smartbuy': typeof ExploreSmartbuyRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/money'
     | '/space'
+    | '/explore/services'
     | '/explore/restaurants'
     | '/explore/shopping'
     | '/explore/smartbuy'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/money'
     | '/space'
+    | '/explore/services'
     | '/explore/restaurants'
     | '/explore/shopping'
     | '/explore/smartbuy'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/money'
     | '/space'
+    | '/explore/services'
     | '/explore/restaurants'
     | '/explore/shopping'
     | '/explore/smartbuy'
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   MoneyRoute: typeof MoneyRoute
   SpaceRoute: typeof SpaceRoute
+  ExploreServicesRoute: typeof ExploreServicesRoute
   ExploreRestaurantsRoute: typeof ExploreRestaurantsRoute
   ExploreShoppingRoute: typeof ExploreShoppingRoute
   ExploreSmartbuyRoute: typeof ExploreSmartbuyRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/explore'
       fullPath: '/explore/'
       preLoaderRoute: typeof ExploreIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explore/services': {
+      id: '/explore/services'
+      path: '/explore/services'
+      fullPath: '/explore/services'
+      preLoaderRoute: typeof ExploreServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explore/restaurants': {
@@ -260,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   MoneyRoute: MoneyRoute,
   SpaceRoute: SpaceRoute,
+  ExploreServicesRoute: ExploreServicesRoute,
   ExploreRestaurantsRoute: ExploreRestaurantsRoute,
   ExploreShoppingRoute: ExploreShoppingRoute,
   ExploreSmartbuyRoute: ExploreSmartbuyRoute,
