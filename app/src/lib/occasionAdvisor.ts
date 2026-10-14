@@ -1,6 +1,6 @@
-import {allFamilyMoments,parseCalendarDate,upcomingMoments,type FamilyMoment,type MomentOccurrence} from "./familyCalendar";
+import {allFamilyMoments,dateKey,parseCalendarDate,upcomingMoments,type FamilyMoment,type MomentOccurrence} from "./familyCalendar";
 import type {Member,MoneyState} from "./money";
-import {buildForecast,legacyIncome,localToday} from "./cashflow";
+import {buildForecast,legacyIncome} from "./cashflow";
 
 export type OccasionPlan={budgetJod:number|null;chosenIdea?:string;done?:string[];updatedAt?:string};
 export type OccasionPlans=Record<string,OccasionPlan>;
@@ -69,7 +69,7 @@ export function eventBudgetGuidance(plan:OccasionPlan|undefined,money:MoneyState
  if(money.demo)return {status:"demo",available:null};
  const balance=money.cashOnHand;
  if(balance==null||!Number.isFinite(balance))return {status:"unknown",available:null};
- const forecast=buildForecast({incomes:money.incomeSources??legacyIncome(money.income),commitments:money.commitments??[],openingBalance:balance,reserve:money.cashReserve??0,today:localToday(now),days:90});
+ const forecast=buildForecast({incomes:money.incomeSources??legacyIncome(money.income),commitments:money.commitments??[],openingBalance:balance,reserve:money.cashReserve??0,today:dateKey(now),days:90});
  const available=forecast.safeToSpend;
  if(available===null)return {status:"unknown",available:null};
  return {status:forecast.overdueCount>0||amount>available?"review":"within",available};
