@@ -17,12 +17,12 @@ import { CommunityReviews } from "@/components/CommunityReviews";
 type TopicKind = "general"|"outing"|"advice";
 export const Route=createFileRoute("/community")({
   validateSearch:(search:Record<string,unknown>)=>({
-    invite:typeof search.invite==="string"?search.invite.slice(0,80):undefined,
-    topic:typeof search.topic==="string"?search.topic.slice(0,120):"",
-    kind:search.kind==="outing"||search.kind==="advice"?search.kind as TopicKind:"general" as TopicKind,
-    category:typeof search.category==="string"?search.category:"restaurant",
-    item:typeof search.item==="string"?search.item.slice(0,100):"",
-    area:typeof search.area==="string"?search.area.slice(0,80):""
+    invite:typeof search['invite']==="string"?search['invite'].slice(0,80):undefined,
+    topic:typeof search['topic']==="string"?search['topic'].slice(0,120):"",
+    kind:search['kind']==="outing"||search['kind']==="advice"?search['kind'] as TopicKind:"general" as TopicKind,
+    category:typeof search['category']==="string"?search['category']:"restaurant",
+    item:typeof search['item']==="string"?search['item'].slice(0,100):"",
+    area:typeof search['area']==="string"?search['area'].slice(0,80):""
   }),
   head:()=>({meta:[{title:"Community — Dabberna"},{name:"description",content:"Private family networks, outing chat and firsthand reviews visible only when viewing a named place or item."}]}),
   component:Community
@@ -37,7 +37,7 @@ function Community(){
   const [members,setMembers]=useState<CommunityMember[]>([]);
   const [groupName,setGroupName]=useState(""),[description,setDescription]=useState("");
   const [shareLink,setShareLink]=useState("");
-  const [panel,setPanel]=useState<"chat"|"reviews">(search.item?"reviews":"chat");
+  const [panel,setPanel]=useState<"chat"|"reviews">(search['item']?"reviews":"chat");
   const [error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
   useEffect(()=>{
     let active=true;
@@ -80,8 +80,8 @@ function Community(){
     setCode("");setNotice(ar?"تم تسجيل الدخول":"Signed in");
   });};
   const join=async()=>execute(async()=>{
-    if(!search.invite)return;
-    await acceptCommunityInvite(search.invite,nickname.trim());
+    if(!search['invite'])return;
+    await acceptCommunityInvite(search['invite'],nickname.trim());
     await refresh();
     setNotice(ar?"انضممت إلى المجموعة. يمكنك الآن مراسلة الأعضاء.":"You joined the group; you can now chat with its members.");
   });
@@ -134,7 +134,7 @@ function Community(){
           await leaveCommunityGroup(selected);await refresh();
         })} disabled={busy || groups.find(g=>g.id===selected)?.creator_id===user.id}>{ar?"مغادرة المجموعة":"Leave group"}</Button>}
       </section>
-      {search.invite&&<section className="card-soft mt-4 p-4">
+      {search['invite']&&<section className="card-soft mt-4 p-4">
         <h2 className="flex items-center gap-2 font-semibold"><UserRoundPlus className="size-5"/>{ar?"دعوة إلى مجموعة":"Group invitation"}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{ar?"لن يتم ضمّك حتى تضغط على زر الانضمام. لا تشارك هذا الرابط علناً.":"Joining requires your confirmation. Keep this invite link private."}</p>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -157,9 +157,9 @@ function Community(){
           <Button variant={panel==="reviews"?"default":"outline"} onClick={()=>setPanel("reviews")}>{ar?"تجارب وآراء":"Experience reviews"}</Button>
         </div>
         {panel==="chat"
-          ?<CommunityChat key={selected+search.kind+search.topic} groupId={selected} currentUserId={user.id} kind={search.kind} topic={search.topic}/>
-          :<CommunityReviews key={selected+search.category+search.item+search.area} groupId={selected} currentUserId={user.id}
-            initialType={search.category as ReviewType} initialName={search.item} initialArea={search.area}/>}
+          ?<CommunityChat key={selected+search['kind']+search['topic']} groupId={selected} currentUserId={user.id} kind={search['kind']} topic={search['topic']}/>
+          :<CommunityReviews key={selected+search['category']+search['item']+search['area']} groupId={selected} currentUserId={user.id}
+            initialType={search['category'] as ReviewType} initialName={search['item']} initialArea={search['area']}/>}
       </section>}
     </>}
     {(error||notice)&&<div role="status" className={"mt-4 rounded-xl p-3 text-sm "+(error?"border border-destructive/30 bg-red-50 text-red-800":"bg-mint text-ink")}>{error||notice}</div>}
