@@ -1,70 +1,70 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, CalendarClock, PiggyBank, ShieldCheck, Wallet } from "lucide-react";
-import { buildForecast, legacyIncome, localToday } from "@/lib/cashflow";
+import { ArrowUpRight, PiggyBank, ShieldCheck, Wallet, CalendarClock } from "lucide-react";
 import { useMemo } from "react";
+import { buildForecast,legacyIncome,localToday } from "@/lib/cashflow";
 import { useI18n } from "@/lib/i18n";
-import { computeMoney, sampleMoney } from "@/lib/money";
-import { fmtJOD, useLocalState } from "@/lib/storage";
+import { computeMoney,sampleMoney } from "@/lib/money";
+import { fmtJOD,useLocalState } from "@/lib/storage";
 
-export function FamilyFinanceSnapshot() {
-  const { lang } = useI18n();
-  const [money, , ready] = useLocalState("money", sampleMoney());
-  const finance = useMemo(() => computeMoney(money), [money]);
-  const cashFlow = useMemo(() => buildForecast({incomes:money.incomeSources??legacyIncome(money.income),commitments:money.commitments??[],openingBalance:money.cashOnHand??null,reserve:money.cashReserve??0,today:localToday(),days:30}),[money]);
-  const ar = lang === "ar";
-  const demo = money.demo;
-  const financialPlanShortfall = finance.projectedSavings < money.savingsPct / 100 * finance.monthlyIncome;
-  return (
-    <section className="mt-5 space-y-3" aria-label={ar ? "الملخص المالي للعائلة" : "Family financial overview"}>
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-brand">{ar ? "راحة البال تبدأ بالتخطيط" : "Peace of mind starts with a plan"}</p>
-          <h2 className="mt-1 text-xl font-semibold text-ink">{ar ? "الملخص المالي للعائلة" : "Your family's money at a glance"}</h2>
-        </div>
-        <Link to="/money" className="inline-flex items-center gap-1 text-sm font-semibold text-brand">
-          {ar ? "التفاصيل" : "Details"} <ArrowUpRight className="size-4 rtl:-rotate-90" />
-        </Link>
+/** The home card is intentionally discreet: never open with large financial figures. */
+export function FamilyFinanceSnapshot(){
+ const {lang}=useI18n(),ar=lang==="ar";
+ const [money,,ready]=useLocalState("money",sampleMoney());
+ const finances=useMemo(()=>computeMoney(money),[money]);
+ const cashFlow=useMemo(()=>buildForecast({
+  incomes:money.incomeSources??legacyIncome(money.income),
+  commitments:money.commitments??[],
+  openingBalance:money.cashOnHand??null,
+  reserve:money.cashReserve??0,
+  today:localToday(),days:30
+ }),[money]);
+ const demo=money.demo;
+ const needsReview=!demo && (cashFlow.overdueCount>0 ||
+   (cashFlow.minimumBalance!==null&&cashFlow.minimumBalance<0) ||
+   finances.projectedSavings<finances.savingsTarget);
+ const stats=[
+  {label:ar?"الدخل الشهري":"Monthly income",value:finances.monthlyIncome,Icon:Wallet},
+  {label:ar?"المصاريف هذا الشهر":"Spent this month",value:finances.spent,Icon:CalendarClock},
+  {label:ar?"هدف الادخار":"Savings goal",value:finances.savingsTarget,Icon:PiggyBank},
+  {label:ar?"المتبقي من المخصص الشهري":"Monthly allowance left",value:finances.remaining,Icon:ShieldCheck}
+ ];
+ return <section className="mt-5" aria-label={ar?"المالية العائلية":"Family finances"}>
+  <div className="card-soft overflow-hidden p-4 sm:p-5">
+   <div className="flex items-start gap-3">
+    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-mint text-brand"><Wallet className="size-5"/></span>
+    <div className="min-w-0 flex-1">
+     <p className="text-xs font-medium tracking-wide text-brand">{ar?"راحة البال والتخطيط":"PEACE OF MIND"}</p>
+     <h2 className="mt-0.5 text-lg font-semibold text-ink">{ar?"مالية العائلة، على راحتك":"Your finances, at your pace"}</h2>
+     <p className="mt-1 text-sm text-muted-foreground">{ar?"اعرف ما يناسب عائلتك، واستمتع بالإنفاق على ما يهم. تفاصيل الميزانية متاحة عند الحاجة.":"Make thoughtful choices and enjoy what matters. Your numbers are here whenever you want them."}</p>
+    </div>
+    <Link to="/money" className="shrink-0 rounded-xl border border-border px-2.5 py-2 text-xs font-semibold text-brand" aria-label={ar?"فتح مالية العائلة":"Open Our Finances"}>
+     {ar?"التفاصيل":"Details"} <ArrowUpRight className="ms-1 inline size-3.5 rtl:-rotate-90"/>
+    </Link>
+   </div>
+   {!ready?<p className="mt-3 text-sm text-muted-foreground">{ar?"جارٍ تحميل الميزانية...":"Loading your saved plan…"}</p>:
+    <>
+     {needsReview&&<p className="mt-3 rounded-xl bg-[#FFF4E8] p-3 text-xs text-[#765B43]" role="status">{ar?"قد يكون هناك التزام يستحق المراجعة. ستجد التفاصيل في المالية.":"An upcoming commitment or spending estimate may deserve attention. Review the details when convenient."}</p>}
+     <details className="group mt-4 rounded-xl bg-muted/45 px-3 py-3">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-brand [&::-webkit-details-marker]:hidden">
+       <span className="flex items-center gap-2"><ShieldCheck className="size-4"/>{ar?"عرض الملخص المالي":"View financial overview"}</span>
+       <span className="text-xs font-normal text-muted-foreground group-open:hidden">{ar?"اضغط لعرض الأرقام":"Tap to show figures"}</span>
+       <span className="hidden text-xs font-normal text-muted-foreground group-open:block">{ar?"يمكن إغلاقه":"Tap to close"}</span>
+      </summary>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+       {stats.map(({label,value,Icon})=><div className="rounded-xl bg-white p-3" key={label}>
+        <Icon className="size-4 text-brand"/>
+        <p className="mt-2 text-xs text-muted-foreground">{label}</p>
+        <p className="mt-0.5 text-base font-semibold tabular-nums text-ink">{fmtJOD(value)}</p>
+       </div>)}
       </div>
-      {!ready ? (
-        <div className="card-soft p-5 text-sm text-muted-foreground">{ar ? "جارٍ قراءة الميزانية المحفوظة..." : "Loading your saved budget…"}</div>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { label: ar ? "الدخل الشهري" : "Monthly income", value: finance.monthlyIncome, Icon: Wallet },
-              { label: ar ? "المصروف هذا الشهر" : "Spent this month", value: finance.spent, Icon: CalendarClock },
-              { label: ar ? "هدف الادخار" : "Savings target", value: finance.savingsTarget, Icon: PiggyBank },
-              { label: ar ? "متبقي مخصص الشهر" : "Monthly allowance left", value: finance.remaining, Icon: ShieldCheck }
-            ].map(({label, value, Icon}) => (
-              <div className="card-soft min-w-0 p-4" key={label}>
-                <Icon aria-hidden="true" className="size-5 text-brand" />
-                <p className="mt-2 text-xs text-muted-foreground">{label}</p>
-                <p className="mt-1 text-lg font-semibold tabular-nums text-ink">{fmtJOD(value)}</p>
-              </div>
-            ))}
-          </div>
-          <div className="rounded-2xl border border-border bg-mint/50 p-4">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 size-5 shrink-0 text-brand" />
-              <div className="min-w-0">
-                <p className="font-semibold text-ink">{demo
-                  ? (ar ? "بيانات تجريبية — ليست تقييماً لوضعك المالي" : "Demo figures — not a financial assessment")
-                  : (cashFlow.overdueCount>0 || (cashFlow.minimumBalance!==null && cashFlow.minimumBalance<0) || financialPlanShortfall
-                    ? (ar ? "قد تحتاج خطة الإنفاق إلى مراجعة" : "Your spending plan may need a review")
-                    : (ar ? "راجع الالتزامات والاحتياطي النقدي" : "Review upcoming bills and cash reserves"))}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {demo
-                    ? (ar ? "الأرقام للعرض فقط. أدخل بياناتك التجريبية في صفحة أموالي لتجربة التوصيات." : "These are illustrative amounts. Adjust the sample budget in My Money to explore the tools.")
-                    : (ar ? "التقديرات تعتمد على المصاريف المدخلة، ولا تثبت الأمان المالي من دون الالتزامات والسيولة والاحتياطي." : "This estimate is based on recorded spending; it cannot confirm financial safety without complete obligations, cash flow and reserves.")}
-                </p>
-                {cashFlow.safeToSpend!==null && !demo && <p className="mt-2 text-sm font-semibold">{ar?"متاح بحذر وفق الجدول النقدي: ":"Conservative cash available: "}{fmtJOD(cashFlow.safeToSpend)} <span className="text-xs font-normal text-muted-foreground">{ar?"(لا يشمل النفقات غير المدخلة)":"(excludes unrecorded expenses)"}</span></p>}
-                {cashFlow.events.some(e=>e.kind==="bill") && <p className="mt-1 text-xs text-muted-foreground">{ar?"الالتزامات المجدولة خلال ٣٠ يومًا: ":"Bills scheduled over 30 days: "}{fmtJOD(cashFlow.upcomingBills)}</p>}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </section>
-  );
+      <div className="mt-3 rounded-lg border border-border bg-white/90 p-3 text-xs text-muted-foreground">
+       {demo
+         ? ar?"هذه أرقام تجريبية وليست تقييمًا لمالية عائلتك. عدّلها في صفحة المالية.":"Illustrative demo figures, not an assessment of your family. You can adjust them in Our Finances."
+         : ar?"هذه تقديرات تعتمد فقط على البيانات التي أدخلتها، ولا تؤكد أمان وضعك المالي.":"These estimates use only your recorded data and cannot confirm your financial safety."}
+       {cashFlow.safeToSpend!==null&&!demo&&<p className="mt-2 font-medium">{ar?"تقدير المبلغ غير الملتزم وفق بياناتك: ":"Estimated uncommitted cash based on your entries: "}{fmtJOD(cashFlow.safeToSpend)}</p>}
+      </div>
+     </details>
+    </>}
+  </div>
+ </section>;
 }
