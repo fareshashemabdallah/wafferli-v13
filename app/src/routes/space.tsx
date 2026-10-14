@@ -142,7 +142,7 @@ function Space() {
           </label>
           <label className="block text-sm font-medium">{ar?"نوع المناسبة":"Occasion type"}
             <NativeSelect value={occasion.kind} onChange={e=>setOccasion({...occasion,kind:e.target.value as MomentKind})}>
-              {(["anniversary","celebration","holiday","school","activity","other"] as MomentKind[]).map(kind=>
+              {(["anniversary","birthday","celebration","holiday","school","activity","other"] as MomentKind[]).map(kind=>
                 <option key={kind} value={kind}>{kindNames[kind][ar?"ar":"en"]}</option>)}
             </NativeSelect>
           </label>
