@@ -1,5 +1,5 @@
 import {Link} from "@tanstack/react-router";
-import {ChevronRight,Wallet} from "lucide-react";
+import {AlertCircle,ChevronRight} from "lucide-react";
 import {useMemo} from "react";
 import {buildForecast,legacyIncome,localToday} from "@/lib/cashflow";
 import {computeMoney,sampleMoney} from "@/lib/money";
@@ -21,17 +21,17 @@ export function FamilyFinanceSnapshot(){
  const toReview=!money.demo&&(forecast.overdueCount>0 ||
    (forecast.minimumBalance!==null&&forecast.minimumBalance<0) ||
    totals.projectedSavings<totals.savingsTarget);
- return <section className="mt-4" aria-label={ar?"المالية":"Money"}>
-  <Link to="/money" className="flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 transition hover:border-brand/30 hover:shadow-sm">
-   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-mint text-brand"><Wallet className="size-5"/></span>
+ // The primary Money action already appears at the top of My Day.
+ // Only show this contextual nudge when real, non-demo data needs attention.
+ if(!ready||money.demo||!toReview)return null;
+ return <section className="mt-4" aria-label={ar?"ملاحظة مالية مهمة":"Financial reminder"}>
+  <Link to="/money" className="flex items-center gap-3 rounded-2xl border border-[#E9DDC8] bg-[#FFF8EF] px-4 py-3 transition hover:border-[#DABF92]">
+   <AlertCircle className="size-5 shrink-0 text-[#956D46]" aria-hidden="true"/>
    <span className="min-w-0 flex-1">
-    <span className="block text-sm font-semibold text-ink">{ar?"ماليتي، براحة بال":"Money, at your pace"}</span>
-    <span className="mt-1 block text-xs text-muted-foreground">{!ready?(ar?"جارٍ التحميل":"Loading your plan…"):
-     toReview?(ar?"هناك تفاصيل في خطتك تستحق المراجعة.":"Something in your plan may be worth a look."):
-     money.demo?(ar?"استكشف الميزانية بأرقام تجريبية.":"Explore with sample numbers."):
-     (ar?"راجع ميزانيتك عند الحاجة.":"Your plan is here when you need it.")}</span>
+    <span className="block text-sm font-semibold text-ink">{ar?"ملاحظة تستحق المراجعة":"Something worth checking"}</span>
+    <span className="mt-1 block text-xs text-muted-foreground">{ar?"قد يحتاج أحد الالتزامات أو تقديرات المصروف إلى مراجعة.":"A bill or spending estimate may need attention."}</span>
    </span>
-   <ChevronRight className="size-4 shrink-0 text-brand rtl:rotate-180"/>
+   <ChevronRight className="size-4 shrink-0 text-[#956D46] rtl:rotate-180" aria-hidden="true"/>
   </Link>
  </section>;
 }
