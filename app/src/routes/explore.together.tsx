@@ -101,23 +101,23 @@ function TogetherPage() {
     e.preventDefault();
     const n = Number(f.friends);
     const clean = opts.map((o) => ({ name: o.name.trim(), note: o.note.trim() })).filter((o) => o.name);
-    if (!f.title.trim()) return setErr("Please add a title.");
+    if (!f.title.trim()) return setErr(tr("Please add a title."));
     const kids = Number(childCount);
     if (children === "yes" && (!Number.isInteger(kids) || kids < 1 || kids > 30))
-      return setErr("Enter the approximate number of children (1–30).");
+      return setErr(tr("Enter the approximate number of children (1–30)."));
     if (parseAttendees(cost.adults) === null)
-      return setErr("Enter the number of adults attending (1–30), separately from the voters.");
+      return setErr(tr("Enter the number of adults attending (1–30), separately from the voters."));
     if ([cost.adultRate,cost.transport,cost.extras,cost.maximum,...(children === "yes" ? [cost.childRate] : [])]
         .some(value => value.trim() !== "" && parseJod(value) === null))
-      return setErr("Enter valid costs in JOD (0–100,000, maximum two decimal places).");
-    if (!Number.isInteger(n) || n < 2 || n > 30) return setErr("Number of friends must be 2–30.");
-    if (clean.length < 3 || clean.length > 10) return setErr("Add 3 to 10 named venues or activities.");
+      return setErr(tr("Enter valid costs in JOD (0–100,000, maximum two decimal places)."));
+    if (!Number.isInteger(n) || n < 2 || n > 30) return setErr(tr("Number of friends must be 2–30."));
+    if (clean.length < 3 || clean.length > 10) return setErr(tr("Add 3 to 10 named venues or activities."));
     setErr(""); setBusy(true);
     try {
       // Only the general family theme is placed in the public title, with opt-in consent.
       // Children's count, ages and practical needs stay on the organizer's device.
-      const theme = children === "yes" ? childFocus === "children" ? " · Kids-focused" : childFocus === "mixed" ? " · Family outing" : " · Kids attending" :
-        children === "unsure" ? " · Kids TBD" : "";
+      const theme = children === "yes" ? childFocus === "children" ? " · "+tr("Kids-focused") : childFocus === "mixed" ? " · "+tr("Family outing") : " · "+tr("Kids attending") :
+        children === "unsure" ? " · "+tr("Kids TBD") : "";
       const publicTitle = shareTheme && theme ? f.title.trim().slice(0, 80 - theme.length) + theme : f.title.trim();
       const r = await createOuting({ title: publicTitle, event_at: f.event_at, neighborhood: f.neighborhood, friend_count: n, organizer_name: f.organizer, options: clean });
       setSaved((s) => [{ ...r, title: publicTitle, whoPays: f.whoPays,
@@ -132,7 +132,7 @@ function TogetherPage() {
         ...(estimate.estimatedTotal !== null ? { estimatedTotal: estimate.estimatedTotal } : {}),
         created: new Date().toISOString(),
       }, ...s].slice(0, 20));
-      toast.success("Vote created");
+      toast.success(tr("Vote created"));
       navigate({ to: "/together/$adminToken", params: { adminToken: r.admin_token } });
     } catch (x) {
       setErr(x instanceof Error ? x.message : "Could not create the vote.");
@@ -161,7 +161,7 @@ function TogetherPage() {
         <Field label={tr("Outing name")}><Input className={inputCls} maxLength={80} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
         <Field label={tr("What kind of outing?")}>
           <NativeSelect value={f.activity} onChange={e=>setF({ ...f, activity: e.target.value as ActivityType })}>
-            {(Object.keys(activityTypes) as ActivityType[]).map(key=><option key={key} value={key}>{activityTypes[key].label}</option>)}
+            {(Object.keys(activityTypes) as ActivityType[]).map(key=><option key={key} value={key}>{tr(activityTypes[key].label)}</option>)}
           </NativeSelect>
         </Field>
         <Field label={tr("Date & time")}><Input className={inputCls} type="datetime-local" value={f.event_at} onChange={(e) => setF({ ...f, event_at: e.target.value })} /></Field>
@@ -195,7 +195,7 @@ function TogetherPage() {
               <div className="grid gap-2 sm:grid-cols-2">
                 {ages.map(group=><label key={group.value} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" checked={ageBands.includes(group.value)} onChange={e=>setAgeBands(old=>e.target.checked ? [...old,group.value] : old.filter(v=>v!==group.value))} />
-                  {group.label}
+                  {tr(group.label)}
                 </label>)}
               </div>
             </div>
@@ -204,9 +204,9 @@ function TogetherPage() {
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={quiet} onChange={e=>setQuiet(e.target.checked)} /> {tr("Prefer quiet / low-noise environments")}</label>
             </div>
             <p className="rounded-xl bg-card p-3 text-xs text-muted-foreground">
-              <strong>{focusNames[childFocus]}.</strong> Check child admission and age limits, smoking exposure, safe facilities, travel time, suitable food and the children's cost.
-              {stroller ? " Prioritize stroller access." : ""}{quiet ? " Avoid noisy venues." : ""}
-              {" "}Dabberna does not independently verify venue safety.
+              <strong>{tr(focusNames[childFocus])}.</strong> {tr("Check child admission and age limits, smoking exposure, safe facilities, travel time, suitable food and the children's cost.")}
+              {stroller ? " "+tr("Prioritize stroller access.") : ""}{quiet ? " "+tr("Avoid noisy venues.") : ""}
+              {" "}{tr("Dabberna does not independently verify venue safety.")}
             </p>
           </>}
           {children === "unsure" && <p className="text-xs text-muted-foreground">{tr("Do not finalize adults-only or age-restricted options until attendance is confirmed.")}</p>}
@@ -218,8 +218,7 @@ function TogetherPage() {
           <div>
             <h2 className="font-semibold">{tr("Outing budget calculator · ميزانية الطلعة")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Private estimates in Jordanian dinars (JOD). Adult and child prices are separate; do not assume children pay adult prices.
-              Leave a price blank if unknown, or enter 0 for free admission.
+              {tr("Private estimates in Jordanian dinars (JOD). Adult and child prices are separate; do not assume children pay adult prices. Leave a price blank if unknown, or enter 0 for free admission.")}
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -252,26 +251,26 @@ function TogetherPage() {
             <h3 className="font-semibold">{tr("Estimated cost for the whole outing")}</h3>
             <div className="mt-2 space-y-1 text-sm">
               <div className="flex justify-between gap-2">
-                <span>Adults ({estimate.adults ?? "?"})</span>
-                <span className="font-semibold">{estimate.adultSubtotal !== null ? formatJod(estimate.adultSubtotal) : "Price needed"}</span>
+                <span>{tr("Adults")} ({estimate.adults ?? "?"})</span>
+                <span className="font-semibold">{estimate.adultSubtotal !== null ? formatJod(estimate.adultSubtotal)  : tr("Price needed")}</span>
               </div>
               {children === "yes" && <div className="flex justify-between gap-2">
-                <span>Children ({estimate.children ?? "?"})</span>
-                <span className="font-semibold">{estimate.childSubtotal !== null ? formatJod(estimate.childSubtotal) : "Price needed"}</span>
+                <span>{tr("Children")} ({estimate.children ?? "?"})</span>
+                <span className="font-semibold">{estimate.childSubtotal !== null ? formatJod(estimate.childSubtotal)  : tr("Price needed")}</span>
               </div>}
               <div className="flex justify-between gap-2"><span>{tr("Transport + other shared costs")}</span>
-                <span>{estimate.transport !== null && estimate.extras !== null ? formatJod(estimate.transport + estimate.extras) : "Check amounts"}</span>
+                <span>{estimate.transport !== null && estimate.extras !== null ? formatJod(estimate.transport + estimate.extras)  : tr("Check amounts")}</span>
               </div>
             </div>
             <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 border-t pt-3">
               <strong>{tr("Estimated total")}</strong>
-              <strong className="text-xl">{estimate.estimatedTotal !== null ? formatJod(estimate.estimatedTotal) : "Not available yet"}</strong>
+              <strong className="text-xl">{estimate.estimatedTotal !== null ? formatJod(estimate.estimatedTotal)  : tr("Not available yet")}</strong>
             </div>
             {children === "unsure" && <p className="mt-2 text-xs text-muted-foreground"> {tr("Children may join: the final total remains unknown until attendance and children's costs are confirmed.")} </p>}
             {children === "yes" && estimate.childRate === null && <p className="mt-2 text-xs text-muted-foreground"> {tr("Please enter an estimated child price (0 if free) to calculate the full group total.")} </p>}
             {estimate.adultRate === null && <p className="mt-2 text-xs text-muted-foreground"> {tr("Enter the estimated adult price to calculate the full group total.")} </p>}
             {estimate.remaining !== null && <p className={"mt-3 font-semibold " + (estimate.remaining >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-destructive")}>
-              {estimate.remaining >= 0 ? "Within budget — " + formatJod(estimate.remaining) + " remaining" : "Over budget by " + formatJod(-estimate.remaining)}
+              {estimate.remaining >= 0 ? tr("Within budget — ")+formatJod(estimate.remaining)+" "+tr("remaining") : tr("Over budget by ")+formatJod(-estimate.remaining)}
             </p>}
             <p className="mt-3 text-xs text-muted-foreground"> {tr("Planning estimate only. Actual venue prices, taxes, tips, transport and child discounts may differ. Blank optional extras are treated as 0.")} </p>
           </div>
@@ -280,7 +279,7 @@ function TogetherPage() {
           <div className="font-medium">{tr("Find activity ideas")}</div>
           <p className="mt-1 text-xs text-muted-foreground">{tr("Opens Google Maps with your outing type and general family focus. This is not yet an AI recommendation or a verified safety search.")}</p>
           <a href={googleActivitiesLink} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center rounded-lg border px-3 py-2 font-semibold text-brand underline-offset-4 hover:underline">
-            Search {children === "yes" ? "suitable family activities" : "activities"} near {f.neighborhood || "Amman"} ↗
+            {tr("Search")} {tr(children === "yes" ? "suitable family activities" : "activities")} {tr("near")} {f.neighborhood || tr("Amman")} ↗
           </a>
         </div>
         <Field label={tr("Who pays (private note)")} hint={tr("Not shown in the vote")}>
@@ -292,23 +291,23 @@ function TogetherPage() {
 
         <div className="sm:col-span-2">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold">Venues or activities to vote on ({opts.length}/10)</h2>
+            <h2 className="font-semibold">{tr("Venues or activities to vote on")} ({opts.length}/10)</h2>
             <Button type="button" size="sm" variant="secondary" disabled={opts.length >= 10} onClick={() => setOpts([...opts, { name: "", note: "" }])}><Plus className="size-4" /> {tr("Add")}</Button>
           </div>
           <ol className="mt-2 space-y-2">
             {opts.map((o, i) => (
               <li key={i} className="flex gap-2 rounded-xl bg-muted p-2">
                 <div className="grid flex-1 gap-2">
-                  <Input aria-label={`Option ${i + 1} name`} className={inputCls} maxLength={80} value={o.name} placeholder={`Option ${i + 1}`} onChange={(e) => setOpts(opts.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
-                  <Input aria-label={`Option ${i + 1} note`} className="h-10 bg-card" maxLength={160} value={o.note} placeholder={tr("Short note (optional)")} onChange={(e) => setOpts(opts.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} />
+                  <Input aria-label={`${tr("Option")} ${i + 1} ${tr("name")}`} className={inputCls} maxLength={80} value={o.name} placeholder={`${tr("Option")} ${i + 1}`} onChange={(e) => setOpts(opts.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+                  <Input aria-label={`${tr("Option")} ${i + 1} ${tr("note")}`} className="h-10 bg-card" maxLength={160} value={o.note} placeholder={tr("Short note (optional)")} onChange={(e) => setOpts(opts.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} />
                 </div>
-                <Button type="button" size="icon" variant="ghost" aria-label={`Remove option ${i + 1}`} disabled={opts.length <= 3} onClick={() => setOpts(opts.filter((_, j) => j !== i))}><Trash2 className="size-4" /></Button>
+                <Button type="button" size="icon" variant="ghost" aria-label={`${tr("Remove")} ${tr("Option")} ${i + 1}`} disabled={opts.length <= 3} onClick={() => setOpts(opts.filter((_, j) => j !== i))}><Trash2 className="size-4" /></Button>
               </li>
             ))}
           </ol>
         </div>
         {err && <p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
-        <Button type="submit" size="lg" className="h-12 sm:col-span-2" disabled={busy}>{busy ? "Creating…" : "Create outing vote & get link"}</Button>
+        <Button type="submit" size="lg" className="h-12 sm:col-span-2" disabled={busy}>{tr(busy ? "Creating…" : "Create outing vote & get link")}</Button>
       </form>
     </AppShell>
   );
