@@ -67,6 +67,7 @@ function MoneyPage() {
           <RotateCcw className="size-4" /> {tr("Reset sample data")} </Button>
       </div>
 
+      {section==="overview"&&<>
       <section className="hero-surface rounded-3xl p-5">
         <p className="text-sm opacity-80">{tr("Remaining allowance this month")}</p>
         <p className="mt-1 font-display text-4xl font-semibold">{fmtJOD(c.remaining)}</p>
@@ -91,9 +92,13 @@ function MoneyPage() {
         Projection: fixed & periodic use the larger of planned or actual; variable extends your current daily pace to month-end.
       </p>
 
+      </>}
+      {section==="planning"&&<>
       <Settings income={c.monthlyIncome} pct={s.savingsPct} hasSources={s.incomeSources!==undefined}
         onSave={(income,savingsPct)=>upd(s.incomeSources===undefined?{income,savingsPct}:{savingsPct})} />
       <CashFlowPlanner state={s} members={members} update={setS} />
+      </>}
+      {section==="spending"&&<>
       <Categories cats={s.categories} spentBy={c.spentBy} onChange={(categories) => upd({ categories })} />
       <Expenses
         cats={s.categories}
@@ -109,6 +114,7 @@ function MoneyPage() {
           return {...previous,expenses,commitments};
         })}
       />
+      </>}
     </AppShell>
   );
 }
