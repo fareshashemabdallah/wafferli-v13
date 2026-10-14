@@ -35,7 +35,7 @@ function storeSelected(name: string) {
 }
 
 function Restaurants() {
-  const { tr } = useI18n();
+  const { tr, lang } = useI18n();
   const navigate = useNavigate();
   const [area, setArea] = useState("abdoun");
   const [kind, setKind] = useState("all");
@@ -61,28 +61,28 @@ function Restaurants() {
   const jordanUrl = googleMapsSearchUrl("jordan",kind,cuisine,words,shisha,customCuisine);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (area === "jordan") { setError("For in-app listings, please choose a neighborhood. Google Maps supports searching across all Jordan."); return; }
-    if (!apiKey) { setError("Connect a free Geoapify key below for in-app listings, or choose Open Google Maps."); return; }
+    if (area === "jordan") { setError(tr("For in-app listings, please choose a neighborhood. Google Maps supports searching across all Jordan.")); return; }
+    if (!apiKey) { setError(tr("Connect a free Geoapify key below for in-app listings, or choose Open Google Maps.")); return; }
     setBusy(true); setError(""); setSearched(false);
     try {
       const result = await getGeoapifyPlaces(area,apiKey);
       setLoaded(result.places); setCached(result.cached); setUpdatedAt(result.updatedAt); setSearched(true);
     } catch (x) {
-      setLoaded([]); setError(x instanceof Error ? x.message : "Search service unavailable. Google Maps still works.");
+      setLoaded([]); setError(tr(x instanceof Error ? x.message : "Search service unavailable. Google Maps still works."));
     } finally { setBusy(false); }
   };
   const saveApiKey = () => {
     const candidate = keyInput.trim();
-    if (!candidate) { setKeyMessage("Paste the API key from your Geoapify dashboard."); return; }
-    try {localStorage.setItem(API_KEY,candidate); setApiKey(candidate); setKeyMessage("Free-tier key saved in this browser. Now select Find inside Dabberna.");setError("");}
-    catch {setKeyMessage("This browser blocked storage. Please enable local storage to keep your key.");}
+    if (!candidate) { setKeyMessage(tr("Paste the API key from your Geoapify dashboard.")); return; }
+    try {localStorage.setItem(API_KEY,candidate); setApiKey(candidate); setKeyMessage(tr("Free-tier key saved in this browser. Now select Find inside Dabberna."));setError("");}
+    catch {setKeyMessage(tr("This browser blocked storage. Please enable local storage to keep your key."));}
   };
   const clearApiKey = () => {
     try {localStorage.removeItem(API_KEY);} catch {}
-    setApiKey("");setKeyInput("");setKeyMessage("Local API key cleared.");setLoaded([]);setSearched(false);
+    setApiKey("");setKeyInput("");setKeyMessage(tr("Local API key cleared."));setLoaded([]);setSearched(false);
   };
   const select = (name: string) => {
-    if (!storeSelected(name)) { setError("Unable to save your choice. Check Safari private browsing/storage settings."); return; }
+    if (!storeSelected(name)) { setError(tr("Unable to save your choice. Check Safari private browsing/storage settings.")); return; }
     navigate({to:"/explore/together"});
   };
   return (
@@ -92,7 +92,7 @@ function Restaurants() {
       <div className="card-soft mt-4 space-y-3 p-4">
         <Field label={tr("Location")}>
           <NativeSelect value={area} onChange={e=>{setArea(e.target.value);setLoaded([]);setSearched(false);}}>
-            {searchAreas.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}
+            {searchAreas.map(x=><option key={x.id} value={x.id}>{lang === "ar" ? x.name.split(" · ")[1] ?? x.name : x.name.split(" · ")[0]}</option>)}
             <option value="jordan">{tr("All Jordan · كل الأردن (Google Maps)")}</option>
           </NativeSelect>
         </Field>
@@ -108,8 +108,8 @@ function Restaurants() {
         <Field label={tr("Cuisine / food type · نوع المطبخ")}>
           <NativeSelect value={cuisine} onChange={e=>setCuisine(e.target.value)}>
             <option value="all">{tr("All cuisines · جميع المطابخ")}</option>
-            {cuisineGroups.map(group=><optgroup key={group.label} label={group.label}>
-              {group.options.map(option=><option key={option.id} value={option.id}>{option.en} · {option.ar}</option>)}
+            {cuisineGroups.map(group=><optgroup key={group.label} label={lang==="ar"?group.label.split(" · ")[1]??group.label:group.label.split(" · ")[0]}>
+              {group.options.map(option=><option key={option.id} value={option.id}>{lang === "ar" ? option.ar : option.en}</option>)}
             </optgroup>)}
             <option value="custom">{tr("Other / type your own · غير ذلك")}</option>
           </NativeSelect>
@@ -119,10 +119,10 @@ function Restaurants() {
             maxLength={80} placeholder={tr("e.g. Tibetan, مقلوبة, gluten-free cake")} />
         </Field>}
         <p className="text-xs text-muted-foreground">
-          {cuisine==="all" ? "Choose any cuisine or search the 140+ Jordan directory cuisine and dining categories." :
-          cuisine==="custom" ? "Your custom cuisine will be included in the live Google Maps search." :
-          `Selected: ${getCuisine(cuisine)?.en ?? ""} · ${getCuisine(cuisine)?.ar ?? ""}. Google Maps will search for this in the chosen area.`}
-          {" "}These categories reflect Jordan food directories, but no individual venue is guaranteed.
+          {cuisine==="all" ? tr("Choose any cuisine or search the 140+ Jordan directory cuisine and dining categories.") :
+          cuisine==="custom" ? tr("Your custom cuisine will be included in the live Google Maps search.") :
+          tr("Selected:")+" "+(lang==="ar"?getCuisine(cuisine)?.ar:getCuisine(cuisine)?.en)+" · "+tr("Google Maps will search for this in the chosen area.")}
+          {" "}{tr("These categories reflect Jordan food directories, but no individual venue is guaranteed.")}
         </p>
         <Field label={tr("Name or search words")}>
           <Input value={words} onChange={e=>setWords(e.target.value)} maxLength={70} placeholder={tr("Lebanese restaurant, mezze, shisha, ...")} />
@@ -142,8 +142,7 @@ function Restaurants() {
       <section className="card-soft mt-4 space-y-3 p-4">
         <div className="flex items-center gap-2"><KeyRound className="size-4 text-brand"/><h2 className="font-semibold">{tr("See real places inside Dabberna (free pilot)")}</h2></div>
         <p className="text-xs text-muted-foreground">
-          Geoapify has a free tier. Create a key and restrict its allowed HTTP origins to this GitHub Pages website.
-          This pilot stores your key in this browser and sends it directly to Geoapify; it is not a secret server credential.
+          {tr("Geoapify has a free tier. Create a key and restrict its allowed HTTP origins to this GitHub Pages website. This pilot stores your key in this browser and sends it directly to Geoapify; it is not a secret server credential.")}
         </p>
         <a className="inline-flex items-center gap-1 text-sm font-medium text-brand underline" href="https://myprojects.geoapify.com/" target="_blank" rel="noopener noreferrer"> {tr("Create a free Geoapify API key")} <ExternalLink className="size-3.5"/>
         </a>
@@ -157,7 +156,7 @@ function Restaurants() {
         {keyMessage && <p className="text-xs text-brand" role="status">{keyMessage}</p>}
         <form onSubmit={submit}>
           <Button type="submit" className="h-11 w-full" disabled={busy || !apiKey || area==="jordan"}>
-            <Search className="size-4"/>{busy?"Searching Geoapify…":area==="jordan"?"Choose a neighborhood for in-app results":apiKey?"Find inside Dabberna":"Add free key to enable in-app search"}
+            <Search className="size-4"/>{tr(busy?"Searching Geoapify…":area==="jordan"?"Choose a neighborhood for in-app results":apiKey?"Find inside Dabberna":"Add free key to enable in-app search")}
           </Button>
         </form>
         <p className="text-xs text-muted-foreground">
@@ -169,16 +168,16 @@ function Restaurants() {
         {error} <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="font-semibold underline">{tr("See live Google Maps results instead")}</a>.
       </div>}
       {searched && <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm">
-        <strong>{shown.length} mapped venue{shown.length===1?"":"s"}</strong>
-        <span className="text-xs text-muted-foreground"><Clock3 className="mr-1 inline size-3"/>{cached?"Cached":"Geoapify lookup"} · {new Date(updatedAt).toLocaleDateString()}</span>
+        <strong>{shown.length} {tr(shown.length===1?"mapped venue":"mapped venues")}</strong>
+        <span className="text-xs text-muted-foreground"><Clock3 className="mr-1 inline size-3"/>{tr(cached?"Cached":"Geoapify lookup")} · {new Date(updatedAt).toLocaleDateString()}</span>
       </div>}
       {searched && shown.length===0 && <p className="mt-3 rounded-xl bg-muted p-4 text-sm"> {tr("No mapped venues matched these filters. Try All cuisines or remove the name search.")} <a className="underline" href={mapUrl} target="_blank" rel="noopener noreferrer">{tr("Search Google Maps")}</a>.
       </p>}
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {shown.map(p=><article key={p.id} className="card-soft flex flex-col gap-2 p-4">
           <h2 className="font-semibold">{p.name}</h2>
-          <p className="text-sm text-muted-foreground"><MapPin className="mr-1 inline size-3.5"/>{p.kind === "restaurant"?"Restaurant":"Café"} · ~{p.distanceKm.toFixed(1)} km from area center</p>
-          <p className="text-xs text-muted-foreground">{p.cuisine?"Tagged cuisine: "+p.cuisine:"Cuisine not tagged"}{p.address?" · "+p.address:""}</p>
+          <p className="text-sm text-muted-foreground"><MapPin className="mr-1 inline size-3.5"/>{tr(p.kind === "restaurant"?"Restaurant":"Café")} · ~{p.distanceKm.toFixed(1)} {tr("km from area center")}</p>
+          <p className="text-xs text-muted-foreground">{p.cuisine?tr("Tagged cuisine:")+" "+p.cuisine:tr("Cuisine not tagged")}{p.address?" · "+p.address:""}</p>
           <p className="text-xs text-muted-foreground">{tr("Argeeleh, hours, prices and reservations: not verified")}</p>
           <div className="mt-auto flex flex-wrap gap-2 pt-2">
             <a className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium text-brand" href={p.osmUrl} target="_blank" rel="noopener noreferrer">{tr("Map")} <ExternalLink className="size-3"/></a>
@@ -196,7 +195,7 @@ function Restaurants() {
         </div>
       </div>
       <div className="mt-4 text-xs text-muted-foreground"> {tr("Data attribution:")} <a href="https://www.geoapify.com/" className="underline" target="_blank" rel="noopener noreferrer">{tr("Powered by Geoapify")}</a>;
-        map data © <a href="https://www.openstreetmap.org/copyright" className="underline" target="_blank" rel="noopener noreferrer">{tr("OpenStreetMap contributors")}</a>.
+        {tr("map data ©")} <a href="https://www.openstreetmap.org/copyright" className="underline" target="_blank" rel="noopener noreferrer">{tr("OpenStreetMap contributors")}</a>.
       </div>
       <Link to="/explore/together" className="mt-4 block rounded-2xl bg-lime p-4 text-center font-semibold text-ink">{tr("Plan a friends' vote →")}</Link>
     </AppShell>
