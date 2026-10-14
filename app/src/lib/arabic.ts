@@ -1,5 +1,9 @@
 /* Arabic text for the Dabberna UI. Translate UI copy, never user-entered names or secrets. */
 const labels:Record<string,string> = {
+  "Find family services": "اكتشف خدمات العائلة",
+  "Family Services": "خدمات العائلة",
+  "Find doctors, schools, tutors, home services, gifts and activities when you need them.": "ابحث عن أطباء ومدارس ومعلمين وخدمات منزلية وهدايا وأنشطة عند الحاجة.",
+  "Third-party directory links — no AI review analysis yet": "روابط أدلة خارجية — تحليل التقييمات بالذكاء الاصطناعي غير متاح بعد",
   "Home": "الرئيسية",
   "Explore": "استكشف",
   "My Money": "أموالي",

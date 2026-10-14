@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Home, Info, Languages, UserRound, Wallet } from "lucide-react";
+import { Compass, Home, Info, Languages, Sparkles, UserRound, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
 import { useI18n, type Key } from "@/lib/i18n";
 import { Logo } from "./Logo";
 
-const tabs: { to: "/" | "/explore" | "/money" | "/space"; key: Key; icon: typeof Home; exact?: boolean }[] = [
+const tabs: { to: "/" | "/explore" | "/money" | "/space" | "/advisor"; key: Key; icon: typeof Home; exact?: boolean }[] = [
   { to: "/", key: "home", icon: Home, exact: true },
   { to: "/explore", key: "explore", icon: Compass },
   { to: "/money", key: "money", icon: Wallet },
+  { to: "/advisor", key: "advisor", icon: Sparkles },
   { to: "/space", key: "space", icon: UserRound },
 ];
 
@@ -76,13 +77,13 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
         aria-label="Main"
         className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur md:hidden"
       >
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {tabs.map(({ to, key, icon: Icon, exact }) => (
             <Link
               key={to}
               to={to}
               activeOptions={exact ? { exact: true } : {}}
-              className="flex min-h-14 flex-col items-center justify-center gap-0.5 pt-2 text-[11px] font-medium text-muted-foreground data-[status=active]:text-brand"
+              className="flex min-h-14 flex-col items-center justify-center gap-0.5 pt-2 text-[10px] font-medium text-muted-foreground data-[status=active]:text-brand"
             >
               <Icon className="size-6" /> {t(key)}
             </Link>

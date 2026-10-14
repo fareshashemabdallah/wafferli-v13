@@ -2,6 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, ListChecks, Receipt, ShoppingBag, Sparkles, Users, UtensilsCrossed } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AppShell, PilotBadge } from "@/components/AppShell";
+import { FamilyFinanceSnapshot } from "@/components/FamilyFinanceSnapshot";
+import { FamilyWeather } from "@/components/FamilyWeather";
+import { FamilyInsights } from "@/components/FamilyInsights";
+import { defaultFamilyPreferences } from "@/lib/familyPreferences";
+import { useLocalState } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { routeIntent, type Intent } from "@/lib/intent";
@@ -9,7 +14,7 @@ import { routeIntent, type Intent } from "@/lib/intent";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dabberna — Your everyday money & decisions assistant" },
+      { title: "Dabberna — A caring companion for family life" },
       { name: "description", content: "Ask once, Dabberna routes you to budgeting, smart buying, shopping lists or a friends' restaurant vote in Amman." },
       { property: "og:title", content: "Dabberna — Personal Pilot" },
       { property: "og:description", content: "Household budgeting, smart buying and group restaurant votes for Amman." },
@@ -26,6 +31,7 @@ function Index() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [prefs] = useLocalState("familyPreferences", defaultFamilyPreferences);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -67,6 +73,10 @@ function Index() {
         </p>
       </section>
 
+      <FamilyFinanceSnapshot />
+      {prefs.weather && <FamilyWeather />}
+      {prefs.notificationFrequency !== "off" && <FamilyInsights />}
+
       {msgs.length > 0 && (
         <section className="mt-5 space-y-3" aria-live="polite">
           {msgs.map((m, i) => (
@@ -91,7 +101,10 @@ function Index() {
       )}
 
       <section className="mt-7">
-        <h2 className="mb-3 text-lg font-semibold">{t("shortcuts")}</h2>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">{t("shortcuts")}</h2>
+          <Link to="/explore/services" className="text-sm font-semibold text-brand">{tr("Find family services")} ↗</Link>
+        </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {shortcuts.map(({ to, label, icon: Icon }) => (
             <Link key={to} to={to} className="card-soft flex min-h-24 flex-col justify-between p-4 transition hover:-translate-y-0.5">

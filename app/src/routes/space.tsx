@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { AppShell, Notice, PilotBadge } from "@/components/AppShell";
+import { FamilyPreferences } from "@/components/FamilyPreferences";
 import { Field, NativeSelect, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,7 @@ function Space() {
         ))}
         {members.length === 0 && <li className="rounded-xl bg-muted p-6 text-center text-sm text-muted-foreground">{tr("No members yet.")}</li>}
       </ul>
+      <FamilyPreferences />
       <section className="card-soft mt-6 p-4 text-sm">
         <h2 className="font-semibold">{tr("Shared vs private expenses")}</h2>
         <p className="mt-1 text-muted-foreground">{tr("In My Money, each expense is marked shared (household) or private. In this pilot everything stays on this one device; multi-user household sharing isn't live yet.")}</p>
