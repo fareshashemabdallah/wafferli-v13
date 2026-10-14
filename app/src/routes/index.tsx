@@ -21,6 +21,7 @@ export const Route = createFileRoute("/")({
 type Msg = { q: string; intent: Intent | null };
 
 function Index() {
+  const { tr } = useI18n();
   const { t } = useI18n();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
@@ -45,7 +46,7 @@ function Index() {
   return (
     <AppShell>
       <section className="hero-surface rounded-3xl p-6 md:p-8">
-        <p className="text-sm opacity-80">Marhaba 👋 · Amman</p>
+        <p className="text-sm opacity-80">{tr("Marhaba 👋 · Amman")}</p>
         <h1 className="mt-2 text-3xl font-semibold leading-tight md:text-4xl">{t("greeting")}</h1>
         <form onSubmit={submit} className="mt-5 flex gap-2 rounded-2xl bg-card p-1.5">
           <label htmlFor="ask" className="sr-only">{t("ask")}</label>
@@ -80,11 +81,9 @@ function Index() {
                     </Button>
                   </>
                 ) : (
-                  <p className="text-sm">
-                    I couldn't match that yet. Try words like “dinner with friends”, “budget”, “groceries” or “buy shoes”, or pick a shortcut below.
-                  </p>
+                  <p className="text-sm"> {tr("I couldn't match that yet. Try words like “dinner with friends”, “budget”, “groceries” or “buy shoes”, or pick a shortcut below.")} </p>
                 )}
-                <p className="mt-2 text-[11px] text-muted-foreground">Rule-based suggestion — not AI, not live internet data.</p>
+                <p className="mt-2 text-[11px] text-muted-foreground">{tr("Rule-based suggestion — not AI, not live internet data.")}</p>
               </div>
             </div>
           ))}
@@ -105,10 +104,10 @@ function Index() {
 
       <section className="card-soft mt-7 flex items-center justify-between gap-3 p-4">
         <div>
-          <div className="flex items-center gap-2 font-medium">Personal pilot <PilotBadge>V13</PilotBadge></div>
-          <p className="text-sm text-muted-foreground">Your money data stays on this device. Only restaurant votes are shared.</p>
+          <div className="flex items-center gap-2 font-medium">{tr("Personal pilot")} <PilotBadge>{tr("V13")}</PilotBadge></div>
+          <p className="text-sm text-muted-foreground">{tr("Your money data stays on this device. Only restaurant votes are shared.")}</p>
         </div>
-        <Link to="/about" className="shrink-0 text-sm font-semibold text-brand underline-offset-4 hover:underline">Details</Link>
+        <Link to="/about" className="shrink-0 text-sm font-semibold text-brand underline-offset-4 hover:underline">{tr("Details")}</Link>
       </section>
     </AppShell>
   );
