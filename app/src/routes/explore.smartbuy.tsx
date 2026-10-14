@@ -69,11 +69,11 @@ function SmartBuy() {
               <Button variant="ghost" size="icon" aria-label={tr("Remove")} onClick={() => setS({ ...s, alts: s.alts.filter((x) => x.id !== a.id) })}><Trash2 className="size-4" /></Button>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold">Total {fmtJOD(a.total)}</span>
-              {budget > 0 && <span className={a.total > budget ? "text-destructive" : "text-brand"}>{a.total > budget ? `${fmtJOD(a.total - budget)} over budget` : "Within budget"}</span>}
+              <span className="font-semibold">{tr("Total")} {fmtJOD(a.total)}</span>
+              {budget > 0 && <span className={a.total > budget ? "text-destructive" : "text-brand"}>{a.total > budget ? `${fmtJOD(a.total - budget)} ${tr("over budget")}` : tr("Within budget")}</span>}
               {best?.id === a.id && <PilotBadge>{tr("Lowest total")}</PilotBadge>}
               <label className="ms-auto flex items-center gap-1.5 text-xs">
-                <input type="checkbox" checked={a.verified} onChange={(e) => setAlt(a.id, { verified: e.target.checked })} /> {a.verified ? "Price I verified" : "Unverified price"}
+                <input type="checkbox" checked={a.verified} onChange={(e) => setAlt(a.id, { verified: e.target.checked })} /> {tr(a.verified ? "Price I verified" : "Unverified price")}
               </label>
             </div>
           </div>
