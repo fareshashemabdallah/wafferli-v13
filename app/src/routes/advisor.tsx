@@ -8,7 +8,7 @@ import { fmtJOD, useLocalState } from "@/lib/storage";
 import { useI18n } from "@/lib/i18n";
 
 export const Route=createFileRoute("/advisor")({
-  head:()=>({meta:[{title:"Family Advisor — Dabberna"},{name:"description",content:"A family spending decision helper using your saved budget. No live AI is connected."}]}),
+  head:()=>({meta:[{title:"Wise Decisions — Dabberna"},{name:"description",content:"A family spending decision helper using your saved budget. No live AI is connected."}]}),
   component: Advisor
 });
 function Advisor(){
@@ -29,10 +29,10 @@ function Advisor(){
     {href:"/explore/smartbuy",en:"Compare a purchase",ar:"قارن مشترياتك",Icon:ShoppingBag},
     {href:"/explore/services",en:"Find a family service",ar:"ابحث عن خدمة للعائلة",Icon:Search}
   ];
-  return <AppShell title={ar?"مساعد العائلة":"Family Advisor"}>
+  return <AppShell title={ar?"قرارات ذكية":"Wise Decisions"}>
     <div className="hero-surface rounded-3xl p-6">
-      <div className="flex items-center gap-2"><Sparkles className="size-6 text-brand"/><h2 className="text-xl font-semibold">{ar?"نساعدك على الاختيار بثقة":"Decide with more confidence"}</h2></div>
-      <p className="mt-2 text-sm text-ink/80">{ar?"نسخة تجريبية: أداة حساب محلية للمساعدة في قرارات الإنفاق؛ ليست ذكاءً اصطناعياً متصلاً أو نصيحة مالية مهنية.":"Pilot: practical on-device spending guidance, not a connected AI chatbot or professional financial advice."}</p>
+      <div className="flex items-center gap-2"><Sparkles className="size-6 text-brand"/><h2 className="text-xl font-semibold">{ar?"أنفق بذكاء، وعِش براحة":"Spend wisely. Live well."}</h2></div>
+      <p className="mt-2 text-sm text-ink/80">{ar?"ليس الهدف صرف أقل دائماً، بل اختيار ما يمنح عائلتك قيمة أفضل ضمن وضع مالي مريح. هذه أداة حساب محلية، وليست دردشة ذكاء اصطناعي متصلة أو نصيحة مالية مهنية.":"The goal is not simply to spend less. Choose what brings your family genuine value while protecting financial stability. This is an on-device calculator, not a connected AI chatbot or professional advice."}</p>
     </div>
     <div className="card-soft mt-5 p-5">
       <div className="flex items-center gap-2"><Calculator className="size-5 text-brand"/><h2 className="font-semibold">{ar?"هل يناسب هذا المصروف ميزانيتنا؟":"Can we plan this purchase?"}</h2></div>
@@ -52,7 +52,7 @@ function Advisor(){
       {valid && <div role="status" className="mt-4 rounded-2xl bg-mint/70 p-4">
         <p className="font-semibold">{!assessed?(ar?"بيانات إضافية مطلوبة":"More information needed"):affordable?(ar?"المبلغ ضمن الحد المحسوب بحذر":"Within the conservative spending estimate"):(ar?"المبلغ يتجاوز الحد المحسوب":"Beyond the current spending estimate")}</p>
         <p className="mt-2 text-sm">{safe===null?
-          (ar?"أدخل رصيدك النقدي الحالي ومواعيد الالتزامات واحتياطي الطوارئ في صفحة أموالي للحصول على تقدير حذر.":"Enter today's cash balance, scheduled bills and reserve in My Money before relying on this estimate.")
+          (ar?"أدخل رصيدك النقدي الحالي ومواعيد الالتزامات واحتياطي الطوارئ في صفحة أموالي للحصول على تقدير حذر.":"Enter today's cash balance, scheduled bills and reserve in Our Finances before relying on this estimate.")
           :(ar?"الحد المحسوب للصرف الآن: ":"Estimated uncommitted cash: ")+fmtJOD(safe)+". "+(ar?"التقدير لا يشمل نفقات لم تُسجّل.":"This does not account for unrecorded expenses.")}</p>
         <p className="mt-2 text-xs text-muted-foreground">{ar?"النتيجة للمراجعة فقط ولا تضمن القدرة المالية أو تعوض التخطيط." : "This is a planning aid, not a financial guarantee."}</p>
       </div>}
