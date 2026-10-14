@@ -1,14 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Home, Info, Languages, MessageCircle, Sparkles, UserRound, Wallet } from "lucide-react";
+import { Compass, Home, Info, Languages, Sparkles, UserRound, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
 import { useI18n, type Key } from "@/lib/i18n";
 import { Logo } from "./Logo";
 
-const tabs: { to: "/" | "/explore" | "/money" | "/space" | "/community"; key: Key; icon: typeof Home; exact?: boolean }[] = [
+const tabs: { to: "/" | "/explore" | "/money" | "/space"; key: Key; icon: typeof Home; exact?: boolean }[] = [
   { to: "/", key: "home", icon: Home, exact: true },
   { to: "/explore", key: "explore", icon: Compass },
   { to: "/money", key: "money", icon: Wallet },
-  { to: "/community", key: "circles", icon: MessageCircle },
   { to: "/space", key: "space", icon: UserRound },
 ];
 
@@ -67,7 +66,7 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
           </div>
         </header>
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-40 pt-5 md:px-8 md:pb-20 md:pt-10">
-          {title && <h1 className="mb-5 text-3xl font-semibold text-ink">{title}</h1>}
+          {title && <h1 className="mb-4 text-2xl font-semibold text-ink sm:text-3xl">{title}</h1>}
           {children}
         </main>
       </div>
@@ -86,7 +85,7 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
         aria-label="Main"
         className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur md:hidden"
       >
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-4">
           {tabs.map(({ to, key, icon: Icon, exact }) => (
             <Link
               key={to}

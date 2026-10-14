@@ -73,15 +73,12 @@ function Space() {
   };
   return (
     <AppShell title={tr("My Family")}>
-      <p className="mb-4 text-sm text-muted-foreground">{tr("One place to reflect your household’s needs and priorities, with privacy in your control.")}</p>
-      <Notice>{ar
-        ?"أفراد العائلة وأعياد الميلاد والمناسبات محفوظة في هذا المتصفح فقط. لا تتم مشاركتها مع مجموعات الأصدقاء، ولا تجري مزامنتها بين أجهزة الأهل بعد."
-        :"Family members, birth dates and important occasions stay in this browser only. They are not shared with friends' circles or synchronized between parents' devices yet."}</Notice>
+      <p className="mb-4 text-sm text-muted-foreground">{ar?"أضف أفراد العائلة والمناسبات المهمة.":"Your people and the dates that matter."}</p>
 
       <section className="mt-5">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold">{tr("Household members")} <PilotBadge>{tr("Sample")}</PilotBadge></h2>
+            <h2 className="text-lg font-semibold">{tr("Household members")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">{ar?"أضف تاريخ الميلاد مرة واحدة ليظهر تلقائياً في التقويم وفي يومي.":"Add a birthday once: it automatically appears in the Family Calendar and My Day."}</p>
           </div>
           <Button size="sm" onClick={()=>{setEdit({id:"",name:"",role:"adult",ageGroup:"30–44",prefs:"",birthday:""});setErr("");}} disabled={members.length>=12}>
@@ -94,10 +91,12 @@ function Space() {
             <Field label={tr("Role")}><NativeSelect value={edit.role} onChange={e=>setEdit({...edit,role:e.target.value as Member["role"]})}>
               <option value="adult">{tr("Adult")}</option><option value="child">{tr("Child")}</option>
             </NativeSelect></Field>
+            <details className="sm:col-span-2 rounded-xl border border-border bg-white p-3"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"معلومات إضافية (اختياري)":"More about this person (optional)"}</summary><div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Field label={tr("Age group")}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
               {ages.map(a=><option key={a}>{a}</option>)}
             </NativeSelect></Field>
             <Field label={tr("Preferences")}><Input className={inputCls} maxLength={120} value={edit.prefs} onChange={e=>setEdit({...edit,prefs:e.target.value})}/></Field>
+            </div></details>
             <label className="block text-sm font-medium sm:col-span-2">
               <span className="flex items-center gap-2"><Cake className="size-4 text-[#B87976]"/>{ar?"تاريخ الميلاد (اختياري)":"Date of birth (optional)"}</span>
               <Input type="date" className={inputCls+" mt-1"} max={dateKey(new Date())} value={edit.birthday??""} onChange={e=>setEdit({...edit,birthday:e.target.value})}/>
@@ -185,11 +184,14 @@ function Space() {
       </section>
 
       <Link to="/occasions" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-mint px-4 py-3 text-sm font-semibold text-brand">{ar?"خطّط لهدية أو نشاط بمناسبة عائلية":"Plan a meaningful gift or family activity"} →</Link>
+      <details className="group mt-6 rounded-2xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"التفضيلات والخصوصية":"Preferences & privacy"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
       <FamilyPreferences/>
       <section className="card-soft mt-6 p-4 text-sm">
         <h2 className="font-semibold">{tr("Shared vs private expenses")}</h2>
         <p className="mt-1 text-muted-foreground">{tr("In My Money, each expense is marked shared (household) or private. In this pilot everything stays on this one device; multi-user household sharing isn't live yet.")}</p>
       </section>
+      <Notice>{ar?"أفراد العائلة وأعياد الميلاد محفوظة على هذا الجهاز، ولا تتم مشاركتها مع دوائر الأصدقاء.":"Family profiles and birthdays stay on this browser, not shared with friends' circles or synchronized across devices."}</Notice>
+      </details>
     </AppShell>
   );
 }

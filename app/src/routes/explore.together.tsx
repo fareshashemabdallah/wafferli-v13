@@ -97,6 +97,7 @@ function TogetherPage() {
   });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showVoteForm,setShowVoteForm]=useState(false);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -144,8 +145,19 @@ function TogetherPage() {
     <AppShell title={tr("Plan Together")}>
       <PlanContextBanner onUseBudget={amount=>updateCost("maximum",String(amount))}/>
       <p className="mb-4 text-sm text-muted-foreground">{tr("Plan a great experience together—balance everyone’s enjoyment, needs and your planned budget.")}</p>
-      <div className="card-soft mb-4 space-y-1 p-4 text-sm"><p className="font-semibold">{tr("Plan together with your circle")}</p><p className="text-muted-foreground">{tr("Invite school parents or friends to a private discussion about activities and choices.")}</p><Link to="/community" className="font-semibold text-brand">{tr("Open group chat")} →</Link></div>
-      <Notice>{tr("Plan")} <strong>{tr("any outing")}</strong> {tr("— a café, cinema, kids' activity, park, game or day trip. Consider children before choosing options. The vote works without an account. Safety, age restrictions and prices must be checked with each venue.")}</Notice>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <a href={googleActivitiesLink} target="_blank" rel="noopener noreferrer" className="flex min-h-30 flex-col justify-center rounded-2xl border border-border bg-white p-4 transition hover:border-brand/40">
+          <span className="text-base font-semibold text-brand">① {tr("Find activity ideas")}</span>
+          <span className="mt-2 text-sm text-muted-foreground">{tr("Search")} {tr("near")} {f.neighborhood || tr("Amman")} ↗</span>
+        </a>
+        <button type="button" onClick={()=>setShowVoteForm(v=>!v)} className={"min-h-30 rounded-2xl border p-4 text-start transition "+(showVoteForm?"border-brand bg-mint":"border-border bg-white hover:border-brand/40")}>
+          <span className="block text-base font-semibold text-brand">② {tr("Plan together with your circle")}</span>
+          <span className="mt-2 block text-sm text-muted-foreground">{showVoteForm?(tr("Close")+" −"):(tr("Create outing vote & get link")+" →")}</span>
+        </button>
+      </div>
+      <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer">{tr("A note on choosing safe, suitable venues")}</summary>
+        <p className="mt-2">{tr("Check child admission, age limits, access, venue safety and prices directly with the provider. Google Maps results are third-party information.")}</p>
+      </details>
 
       {saved.length > 0 && (
         <section className="card-soft mt-4 p-4">
@@ -161,7 +173,8 @@ function TogetherPage() {
         </section>
       )}
 
-      <form onSubmit={submit} className="card-soft mt-4 grid gap-4 p-4 sm:grid-cols-2">
+      {showVoteForm&&<form onSubmit={submit} className="card-soft mt-4 grid gap-4 p-4 sm:grid-cols-2">
+       <p className="sm:col-span-2 text-sm font-medium text-brand">{tr("Choose a few places and invite your group to vote.")}</p>
         <Field label={tr("Outing name")}><Input className={inputCls} maxLength={80} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
         <Field label={tr("What kind of outing?")}>
           <NativeSelect value={f.activity} onChange={e=>setF({ ...f, activity: e.target.value as ActivityType })}>
@@ -194,15 +207,17 @@ function TogetherPage() {
             <Field label={tr("Approximate number of children")} hint={tr("Planning estimate; no children's names are collected")}>
               <Input className={inputCls} inputMode="numeric" value={childCount} onChange={e=>setChildCount(e.target.value)} />
             </Field>
-            <div>
-              <p className="mb-2 text-sm font-medium">{tr("Children's age groups (optional)")}</p>
+            <details>
+              <summary className="cursor-pointer text-sm font-semibold text-brand">{tr("Children's age groups (optional)")} +</summary>
+              <div className="mt-3">
               <div className="grid gap-2 sm:grid-cols-2">
                 {ages.map(group=><label key={group.value} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" checked={ageBands.includes(group.value)} onChange={e=>setAgeBands(old=>e.target.checked ? [...old,group.value] : old.filter(v=>v!==group.value))} />
                   {tr(group.label)}
                 </label>)}
               </div>
-            </div>
+              </div>
+            </details>
             <div className="grid gap-2">
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={stroller} onChange={e=>setStroller(e.target.checked)} /> {tr("Stroller or step-free access needed")}</label>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={quiet} onChange={e=>setQuiet(e.target.checked)} /> {tr("Prefer quiet / low-noise environments")}</label>
@@ -218,7 +233,8 @@ function TogetherPage() {
             <input type="checkbox" checked={shareTheme} onChange={e=>setShareTheme(e.target.checked)} /> {tr("Include a general family/kids label in the shared outing title")} </label>
           <p className="text-xs text-muted-foreground">{tr("Counts, age groups and preferences remain only in your organizer notes on this device. Only a general label is shared when selected.")}</p>
         </section>
-        <section className="sm:col-span-2 space-y-3 rounded-2xl border bg-card p-4" aria-label={tr("Outing cost calculator")}>
+        <details className="sm:col-span-2 rounded-2xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{tr("Outing cost calculator")} +</summary>
+        <section className="mt-3 space-y-3" aria-label={tr("Outing cost calculator")}>
           <div>
             <h2 className="font-semibold">{tr("Outing budget calculator · ميزانية الطلعة")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -278,7 +294,7 @@ function TogetherPage() {
             </p>}
             <p className="mt-3 text-xs text-muted-foreground"> {tr("Planning estimate only. Actual venue prices, taxes, tips, transport and child discounts may differ. Blank optional extras are treated as 0.")} </p>
           </div>
-        </section>
+        </section></details>
         <div className="sm:col-span-2 rounded-xl border p-3 text-sm">
           <div className="font-medium">{tr("Find activity ideas")}</div>
           <p className="mt-1 text-xs text-muted-foreground">{tr("Opens Google Maps with your outing type and general family focus. This is not yet an AI recommendation or a verified safety search.")}</p>
@@ -312,7 +328,7 @@ function TogetherPage() {
         </div>
         {err && <p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
         <Button type="submit" size="lg" className="h-12 sm:col-span-2" disabled={busy}>{tr(busy ? "Creating…" : "Create outing vote & get link")}</Button>
-      </form>
+      </form>}
     </AppShell>
   );
 }

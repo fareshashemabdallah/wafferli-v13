@@ -66,7 +66,7 @@ export function HomeJourneyHighlights(){
     <Link to="/explore" className="text-xs font-semibold text-brand">{ar?"كل الخيارات":"All choices"} →</Link>
    </div>
    <div className="grid grid-cols-3 gap-2.5">
-    {quick.map(({to,Icon,name,hint})=><Link to={to} key={to} className="flex min-h-35 flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-white p-3 shadow-[0_5px_18px_-15px_rgba(35,62,48,0.36)] transition hover:-translate-y-0.5 hover:border-brand/30 sm:p-4">
+    {quick.map(({to,Icon,name,hint})=><Link to={to} key={to} className="flex min-h-26 flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-white p-3 shadow-[0_5px_18px_-15px_rgba(35,62,48,0.36)] transition hover:-translate-y-0.5 hover:border-brand/30 sm:p-4">
       <span className="grid size-10 place-items-center rounded-2xl bg-mint text-brand"><Icon className="size-5"/></span>
       <span className="block"><span className="block text-sm font-semibold leading-tight">{name}</span><span className="mt-1 hidden text-xs text-muted-foreground sm:block">{hint}</span></span>
     </Link>)}
