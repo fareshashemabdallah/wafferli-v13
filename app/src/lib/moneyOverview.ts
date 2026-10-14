@@ -1,4 +1,4 @@
-import {buildForecast,legacyIncome,localToday,monthlyTotal,roundJod,type Commitment,type Forecast,type IncomeSource} from "./cashflow";
+import {buildForecast,futureDate,legacyIncome,roundJod,type Forecast} from "./cashflow";
 import {computeMoney,sampleMoney,type MoneyState} from "./money";
 
 /**
@@ -43,7 +43,7 @@ export function getMoneyOverview(state:MoneyState,now=new Date()):MoneyOverview 
     uncategorizedBills:commitments.filter(b=>!b.categoryId||!state.categories.some(c=>c.id===b.categoryId)).length,
     paidBillsThisMonth:new Set([...paidMarked,...paidBillKeys]).size,
     billExpensesThisMonth:roundJod(paidExpenses.reduce((n,e)=>n+e.amount,0)),
-    billsNext7Days:roundJod(forecast.events.filter(e=>e.kind==="bill" && e.date<=new Date(now.getFullYear(),now.getMonth(),now.getDate()+7).toLocaleDateString("en-CA")).reduce((a,e)=>a+e.amount,0)),
+    billsNext7Days:roundJod(forecast.events.filter(e=>e.kind==="bill" && e.date<=futureDate(today,7)).reduce((a,e)=>a+e.amount,0)),
     plannedCategoriesWithoutBillLinks:state.categories.filter(c=>c.planned>0&&!linkedCategories.has(c.id)).length,
     billOnlyRemainder:forecast.safeToSpend
   };
