@@ -13,7 +13,7 @@ import { getCuisine, getCuisineQuery, getVisibleCuisines } from "@/lib/cuisines"
 export const Route = createFileRoute("/explore/restaurants")({
   head: () => ({
     meta: [
-      { title: "Find real places in Amman — Dabberna" },
+      { title: "Eat & Enjoy — Dabberna" },
       { name: "description", content: "Find live Google Maps results free or connect a Geoapify free key to show real mapped venues inside Dabberna." },
     ],
   }),
@@ -86,7 +86,8 @@ function Restaurants() {
     navigate({to:"/explore/together"});
   };
   return (
-    <AppShell title={tr("Find real places")}>
+    <AppShell title={tr("Eat & Enjoy")}>
+      <p className="mb-4 text-sm text-muted-foreground">{tr("Find the right dining experience for your family, the occasion and your budget—not just a cheaper meal.")}</p>
       <Notice>
         <strong>{tr("The old community map server repeatedly timed out.")}</strong> {tr("We no longer rely on it for this screen. Search Google Maps without any API key, or connect a personal free Geoapify key to show actual mapped venues")} <strong>{tr("inside")}</strong> {tr("Dabberna. This is place lookup, not yet AI.")} </Notice>
       <div className="card-soft mt-4 space-y-3 p-4">
