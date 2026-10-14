@@ -23,7 +23,7 @@ export function FamilyInsights() {
   }), [money]);
   const dueSoon = forecast.events.find(e=>e.kind==="bill" && e.date <= new Date(Date.now()+7*86400000).toISOString().slice(0,10));
   const hasChildren = members.some(m=>m.role==="child");
-  const cards: {title:string;desc:string;link:string;cta:string;Icon:typeof Sparkles}[]=[];
+  const cards: {title:string;desc:string;link:"/money"|"/explore/together"|"/explore/smartbuy";cta:string;Icon:typeof Sparkles}[]=[];
   if (prefs.billReminders && dueSoon) cards.push({
     title: ar?"التزام قادم":"Upcoming commitment",
     desc: (ar?"تحقّق من الدفع المخطط لـ ":"Review the planned payment for ")+dueSoon.name+" ("+fmtJOD(dueSoon.amount)+").",
