@@ -15,7 +15,7 @@ describe("contextual journey",()=>{
  });
  it("generates only neutral category search terms, never a birthday or budget",()=>{
   const url=externalMapLink("outing","Amman");
-  expect(url).toContain("Google").toBe(false);
+  expect(url).toContain("https://www.google.com/maps/search/");
   expect(decodeURIComponent(url)).toContain("family activities and experiences Amman Jordan");
   expect(url).not.toContain("Birthday");
   expect(url).not.toContain("85");
