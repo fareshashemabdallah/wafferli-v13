@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MapPin, Search, ExternalLink, Plus, Clock3, KeyRound } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
@@ -34,6 +35,7 @@ function storeSelected(name: string) {
 }
 
 function Restaurants() {
+  const { tr } = useI18n();
   const navigate = useNavigate();
   const [area, setArea] = useState("abdoun");
   const [kind, setKind] = useState("all");
@@ -84,39 +86,37 @@ function Restaurants() {
     navigate({to:"/explore/together"});
   };
   return (
-    <AppShell title="Find real places">
+    <AppShell title={tr("Find real places")}>
       <Notice>
-        <strong>The old community map server repeatedly timed out.</strong> We no longer rely on it for this screen.
-        Search Google Maps without any API key, or connect a personal free Geoapify key to show actual mapped venues <strong>inside</strong> Dabberna. This is place lookup, not yet AI.
-      </Notice>
+        <strong>{tr("The old community map server repeatedly timed out.")}</strong> {tr("We no longer rely on it for this screen. Search Google Maps without any API key, or connect a personal free Geoapify key to show actual mapped venues")} <strong>{tr("inside")}</strong> {tr("Dabberna. This is place lookup, not yet AI.")} </Notice>
       <div className="card-soft mt-4 space-y-3 p-4">
-        <Field label="Location">
+        <Field label={tr("Location")}>
           <NativeSelect value={area} onChange={e=>{setArea(e.target.value);setLoaded([]);setSearched(false);}}>
             {searchAreas.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}
-            <option value="jordan">All Jordan · كل الأردن (Google Maps)</option>
+            <option value="jordan">{tr("All Jordan · كل الأردن (Google Maps)")}</option>
           </NativeSelect>
         </Field>
-        <Field label="Place type">
+        <Field label={tr("Place type")}>
           <NativeSelect value={kind} onChange={e=>setKind(e.target.value)}>
-            <option value="all">Restaurants & cafés</option><option value="restaurant">Restaurants</option><option value="cafe">Cafés</option>
+            <option value="all">{tr("Restaurants & cafés")}</option><option value="restaurant">{tr("Restaurants")}</option><option value="cafe">{tr("Cafés")}</option>
           </NativeSelect>
         </Field>
-        <Field label="Find a cuisine or food type · ابحث عن المطبخ">
+        <Field label={tr("Find a cuisine or food type · ابحث عن المطبخ")}>
           <Input value={cuisineSearch} onChange={e=>{setCuisineSearch(e.target.value);setCuisine("all");}}
-            maxLength={45} placeholder="e.g. Yemeni, كوري, sushi, مشاوي" />
+            maxLength={45} placeholder={tr("e.g. Yemeni, كوري, sushi, مشاوي")} />
         </Field>
-        <Field label="Cuisine / food type · نوع المطبخ">
+        <Field label={tr("Cuisine / food type · نوع المطبخ")}>
           <NativeSelect value={cuisine} onChange={e=>setCuisine(e.target.value)}>
-            <option value="all">All cuisines · جميع المطابخ</option>
+            <option value="all">{tr("All cuisines · جميع المطابخ")}</option>
             {cuisineGroups.map(group=><optgroup key={group.label} label={group.label}>
               {group.options.map(option=><option key={option.id} value={option.id}>{option.en} · {option.ar}</option>)}
             </optgroup>)}
-            <option value="custom">Other / type your own · غير ذلك</option>
+            <option value="custom">{tr("Other / type your own · غير ذلك")}</option>
           </NativeSelect>
         </Field>
-        {cuisine==="custom" && <Field label="Your cuisine or food request · اكتب نوع الأكل">
+        {cuisine==="custom" && <Field label={tr("Your cuisine or food request · اكتب نوع الأكل")}>
           <Input value={customCuisine} onChange={e=>setCustomCuisine(e.target.value)}
-            maxLength={80} placeholder="e.g. Tibetan, مقلوبة, gluten-free cake" />
+            maxLength={80} placeholder={tr("e.g. Tibetan, مقلوبة, gluten-free cake")} />
         </Field>}
         <p className="text-xs text-muted-foreground">
           {cuisine==="all" ? "Choose any cuisine or search the 140+ Jordan directory cuisine and dining categories." :
@@ -124,38 +124,35 @@ function Restaurants() {
           `Selected: ${getCuisine(cuisine)?.en ?? ""} · ${getCuisine(cuisine)?.ar ?? ""}. Google Maps will search for this in the chosen area.`}
           {" "}These categories reflect Jordan food directories, but no individual venue is guaranteed.
         </p>
-        <Field label="Name or search words">
-          <Input value={words} onChange={e=>setWords(e.target.value)} maxLength={70} placeholder="Lebanese restaurant, mezze, shisha, ..." />
+        <Field label={tr("Name or search words")}>
+          <Input value={words} onChange={e=>setWords(e.target.value)} maxLength={70} placeholder={tr("Lebanese restaurant, mezze, shisha, ...")} />
         </Field>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={shisha} onChange={e=>setShisha(e.target.checked)} />
-          Include argeeleh / shisha in Google Maps search
-        </label>
+          <input type="checkbox" checked={shisha} onChange={e=>setShisha(e.target.checked)} /> {tr("Include argeeleh / shisha in Google Maps search")} </label>
         <a href={mapUrl} target="_blank" rel="noopener noreferrer"
           className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 text-center font-semibold text-primary-foreground">
-          <MapPin className="size-4"/> Open real Google Maps results <ExternalLink className="size-4"/>
+          <MapPin className="size-4"/> {tr("Open real Google Maps results")} <ExternalLink className="size-4"/>
         </a>
         {area !== "jordan" && <a href={jordanUrl} target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold text-brand">
-          <Search className="size-4" /> Search this cuisine across all Jordan <ExternalLink className="size-3.5"/>
+          <Search className="size-4" /> {tr("Search this cuisine across all Jordan")} <ExternalLink className="size-3.5"/>
         </a>}
-        <p className="text-xs text-muted-foreground">No API key needed for Google Maps. If a cuisine has no results in a neighborhood, search all Jordan. Restaurant availability and descriptions come from Google Maps, not from a verified Dabberna catalogue.</p>
+        <p className="text-xs text-muted-foreground">{tr("No API key needed for Google Maps. If a cuisine has no results in a neighborhood, search all Jordan. Restaurant availability and descriptions come from Google Maps, not from a verified Dabberna catalogue.")}</p>
       </div>
 
       <section className="card-soft mt-4 space-y-3 p-4">
-        <div className="flex items-center gap-2"><KeyRound className="size-4 text-brand"/><h2 className="font-semibold">See real places inside Dabberna (free pilot)</h2></div>
+        <div className="flex items-center gap-2"><KeyRound className="size-4 text-brand"/><h2 className="font-semibold">{tr("See real places inside Dabberna (free pilot)")}</h2></div>
         <p className="text-xs text-muted-foreground">
           Geoapify has a free tier. Create a key and restrict its allowed HTTP origins to this GitHub Pages website.
           This pilot stores your key in this browser and sends it directly to Geoapify; it is not a secret server credential.
         </p>
-        <a className="inline-flex items-center gap-1 text-sm font-medium text-brand underline" href="https://myprojects.geoapify.com/" target="_blank" rel="noopener noreferrer">
-          Create a free Geoapify API key <ExternalLink className="size-3.5"/>
+        <a className="inline-flex items-center gap-1 text-sm font-medium text-brand underline" href="https://myprojects.geoapify.com/" target="_blank" rel="noopener noreferrer"> {tr("Create a free Geoapify API key")} <ExternalLink className="size-3.5"/>
         </a>
-        <Field label="Your own Geoapify browser API key">
-          <Input type="password" autoComplete="off" value={keyInput} onChange={e=>setKeyInput(e.target.value)} placeholder="Paste your free API key" />
+        <Field label={tr("Your own Geoapify browser API key")}>
+          <Input type="password" autoComplete="off" value={keyInput} onChange={e=>setKeyInput(e.target.value)} placeholder={tr("Paste your free API key")} />
         </Field>
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="secondary" onClick={saveApiKey}>Save key on this device</Button>
-          {apiKey && <Button type="button" variant="outline" onClick={clearApiKey}>Forget key</Button>}
+          <Button type="button" variant="secondary" onClick={saveApiKey}>{tr("Save key on this device")}</Button>
+          {apiKey && <Button type="button" variant="outline" onClick={clearApiKey}>{tr("Forget key")}</Button>}
         </div>
         {keyMessage && <p className="text-xs text-brand" role="status">{keyMessage}</p>}
         <form onSubmit={submit}>
@@ -169,41 +166,39 @@ function Restaurants() {
         </p>
       </section>
       {error && <div role="alert" className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
-        {error} <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="font-semibold underline">See live Google Maps results instead</a>.
+        {error} <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="font-semibold underline">{tr("See live Google Maps results instead")}</a>.
       </div>}
       {searched && <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm">
         <strong>{shown.length} mapped venue{shown.length===1?"":"s"}</strong>
         <span className="text-xs text-muted-foreground"><Clock3 className="mr-1 inline size-3"/>{cached?"Cached":"Geoapify lookup"} · {new Date(updatedAt).toLocaleDateString()}</span>
       </div>}
-      {searched && shown.length===0 && <p className="mt-3 rounded-xl bg-muted p-4 text-sm">
-        No mapped venues matched these filters. Try All cuisines or remove the name search. <a className="underline" href={mapUrl} target="_blank" rel="noopener noreferrer">Search Google Maps</a>.
+      {searched && shown.length===0 && <p className="mt-3 rounded-xl bg-muted p-4 text-sm"> {tr("No mapped venues matched these filters. Try All cuisines or remove the name search.")} <a className="underline" href={mapUrl} target="_blank" rel="noopener noreferrer">{tr("Search Google Maps")}</a>.
       </p>}
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {shown.map(p=><article key={p.id} className="card-soft flex flex-col gap-2 p-4">
           <h2 className="font-semibold">{p.name}</h2>
           <p className="text-sm text-muted-foreground"><MapPin className="mr-1 inline size-3.5"/>{p.kind === "restaurant"?"Restaurant":"Café"} · ~{p.distanceKm.toFixed(1)} km from area center</p>
           <p className="text-xs text-muted-foreground">{p.cuisine?"Tagged cuisine: "+p.cuisine:"Cuisine not tagged"}{p.address?" · "+p.address:""}</p>
-          <p className="text-xs text-muted-foreground">Argeeleh, hours, prices and reservations: not verified</p>
+          <p className="text-xs text-muted-foreground">{tr("Argeeleh, hours, prices and reservations: not verified")}</p>
           <div className="mt-auto flex flex-wrap gap-2 pt-2">
-            <a className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium text-brand" href={p.osmUrl} target="_blank" rel="noopener noreferrer">Map <ExternalLink className="size-3"/></a>
-            {p.website && <a className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium text-brand" href={p.website} target="_blank" rel="noopener noreferrer">Website <ExternalLink className="size-3"/></a>}
-            <Button type="button" variant="secondary" size="sm" onClick={()=>select(p.name)}><Plus className="size-3.5"/>Add to Together</Button>
+            <a className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium text-brand" href={p.osmUrl} target="_blank" rel="noopener noreferrer">{tr("Map")} <ExternalLink className="size-3"/></a>
+            {p.website && <a className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium text-brand" href={p.website} target="_blank" rel="noopener noreferrer">{tr("Website")} <ExternalLink className="size-3"/></a>}
+            <Button type="button" variant="secondary" size="sm" onClick={()=>select(p.name)}><Plus className="size-3.5"/>{tr("Add to Together")}</Button>
           </div>
         </article>)}
       </div>
       <div className="card-soft mt-4 space-y-2 p-4">
-        <h3 className="font-semibold">Found a place on Google Maps?</h3>
-        <p className="text-xs text-muted-foreground">Paste its name to add it to your friends' poll. You'll choose at least three venues in Together.</p>
+        <h3 className="font-semibold">{tr("Found a place on Google Maps?")}</h3>
+        <p className="text-xs text-muted-foreground">{tr("Paste its name to add it to your friends' poll. You'll choose at least three venues in Together.")}</p>
         <div className="flex gap-2">
-          <Input value={manual} onChange={e=>setManual(e.target.value)} maxLength={80} placeholder="Actual restaurant name" />
-          <Button type="button" onClick={()=>select(manual)} disabled={!manual.trim()}>Add</Button>
+          <Input value={manual} onChange={e=>setManual(e.target.value)} maxLength={80} placeholder={tr("Actual restaurant name")} />
+          <Button type="button" onClick={()=>select(manual)} disabled={!manual.trim()}>{tr("Add")}</Button>
         </div>
       </div>
-      <div className="mt-4 text-xs text-muted-foreground">
-        Data attribution: <a href="https://www.geoapify.com/" className="underline" target="_blank" rel="noopener noreferrer">Powered by Geoapify</a>;
-        map data © <a href="https://www.openstreetmap.org/copyright" className="underline" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.
+      <div className="mt-4 text-xs text-muted-foreground"> {tr("Data attribution:")} <a href="https://www.geoapify.com/" className="underline" target="_blank" rel="noopener noreferrer">{tr("Powered by Geoapify")}</a>;
+        map data © <a href="https://www.openstreetmap.org/copyright" className="underline" target="_blank" rel="noopener noreferrer">{tr("OpenStreetMap contributors")}</a>.
       </div>
-      <Link to="/explore/together" className="mt-4 block rounded-2xl bg-lime p-4 text-center font-semibold text-ink">Plan a friends' vote →</Link>
+      <Link to="/explore/together" className="mt-4 block rounded-2xl bg-lime p-4 text-center font-semibold text-ink">{tr("Plan a friends' vote →")}</Link>
     </AppShell>
   );
 }
