@@ -5,7 +5,7 @@ import {FamilyFinanceSnapshot} from "@/components/FamilyFinanceSnapshot";
 import {HomeJourneyHighlights} from "@/components/HomeJourneyHighlights";
 import {FamilyWeather} from "@/components/FamilyWeather";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
-import {useLocalState} from "@/lib/storage";
+import {useLocalState,writeLocal} from "@/lib/storage";
 import {useI18n} from "@/lib/i18n";
 
 export const Route=createFileRoute("/")({
@@ -78,7 +78,7 @@ function Index(){
      </div>
    </div>
    <div className="mt-4 grid gap-3">
-    {starts.map(({to,Icon,en,ar:arabic,enDetail,arDetail,tone},idx)=><Link key={to} to={to} onClick={()=>setIntroDone(true)}
+    {starts.map(({to,Icon,en,ar:arabic,enDetail,arDetail,tone})=><Link key={to} to={to} onClick={()=>{writeLocal("homeIntroDone",true);setIntroDone(true);}}
      className="soft-action group flex min-h-25 items-center gap-4 p-4 sm:p-5">
      <span className={"grid size-14 shrink-0 place-items-center rounded-[1.05rem] "+tileBg(tone)+" "+tileIcon(tone)}>
       <Icon className="size-7" strokeWidth={1.65}/>
