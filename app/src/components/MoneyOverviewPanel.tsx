@@ -76,12 +76,12 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
    </section>
    <section className="editorial-card p-5 sm:p-6">
     <div className="flex items-center gap-2"><Landmark className="size-5 text-brand"/><h2 className="text-lg font-semibold">{ar?"خطة مصروف الشهر":"This month's spending plan"}</h2></div>
-    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?"هذه حسابات ميزانية شهرية، مختلفة عن السيولة الفعلية وجدول الفواتير. أرقام الدخل هنا متوسط شهري وليست مواعيد إيداع مؤكدة.":"These are monthly planning figures, not cash on hand or a list of actual bill due dates. Income is a monthly estimate, not confirmed deposits."}</p>
+    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?"هذه حسابات تخطيط شهرية لا تمثّل رصيد البنك. المتبقي يخصم المصاريف المسجلة وهدف الادخار، وليس الفواتير غير المدفوعة أو المخصصات التي لم تُصرف بعد. الدخل تقديري وليس إيداعاً مؤكداً.":"These are monthly planning figures, not cash on hand or actual bill due dates. This remainder subtracts recorded expenses and the savings goal, not unpaid bills or unspent category allocations. Income is an estimate, not confirmed deposits."}</p>
     <div className="mt-4 grid grid-cols-2 gap-3">
      <div className="rounded-xl bg-[#F3F6F1] p-3"><p className="text-xs text-muted-foreground">{ar?"الدخل الشهري المقدّر":"Estimated monthly income"}</p><p className="mt-2 text-lg font-semibold tabular-nums">{fmtJOD(c.monthlyIncome)}</p></div>
      <div className="rounded-xl bg-[#F8F2EA] p-3"><p className="text-xs text-muted-foreground">{ar?"ميزانيات الفئات":"Category budgets"}</p><p className="mt-2 text-lg font-semibold tabular-nums">{fmtJOD(c.planned)}</p></div>
      <div className="rounded-xl bg-[#F3F6F1] p-3"><p className="text-xs text-muted-foreground">{ar?"مصاريف مسجلة هذا الشهر":"Recorded expenses this month"}</p><p className="mt-2 text-lg font-semibold tabular-nums">{fmtJOD(c.spent)}</p></div>
-     <div className="rounded-xl bg-[#F8F2EA] p-3"><p className="text-xs text-muted-foreground">{ar?"باقي مخصص الشهر (ليس نقداً)":"Monthly allowance left (not cash)"}</p><p className="mt-2 text-lg font-semibold tabular-nums">{fmtJOD(c.remaining)}</p></div>
+     <div className="rounded-xl bg-[#F8F2EA] p-3"><p className="text-xs text-muted-foreground">{ar?"الدخل بعد الادخار والمصاريف المسجلة (ليس نقداً)":"After savings & recorded expenses (not cash)"}</p><p className="mt-2 text-lg font-semibold tabular-nums">{fmtJOD(c.remaining)}</p></div>
     </div>
     <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
      {ar?"عند تأكيد دفع فاتورة داخل التطبيق، تُسجّل كمصروف وتدخل في الإجمالي أعلاه. تحديث رصيد البنك يبقى يدوياً.":"Marking a scheduled bill paid creates a recorded expense, included in the total above. Your actual bank/cash balance still needs manual updating."}
