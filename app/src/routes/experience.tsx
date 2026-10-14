@@ -8,7 +8,7 @@ import { communityDb as db, itemKey, opinionNoticeAr, opinionNoticeEn, type Expe
 import { useI18n } from "@/lib/i18n";
 import type { User } from "@supabase/supabase-js";
 export const Route=createFileRoute("/experience")({
- head:()=>({meta:[{title:"Experience Notes — Dabberna"},{name:"description",content:"Read or contribute personal experiences for a specific place, product or service."}]}),
+ head:()=>({meta:[{title:"Community Experiences — Dabberna"},{name:"description",content:"Read or contribute personal experiences for a specific place, product or service."}]}),
  component:Experience
 });
 const types=[
@@ -57,7 +57,7 @@ function Experience(){
  });};
  const report=(id:string)=>{if(!user)return;const reason=window.prompt(ar?"سبب الإبلاغ عن هذا التقييم":"Why report this review?");if(!reason||reason.trim().length<5)return;void run(async()=>{const {error}=await db.from("family_content_reports").insert({reporter_id:user.id,review_id:id,reason:reason.slice(0,400)});if(error)throw error;setNotice(ar?"تم تسجيل البلاغ للمراجعة":"Report submitted for review");});};
  const remove=(id:string)=>{if(!user)return;void run(async()=>{const {error}=await db.rpc("delete_family_experience_review",{p_id:id});if(error)throw error;if(current)await lookup(current.type,current.item,current.city);});};
- return <AppShell title={ar?"تجارب العائلات":"Family Experiences"}>
+ return <AppShell title={ar?"تجارب المجتمع":"Community Experiences"}>
   <div className="hero-surface rounded-3xl p-5">
    <div className="flex items-center gap-2"><MessageSquareText className="size-6 text-brand"/><h2 className="text-xl font-semibold">{ar?"تعلّم من تجارب الآخرين":"Learn from real people's experiences"}</h2></div>
    <p className="mt-2 text-sm">{ar?"ابحث عن مكان أو طبيب أو لعبة أو منتج محدّد لقراءة آراء المستخدمين الخاصة به فقط. لا نعرضها تلقائياً على الصفحة الرئيسية.":"Search for a particular place, doctor, playground or product. Only experiences attached to that exact search appear—not an unsolicited public feed."}</p>
