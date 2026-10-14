@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/explore/services")({
   head: () => ({ meta: [
-    { title: "Family Services — Dabberna" },
+    { title: "Find the Right Service — Dabberna" },
     { name: "description", content: "Find family services with transparent links to third-party search; provider reviews are not verified by Dabberna." }
   ] }),
   component: Services
@@ -35,13 +35,13 @@ function Services() {
     const q = [detail.trim().slice(0,90), item.query, city.trim().slice(0,80)].filter(Boolean).join(" ");
     setUrl("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q));
   };
-  return <AppShell title={ar?"اكتشف خدمات العائلة":"Discover family services"}>
+  return <AppShell title={ar?"اختَر الخدمة الأنسب":"Find the Right Service"}>
     <div className="rounded-3xl bg-mint/70 p-5">
       <div className="flex items-center gap-3">
         <Stethoscope className="size-7 text-brand"/>
         <div>
           <h2 className="text-xl font-semibold">{ar?"ابحث عما تحتاجه عائلتك":"Find what your family needs"}</h2>
-          <p className="text-sm text-muted-foreground">{ar?"خدمة بحث حسب الطلب، وليست توصية تلقائية." : "Search when you need a service; nothing is promoted automatically."}</p>
+          <p className="text-sm text-muted-foreground">{ar?"ابدأ بما تحتاجه عائلتك وقارن الملاءمة والجودة والتكلفة. هذا البحث عند الطلب، وليس توصية تلقائية." : "Start with your family’s needs, then weigh suitability, quality and cost. Search is on demand, not an automatic recommendation."}</p>
         </div>
       </div>
     </div>
