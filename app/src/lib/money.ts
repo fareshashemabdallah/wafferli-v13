@@ -2,19 +2,23 @@ import type { IncomeSource, Commitment } from "./cashflow";
 import { monthlyTotal } from "./cashflow";
 export type CatType = "fixed" | "variable" | "periodic";
 export type Category = { id: string; name: string; type: CatType; planned: number };
-export type Expense = { id: string; date: string; categoryId: string; amount: number; note?: string; owner?: string; shared: boolean; billId?:string; dueDate?:string };
+export type Expense = { id: string; date: string; categoryId: string; amount: number; note?: string; owner?: string; shared: boolean; billId?:string; dueDate?:string; cashDeducted?:boolean };
 export type MoneyState = {
   /** Legacy monthly income: retained to preserve users' existing saved budgets. */
   income:number; savingsPct:number; categories:Category[]; expenses:Expense[]; demo:boolean;
   incomeSources?:IncomeSource[]; commitments?:Commitment[];
   /** Manual actual cash available now, intentionally not inferred from historic expense entries. */
   cashOnHand?:number|null; cashReserve?:number;
+  /** Date on which the user last refreshed the manually entered cash balance. */
+  cashUpdatedAt?:string | undefined;
 };
 export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string; /** Date of birth, stored on this device only. */ birthday?: string | undefined };
 
 const today = new Date();
-const d = (day: number) =>
-  new Date(today.getFullYear(), today.getMonth(), Math.min(day, today.getDate())).toISOString().slice(0, 10);
+const d = (day: number) => {
+  const n = new Date(today.getFullYear(),today.getMonth(),Math.min(day,today.getDate()));
+  return [n.getFullYear(),String(n.getMonth()+1).padStart(2,"0"),String(n.getDate()).padStart(2,"0")].join("-");
+};
 
 export const sampleMoney = (): MoneyState => ({
   demo: true,
@@ -43,7 +47,7 @@ export const sampleMembers = (): Member[] => [
 ];
 
 export function computeMoney(s: MoneyState, now = new Date()) {
-  const ym = now.toISOString().slice(0, 7);
+  const ym = [now.getFullYear(),String(now.getMonth()+1).padStart(2,"0")].join("-");
   const month = s.expenses.filter((e) => e.date.startsWith(ym));
   const spentBy = (id: string) => month.filter((e) => e.categoryId === id).reduce((a, e) => a + e.amount, 0);
   const monthlyIncome = s.incomeSources === undefined ? s.income : monthlyTotal(s.incomeSources);

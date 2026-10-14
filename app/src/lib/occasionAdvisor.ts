@@ -67,10 +67,13 @@ export function eventBudgetGuidance(plan:OccasionPlan|undefined,money:MoneyState
  const amount=plan?.budgetJod;
  if(amount==null||!Number.isFinite(amount)||amount<0)return {status:"unset",available:null};
  if(money.demo)return {status:"demo",available:null};
+ // An empty bill schedule or incomplete dates must never be interpreted as zero expenses.
+ if(!money.commitments?.length)return {status:"unknown",available:null};
  const balance=money.cashOnHand;
  if(balance==null||!Number.isFinite(balance))return {status:"unknown",available:null};
  const forecast=buildForecast({incomes:money.incomeSources??legacyIncome(money.income),commitments:money.commitments??[],openingBalance:balance,reserve:money.cashReserve??0,today:dateKey(now),days:90});
  const available=forecast.safeToSpend;
+ if(forecast.missingDates>0)return {status:"unknown",available:null};
  if(available===null)return {status:"unknown",available:null};
  return {status:forecast.overdueCount>0||amount>available?"review":"within",available};
 }

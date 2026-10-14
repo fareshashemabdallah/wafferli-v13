@@ -30,8 +30,9 @@ describe("Occasion assistant",()=>{
   expect(eventBudgetGuidance({budgetJod:65},{...sample,demo:false,cashOnHand:null},new Date(2026,9,14)).status).toBe("unknown");
   expect(eventBudgetGuidance(undefined,sample,new Date(2026,9,14)).status).toBe("unset");
  });
- it("conservatively flags a plan over available cash when real input is supplied",()=>{
-  const m={...sampleMoney(),demo:false,cashOnHand:15,cashReserve:10,income:0,incomeSources:[],commitments:[]};
+ it("conservatively flags a plan over available cash when recorded bills exist",()=>{
+  const m={...sampleMoney(),demo:false,cashOnHand:15,cashReserve:10,income:0,incomeSources:[],commitments:[{id:"rent",name:"Rent",amount:10,frequency:"once" as const,dueDate:"2026-10-20"}]};
   expect(eventBudgetGuidance({budgetJod:50},m,new Date(2026,9,14)).status).toBe("review");
+  expect(eventBudgetGuidance({budgetJod:50},{...m,commitments:[]},new Date(2026,9,14)).status).toBe("unknown");
  });
 });
