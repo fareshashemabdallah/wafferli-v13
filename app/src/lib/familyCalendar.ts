@@ -1,5 +1,5 @@
 /** Device-only family occasions. Public holidays are not populated by a remote calendar. */
-export type MomentKind = "birthday" | "holiday" | "celebration" | "school" | "activity" | "other";
+export type MomentKind = "birthday" | "anniversary" | "holiday" | "celebration" | "school" | "activity" | "other";
 export type FamilyMoment = {
   id: string;
   title: string;
@@ -8,16 +8,43 @@ export type FamilyMoment = {
   annual: boolean;
   note?: string;
   time?: string; // HH:mm or empty
+  /** Derived, not persisted, for a family-member birthday. */
+  source?: "member";
+  memberId?: string;
 };
 export type MomentOccurrence = FamilyMoment & { occursOn: string };
 export const kindNames: Record<MomentKind,{en:string;ar:string}> = {
   birthday:{en:"Birthday",ar:"عيد ميلاد"},
+  anniversary:{en:"Anniversary",ar:"ذكرى سنوية"},
   holiday:{en:"Holiday",ar:"عطلة / مناسبة"},
   celebration:{en:"Special occasion",ar:"مناسبة خاصة"},
   school:{en:"School event",ar:"مناسبة مدرسية"},
   activity:{en:"Family activity",ar:"نشاط عائلي"},
   other:{en:"Other",ar:"أخرى"},
 };
+/** A member birthday is derived from their profile; we never save a second calendar copy. */
+export type BirthdayProfile = { id:string; name:string; birthday?:string };
+const normalizedBirthdayName=(title:string):string=>title.toLocaleLowerCase().replace(/[\u2019']/g,"").replace(/^(birthday of |birthday: |عيد ميلاد )/g,"").replace(/(s birthday| birthday|\s+عيد ميلاد)$/g,"").trim().replace(/\s+/g," ");
+export function calendarWithMemberBirthdays(
+  saved:FamilyMoment[], members:BirthdayProfile[], language:"en"|"ar"
+):FamilyMoment[] {
+  const generated=members.filter(m=>m.name.trim() && m.birthday && parseCalendarDate(m.birthday))
+    .map(m=>({
+      id:"member-birthday:"+m.id,
+      title:language==="ar"?"عيد ميلاد "+m.name.trim():m.name.trim()+"'s birthday",
+      date:m.birthday!,
+      kind:"birthday" as const,
+      annual:true,
+      source:"member" as const,
+      memberId:m.id,
+    }));
+  const visibleManual=saved.filter(e=>!generated.some(b=>
+    e.kind==="birthday" &&
+    e.date.slice(5)===b.date.slice(5) &&
+    normalizedBirthdayName(e.title)===normalizedBirthdayName(b.title)
+  ));
+  return [...visibleManual,...generated];
+}
 export function dateKey(d:Date):string {
   return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
 }
