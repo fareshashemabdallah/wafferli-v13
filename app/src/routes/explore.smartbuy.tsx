@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ImagePlus, Plus, Receipt, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppShell, Notice } from "@/components/AppShell";
+import { PlanContextBanner } from "@/components/PlanContextBanner";
 import { Field, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,11 +40,11 @@ function Photo({ label, icon: Icon }: { label: string; icon: typeof Receipt }) {
 function SmartBuy() {
   const { tr } = useI18n();
   const [s, setS] = useLocalState("smartbuy", {
-    product: "Winter jacket",
-    budget: "60",
+    product: "",
+    budget: "",
     alts: [
-      { id: "a1", store: "Mall store (example)", price: "55", extra: "3", verified: true },
-      { id: "a2", store: "Online shop (example)", price: "48", extra: "4", verified: false },
+      { id: "a1", store: "", price: "", extra: "", verified: false },
+      { id: "a2", store: "", price: "", extra: "", verified: false },
     ] as Alt[],
   });
   const budget = Number(s.budget) || 0;
@@ -54,6 +55,7 @@ function SmartBuy() {
 
   return (
     <AppShell title={tr("Compare & Choose")}>
+      <PlanContextBanner onUseBudget={amount=>setS(old=>({...old,budget:String(amount)}))}/>
       <div className="rounded-2xl bg-mint/60 p-4 text-sm text-ink">{tr("The lowest price is not always the best value. Consider quality, durability, convenience and support before choosing. This pilot compares your entered costs only.")}</div>
       <Notice>{tr("Enter prices you've seen yourself. Dabberna doesn't fetch live prices yet, so there are no automatic \"savings\" claims.")}</Notice>
       <div className="card-soft mt-4 grid gap-3 p-4 sm:grid-cols-2">
