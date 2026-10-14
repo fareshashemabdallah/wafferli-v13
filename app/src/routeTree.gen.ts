@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as ExperienceRouteImport } from './routes/experience'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as AdvisorRouteImport } from './routes/advisor'
 import { Route as MoneyRouteImport } from './routes/money'
 import { Route as SpaceRouteImport } from './routes/space'
@@ -31,6 +33,16 @@ const IndexRoute = IndexRouteImport.update({
 const AdvisorRoute = AdvisorRouteImport.update({
   id: '/advisor',
   path: '/advisor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExperienceRoute = ExperienceRouteImport.update({
+  id: '/experience',
+  path: '/experience',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -92,6 +104,8 @@ const VoteTokenRoute = VoteTokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
+  '/community': typeof CommunityRoute
+  '/experience': typeof ExperienceRoute
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
@@ -107,6 +121,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
+  '/community': typeof CommunityRoute
+  '/experience': typeof ExperienceRoute
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
@@ -123,6 +139,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
+  '/community': typeof CommunityRoute
+  '/experience': typeof ExperienceRoute
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
@@ -140,6 +158,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/advisor'
+    | '/community'
+    | '/experience'
     | '/about'
     | '/money'
     | '/space'
@@ -155,6 +175,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/advisor'
+    | '/community'
+    | '/experience'
     | '/about'
     | '/money'
     | '/space'
@@ -170,6 +192,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/advisor'
+    | '/community'
+    | '/experience'
     | '/about'
     | '/money'
     | '/space'
@@ -186,6 +210,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdvisorRoute: typeof AdvisorRoute
+  CommunityRoute: typeof CommunityRoute
+  ExperienceRoute: typeof ExperienceRoute
   AboutRoute: typeof AboutRoute
   MoneyRoute: typeof MoneyRoute
   SpaceRoute: typeof SpaceRoute
@@ -213,6 +239,20 @@ declare module '@tanstack/react-router' {
       path: '/advisor'
       fullPath: '/advisor'
       preLoaderRoute: typeof AdvisorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/experience': {
+      id: '/experience'
+      path: '/experience'
+      fullPath: '/experience'
+      preLoaderRoute: typeof ExperienceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -298,6 +338,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdvisorRoute: AdvisorRoute,
+  CommunityRoute: CommunityRoute,
+  ExperienceRoute: ExperienceRoute,
   AboutRoute: AboutRoute,
   MoneyRoute: MoneyRoute,
   SpaceRoute: SpaceRoute,
