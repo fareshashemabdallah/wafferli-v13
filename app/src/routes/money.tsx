@@ -215,7 +215,7 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
                 onClick={() => confirm(`${tr("Delete category")} "${c.name}"?`) && onChange(cats.filter((x) => x.id !== c.id))}
               >
                 <Trash2 className="size-4" />
-              </Button></div></details>
+              </Button>
             </li>
           );
         })}
