@@ -58,6 +58,7 @@ function Advisor(){
       </div>}
       <Link to="/money" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand">{ar?"أكمل بيانات الميزانية":"Complete your financial plan"} <ArrowRight className="size-4 rtl:rotate-180"/></Link>
     </div>
+    <div className="card-soft mt-5 p-4"><h2 className="font-semibold">{ar?"اسأل من تثق بهم":"Ask people you trust"}</h2><p className="mt-1 text-sm text-muted-foreground">{ar?"اسأل مجموعتك عن طبيب أو منتج أو نشاط جرّبوه بالفعل.":"Ask your circle if someone has personally tried a doctor, product or activity."}</p><Link to="/community" className="mt-2 inline-block font-semibold text-brand">{ar?"فتح دردشة المجموعة":"Open group discussion"} →</Link></div>
     <h2 className="mt-7 mb-3 text-lg font-semibold">{ar?"كيف نساعدك اليوم؟":"What would you like to do?"}</h2>
     <div className="grid gap-3 sm:grid-cols-2">
       {shortcuts.map(({href,en,ar:arabic,Icon})=><Link key={href} to={href} className="card-soft flex items-center gap-3 p-4 font-medium hover:border-brand/40"><Icon className="size-5 text-brand"/>{ar?arabic:en}<ArrowRight className="ms-auto size-4 text-muted-foreground rtl:rotate-180"/></Link>)}

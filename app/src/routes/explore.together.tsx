@@ -141,6 +141,7 @@ function TogetherPage() {
 
   return (
     <AppShell title={tr("Dabberna Together")}>
+      <div className="card-soft mb-4 space-y-1 p-4 text-sm"><p className="font-semibold">{tr("Plan together with your circle")}</p><p className="text-muted-foreground">{tr("Invite school parents or friends to a private discussion about activities and choices.")}</p><Link to="/community" className="font-semibold text-brand">{tr("Open group chat")} →</Link></div>
       <Notice>{tr("Plan")} <strong>{tr("any outing")}</strong> {tr("— a café, cinema, kids' activity, park, game or day trip. Consider children before choosing options. The vote works without an account. Safety, age restrictions and prices must be checked with each venue.")}</Notice>
 
       {saved.length > 0 && (
