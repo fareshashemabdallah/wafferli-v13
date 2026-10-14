@@ -13,7 +13,7 @@ export function Tally({ options, total, friends, mine, showVoters }: { options: 
           return (
             <li key={o.id}>
               <div className="flex justify-between gap-2 text-sm">
-                <span className="font-medium">{o.name}{o.id === mine && " · your pick"}{max > 0 && o.votes === max && " 🏆"}</span>
+                <span className="font-medium">{o.name}{o.id === mine && " · "+tr("your pick")}{max > 0 && o.votes === max && " 🏆"}</span>
                 <span className="tabular-nums text-muted-foreground">{o.votes} · {pct}%</span>
               </div>
               <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-muted">
