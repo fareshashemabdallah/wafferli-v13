@@ -12,6 +12,7 @@ import {
   localToday, monthlyTotal, roundJod, scheduleDates,
 } from "@/lib/cashflow";
 import { fmtJOD, uid } from "@/lib/storage";
+import {recordBillPayment,reverseBillPayment,type PaidBillCashMode} from "@/lib/billPayment";
 
 type Props = {
   state: MoneyState; members: Member[];
@@ -42,6 +43,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const [receipt,setReceipt]=useState<{sourceId:string;date:string;value:string}|null>(null);
   const [error,setError]=useState("");
   const [pendingPaid,setPendingPaid]=useState<{bill:Commitment;dueDate:string}|null>(null);
+  const [pendingUndo,setPendingUndo]=useState<{billId:string;date:string}|null>(null);
   useEffect(()=>setCash(state.cashOnHand==null?"":String(state.cashOnHand)),[state.cashOnHand]);
   useEffect(()=>setReserve(String(state.cashReserve??0)),[state.cashReserve]);
 
@@ -96,30 +98,20 @@ export function CashFlowPlanner({state,members,update}:Props) {
     });
     setReceipt(null);setError("");toast.success(tr("Actual receipt recorded. Update your cash balance separately."));
   };
-  const markPaid=(bill:Commitment,dueDate:string,cashMode:"already"|"deduct"|"untracked")=>{
+  const markPaid=(bill:Commitment,dueDate:string,cashMode:PaidBillCashMode)=>{
     if(dueDate>today)return;
-    if(cashMode==="deduct" && (state.cashOnHand==null||state.cashOnHand<bill.amount)){
-      setError(ar?"المبلغ أكبر من الرصيد المدخل. حدّث رصيدك الفعلي أولاً.":"The payment exceeds the entered cash balance. Please update your actual balance first.");return;
+    if(cashMode==="deduct"&&(state.cashOnHand==null||state.cashOnHand<bill.amount)){
+      setError(ar?"المبلغ أكبر من الرصيد المدخل. حدّث الرصيد أولاً.":"Payment exceeds entered cash. Refresh your balance first.");return;
     }
-    update(s=>{
-      const current=s.commitments??[];
-      if(current.some(x=>x.id===bill.id&&x.paidDates?.includes(dueDate)))return s;
-      const category=s.categories.find(c=>c.id===bill.categoryId)?.id??"uncategorized";
-      return {...s,
-        commitments:current.map(x=>x.id===bill.id?{...x,paidDates:[...(x.paidDates??[]),dueDate]}:x),
-        expenses:[{id:uid(),date:today,categoryId:category,amount:bill.amount,note:bill.name,shared:true,billId:bill.id,dueDate},...s.expenses],
-        ...(cashMode==="deduct"&&s.cashOnHand!=null?{cashOnHand:roundJod(s.cashOnHand-bill.amount),cashUpdatedAt:today}:{})
-      };
-    });
+    const expenseId=uid();
+    update(current=>recordBillPayment(current,bill.id,dueDate,today,expenseId,cashMode));
     setPendingPaid(null);setError("");
-    toast.success(ar?"سُجلت الفاتورة المدفوعة مع المصروف.":"Bill marked paid and expense recorded.");
+    toast.success(ar?"سُجلت الفاتورة المدفوعة مع المصروف.":"Paid bill and expense recorded.");
   };
-  const undoPayment=(billId:string,date:string)=>{
-    update(s=>({...s,
-      commitments:(s.commitments??[]).map(b=>b.id===billId?{...b,paidDates:(b.paidDates??[]).filter(x=>x!==date)}:b),
-      expenses:s.expenses.filter(e=>!(e.billId===billId&&e.dueDate===date))
-    }));
-    toast.success(tr("Payment confirmation and linked expense reverted"));
+  const undoPayment=(billId:string,date:string,restoreCash:boolean)=>{
+    update(current=>reverseBillPayment(current,billId,date,restoreCash,today));
+    setPendingUndo(null);setError("");
+    toast.success(ar?"تم التراجع عن الفاتورة والمصروف. راجع رصيدك.":"Payment and linked expense undone. Please check your cash balance.");
   };
   const dueIncome=incomes.flatMap(i=>
     scheduleDates(i.nextDate,i.frequency,futureDate(today,-45),today,i.endDate)
@@ -217,7 +209,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
                     <p className="text-sm font-semibold">{ar?"تأكيد دفع الفاتورة":"Confirm this bill was paid"}</p>
                     <p className="mt-1 text-xs text-muted-foreground">{ar?"سنضيفها للمصاريف. هل رصيدك المُدخل يعكس هذا الدفع؟":"We'll log the expense. Does your entered cash balance already reflect this payment?"}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Button type="button" size="sm" variant="outline" onClick={()=>markPaid(bill,next.displayDate,"already")}>{ar?"نعم، الرصيد محدّث":"Yes, already reflected"}</Button>
+                      {state.cashOnHand!=null&&<Button type="button" size="sm" variant="outline" onClick={()=>markPaid(bill,next.displayDate,"already")}>{ar?"نعم، الرصيد محدّث":"Yes, already reflected"}</Button>}
                       {state.cashOnHand!=null&&state.cashOnHand>=bill.amount&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"deduct")}>{ar?"لا، اخصمه الآن":"No, deduct it now"}</Button>}
                       {state.cashOnHand==null&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"untracked")}>{ar?"الرصيد غير مُدخل":"No cash balance entered"}</Button>}
                       <Button type="button" size="sm" variant="ghost" onClick={()=>setPendingPaid(null)}>{ar?"إلغاء":"Cancel"}</Button>
@@ -225,10 +217,25 @@ export function CashFlowPlanner({state,members,update}:Props) {
                     <p className="mt-2 text-xs text-muted-foreground">{ar?"لا تخصم المبلغ مجدداً إذا كان رصيد البنك يشمل الدفع.":"If your actual balance already includes this payment, do not deduct it again."}</p>
                   </div>}
               </>}
-              {paid.map(date=><button key={date} type="button" className="mt-2 block text-xs text-brand underline"
-                onClick={()=>{if(confirm(tr("Undo this payment? Its linked expense will also be removed.")))undoPayment(bill.id,date);}}>
-                {tr("Paid")} {date} · {tr("Undo")}
-              </button>)}
+              {paid.map(date=>{
+                const linked=state.expenses.find(e=>e.billId===bill.id&&e.dueDate===date);
+                const show=pendingUndo?.billId===bill.id&&pendingUndo.date===date;
+                return <div key={date} className="mt-2">
+                  <button type="button" className="text-xs font-semibold text-brand underline underline-offset-2"
+                    onClick={()=>{setPendingUndo({billId:bill.id,date});setPendingPaid(null);}}>
+                    {tr("Paid")} {date} · {tr("Undo")}
+                  </button>
+                  {show&&<div className="mt-2 rounded-xl bg-[#F5F8F1] p-3">
+                    <p className="text-xs font-medium">{ar?"سيتم حذف تأكيد الدفع والمصروف المرتبط.":"This removes the payment confirmation and its linked expense."}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {linked?.cashDeducted&&state.cashOnHand!=null&&<Button type="button" size="sm" onClick={()=>undoPayment(bill.id,date,true)}>{ar?"تراجع وأعد الخصم للرصيد":"Undo & restore deducted cash"}</Button>}
+                      <Button type="button" size="sm" variant="outline" onClick={()=>undoPayment(bill.id,date,false)}>{ar?"تراجع دون تغيير الرصيد":"Undo without changing cash"}</Button>
+                      <Button type="button" size="sm" variant="ghost" onClick={()=>setPendingUndo(null)}>{ar?"إلغاء":"Cancel"}</Button>
+                    </div>
+                    {linked?.cashDeducted&&<p className="mt-2 text-xs text-muted-foreground">{ar?"إذا عدّلت رصيد البنك يدوياً بعد الدفع، اختر التراجع دون تغيير الرصيد.":"If you manually changed cash after paying, undo without changing cash to avoid double adjustments."}</p>}
+                  </div>}
+                </div>;
+              })}
             </div>;
           })}
         </div>
