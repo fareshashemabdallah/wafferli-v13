@@ -99,6 +99,7 @@ function Community(){
         </div>
       </div>
     </section>
+    <p className="mt-3 text-xs text-muted-foreground">{ar?"المجموعات مستقلة وغير معتمدة من المدارس أو المؤسسات؛ لا تفترض هوية الأعضاء من اسم المجموعة.":"Groups are not official school or institutional channels; group names and membership claims are not independently verified."}</p>
     {!authReady?<p className="mt-5 text-sm text-muted-foreground">{ar?"جارٍ التحقق من الحساب…":"Checking your account…"}</p>:
     !user?<section className="card-soft mt-5 p-5">
       <h2 className="flex items-center gap-2 font-semibold"><LockKeyhole className="size-5"/>{ar?"تسجيل الدخول للمجموعات الخاصة":"Sign in for private groups"}</h2>
