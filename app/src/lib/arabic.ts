@@ -46,6 +46,7 @@ const labels:Record<string,string> = {
   "Shared family financial accounts and cross-device sync (group accounts are separate)": "حسابات مالية عائلية مشتركة ومزامنة الأجهزة (حسابات المجموعات منفصلة)",
   "Automated provider reviews, verified prices or bookings (third-party directory links are available)": "تحليل آلي لتقييمات الخدمات أو أسعار وحجوزات موثّقة (روابط أدلة خارجية متاحة)",
   "Discover → Plan Together → create a vote.": "اكتشف ← نخطط سوا ← أنشئ تصويتًا.",
+  "Lowest entered total — not necessarily best value": "الأقل تكلفةً وفق الأرقام المدخلة — ليس بالضرورة الأفضل قيمةً",
   "Home": "الرئيسية",
   "Explore": "استكشف",
   "My Money": "أموالي",
