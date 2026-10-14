@@ -44,6 +44,14 @@ describe("aligned Money overview",()=>{
   s.cashOnHand=200;
   expect(getMoneyOverview(s,date).billOnlyRemainder).toBe(100);
  });
+ it("exposes a negative cash shortfall instead of presenting it as zero available cash",()=>{
+  const s=plain();s.cashOnHand=100;s.cashReserve=50;
+  s.commitments=[{id:"rent",name:"Rent",amount:400,frequency:"once",dueDate:"2026-10-20"}];
+  const result=getMoneyOverview(s,date);
+  expect(result.billOnlyRemainder).toBe(0);
+  expect(result.cashAfterBills).toBe(-350);
+  expect(result.forecast.minimumBalance).toBe(-300);
+ });
  it("does not call absent scheduled bills zero commitments",()=>{
   const s=plain();s.cashOnHand=500;
   const r=getMoneyOverview(s,date);
