@@ -43,19 +43,19 @@ export function CashFlowPlanner({state,members,update}:Props) {
 
   const saveBalance=(event:FormEvent)=>{
     event.preventDefault();
-    if(cash.trim()&&!nonnegative(cash))return setError("Enter a valid current cash balance (0 to 1,000,000 JOD).");
-    if(!nonnegative(reserve))return setError("Enter a valid nonnegative cash reserve.");
+    if(cash.trim()&&!nonnegative(cash))return setError(tr("Enter a valid current cash balance (0 to 1,000,000 JOD)."));
+    if(!nonnegative(reserve))return setError(tr("Enter a valid nonnegative cash reserve."));
     update(s=>({...s,cashOnHand:cash.trim()?roundJod(Number(cash)):null,cashReserve:roundJod(Number(reserve))}));
-    setError("");toast.success("Cash position updated");
+    setError("");toast.success(tr("Cash position updated"));
   };
   const saveIncome=(event:FormEvent)=>{
     event.preventDefault();
     if(!editIncome)return;
-    if(!editIncome.name.trim())return setError("Add a name for the income source.");
-    if(!positive(incomeAmount))return setError("Enter an income amount greater than zero (JOD).");
-    if(!validDate(editIncome.nextDate))return setError("Choose the next expected payment date.");
+    if(!editIncome.name.trim())return setError(tr("Add a name for the income source."));
+    if(!positive(incomeAmount))return setError(tr("Enter an income amount greater than zero (JOD)."));
+    if(!validDate(editIncome.nextDate))return setError(tr("Choose the next expected payment date."));
     if(editIncome.endDate && (!validDate(editIncome.endDate)||editIncome.endDate<editIncome.nextDate))
-      return setError("End date must be on or after the first payment.");
+      return setError(tr("End date must be on or after the first payment."));
     const item:IncomeSource={...editIncome,id:editIncome.id||uid(),name:editIncome.name.trim().slice(0,60),
       amount:roundJod(Number(incomeAmount))};
     update(s=>{
@@ -64,24 +64,24 @@ export function CashFlowPlanner({state,members,update}:Props) {
         current.map(x=>x.id===editIncome.id?item:x):[...current,item];
       return {...s,incomeSources:next,income:monthlyTotal(next)};
     });
-    setError("");setEditIncome(null);toast.success("Income schedule saved");
+    setError("");setEditIncome(null);toast.success(tr("Income schedule saved"));
   };
   const saveBill=(event:FormEvent)=>{
     event.preventDefault();
     if(!editBill)return;
-    if(!editBill.name.trim())return setError("Add a name for the bill or commitment.");
-    if(!positive(billAmount))return setError("Enter a bill amount greater than zero (JOD).");
-    if(!validDate(editBill.dueDate))return setError("Choose a valid due date.");
+    if(!editBill.name.trim())return setError(tr("Add a name for the bill or commitment."));
+    if(!positive(billAmount))return setError(tr("Enter a bill amount greater than zero (JOD)."));
+    if(!validDate(editBill.dueDate))return setError(tr("Choose a valid due date."));
     if(editBill.endDate && (!validDate(editBill.endDate)||editBill.endDate<editBill.dueDate))
       return setError("End date must be on or after the first due date.");
     const item:Commitment={...editBill,id:editBill.id||uid(),name:editBill.name.trim().slice(0,60),
       amount:roundJod(Number(billAmount))};
     update(s=>({...s,commitments:editBill.id?
       (s.commitments??[]).map(x=>x.id===editBill.id?item:x):[...(s.commitments??[]),item]}));
-    setError("");setEditBill(null);toast.success("Payment schedule saved");
+    setError("");setEditBill(null);toast.success(tr("Payment schedule saved"));
   };
   const confirmReceived=()=>{
-    if(!receipt||!positive(receipt.value))return setError("Enter the actual received amount, greater than zero.");
+    if(!receipt||!positive(receipt.value))return setError(tr("Enter the actual received amount, greater than zero."));
     update(s=>{
       const current=s.incomeSources??legacyIncome(s.income);
       const next=current.map(x=>x.id===receipt.sourceId?{
@@ -90,7 +90,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
       }:x);
       return {...s,incomeSources:next,income:monthlyTotal(next)};
     });
-    setReceipt(null);setError("");toast.success("Actual receipt recorded. Update your cash balance separately.");
+    setReceipt(null);setError("");toast.success(tr("Actual receipt recorded. Update your cash balance separately."));
   };
   const markPaid=(bill:Commitment,dueDate:string)=>{
     if(dueDate>today)return;
@@ -104,14 +104,14 @@ export function CashFlowPlanner({state,members,update}:Props) {
           shared:true,billId:bill.id,dueDate},...s.expenses]
       };
     });
-    toast.success("Marked paid and added to actual expenses. Update cash balance if needed.");
+    toast.success(tr("Marked paid and added to actual expenses. Update cash balance if needed."));
   };
   const undoPayment=(billId:string,date:string)=>{
     update(s=>({...s,
       commitments:(s.commitments??[]).map(b=>b.id===billId?{...b,paidDates:(b.paidDates??[]).filter(x=>x!==date)}:b),
       expenses:s.expenses.filter(e=>!(e.billId===billId&&e.dueDate===date))
     }));
-    toast.success("Payment confirmation and linked expense reverted");
+    toast.success(tr("Payment confirmation and linked expense reverted"));
   };
   const dueIncome=incomes.flatMap(i=>
     scheduleDates(i.nextDate,i.frequency,futureDate(today,-45),today,i.endDate)
@@ -131,17 +131,17 @@ export function CashFlowPlanner({state,members,update}:Props) {
           <h2 className="text-lg font-semibold">{tr("Cash flow · التدفق النقدي")}</h2>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Understand when money actually comes in and when bills are due. Estimates are based on dates you enter; not connected to banks.
+          {tr("Understand when money actually comes in and when bills are due. Estimates are based on dates you enter; not connected to banks.")}
         </p>
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Metric label={tr("Available now")} value={totalsReady?fmtJOD(state.cashOnHand!):"Not set"} />
+          <Metric label={tr("Available now")} value={totalsReady?fmtJOD(state.cashOnHand!):tr("Not set")} />
           <Metric label={tr("Expected next 30 days")} value={fmtJOD(forecast.expectedIncome)} />
           <Metric label={tr("Bills next 30 days")} value={fmtJOD(forecast.upcomingBills)} />
-          <Metric label={tr("Safe to spend now")} value={forecast.safeToSpend===null?"Not ready":fmtJOD(forecast.safeToSpend)}
+          <Metric label={tr("Safe to spend now")} value={forecast.safeToSpend===null?tr("Not ready"):fmtJOD(forecast.safeToSpend)}
             warning={forecast.safeToSpend===0&&totalsReady}/>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Safe to Spend = today's cash minus bills due within 30 days and your reserve; future salaries are <strong>{tr("not")}</strong> {tr("counted as cash yet. Already-paid expenses must be reflected in your entered cash balance.")} </p>
+          {tr("Safe to Spend = today's cash minus bills due within 30 days and your reserve; future salaries are")} <strong>{tr("not")}</strong> {tr("counted as cash yet. Already-paid expenses must be reflected in your entered cash balance.")} </p>
         <form onSubmit={saveBalance} className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
           <Field label={tr("Cash available now (JOD)")} hint={tr("Bank + cash balance as of today; manual")}>
             <Input inputMode="decimal" className={inputCls} value={cash} onChange={e=>setCash(e.target.value)} placeholder={tr("e.g. 750")} />
@@ -152,20 +152,19 @@ export function CashFlowPlanner({state,members,update}:Props) {
           <Button type="submit" className="h-11">{tr("Update balance")}</Button>
         </form>
         {forecast.advice.length>0&&<div className="mt-3 space-y-1 rounded-xl bg-muted px-3 py-3">
-          {forecast.advice.slice(0,4).map(text=><p key={text} className="text-xs text-muted-foreground">• {text}</p>)}
+          {forecast.advice.slice(0,4).map(text=><p key={text} className="text-xs text-muted-foreground">• {tr(text)}</p>)}
         </div>}
       </section>
 
       <section className="card-soft p-4">
         <div className="flex items-center justify-between gap-2">
           <div><h2 className="font-semibold">{tr("Income schedule · مصادر الدخل")}</h2>
-            <p className="text-xs text-muted-foreground">Received this month: {fmtJOD(received)}</p></div>
+            <p className="text-xs text-muted-foreground">{tr("Received this month:")} {fmtJOD(received)}</p></div>
           <Button size="sm" onClick={()=>{setEditIncome(blankIncome());setIncomeAmount("");setError("");}}>
             <Plus className="size-4"/> {tr("Add income")} </Button>
         </div>
         {state.incomeSources===undefined&&state.income>0&&<p className="mt-2 rounded-lg bg-muted p-2 text-xs">
-          Your existing monthly income ({fmtJOD(state.income)}) is preserved. Edit it to set its next payment date.
-          Until then it's excluded from the dated cash-flow forecast.
+          {tr("Your existing monthly income")} ({fmtJOD(state.income)}) {tr("is preserved. Edit it to set its next payment date. Until then it's excluded from the dated cash-flow forecast.")}
         </p>}
         {editIncome&&<form onSubmit={saveIncome} className="mt-3 space-y-3 rounded-xl border bg-muted/40 p-3">
           <div className="grid gap-3 sm:grid-cols-2">
@@ -175,7 +174,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
               onChange={e=>setIncomeAmount(e.target.value)} placeholder={tr("e.g. 1200")} /></Field>
             <Field label={tr("Frequency")}><NativeSelect value={editIncome.frequency}
               onChange={e=>setEditIncome({...editIncome,frequency:e.target.value as Frequency})}>
-              {keys.map(key=><option key={key} value={key}>{frequencyNames[key]}</option>)}
+              {keys.map(key=><option key={key} value={key}>{tr(frequencyNames[key])}</option>)}
             </NativeSelect></Field>
             <Field label={tr("Next expected date")}><Input className={inputCls} type="date" value={editIncome.nextDate}
               onChange={e=>setEditIncome({...editIncome,nextDate:e.target.value})} /></Field>
@@ -199,7 +198,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
                 <option value="shared">{tr("Shared household")}</option><option value="private">{tr("Private")}</option>
               </NativeSelect></Field>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">Privacy labels are organizational in this device-only pilot; real multi-user access control is not yet implemented.</p>
+            <p className="mt-2 text-xs text-muted-foreground">{tr("Privacy labels are organizational in this device-only pilot; real multi-user access control is not yet implemented.")}</p>
           </details>
           <div className="flex gap-2"><Button type="submit">{tr("Save income")}</Button>
             <Button type="button" variant="outline" onClick={()=>{setEditIncome(null);setError("");}}>{tr("Cancel")}</Button></div>
@@ -213,17 +212,17 @@ export function CashFlowPlanner({state,members,update}:Props) {
             return <div key={item.id} className="py-3 text-sm">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0"><p className="font-semibold">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">{fmtJOD(item.amount)} · {frequencyNames[item.frequency]} · {item.owner??(item.shared?"Household":"Private")}</p>
+                  <p className="text-xs text-muted-foreground">{fmtJOD(item.amount)} · {tr(frequencyNames[item.frequency])} · {item.owner??tr(item.shared?"Household":"Private")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Next forecast: {next?next.date:item.nextDate?"No future payment in next 30 days":"Date needed"}
-                    {lastConfirmed?" · Last received: "+lastConfirmed:""}
+                    {tr("Next forecast:")} {next?next.date:tr(item.nextDate?"No future payment in next 30 days":"Date needed")}
+                    {lastConfirmed?" · "+tr("Last received:")+" "+lastConfirmed:""}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <Button type="button" variant="ghost" size="icon" aria-label={"Edit "+item.name}
                     onClick={()=>{setEditIncome(item);setIncomeAmount(String(item.amount));setError("");}}><Pencil className="size-4"/></Button>
                   <Button type="button" variant="ghost" size="icon" aria-label={"Delete "+item.name}
-                    onClick={()=>{if(confirm("Delete income schedule?"))update(s=>{
+                    onClick={()=>{if(confirm(tr("Delete income schedule?")))update(s=>{
                       const remaining=(s.incomeSources??legacyIncome(s.income)).filter(x=>x.id!==item.id);
                       return {...s,incomeSources:remaining,income:monthlyTotal(remaining)};
                     });}}><Trash2 className="size-4"/></Button>
@@ -231,7 +230,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
               </div>
               {recent.length>0&&<div className="mt-2 space-y-2">
                 {recent.map(({date})=><div key={date} className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-2">
-                  <span className="flex-1 text-xs">{date<today?"Outstanding":"Expected today"} · {date}</span>
+                  <span className="flex-1 text-xs">{tr(date<today?"Outstanding":"Expected today")} · {date}</span>
                   {receipt?.sourceId===item.id&&receipt.date===date?
                     <><Input aria-label={tr("Actual income received (JOD)")} className="h-9 w-28" inputMode="decimal"
                         value={receipt.value} onChange={e=>setReceipt({...receipt,value:e.target.value})}/>
@@ -245,7 +244,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
           })}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Outstanding income in the last 45 days: {fmtJOD(outstanding)}.
+          {tr("Outstanding income in the last 45 days:")} {fmtJOD(outstanding)}.
           Confirm each receipt with its <em>{tr("actual")}</em> {tr("amount. Expected deposits are not credited to your cash balance automatically.")} </p>
       </section>
 
@@ -263,7 +262,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
               onChange={e=>setBillAmount(e.target.value)} /></Field>
             <Field label={tr("Frequency")}><NativeSelect value={editBill.frequency}
               onChange={e=>setEditBill({...editBill,frequency:e.target.value as Frequency})}>
-              {keys.map(key=><option key={key} value={key}>{frequencyNames[key]}</option>)}
+              {keys.map(key=><option key={key} value={key}>{tr(frequencyNames[key])}</option>)}
             </NativeSelect></Field>
             <Field label={tr("Next due date")}><Input className={inputCls} type="date" value={editBill.dueDate}
               onChange={e=>setEditBill({...editBill,dueDate:e.target.value})}/></Field>
@@ -288,21 +287,21 @@ export function CashFlowPlanner({state,members,update}:Props) {
             return <div key={bill.id} className="py-3 text-sm">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0"><p className="font-semibold">{bill.name}</p>
-                  <p className="text-xs text-muted-foreground">{fmtJOD(bill.amount)} · {frequencyNames[bill.frequency]}</p>
-                  <p className="text-xs text-muted-foreground">Next due: {next?.displayDate??(bill.dueDate||"Date needed")}
-                    {next?.overdue?" · Overdue":""}</p>
+                  <p className="text-xs text-muted-foreground">{fmtJOD(bill.amount)} · {tr(frequencyNames[bill.frequency])}</p>
+                  <p className="text-xs text-muted-foreground">{tr("Next due:")} {next?.displayDate??(bill.dueDate||tr("Date needed"))}
+                    {next?.overdue?" · "+tr("Overdue"):""}</p>
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <Button type="button" variant="ghost" size="icon" aria-label={"Edit "+bill.name} onClick={()=>{setEditBill(bill);setBillAmount(String(bill.amount));setError("");}}><Pencil className="size-4"/></Button>
                   <Button type="button" variant="ghost" size="icon" aria-label={"Delete "+bill.name}
-                    onClick={()=>{if(confirm("Delete this bill schedule? Already recorded expenses stay in your history."))update(s=>({...s,commitments:(s.commitments??[]).filter(x=>x.id!==bill.id)}));}}><Trash2 className="size-4"/></Button>
+                    onClick={()=>{if(confirm(tr("Delete this bill schedule? Already recorded expenses stay in your history.")))update(s=>({...s,commitments:(s.commitments??[]).filter(x=>x.id!==bill.id)}));}}><Trash2 className="size-4"/></Button>
                 </div>
               </div>
               {next && next.displayDate<=today && <Button type="button" className="mt-2" size="sm" variant="secondary"
                 onClick={()=>markPaid(bill,next.displayDate)}><Check className="size-3.5"/> {tr("Mark paid & log expense")}</Button>}
               {paid.map(date=><button key={date} type="button" className="mt-2 block text-xs text-brand underline"
-                onClick={()=>{if(confirm("Undo this payment? Its linked expense will also be removed."))undoPayment(bill.id,date);}}>
-                Paid {date} · Undo
+                onClick={()=>{if(confirm(tr("Undo this payment? Its linked expense will also be removed.")))undoPayment(bill.id,date);}}>
+                {tr("Paid")} {date} · {tr("Undo")}
               </button>)}
             </div>;
           })}
@@ -316,17 +315,16 @@ export function CashFlowPlanner({state,members,update}:Props) {
         {forecast.events.length===0&&<p className="mt-3 text-sm text-muted-foreground">{tr("Add expected payment and bill due dates to see a cash-flow timeline.")}</p>}
         <div className="mt-3 divide-y">
           {forecast.events.slice(0,20).map(e=><div key={e.key} className="flex items-center gap-3 py-2 text-sm">
-            <span className="w-24 shrink-0 text-xs text-muted-foreground">{e.overdue?"Overdue "+e.displayDate:e.date}</span>
-            <span className="min-w-0 flex-1 truncate">{e.name}{e.variable?" (estimate)":""}</span>
+            <span className="w-24 shrink-0 text-xs text-muted-foreground">{e.overdue?tr("Overdue")+" "+e.displayDate:e.date}</span>
+            <span className="min-w-0 flex-1 truncate">{e.name}{e.variable?" ("+tr("estimate")+")":""}</span>
             <span className={"shrink-0 font-semibold tabular-nums "+(e.kind==="income"?"text-emerald-700 dark:text-emerald-300":"")}>
               {e.kind==="income"?"+":"−"}{fmtJOD(e.amount)}
             </span>
           </div>)}
         </div>
-        {forecast.events.length>20&&<p className="mt-2 text-xs text-muted-foreground">Showing 20 of {forecast.events.length} events.</p>}
+        {forecast.events.length>20&&<p className="mt-2 text-xs text-muted-foreground">{tr("Showing")} 20 {tr("of")} {forecast.events.length} {tr("events.")}</p>}
         <p className="mt-3 text-xs text-muted-foreground">
-          Rule-based advisory only; no bank access, AI financial advice or automatic balance reconciliation.
-          You must update your available cash after real receipts and payments.
+          {tr("Rule-based advisory only; no bank access, AI financial advice or automatic balance reconciliation. You must update your available cash after real receipts and payments.")}
         </p>
       </section>
       {error&&<p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">{error}</p>}
