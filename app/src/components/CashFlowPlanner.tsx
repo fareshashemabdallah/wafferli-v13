@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useState, type FormEvent } from "react";
 import { CalendarClock, Check, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ const nonnegative=(str:string)=>/^(?:\d{1,7})(?:\.\d{1,2})?$/.test(str.trim()) &
 const validDate=(str:string)=>/^\d{4}-\d{2}-\d{2}$/.test(str)&&!Number.isNaN(new Date(str+"T12:00:00").getTime());
 
 export function CashFlowPlanner({state,members,update}:Props) {
+  const { tr } = useI18n();
   const today=localToday();
   const incomes=state.incomeSources ?? legacyIncome(state.income);
   const bills=state.commitments ?? [];
@@ -126,30 +128,28 @@ export function CashFlowPlanner({state,members,update}:Props) {
     <div className="space-y-4" id="cash-flow">
       <section className="card-soft mt-6 p-4 sm:p-5">
         <div className="flex items-center gap-2"><CalendarClock className="size-5 text-brand"/>
-          <h2 className="text-lg font-semibold">Cash flow · التدفق النقدي</h2>
+          <h2 className="text-lg font-semibold">{tr("Cash flow · التدفق النقدي")}</h2>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           Understand when money actually comes in and when bills are due. Estimates are based on dates you enter; not connected to banks.
         </p>
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Metric label="Available now" value={totalsReady?fmtJOD(state.cashOnHand!):"Not set"} />
-          <Metric label="Expected next 30 days" value={fmtJOD(forecast.expectedIncome)} />
-          <Metric label="Bills next 30 days" value={fmtJOD(forecast.upcomingBills)} />
-          <Metric label="Safe to spend now" value={forecast.safeToSpend===null?"Not ready":fmtJOD(forecast.safeToSpend)}
+          <Metric label={tr("Available now")} value={totalsReady?fmtJOD(state.cashOnHand!):"Not set"} />
+          <Metric label={tr("Expected next 30 days")} value={fmtJOD(forecast.expectedIncome)} />
+          <Metric label={tr("Bills next 30 days")} value={fmtJOD(forecast.upcomingBills)} />
+          <Metric label={tr("Safe to spend now")} value={forecast.safeToSpend===null?"Not ready":fmtJOD(forecast.safeToSpend)}
             warning={forecast.safeToSpend===0&&totalsReady}/>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Safe to Spend = today's cash minus bills due within 30 days and your reserve; future salaries are <strong>not</strong> counted as cash yet.
-          Already-paid expenses must be reflected in your entered cash balance.
-        </p>
+          Safe to Spend = today's cash minus bills due within 30 days and your reserve; future salaries are <strong>{tr("not")}</strong> {tr("counted as cash yet. Already-paid expenses must be reflected in your entered cash balance.")} </p>
         <form onSubmit={saveBalance} className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-          <Field label="Cash available now (JOD)" hint="Bank + cash balance as of today; manual">
-            <Input inputMode="decimal" className={inputCls} value={cash} onChange={e=>setCash(e.target.value)} placeholder="e.g. 750" />
+          <Field label={tr("Cash available now (JOD)")} hint={tr("Bank + cash balance as of today; manual")}>
+            <Input inputMode="decimal" className={inputCls} value={cash} onChange={e=>setCash(e.target.value)} placeholder={tr("e.g. 750")} />
           </Field>
-          <Field label="Safety reserve (JOD)" hint="Protected emergency buffer">
+          <Field label={tr("Safety reserve (JOD)")} hint={tr("Protected emergency buffer")}>
             <Input inputMode="decimal" className={inputCls} value={reserve} onChange={e=>setReserve(e.target.value)} />
           </Field>
-          <Button type="submit" className="h-11">Update balance</Button>
+          <Button type="submit" className="h-11">{tr("Update balance")}</Button>
         </form>
         {forecast.advice.length>0&&<div className="mt-3 space-y-1 rounded-xl bg-muted px-3 py-3">
           {forecast.advice.slice(0,4).map(text=><p key={text} className="text-xs text-muted-foreground">• {text}</p>)}
@@ -158,11 +158,10 @@ export function CashFlowPlanner({state,members,update}:Props) {
 
       <section className="card-soft p-4">
         <div className="flex items-center justify-between gap-2">
-          <div><h2 className="font-semibold">Income schedule · مصادر الدخل</h2>
+          <div><h2 className="font-semibold">{tr("Income schedule · مصادر الدخل")}</h2>
             <p className="text-xs text-muted-foreground">Received this month: {fmtJOD(received)}</p></div>
           <Button size="sm" onClick={()=>{setEditIncome(blankIncome());setIncomeAmount("");setError("");}}>
-            <Plus className="size-4"/> Add income
-          </Button>
+            <Plus className="size-4"/> {tr("Add income")} </Button>
         </div>
         {state.incomeSources===undefined&&state.income>0&&<p className="mt-2 rounded-lg bg-muted p-2 text-xs">
           Your existing monthly income ({fmtJOD(state.income)}) is preserved. Edit it to set its next payment date.
@@ -170,47 +169,47 @@ export function CashFlowPlanner({state,members,update}:Props) {
         </p>}
         {editIncome&&<form onSubmit={saveIncome} className="mt-3 space-y-3 rounded-xl border bg-muted/40 p-3">
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Source name"><Input className={inputCls} maxLength={60} value={editIncome.name}
-              onChange={e=>setEditIncome({...editIncome,name:e.target.value})} placeholder="Salary, freelance, rent..." /></Field>
-            <Field label="Amount (JOD)"><Input className={inputCls} inputMode="decimal" value={incomeAmount}
-              onChange={e=>setIncomeAmount(e.target.value)} placeholder="e.g. 1200" /></Field>
-            <Field label="Frequency"><NativeSelect value={editIncome.frequency}
+            <Field label={tr("Source name")}><Input className={inputCls} maxLength={60} value={editIncome.name}
+              onChange={e=>setEditIncome({...editIncome,name:e.target.value})} placeholder={tr("Salary, freelance, rent...")} /></Field>
+            <Field label={tr("Amount (JOD)")}><Input className={inputCls} inputMode="decimal" value={incomeAmount}
+              onChange={e=>setIncomeAmount(e.target.value)} placeholder={tr("e.g. 1200")} /></Field>
+            <Field label={tr("Frequency")}><NativeSelect value={editIncome.frequency}
               onChange={e=>setEditIncome({...editIncome,frequency:e.target.value as Frequency})}>
               {keys.map(key=><option key={key} value={key}>{frequencyNames[key]}</option>)}
             </NativeSelect></Field>
-            <Field label="Next expected date"><Input className={inputCls} type="date" value={editIncome.nextDate}
+            <Field label={tr("Next expected date")}><Input className={inputCls} type="date" value={editIncome.nextDate}
               onChange={e=>setEditIncome({...editIncome,nextDate:e.target.value})} /></Field>
           </div>
           <details className="rounded-lg bg-card p-3 text-sm">
-            <summary className="cursor-pointer font-medium">More details (optional)</summary>
+            <summary className="cursor-pointer font-medium">{tr("More details (optional)")}</summary>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <Field label="Income owner">
+              <Field label={tr("Income owner")}>
                 <NativeSelect value={editIncome.owner??""} onChange={e=>{
                   const copy={...editIncome}; if(e.target.value)copy.owner=e.target.value;else delete copy.owner;setEditIncome(copy);
-                }}><option value="">Not specified</option>{members.filter(m=>m.role==="adult").map(m=><option key={m.id} value={m.name}>{m.name}</option>)}</NativeSelect>
+                }}><option value="">{tr("Not specified")}</option>{members.filter(m=>m.role==="adult").map(m=><option key={m.id} value={m.name}>{m.name}</option>)}</NativeSelect>
               </Field>
-              <Field label="End date, if applicable"><Input className={inputCls} type="date" value={editIncome.endDate??""}
+              <Field label={tr("End date, if applicable")}><Input className={inputCls} type="date" value={editIncome.endDate??""}
                 onChange={e=>{const copy={...editIncome};if(e.target.value)copy.endDate=e.target.value;else delete copy.endDate;setEditIncome(copy);}} /></Field>
-              <Field label="Income reliability"><NativeSelect value={editIncome.variable?"variable":"fixed"}
+              <Field label={tr("Income reliability")}><NativeSelect value={editIncome.variable?"variable":"fixed"}
                 onChange={e=>setEditIncome({...editIncome,variable:e.target.value==="variable"})}>
-                <option value="fixed">Fixed / usual amount</option><option value="variable">Estimated / varies</option>
+                <option value="fixed">{tr("Fixed / usual amount")}</option><option value="variable">{tr("Estimated / varies")}</option>
               </NativeSelect></Field>
-              <Field label="Privacy label"><NativeSelect value={editIncome.shared?"shared":"private"}
+              <Field label={tr("Privacy label")}><NativeSelect value={editIncome.shared?"shared":"private"}
                 onChange={e=>setEditIncome({...editIncome,shared:e.target.value==="shared"})}>
-                <option value="shared">Shared household</option><option value="private">Private</option>
+                <option value="shared">{tr("Shared household")}</option><option value="private">{tr("Private")}</option>
               </NativeSelect></Field>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">Privacy labels are organizational in this device-only pilot; real multi-user access control is not yet implemented.</p>
           </details>
-          <div className="flex gap-2"><Button type="submit">Save income</Button>
-            <Button type="button" variant="outline" onClick={()=>{setEditIncome(null);setError("");}}>Cancel</Button></div>
+          <div className="flex gap-2"><Button type="submit">{tr("Save income")}</Button>
+            <Button type="button" variant="outline" onClick={()=>{setEditIncome(null);setError("");}}>{tr("Cancel")}</Button></div>
         </form>}
-        {incomes.length===0&&<p className="mt-3 text-sm text-muted-foreground">Add your first income source to start planning.</p>}
+        {incomes.length===0&&<p className="mt-3 text-sm text-muted-foreground">{tr("Add your first income source to start planning.")}</p>}
         <div className="mt-2 divide-y">
           {incomes.map(item=>{
             const next=forecast.events.find(e=>e.kind==="income"&&e.sourceId===item.id);
             const recent=dueIncome.filter(x=>x.source.id===item.id).slice(0,2);
-            const lastConfirmed=(item.receivedDates??[]).filter(d=>d<=today).sort().at(-1);
+            const lastConfirmed=(item.receivedDates??[]).filter(d=>{tr("d")}<=today).sort().at(-1);
             return <div key={item.id} className="py-3 text-sm">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0"><p className="font-semibold">{item.name}</p>
@@ -234,13 +233,12 @@ export function CashFlowPlanner({state,members,update}:Props) {
                 {recent.map(({date})=><div key={date} className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-2">
                   <span className="flex-1 text-xs">{date<today?"Outstanding":"Expected today"} · {date}</span>
                   {receipt?.sourceId===item.id&&receipt.date===date?
-                    <><Input aria-label="Actual income received (JOD)" className="h-9 w-28" inputMode="decimal"
+                    <><Input aria-label={tr("Actual income received (JOD)")} className="h-9 w-28" inputMode="decimal"
                         value={receipt.value} onChange={e=>setReceipt({...receipt,value:e.target.value})}/>
-                      <Button type="button" size="sm" onClick={confirmReceived}>Confirm</Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={()=>setReceipt(null)}>Cancel</Button></>:
+                      <Button type="button" size="sm" onClick={confirmReceived}>{tr("Confirm")}</Button>
+                      <Button type="button" size="sm" variant="ghost" onClick={()=>setReceipt(null)}>{tr("Cancel")}</Button></>:
                     <Button type="button" size="sm" variant="secondary" onClick={()=>setReceipt({sourceId:item.id,date,value:String(item.amount)})}>
-                      <Check className="size-3.5"/> Received
-                    </Button>}
+                      <Check className="size-3.5"/> {tr("Received")} </Button>}
                 </div>)}
               </div>}
             </div>;
@@ -248,42 +246,41 @@ export function CashFlowPlanner({state,members,update}:Props) {
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
           Outstanding income in the last 45 days: {fmtJOD(outstanding)}.
-          Confirm each receipt with its <em>actual</em> amount. Expected deposits are not credited to your cash balance automatically.
-        </p>
+          Confirm each receipt with its <em>{tr("actual")}</em> {tr("amount. Expected deposits are not credited to your cash balance automatically.")} </p>
       </section>
 
       <section className="card-soft p-4">
         <div className="flex items-center justify-between gap-2">
-          <div><h2 className="font-semibold">Upcoming bills · الالتزامات</h2>
-            <p className="text-xs text-muted-foreground">Add due dates for rent, utilities, school or other commitments.</p></div>
-          <Button size="sm" onClick={()=>{setEditBill(blankBill());setBillAmount("");setError("");}}><Plus className="size-4"/> Add bill</Button>
+          <div><h2 className="font-semibold">{tr("Upcoming bills · الالتزامات")}</h2>
+            <p className="text-xs text-muted-foreground">{tr("Add due dates for rent, utilities, school or other commitments.")}</p></div>
+          <Button size="sm" onClick={()=>{setEditBill(blankBill());setBillAmount("");setError("");}}><Plus className="size-4"/> {tr("Add bill")}</Button>
         </div>
         {editBill&&<form onSubmit={saveBill} className="mt-3 space-y-3 rounded-xl border bg-muted/40 p-3">
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Bill name"><Input className={inputCls} maxLength={60} value={editBill.name}
-              onChange={e=>setEditBill({...editBill,name:e.target.value})} placeholder="Rent, electricity, school..." /></Field>
-            <Field label="Amount (JOD)"><Input className={inputCls} inputMode="decimal" value={billAmount}
+            <Field label={tr("Bill name")}><Input className={inputCls} maxLength={60} value={editBill.name}
+              onChange={e=>setEditBill({...editBill,name:e.target.value})} placeholder={tr("Rent, electricity, school...")} /></Field>
+            <Field label={tr("Amount (JOD)")}><Input className={inputCls} inputMode="decimal" value={billAmount}
               onChange={e=>setBillAmount(e.target.value)} /></Field>
-            <Field label="Frequency"><NativeSelect value={editBill.frequency}
+            <Field label={tr("Frequency")}><NativeSelect value={editBill.frequency}
               onChange={e=>setEditBill({...editBill,frequency:e.target.value as Frequency})}>
               {keys.map(key=><option key={key} value={key}>{frequencyNames[key]}</option>)}
             </NativeSelect></Field>
-            <Field label="Next due date"><Input className={inputCls} type="date" value={editBill.dueDate}
+            <Field label={tr("Next due date")}><Input className={inputCls} type="date" value={editBill.dueDate}
               onChange={e=>setEditBill({...editBill,dueDate:e.target.value})}/></Field>
           </div>
-          <details className="rounded-lg bg-card p-3 text-sm"><summary className="cursor-pointer font-medium">More details (optional)</summary>
+          <details className="rounded-lg bg-card p-3 text-sm"><summary className="cursor-pointer font-medium">{tr("More details (optional)")}</summary>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <Field label="Spending category"><NativeSelect value={editBill.categoryId??""} onChange={e=>{
+              <Field label={tr("Spending category")}><NativeSelect value={editBill.categoryId??""} onChange={e=>{
                 const copy={...editBill};if(e.target.value)copy.categoryId=e.target.value;else delete copy.categoryId;setEditBill(copy);
-              }}><option value="">Uncategorized</option>{state.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</NativeSelect></Field>
-              <Field label="End date"><Input className={inputCls} type="date" value={editBill.endDate??""}
+              }}><option value="">{tr("Uncategorized")}</option>{state.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</NativeSelect></Field>
+              <Field label={tr("End date")}><Input className={inputCls} type="date" value={editBill.endDate??""}
                 onChange={e=>{const copy={...editBill};if(e.target.value)copy.endDate=e.target.value;else delete copy.endDate;setEditBill(copy);}}/></Field>
             </div>
           </details>
-          <div className="flex gap-2"><Button type="submit">Save bill</Button>
-            <Button type="button" variant="outline" onClick={()=>{setEditBill(null);setError("");}}>Cancel</Button></div>
+          <div className="flex gap-2"><Button type="submit">{tr("Save bill")}</Button>
+            <Button type="button" variant="outline" onClick={()=>{setEditBill(null);setError("");}}>{tr("Cancel")}</Button></div>
         </form>}
-        {bills.length===0&&<p className="mt-3 text-sm text-muted-foreground">No scheduled bills. Planned categories above do not automatically create due dates.</p>}
+        {bills.length===0&&<p className="mt-3 text-sm text-muted-foreground">{tr("No scheduled bills. Planned categories above do not automatically create due dates.")}</p>}
         <div className="mt-2 divide-y">
           {bills.map(bill=>{
             const next=upcomingBills.find(e=>e.sourceId===bill.id);
@@ -302,7 +299,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
                 </div>
               </div>
               {next && next.displayDate<=today && <Button type="button" className="mt-2" size="sm" variant="secondary"
-                onClick={()=>markPaid(bill,next.displayDate)}><Check className="size-3.5"/> Mark paid & log expense</Button>}
+                onClick={()=>markPaid(bill,next.displayDate)}><Check className="size-3.5"/> {tr("Mark paid & log expense")}</Button>}
               {paid.map(date=><button key={date} type="button" className="mt-2 block text-xs text-brand underline"
                 onClick={()=>{if(confirm("Undo this payment? Its linked expense will also be removed."))undoPayment(bill.id,date);}}>
                 Paid {date} · Undo
@@ -313,10 +310,10 @@ export function CashFlowPlanner({state,members,update}:Props) {
       </section>
 
       <section className="card-soft p-4">
-        <h2 className="font-semibold">Your next 30 days · التدفق المتوقع</h2>
+        <h2 className="font-semibold">{tr("Your next 30 days · التدفق المتوقع")}</h2>
         <p className="mt-1 text-xs text-muted-foreground">Projected end balance: {forecast.projectedEnd===null?
           "Set today's actual cash balance":fmtJOD(forecast.projectedEnd)}. Future income is expected, not yet received.</p>
-        {forecast.events.length===0&&<p className="mt-3 text-sm text-muted-foreground">Add expected payment and bill due dates to see a cash-flow timeline.</p>}
+        {forecast.events.length===0&&<p className="mt-3 text-sm text-muted-foreground">{tr("Add expected payment and bill due dates to see a cash-flow timeline.")}</p>}
         <div className="mt-3 divide-y">
           {forecast.events.slice(0,20).map(e=><div key={e.key} className="flex items-center gap-3 py-2 text-sm">
             <span className="w-24 shrink-0 text-xs text-muted-foreground">{e.overdue?"Overdue "+e.displayDate:e.date}</span>
@@ -337,6 +334,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
   );
 }
 function Metric({label,value,warning=false}:{label:string;value:string;warning?:boolean}){
+  const { tr } = useI18n();
   return <div className="rounded-xl bg-muted p-3">
     <p className="text-xs text-muted-foreground">{label}</p>
     <p className={"mt-1 font-semibold tabular-nums "+(warning?"text-destructive":"")}>{value}</p>
