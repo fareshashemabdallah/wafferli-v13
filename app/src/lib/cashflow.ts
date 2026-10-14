@@ -5,7 +5,7 @@ export type Frequency = "daily" | "weekly" | "biweekly" | "monthly" | "quarterly
 export type IncomeSource = {
   id:string; name:string; amount:number; frequency:Frequency; nextDate:string;
   endDate?:string; owner?:string; shared:boolean; variable?:boolean;
-  receivedDates?:string[];
+  receivedDates?:string[]; receivedAmounts?:Record<string,number>;
 };
 export type Commitment = {
   id:string; name:string; amount:number; frequency:Frequency; dueDate:string;
