@@ -66,6 +66,7 @@ function MoneyPage() {
           }}
         >
           <RotateCcw className="size-4" /> {tr("Reset sample data")} </Button>
+        </div></details>
       </div>
 
       {section==="overview"&&<>
