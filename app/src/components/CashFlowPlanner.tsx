@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { CalendarClock, Check, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Field, NativeSelect, inputCls } from "./Field";
@@ -26,7 +26,8 @@ const nonnegative=(str:string)=>/^(?:\d{1,7})(?:\.\d{1,2})?$/.test(str.trim()) &
 const validDate=(str:string)=>/^\d{4}-\d{2}-\d{2}$/.test(str)&&!Number.isNaN(new Date(str+"T12:00:00").getTime());
 
 export function CashFlowPlanner({state,members,update}:Props) {
-  const { tr } = useI18n();
+  const { tr, lang } = useI18n();
+  const ar=lang==="ar";
   const today=localToday();
   const incomes=state.incomeSources ?? legacyIncome(state.income);
   const bills=state.commitments ?? [];
@@ -40,12 +41,15 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const [billAmount,setBillAmount]=useState("");
   const [receipt,setReceipt]=useState<{sourceId:string;date:string;value:string}|null>(null);
   const [error,setError]=useState("");
+  const [pendingPaid,setPendingPaid]=useState<{bill:Commitment;dueDate:string}|null>(null);
+  useEffect(()=>setCash(state.cashOnHand==null?"":String(state.cashOnHand)),[state.cashOnHand]);
+  useEffect(()=>setReserve(String(state.cashReserve??0)),[state.cashReserve]);
 
   const saveBalance=(event:FormEvent)=>{
     event.preventDefault();
     if(cash.trim()&&!nonnegative(cash))return setError(tr("Enter a valid current cash balance (0 to 1,000,000 JOD)."));
     if(!nonnegative(reserve))return setError(tr("Enter a valid nonnegative cash reserve."));
-    update(s=>({...s,cashOnHand:cash.trim()?roundJod(Number(cash)):null,cashReserve:roundJod(Number(reserve))}));
+    update(s=>({...s,cashOnHand:cash.trim()?roundJod(Number(cash)):null,cashReserve:roundJod(Number(reserve)),cashUpdatedAt:cash.trim()?today:undefined}));
     setError("");toast.success(tr("Cash position updated"));
   };
   const saveIncome=(event:FormEvent)=>{
@@ -92,19 +96,23 @@ export function CashFlowPlanner({state,members,update}:Props) {
     });
     setReceipt(null);setError("");toast.success(tr("Actual receipt recorded. Update your cash balance separately."));
   };
-  const markPaid=(bill:Commitment,dueDate:string)=>{
+  const markPaid=(bill:Commitment,dueDate:string,cashMode:"already"|"deduct"|"untracked")=>{
     if(dueDate>today)return;
+    if(cashMode==="deduct" && (state.cashOnHand==null||state.cashOnHand<bill.amount)){
+      setError(ar?"المبلغ أكبر من الرصيد المدخل. حدّث رصيدك الفعلي أولاً.":"The payment exceeds the entered cash balance. Please update your actual balance first.");return;
+    }
     update(s=>{
       const current=s.commitments??[];
       if(current.some(x=>x.id===bill.id&&x.paidDates?.includes(dueDate)))return s;
       const category=s.categories.find(c=>c.id===bill.categoryId)?.id??"uncategorized";
       return {...s,
         commitments:current.map(x=>x.id===bill.id?{...x,paidDates:[...(x.paidDates??[]),dueDate]}:x),
-        expenses:[{id:uid(),date:today,categoryId:category,amount:bill.amount,note:bill.name,
-          shared:true,billId:bill.id,dueDate},...s.expenses]
+        expenses:[{id:uid(),date:today,categoryId:category,amount:bill.amount,note:bill.name,shared:true,billId:bill.id,dueDate},...s.expenses],
+        ...(cashMode==="deduct"&&s.cashOnHand!=null?{cashOnHand:roundJod(s.cashOnHand-bill.amount),cashUpdatedAt:today}:{})
       };
     });
-    toast.success(tr("Marked paid and added to actual expenses. Update cash balance if needed."));
+    setPendingPaid(null);setError("");
+    toast.success(ar?"سُجلت الفاتورة المدفوعة مع المصروف.":"Bill marked paid and expense recorded.");
   };
   const undoPayment=(billId:string,date:string)=>{
     update(s=>({...s,
