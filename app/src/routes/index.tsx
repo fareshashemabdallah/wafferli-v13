@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, ListChecks, Receipt, ShoppingBag, Sparkles, Users, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, CalendarDays, ListChecks, Receipt, ShoppingBag, Sparkles, Users, UtensilsCrossed } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AppShell, PilotBadge } from "@/components/AppShell";
 import { FamilyFinanceSnapshot } from "@/components/FamilyFinanceSnapshot";
+import { FamilyCalendarHighlights } from "@/components/FamilyCalendarHighlights";
 import { FamilyWeather } from "@/components/FamilyWeather";
 import { FamilyInsights } from "@/components/FamilyInsights";
 import { defaultFamilyPreferences } from "@/lib/familyPreferences";
@@ -26,8 +27,7 @@ export const Route = createFileRoute("/")({
 type Msg = { q: string; intent: Intent | null };
 
 function Index() {
-  const { tr } = useI18n();
-  const { t } = useI18n();
+  const { tr,t,lang } = useI18n();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -51,31 +51,40 @@ function Index() {
 
   return (
     <AppShell>
-      <section className="hero-surface rounded-3xl p-6 md:p-8">
-        <p className="text-sm opacity-80">{tr("Spend wisely. Live well.")}</p>
-        <h1 className="mt-2 text-3xl font-semibold leading-tight md:text-4xl">{t("greeting")}</h1>
-        <form onSubmit={submit} className="mt-5 flex gap-2 rounded-2xl bg-card p-1.5">
-          <label htmlFor="ask" className="sr-only">{t("ask")}</label>
-          <input
-            id="ask"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            maxLength={200}
-            placeholder={t("askPh")}
-            className="min-w-0 flex-1 bg-transparent px-3 text-ink outline-none placeholder:text-muted-foreground"
-          />
-          <Button type="submit" size="lg" className="rounded-xl">
-            {t("ask")}
-          </Button>
-        </form>
-        <p className="mt-2 flex items-center gap-1.5 text-xs opacity-80">
-          <Sparkles className="size-3.5" /> {t("routerNote")}
-        </p>
+      <section className="hero-surface rounded-3xl p-5 sm:p-7">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs font-semibold tracking-wider text-brand">{tr("Spend wisely. Live well.")}</p>
+          <p className="text-xs text-muted-foreground">{new Intl.DateTimeFormat(lang==="ar"?"ar-JO":"en-US",{weekday:"long",day:"numeric",month:"short"}).format(new Date())}</p>
+        </div>
+        <h1 className="mt-3 text-[1.7rem] font-semibold leading-snug text-ink sm:text-4xl">{t("greeting")} <span aria-hidden="true">☀️</span></h1>
+        <p className="mt-2 max-w-md text-sm text-[#5A7165]">{lang==="ar"?"نخطط للأوقات الجميلة، نهتم بالتفاصيل، ونختار ما يناسب عائلتنا.":"A thoughtful day starts with the little things that make family life better."}</p>
+        <Link to="/calendar" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/85 px-3 py-2.5 text-sm font-semibold text-brand shadow-sm transition hover:bg-white">
+          <CalendarDays className="size-4"/> {lang==="ar"?"أضف مناسبة عائلية":"Add a family occasion"} <ArrowRight className="size-4 rtl:rotate-180"/>
+        </Link>
       </section>
 
-      <FamilyFinanceSnapshot />
       {prefs.weather && <FamilyWeather />}
+      <FamilyCalendarHighlights />
       {prefs.notificationFrequency !== "off" && <FamilyInsights />}
+      <FamilyFinanceSnapshot />
+
+      <section className="card-soft mt-5 p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-mint text-brand"><Sparkles className="size-5"/></span>
+          <div>
+            <h2 className="font-semibold">{lang==="ar"?"هل تحتاج إلى مساعدة في قرار؟":"Need a hand deciding?"}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{lang==="ar"?"اسأل عن الأنشطة أو المشتريات أو الميزانية وسنرشدك إلى القسم المناسب.":"Ask about an outing, a purchase or your budget and find the right tools."}</p>
+          </div>
+        </div>
+        <form onSubmit={submit} className="mt-4 flex gap-2 rounded-2xl border border-border bg-background p-1.5">
+          <label htmlFor="ask" className="sr-only">{t("ask")}</label>
+          <input id="ask" value={q} onChange={e=>setQ(e.target.value)}
+            maxLength={200} placeholder={t("askPh")}
+            className="min-w-0 flex-1 bg-transparent px-3 text-ink outline-none placeholder:text-muted-foreground"/>
+          <Button type="submit" size="lg" className="rounded-xl">{t("ask")}</Button>
+        </form>
+        <p className="mt-2 text-xs text-muted-foreground">{t("routerNote")}</p>
+      </section>
 
       {msgs.length > 0 && (
         <section className="mt-5 space-y-3" aria-live="polite">
