@@ -26,6 +26,7 @@ export const Route = createFileRoute("/vote/$token")({
 });
 
 function VotePage() {
+  const { tr } = useI18n();
   const { token } = Route.useParams();
   const { t, lang, setLang } = useI18n();
   const q = useQuery({ queryKey: ["vote", token], queryFn: () => getVote(token), refetchInterval: 5000 });
@@ -49,7 +50,7 @@ function VotePage() {
   );
 
   if (q.isPending) return shell(<div className="space-y-3"><Skeleton className="h-24 rounded-2xl" /><Skeleton className="h-16 rounded-2xl" /><Skeleton className="h-16 rounded-2xl" /></div>);
-  if (q.isError) return shell(<div className="card-soft p-5"><p className="text-destructive">{q.error.message}</p><Button className="mt-3" onClick={() => q.refetch()}>Try again</Button></div>);
+  if (q.isError) return shell(<div className="card-soft p-5"><p className="text-destructive">{q.error.message}</p><Button className="mt-3" onClick={() => q.refetch()}>{tr("Try again")}</Button></div>);
   const d = q.data;
   if (!d) return shell(<div className="card-soft p-5">{t("notFound")}</div>);
 
