@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Plus, Trash2 } from "lucide-react";
+import { MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AppShell, Notice } from "@/components/AppShell";
@@ -141,6 +141,7 @@ function TogetherPage() {
 
   return (
     <AppShell title={tr("Dabberna Together")}>
+      <Link to="/community" search={{kind:"outing",topic:f.title.slice(0,100),invite:undefined,category:"restaurant",item:"",area:""}} className="card-soft mb-4 flex items-start gap-3 p-4 hover:border-brand/40"><MessagesSquare className="mt-1 size-6 text-brand"/><span><strong>{tr("Discuss this outing with a group")}</strong><span className="mt-1 block text-sm text-muted-foreground">{tr("Ask parents or friends for ideas before you choose a place. Only invited members can see the chat.")}</span></span></Link>
       <Notice>{tr("Plan")} <strong>{tr("any outing")}</strong> {tr("— a café, cinema, kids' activity, park, game or day trip. Consider children before choosing options. The vote works without an account. Safety, age restrictions and prices must be checked with each venue.")}</Notice>
 
       {saved.length > 0 && (

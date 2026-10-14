@@ -182,6 +182,9 @@ function Restaurants() {
             <a className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium text-brand" href={p.osmUrl} target="_blank" rel="noopener noreferrer">{tr("Map")} <ExternalLink className="size-3"/></a>
             {p.website && <a className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium text-brand" href={p.website} target="_blank" rel="noopener noreferrer">{tr("Website")} <ExternalLink className="size-3"/></a>}
             <Button type="button" variant="secondary" size="sm" onClick={()=>select(p.name)}><Plus className="size-3.5"/>{tr("Add to Together")}</Button>
+            <Link to="/community" search={{kind:"advice",topic:"Restaurant experiences",invite:undefined,category:"restaurant",item:p.name,area:"Amman"}} className="rounded-lg border border-brand/20 bg-mint px-3 py-2 text-xs font-semibold text-brand">
+              {lang==="ar"?"تجارب الأهالي مع هذا المكان":"Group experiences for this place"} ↗
+            </Link>
           </div>
         </article>)}
       </div>
@@ -191,6 +194,7 @@ function Restaurants() {
         <div className="flex gap-2">
           <Input value={manual} onChange={e=>setManual(e.target.value)} maxLength={80} placeholder={tr("Actual restaurant name")} />
           <Button type="button" onClick={()=>select(manual)} disabled={!manual.trim()}>{tr("Add")}</Button>
+          {manual.trim().length>=3&&<Link to="/community" search={{kind:"advice",topic:"Restaurant experiences",invite:undefined,category:"restaurant",item:manual.trim(),area:"Amman"}} className="rounded-lg border px-3 py-2 text-xs font-semibold text-brand">{lang==="ar"?"تجارب الأهالي":"Group reviews"} ↗</Link>}
         </div>
       </div>
       <div className="mt-4 text-xs text-muted-foreground"> {tr("Data attribution:")} <a href="https://www.geoapify.com/" className="underline" target="_blank" rel="noopener noreferrer">{tr("Powered by Geoapify")}</a>;

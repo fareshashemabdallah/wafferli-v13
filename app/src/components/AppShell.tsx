@@ -1,14 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Home, Info, Languages, Sparkles, UserRound, Wallet } from "lucide-react";
+import { Compass, Home, Info, Languages, MessagesSquare, Sparkles, UserRound, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
 import { useI18n, type Key } from "@/lib/i18n";
 import { Logo } from "./Logo";
 
-const tabs: { to: "/" | "/explore" | "/money" | "/space" | "/advisor"; key: Key; icon: typeof Home; exact?: boolean }[] = [
+const tabs: { to: "/" | "/explore" | "/money" | "/space" | "/advisor" | "/community"; key: Key; icon: typeof Home; exact?: boolean }[] = [
   { to: "/", key: "home", icon: Home, exact: true },
   { to: "/explore", key: "explore", icon: Compass },
   { to: "/money", key: "money", icon: Wallet },
   { to: "/advisor", key: "advisor", icon: Sparkles },
+  { to: "/community", key: "community", icon: MessagesSquare },
   { to: "/space", key: "space", icon: UserRound },
 ];
 
@@ -59,6 +60,7 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
           <div className="flex h-14 items-center justify-between px-4">
             <Link to="/" aria-label="dabberna home"><Logo /></Link>
             <div className="flex items-center gap-2">
+              <Link to="/advisor" aria-label={t("advisor")} className="grid size-10 place-items-center rounded-full border bg-card"><Sparkles className="size-4" /></Link>
               <Link to="/about" aria-label={t("about")} className="grid size-10 place-items-center rounded-full border bg-card">
                 <Info className="size-4" />
               </Link>
@@ -78,7 +80,7 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
         className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur md:hidden"
       >
         <div className="grid grid-cols-5">
-          {tabs.map(({ to, key, icon: Icon, exact }) => (
+          {tabs.filter(tab => tab.to !== "/advisor").map(({ to, key, icon: Icon, exact }) => (
             <Link
               key={to}
               to={to}

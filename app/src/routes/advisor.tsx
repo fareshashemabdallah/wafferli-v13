@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Calculator, Compass, Receipt, Search, ShoppingBag, Sparkles } from "lucide-react";
+import { ArrowRight, Calculator, Compass, MessagesSquare, Receipt, Search, ShoppingBag, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { buildForecast, legacyIncome, localToday } from "@/lib/cashflow";
@@ -58,6 +58,9 @@ function Advisor(){
       </div>}
       <Link to="/money" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand">{ar?"أكمل بيانات الميزانية":"Complete your financial plan"} <ArrowRight className="size-4 rtl:rotate-180"/></Link>
     </div>
+    <Link to="/community" search={{kind:"advice",topic:"Family recommendations",invite:undefined,category:"doctor",item:"",area:""}} className="card-soft mt-4 flex items-start gap-3 p-4 hover:border-brand/40">
+      <MessagesSquare className="mt-0.5 size-6 text-brand"/><span><strong>{ar?"اسأل أولياء الأمور في مجموعتك":"Ask your trusted parent network"}</strong><span className="mt-1 block text-sm text-muted-foreground">{ar?"مثلاً: هل جرب أحد هذا الطبيب أو المنتَج؟ افتح نقاشاً خاصاً بالمجموعة.":"For example: Has anyone used this doctor or product? Ask in a private group."}</span></span>
+    </Link>
     <h2 className="mt-7 mb-3 text-lg font-semibold">{ar?"كيف نساعدك اليوم؟":"What would you like to do?"}</h2>
     <div className="grid gap-3 sm:grid-cols-2">
       {shortcuts.map(({href,en,ar:arabic,Icon})=><Link key={href} to={href} className="card-soft flex items-center gap-3 p-4 font-medium hover:border-brand/40"><Icon className="size-5 text-brand"/>{ar?arabic:en}<ArrowRight className="ms-auto size-4 text-muted-foreground rtl:rotate-180"/></Link>)}

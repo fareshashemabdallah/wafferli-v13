@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, ListChecks, Receipt, ShoppingBag, Sparkles, Users, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, ListChecks, MessagesSquare, Receipt, ShoppingBag, Sparkles, Users, UtensilsCrossed } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AppShell, PilotBadge } from "@/components/AppShell";
 import { FamilyFinanceSnapshot } from "@/components/FamilyFinanceSnapshot";
@@ -43,6 +43,7 @@ function Index() {
 
   const shortcuts = [
     { to: "/explore/together" as const, label: t("planOuting"), icon: Users },
+    { to: "/community" as const, label: tr("Parents & friends groups"), icon: MessagesSquare },
     { to: "/money" as const, label: t("trackSpend"), icon: Receipt },
     { to: "/explore/shopping" as const, label: t("shopList"), icon: ListChecks },
     { to: "/explore/smartbuy" as const, label: t("smartBuy"), icon: ShoppingBag },
@@ -118,7 +119,7 @@ function Index() {
       <section className="card-soft mt-7 flex items-center justify-between gap-3 p-4">
         <div>
           <div className="flex items-center gap-2 font-medium">{tr("Personal pilot")} <PilotBadge>{tr("V13")}</PilotBadge></div>
-          <p className="text-sm text-muted-foreground">{tr("Your money data stays on this device. Only restaurant votes are shared.")}</p>
+          <p className="text-sm text-muted-foreground">{tr("Family budgets stay on this device. Votes and community conversations use separate online services.")}</p>
         </div>
         <Link to="/about" className="shrink-0 text-sm font-semibold text-brand underline-offset-4 hover:underline">{tr("Details")}</Link>
       </section>

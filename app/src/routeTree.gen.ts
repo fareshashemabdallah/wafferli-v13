@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdvisorRouteImport } from './routes/advisor'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as MoneyRouteImport } from './routes/money'
 import { Route as SpaceRouteImport } from './routes/space'
 import { Route as ExploreIndexRouteImport } from './routes/explore.index'
@@ -26,6 +27,11 @@ import { Route as VoteTokenRouteImport } from './routes/vote.$token'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdvisorRoute = AdvisorRouteImport.update({
@@ -91,6 +97,7 @@ const VoteTokenRoute = VoteTokenRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/advisor': typeof AdvisorRoute
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/advisor': typeof AdvisorRoute
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
@@ -122,6 +130,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/advisor': typeof AdvisorRoute
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/community'
     | '/advisor'
     | '/about'
     | '/money'
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/community'
     | '/advisor'
     | '/about'
     | '/money'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/community'
     | '/advisor'
     | '/about'
     | '/money'
@@ -185,6 +197,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CommunityRoute: typeof CommunityRoute
   AdvisorRoute: typeof AdvisorRoute
   AboutRoute: typeof AboutRoute
   MoneyRoute: typeof MoneyRoute
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/advisor': {
@@ -297,6 +317,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CommunityRoute: CommunityRoute,
   AdvisorRoute: AdvisorRoute,
   AboutRoute: AboutRoute,
   MoneyRoute: MoneyRoute,
