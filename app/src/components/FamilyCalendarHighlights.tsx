@@ -1,14 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, CalendarDays, Cake, ChevronRight, Gift, Heart, Plus, Sun } from "lucide-react";
 import { useMemo } from "react";
-import { dateKey,formatMomentDate,kindNames,nextJordanWeekend,shiftDays,upcomingMoments,type FamilyMoment } from "@/lib/familyCalendar";
+import { calendarWithMemberBirthdays,dateKey,formatMomentDate,kindNames,nextJordanWeekend,shiftDays,upcomingMoments,type FamilyMoment } from "@/lib/familyCalendar";
+import { sampleMembers,type Member } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
 import { useLocalState } from "@/lib/storage";
 
 export function FamilyCalendarHighlights() {
  const {lang}=useI18n();
  const ar=lang==="ar";
- const [events,,ready]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const [saved,,eventsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
+ const events=useMemo(()=>calendarWithMemberBirthdays(saved,members,lang),[saved,members,lang]);
+ const ready=eventsReady&&membersReady;
  const now=useMemo(()=>new Date(),[]);
  const today=dateKey(now);
  const upcoming=useMemo(()=>upcomingMoments(events,now,35).slice(0,3),[events,now]);
