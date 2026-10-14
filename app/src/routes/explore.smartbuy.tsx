@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ImagePlus, Plus, Receipt, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppShell, Notice } from "@/components/AppShell";
+import { PlanContextBanner } from "@/components/PlanContextBanner";
 import { Field, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/explore/smartbuy")({
   component: SmartBuy,
 });
 
-type Alt = { id: string; store: string; price: string; extra: string; verified: boolean };
+type Alt = { id: string; store: string; price: string; extra: string; verified: boolean; quality?: string; fit?: string; note?: string };
 
 function Photo({ label, icon: Icon }: { label: string; icon: typeof Receipt }) {
   const { tr } = useI18n();
@@ -39,11 +40,11 @@ function Photo({ label, icon: Icon }: { label: string; icon: typeof Receipt }) {
 function SmartBuy() {
   const { tr } = useI18n();
   const [s, setS] = useLocalState("smartbuy", {
-    product: "Winter jacket",
-    budget: "60",
+    product: "",
+    budget: "",
     alts: [
-      { id: "a1", store: "Mall store (example)", price: "55", extra: "3", verified: true },
-      { id: "a2", store: "Online shop (example)", price: "48", extra: "4", verified: false },
+      { id: "a1", store: "", price: "", extra: "", verified: false },
+      { id: "a2", store: "", price: "", extra: "", verified: false },
     ] as Alt[],
   });
   const budget = Number(s.budget) || 0;
@@ -54,6 +55,7 @@ function SmartBuy() {
 
   return (
     <AppShell title={tr("Compare & Choose")}>
+      <PlanContextBanner onUseBudget={amount=>setS(old=>({...old,budget:String(amount)}))}/>
       <div className="rounded-2xl bg-mint/60 p-4 text-sm text-ink">{tr("The lowest price is not always the best value. Consider quality, durability, convenience and support before choosing. This pilot compares your entered costs only.")}</div>
       <Notice>{tr("Enter prices you've seen yourself. Dabberna doesn't fetch live prices yet, so there are no automatic \"savings\" claims.")}</Notice>
       <div className="card-soft mt-4 grid gap-3 p-4 sm:grid-cols-2">
@@ -77,6 +79,27 @@ function SmartBuy() {
                 <input type="checkbox" checked={a.verified} onChange={(e) => setAlt(a.id, { verified: e.target.checked })} /> {tr(a.verified ? "Price I verified" : "Unverified price")}
               </label>
             </div>
+            <details className="group mt-3 rounded-xl bg-muted/40 p-3">
+              <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
+                <span>{tr("More than a price: assess this choice")}</span><span className="text-xs group-open:hidden">+</span><span className="hidden text-xs group-open:inline">−</span>
+              </summary>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-xs font-medium">{tr("Quality & durability (your view)")}
+                  <select value={a.quality??""} onChange={e=>setAlt(a.id,{quality:e.target.value})} className="mt-1 w-full rounded-xl border bg-card p-2.5">
+                    <option value="">{tr("Not assessed")}</option>{[1,2,3,4,5].map(n=><option key={n} value={String(n)}>{n}/5</option>)}
+                  </select>
+                </label>
+                <label className="text-xs font-medium">{tr("Fit for your needs (your view)")}
+                  <select value={a.fit??""} onChange={e=>setAlt(a.id,{fit:e.target.value})} className="mt-1 w-full rounded-xl border bg-card p-2.5">
+                    <option value="">{tr("Not assessed")}</option>{[1,2,3,4,5].map(n=><option key={n} value={String(n)}>{n}/5</option>)}
+                  </select>
+                </label>
+                <label className="text-xs font-medium sm:col-span-2">{tr("Why would you choose this?")}
+                  <Input className="mt-1" maxLength={150} value={a.note??""} onChange={e=>setAlt(a.id,{note:e.target.value})} placeholder={tr("Better quality, reliable warranty, convenient delivery…")}/>
+                </label>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">{tr("These are your personal judgments, not verified product ratings or live offers.")}</p>
+            </details>
           </div>
         ))}
         <Button variant="secondary" disabled={s.alts.length >= 8} onClick={() => setS({ ...s, alts: [...s.alts, { id: uid(), store: "", price: "", extra: "", verified: false }] })}><Plus className="size-4" /> {tr("Add alternative")}</Button>

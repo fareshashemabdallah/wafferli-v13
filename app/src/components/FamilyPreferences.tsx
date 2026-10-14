@@ -18,6 +18,14 @@ export function FamilyPreferences() {
   return <section className="card-soft mt-6 p-4" id="family-preferences">
     <h2 className="text-lg font-semibold">{ar?"تفضيلات العائلة":"Family preferences"}</h2>
     <p className="mt-1 text-sm text-muted-foreground">{ar?"اختاروا النصائح التي تظهر في الصفحة الرئيسية. هذه الإعدادات محفوظة على الجهاز فقط، ولا ترسل إشعارات هاتف حالياً.":"Choose what appears on your home screen. Preferences stay on this device; push notifications are not active."}</p>
+    <label className="mt-4 block text-sm font-medium">{ar?"هذه التجربة لمن؟":"Who are we planning for?"}
+      <select className="mt-1 w-full rounded-xl border border-border bg-card p-3" value={preferences.experienceMode??"auto"} onChange={e=>set("experienceMode",e.target.value as "auto"|"individual"|"family")}>
+       <option value="auto">{ar?"تلقائي حسب الملف الشخصي":"Adapt to my profile"}</option>
+       <option value="individual">{ar?"أنا كفرد":"Myself"}</option>
+       <option value="family">{ar?"عائلتي أو أسرتي":"My family / household"}</option>
+      </select>
+      <span className="mt-1 block text-xs font-normal text-muted-foreground">{ar?"يمكنك تغيير ذلك لاحقاً دون فقدان البيانات.":"You can change this without losing any saved information."}</span>
+    </label>
     <div className="mt-4 space-y-2">
       {interests.map(({key,en,ar:arabic,Icon})=><label key={key} className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-muted/40 p-3">
         <span className="flex items-center gap-3 text-sm font-medium"><Icon className="size-5 shrink-0 text-brand"/>{ar?arabic:en}</span>

@@ -1,12 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, CalendarDays, ListChecks, Receipt, ShoppingBag, Sparkles, Users, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, CloudSun, Sparkles } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { AppShell, PilotBadge } from "@/components/AppShell";
+import { AppShell } from "@/components/AppShell";
 import { FamilyFinanceSnapshot } from "@/components/FamilyFinanceSnapshot";
-import { FamilyCalendarHighlights } from "@/components/FamilyCalendarHighlights";
-import { OccasionPreview } from "@/components/OccasionPreview";
+import { HomeJourneyHighlights } from "@/components/HomeJourneyHighlights";
 import { FamilyWeather } from "@/components/FamilyWeather";
-import { FamilyInsights } from "@/components/FamilyInsights";
 import { defaultFamilyPreferences } from "@/lib/familyPreferences";
 import { useLocalState } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
@@ -42,51 +40,45 @@ function Index() {
     setQ("");
   };
 
-  const shortcuts = [
-    { to: "/explore/together" as const, label: t("planOuting"), icon: Users },
-    { to: "/money" as const, label: t("trackSpend"), icon: Receipt },
-    { to: "/explore/shopping" as const, label: t("shopList"), icon: ListChecks },
-    { to: "/explore/smartbuy" as const, label: t("smartBuy"), icon: ShoppingBag },
-    { to: "/explore/restaurants" as const, label: t("restaurants"), icon: UtensilsCrossed },
-  ];
-
   return (
     <AppShell>
       <section className="hero-surface rounded-3xl p-5 sm:p-7">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-semibold tracking-wider text-brand">{tr("Spend wisely. Live well.")}</p>
           <p className="text-xs text-muted-foreground">{new Intl.DateTimeFormat(lang==="ar"?"ar-JO":"en-US",{weekday:"long",day:"numeric",month:"short"}).format(new Date())}</p>
         </div>
-        <h1 className="mt-3 text-[1.7rem] font-semibold leading-snug text-ink sm:text-4xl">{t("greeting")} <span aria-hidden="true">☀️</span></h1>
-        <p className="mt-2 max-w-md text-sm text-[#5A7165]">{lang==="ar"?"نخطط للأوقات الجميلة، نهتم بالتفاصيل، ونختار ما يناسب عائلتنا.":"A thoughtful day starts with the little things that make family life better."}</p>
-        <Link to="/calendar" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/85 px-3 py-2.5 text-sm font-semibold text-brand shadow-sm transition hover:bg-white">
-          <CalendarDays className="size-4"/> {lang==="ar"?"أضف مناسبة عائلية":"Add a family occasion"} <ArrowRight className="size-4 rtl:rotate-180"/>
-        </Link>
+        <h1 className="mt-3 text-2xl font-semibold leading-snug text-ink sm:text-3xl">{lang==="ar"?"يوم أجمل، بقرارات أهدأ":"A little more life. A lot more ease."}</h1>
+        <p className="mt-2 max-w-md text-sm text-[#586F63]">{lang==="ar"?"مواعيدك وأفكارك وخياراتك المهمة، في مكان واحد دون ازدحام.":"Your moments, plans and thoughtful choices, all in one calm place."}</p>
       </section>
 
-      {prefs.weather && <FamilyWeather />}
-      <FamilyCalendarHighlights />
-      <OccasionPreview />
-      {prefs.notificationFrequency !== "off" && <FamilyInsights />}
+      <HomeJourneyHighlights />
       <FamilyFinanceSnapshot />
 
-      <section className="card-soft mt-5 p-4 sm:p-5">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-mint text-brand"><Sparkles className="size-5"/></span>
-          <div>
-            <h2 className="font-semibold">{lang==="ar"?"هل تحتاج إلى مساعدة في قرار؟":"Need a hand deciding?"}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{lang==="ar"?"اسأل عن الأنشطة أو المشتريات أو الميزانية وسنرشدك إلى القسم المناسب.":"Ask about an outing, a purchase or your budget and find the right tools."}</p>
-          </div>
-        </div>
+      {prefs.weather && <details className="group mt-4 rounded-2xl border border-border bg-card p-4">
+        <summary className="flex cursor-pointer list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
+          <span className="grid size-10 place-items-center rounded-xl bg-mint text-brand"><CloudSun className="size-5"/></span>
+          <span className="flex-1"><span className="block text-sm font-semibold">{lang==="ar"?"الطقس والاستعداد للخروج":"Weather & getting ready"}</span><span className="block text-xs text-muted-foreground">{lang==="ar"?"تفاصيل مفيدة فقط عندما تحتاجها":"Practical details whenever you need them"}</span></span>
+          <span className="text-xs font-semibold text-brand group-open:hidden">{lang==="ar"?"عرض":"View"} +</span>
+          <span className="hidden text-xs font-semibold text-brand group-open:block">{lang==="ar"?"إخفاء":"Hide"} −</span>
+        </summary>
+        <FamilyWeather />
+      </details>}
+
+      <details className="group mt-5 rounded-2xl border border-border bg-white p-4 sm:p-5">
+        <summary className="flex cursor-pointer list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
+          <span className="grid size-10 place-items-center rounded-xl bg-mint text-brand"><Sparkles className="size-5"/></span>
+          <span className="flex-1"><span className="block text-sm font-semibold">{lang==="ar"?"لست متأكدًا من أين تبدأ؟":"Not sure where to begin?"}</span><span className="block text-xs text-muted-foreground">{lang==="ar"?"صف ما تحتاجه وسنوجّهك للقسم المناسب":"Describe your goal and we'll find the right tool"}</span></span>
+          <span className="text-xs font-semibold text-brand group-open:hidden">{lang==="ar"?"اسأل":"Ask"} +</span>
+          <span className="hidden text-xs font-semibold text-brand group-open:block">{lang==="ar"?"إغلاق":"Close"} −</span>
+        </summary>
         <form onSubmit={submit} className="mt-4 flex gap-2 rounded-2xl border border-border bg-background p-1.5">
           <label htmlFor="ask" className="sr-only">{t("ask")}</label>
-          <input id="ask" value={q} onChange={e=>setQ(e.target.value)}
-            maxLength={200} placeholder={t("askPh")}
-            className="min-w-0 flex-1 bg-transparent px-3 text-ink outline-none placeholder:text-muted-foreground"/>
+          <input id="ask" value={q} onChange={e=>setQ(e.target.value)} maxLength={200}
+            placeholder={t("askPh")} className="min-w-0 flex-1 bg-transparent px-3 text-ink outline-none placeholder:text-muted-foreground"/>
           <Button type="submit" size="lg" className="rounded-xl">{t("ask")}</Button>
         </form>
         <p className="mt-2 text-xs text-muted-foreground">{t("routerNote")}</p>
-      </section>
+      </details>
 
       {msgs.length > 0 && (
         <section className="mt-5 space-y-3" aria-live="polite">
@@ -111,28 +103,7 @@ function Index() {
         </section>
       )}
 
-      <section className="mt-7">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">{t("shortcuts")}</h2>
-          <Link to="/explore/services" className="text-sm font-semibold text-brand">{tr("Find the Right Service")} ↗</Link>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {shortcuts.map(({ to, label, icon: Icon }) => (
-            <Link key={to} to={to} className="card-soft flex min-h-24 flex-col justify-between p-4 transition hover:-translate-y-0.5">
-              <span className="grid size-10 place-items-center rounded-xl bg-mint text-brand"><Icon className="size-5" /></span>
-              <span className="font-medium">{label}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="card-soft mt-7 flex items-center justify-between gap-3 p-4">
-        <div>
-          <div className="flex items-center gap-2 font-medium">{tr("Personal pilot")} <PilotBadge>{tr("V13")}</PilotBadge></div>
-          <p className="text-sm text-muted-foreground">{tr("Financial details stay on this device. Circle messages, experiences and outing votes are shared only when you choose.")}</p>
-        </div>
-        <Link to="/about" className="shrink-0 text-sm font-semibold text-brand underline-offset-4 hover:underline">{tr("Details")}</Link>
-      </section>
+      <p className="mt-7 text-center text-xs text-muted-foreground">{lang==="ar"?"بياناتك المالية ومناسباتك على هذا الجهاز فقط.":"Financial and family dates remain on this device."} <Link to="/about" className="font-semibold text-brand underline underline-offset-2">{lang==="ar"?"كيف نعمل؟":"How it works"}</Link></p>
     </AppShell>
   );
 }

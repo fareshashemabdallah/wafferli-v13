@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ExternalLink, Search, ShieldAlert, Stethoscope } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
+import { PlanContextBanner } from "@/components/PlanContextBanner";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,7 @@ function Services() {
     setUrl("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q));
   };
   return <AppShell title={ar?"اختَر الخدمة الأنسب":"Find the Right Service"}>
+    <PlanContextBanner/>
     <div className="rounded-3xl bg-mint/70 p-5">
       <div className="flex items-center gap-3">
         <Stethoscope className="size-7 text-brand"/>
