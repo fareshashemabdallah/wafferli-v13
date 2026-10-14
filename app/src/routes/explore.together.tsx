@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Plus, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
@@ -54,6 +55,7 @@ const focusNames: Record<ChildFocus,string> = {
 };
 
 function TogetherPage() {
+  const { tr } = useI18n();
   const navigate = useNavigate();
   const [saved, setSaved] = useLocalState<SavedOuting[]>("outings", []);
   const [f, setF] = useState({ title: "Our outing", event_at: "", neighborhood: "Amman", friends: "6", organizer: "", whoPays: "later", activity:"other" as ActivityType });
@@ -138,17 +140,17 @@ function TogetherPage() {
   };
 
   return (
-    <AppShell title="Dabberna Together">
-      <Notice>Plan <strong>any outing</strong> — a café, cinema, kids' activity, park, game or day trip. Consider children before choosing options. The vote works without an account. Safety, age restrictions and prices must be checked with each venue.</Notice>
+    <AppShell title={tr("Dabberna Together")}>
+      <Notice>{tr("Plan")} <strong>{tr("any outing")}</strong> {tr("— a café, cinema, kids' activity, park, game or day trip. Consider children before choosing options. The vote works without an account. Safety, age restrictions and prices must be checked with each venue.")}</Notice>
 
       {saved.length > 0 && (
         <section className="card-soft mt-4 p-4">
-          <h2 className="font-semibold">Your outings</h2>
+          <h2 className="font-semibold">{tr("Your outings")}</h2>
           <ul className="mt-2 divide-y">
             {saved.map((o) => (
               <li key={o.admin_token} className="flex items-center justify-between py-2 text-sm">
                 <span className="truncate">{o.title}</span>
-                <Link to="/together/$adminToken" params={{ adminToken: o.admin_token }} className="font-semibold text-brand">Results →</Link>
+                <Link to="/together/$adminToken" params={{ adminToken: o.admin_token }} className="font-semibold text-brand">{tr("Results →")}</Link>
               </li>
             ))}
           </ul>
@@ -156,40 +158,40 @@ function TogetherPage() {
       )}
 
       <form onSubmit={submit} className="card-soft mt-4 grid gap-4 p-4 sm:grid-cols-2">
-        <Field label="Outing name"><Input className={inputCls} maxLength={80} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
-        <Field label="What kind of outing?">
+        <Field label={tr("Outing name")}><Input className={inputCls} maxLength={80} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
+        <Field label={tr("What kind of outing?")}>
           <NativeSelect value={f.activity} onChange={e=>setF({ ...f, activity: e.target.value as ActivityType })}>
             {(Object.keys(activityTypes) as ActivityType[]).map(key=><option key={key} value={key}>{activityTypes[key].label}</option>)}
           </NativeSelect>
         </Field>
-        <Field label="Date & time"><Input className={inputCls} type="datetime-local" value={f.event_at} onChange={(e) => setF({ ...f, event_at: e.target.value })} /></Field>
-        <Field label="Neighborhood"><Input className={inputCls} maxLength={60} value={f.neighborhood} onChange={(e) => setF({ ...f, neighborhood: e.target.value })} /></Field>
-        <Field label="Number of voters (2–30)" hint="People expected to vote; children do not need their own accounts">
+        <Field label={tr("Date & time")}><Input className={inputCls} type="datetime-local" value={f.event_at} onChange={(e) => setF({ ...f, event_at: e.target.value })} /></Field>
+        <Field label={tr("Neighborhood")}><Input className={inputCls} maxLength={60} value={f.neighborhood} onChange={(e) => setF({ ...f, neighborhood: e.target.value })} /></Field>
+        <Field label={tr("Number of voters (2–30)")} hint={tr("People expected to vote; children do not need their own accounts")}>
           <Input className={inputCls} inputMode="numeric" value={f.friends} onChange={(e) => setF({ ...f, friends: e.target.value })} />
         </Field>
-        <Field label="Your display name (optional)" hint="Shown to friends"><Input className={inputCls} maxLength={40} value={f.organizer} onChange={(e) => setF({ ...f, organizer: e.target.value })} /></Field>
-         <section className="sm:col-span-2 space-y-3 rounded-2xl border bg-muted/30 p-4" aria-label="Children joining the outing">
-          <h2 className="font-semibold">Are children joining? · هل الأطفال معنا؟</h2>
-          <Field label="Children attending">
+        <Field label={tr("Your display name (optional)")} hint={tr("Shown to friends")}><Input className={inputCls} maxLength={40} value={f.organizer} onChange={(e) => setF({ ...f, organizer: e.target.value })} /></Field>
+         <section className="sm:col-span-2 space-y-3 rounded-2xl border bg-muted/30 p-4" aria-label={tr("Children joining the outing")}>
+          <h2 className="font-semibold">{tr("Are children joining? · هل الأطفال معنا؟")}</h2>
+          <Field label={tr("Children attending")}>
             <NativeSelect value={children} onChange={e=>setChildren(e.target.value as ChildAttendance)}>
-              <option value="no">No — adults only</option>
-              <option value="yes">Yes — children are coming</option>
-              <option value="unsure">Not sure yet</option>
+              <option value="no">{tr("No — adults only")}</option>
+              <option value="yes">{tr("Yes — children are coming")}</option>
+              <option value="unsure">{tr("Not sure yet")}</option>
             </NativeSelect>
           </Field>
           {children === "yes" && <>
-            <Field label="Who is this outing mainly for?">
+            <Field label={tr("Who is this outing mainly for?")}>
               <NativeSelect value={childFocus} onChange={e=>setChildFocus(e.target.value as ChildFocus)}>
-                <option value="children">Children-focused — kids' enjoyment comes first</option>
-                <option value="mixed">Family / mixed — suitable for adults and children</option>
-                <option value="adults">Adult-focused — but children will be present</option>
+                <option value="children">{tr("Children-focused — kids' enjoyment comes first")}</option>
+                <option value="mixed">{tr("Family / mixed — suitable for adults and children")}</option>
+                <option value="adults">{tr("Adult-focused — but children will be present")}</option>
               </NativeSelect>
             </Field>
-            <Field label="Approximate number of children" hint="Planning estimate; no children's names are collected">
+            <Field label={tr("Approximate number of children")} hint={tr("Planning estimate; no children's names are collected")}>
               <Input className={inputCls} inputMode="numeric" value={childCount} onChange={e=>setChildCount(e.target.value)} />
             </Field>
             <div>
-              <p className="mb-2 text-sm font-medium">Children's age groups (optional)</p>
+              <p className="mb-2 text-sm font-medium">{tr("Children's age groups (optional)")}</p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {ages.map(group=><label key={group.value} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" checked={ageBands.includes(group.value)} onChange={e=>setAgeBands(old=>e.target.checked ? [...old,group.value] : old.filter(v=>v!==group.value))} />
@@ -198,8 +200,8 @@ function TogetherPage() {
               </div>
             </div>
             <div className="grid gap-2">
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={stroller} onChange={e=>setStroller(e.target.checked)} /> Stroller or step-free access needed</label>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={quiet} onChange={e=>setQuiet(e.target.checked)} /> Prefer quiet / low-noise environments</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={stroller} onChange={e=>setStroller(e.target.checked)} /> {tr("Stroller or step-free access needed")}</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={quiet} onChange={e=>setQuiet(e.target.checked)} /> {tr("Prefer quiet / low-noise environments")}</label>
             </div>
             <p className="rounded-xl bg-card p-3 text-xs text-muted-foreground">
               <strong>{focusNames[childFocus]}.</strong> Check child admission and age limits, smoking exposure, safe facilities, travel time, suitable food and the children's cost.
@@ -207,49 +209,47 @@ function TogetherPage() {
               {" "}Dabberna does not independently verify venue safety.
             </p>
           </>}
-          {children === "unsure" && <p className="text-xs text-muted-foreground">Do not finalize adults-only or age-restricted options until attendance is confirmed.</p>}
+          {children === "unsure" && <p className="text-xs text-muted-foreground">{tr("Do not finalize adults-only or age-restricted options until attendance is confirmed.")}</p>}
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={shareTheme} onChange={e=>setShareTheme(e.target.checked)} />
-            Include a general family/kids label in the shared outing title
-          </label>
-          <p className="text-xs text-muted-foreground">Counts, age groups and preferences remain only in your organizer notes on this device. Only a general label is shared when selected.</p>
+            <input type="checkbox" checked={shareTheme} onChange={e=>setShareTheme(e.target.checked)} /> {tr("Include a general family/kids label in the shared outing title")} </label>
+          <p className="text-xs text-muted-foreground">{tr("Counts, age groups and preferences remain only in your organizer notes on this device. Only a general label is shared when selected.")}</p>
         </section>
-        <section className="sm:col-span-2 space-y-3 rounded-2xl border bg-card p-4" aria-label="Outing cost calculator">
+        <section className="sm:col-span-2 space-y-3 rounded-2xl border bg-card p-4" aria-label={tr("Outing cost calculator")}>
           <div>
-            <h2 className="font-semibold">Outing budget calculator · ميزانية الطلعة</h2>
+            <h2 className="font-semibold">{tr("Outing budget calculator · ميزانية الطلعة")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               Private estimates in Jordanian dinars (JOD). Adult and child prices are separate; do not assume children pay adult prices.
               Leave a price blank if unknown, or enter 0 for free admission.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Adults attending" hint="Separate from number of voters">
+            <Field label={tr("Adults attending")} hint={tr("Separate from number of voters")}>
               <Input className={inputCls} type="number" inputMode="numeric" min="1" max="30" step="1"
                 value={cost.adults} onChange={e=>updateCost("adults",e.target.value)} />
             </Field>
-            <Field label="Estimated cost per adult (JOD)" hint="Entry, food or activity for one adult">
+            <Field label={tr("Estimated cost per adult (JOD)")} hint={tr("Entry, food or activity for one adult")}>
               <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
-                placeholder="e.g. 20" value={cost.adultRate} onChange={e=>updateCost("adultRate",e.target.value)} />
+                placeholder={tr("e.g. 20")} value={cost.adultRate} onChange={e=>updateCost("adultRate",e.target.value)} />
             </Field>
-            {children === "yes" && <Field label="Estimated cost per child (JOD)" hint="Enter 0 if children enter free; check age-based discounts">
+            {children === "yes" && <Field label={tr("Estimated cost per child (JOD)")} hint={tr("Enter 0 if children enter free; check age-based discounts")}>
               <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
-                placeholder="e.g. 10" value={cost.childRate} onChange={e=>updateCost("childRate",e.target.value)} />
+                placeholder={tr("e.g. 10")} value={cost.childRate} onChange={e=>updateCost("childRate",e.target.value)} />
             </Field>}
-            <Field label="Transport for the whole group (JOD)" hint="Total cost, not per person">
+            <Field label={tr("Transport for the whole group (JOD)")} hint={tr("Total cost, not per person")}>
               <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
-                placeholder="e.g. 8" value={cost.transport} onChange={e=>updateCost("transport",e.target.value)} />
+                placeholder={tr("e.g. 8")} value={cost.transport} onChange={e=>updateCost("transport",e.target.value)} />
             </Field>
-            <Field label="Other shared costs (JOD)" hint="Parking, equipment, babysitting, extras, etc.">
+            <Field label={tr("Other shared costs (JOD)")} hint={tr("Parking, equipment, babysitting, extras, etc.")}>
               <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
-                placeholder="e.g. 5" value={cost.extras} onChange={e=>updateCost("extras",e.target.value)} />
+                placeholder={tr("e.g. 5")} value={cost.extras} onChange={e=>updateCost("extras",e.target.value)} />
             </Field>
-            <Field label="Maximum budget for entire outing (JOD)" hint="Optional spending limit for everyone together">
+            <Field label={tr("Maximum budget for entire outing (JOD)")} hint={tr("Optional spending limit for everyone together")}>
               <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
-                placeholder="e.g. 100" value={cost.maximum} onChange={e=>updateCost("maximum",e.target.value)} />
+                placeholder={tr("e.g. 100")} value={cost.maximum} onChange={e=>updateCost("maximum",e.target.value)} />
             </Field>
           </div>
           <div className="rounded-2xl bg-muted p-4" aria-live="polite">
-            <h3 className="font-semibold">Estimated cost for the whole outing</h3>
+            <h3 className="font-semibold">{tr("Estimated cost for the whole outing")}</h3>
             <div className="mt-2 space-y-1 text-sm">
               <div className="flex justify-between gap-2">
                 <span>Adults ({estimate.adults ?? "?"})</span>
@@ -259,56 +259,48 @@ function TogetherPage() {
                 <span>Children ({estimate.children ?? "?"})</span>
                 <span className="font-semibold">{estimate.childSubtotal !== null ? formatJod(estimate.childSubtotal) : "Price needed"}</span>
               </div>}
-              <div className="flex justify-between gap-2"><span>Transport + other shared costs</span>
+              <div className="flex justify-between gap-2"><span>{tr("Transport + other shared costs")}</span>
                 <span>{estimate.transport !== null && estimate.extras !== null ? formatJod(estimate.transport + estimate.extras) : "Check amounts"}</span>
               </div>
             </div>
             <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 border-t pt-3">
-              <strong>Estimated total</strong>
+              <strong>{tr("Estimated total")}</strong>
               <strong className="text-xl">{estimate.estimatedTotal !== null ? formatJod(estimate.estimatedTotal) : "Not available yet"}</strong>
             </div>
-            {children === "unsure" && <p className="mt-2 text-xs text-muted-foreground">
-              Children may join: the final total remains unknown until attendance and children's costs are confirmed.
-            </p>}
-            {children === "yes" && estimate.childRate === null && <p className="mt-2 text-xs text-muted-foreground">
-              Please enter an estimated child price (0 if free) to calculate the full group total.
-            </p>}
-            {estimate.adultRate === null && <p className="mt-2 text-xs text-muted-foreground">
-              Enter the estimated adult price to calculate the full group total.
-            </p>}
+            {children === "unsure" && <p className="mt-2 text-xs text-muted-foreground"> {tr("Children may join: the final total remains unknown until attendance and children's costs are confirmed.")} </p>}
+            {children === "yes" && estimate.childRate === null && <p className="mt-2 text-xs text-muted-foreground"> {tr("Please enter an estimated child price (0 if free) to calculate the full group total.")} </p>}
+            {estimate.adultRate === null && <p className="mt-2 text-xs text-muted-foreground"> {tr("Enter the estimated adult price to calculate the full group total.")} </p>}
             {estimate.remaining !== null && <p className={"mt-3 font-semibold " + (estimate.remaining >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-destructive")}>
               {estimate.remaining >= 0 ? "Within budget — " + formatJod(estimate.remaining) + " remaining" : "Over budget by " + formatJod(-estimate.remaining)}
             </p>}
-            <p className="mt-3 text-xs text-muted-foreground">
-              Planning estimate only. Actual venue prices, taxes, tips, transport and child discounts may differ. Blank optional extras are treated as 0.
-            </p>
+            <p className="mt-3 text-xs text-muted-foreground"> {tr("Planning estimate only. Actual venue prices, taxes, tips, transport and child discounts may differ. Blank optional extras are treated as 0.")} </p>
           </div>
         </section>
         <div className="sm:col-span-2 rounded-xl border p-3 text-sm">
-          <div className="font-medium">Find activity ideas</div>
-          <p className="mt-1 text-xs text-muted-foreground">Opens Google Maps with your outing type and general family focus. This is not yet an AI recommendation or a verified safety search.</p>
+          <div className="font-medium">{tr("Find activity ideas")}</div>
+          <p className="mt-1 text-xs text-muted-foreground">{tr("Opens Google Maps with your outing type and general family focus. This is not yet an AI recommendation or a verified safety search.")}</p>
           <a href={googleActivitiesLink} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center rounded-lg border px-3 py-2 font-semibold text-brand underline-offset-4 hover:underline">
             Search {children === "yes" ? "suitable family activities" : "activities"} near {f.neighborhood || "Amman"} ↗
           </a>
         </div>
-        <Field label="Who pays (private note)" hint="Not shown in the vote">
+        <Field label={tr("Who pays (private note)")} hint={tr("Not shown in the vote")}>
           <NativeSelect value={f.whoPays} onChange={(e) => setF({ ...f, whoPays: e.target.value })}>
-            <option value="later">Decide later</option><option value="equal">Equal split</option>
-            <option value="separate">Everyone pays their own</option><option value="host">Host pays</option>
+            <option value="later">{tr("Decide later")}</option><option value="equal">{tr("Equal split")}</option>
+            <option value="separate">{tr("Everyone pays their own")}</option><option value="host">{tr("Host pays")}</option>
           </NativeSelect>
         </Field>
 
         <div className="sm:col-span-2">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold">Venues or activities to vote on ({opts.length}/10)</h2>
-            <Button type="button" size="sm" variant="secondary" disabled={opts.length >= 10} onClick={() => setOpts([...opts, { name: "", note: "" }])}><Plus className="size-4" /> Add</Button>
+            <Button type="button" size="sm" variant="secondary" disabled={opts.length >= 10} onClick={() => setOpts([...opts, { name: "", note: "" }])}><Plus className="size-4" /> {tr("Add")}</Button>
           </div>
           <ol className="mt-2 space-y-2">
             {opts.map((o, i) => (
               <li key={i} className="flex gap-2 rounded-xl bg-muted p-2">
                 <div className="grid flex-1 gap-2">
                   <Input aria-label={`Option ${i + 1} name`} className={inputCls} maxLength={80} value={o.name} placeholder={`Option ${i + 1}`} onChange={(e) => setOpts(opts.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
-                  <Input aria-label={`Option ${i + 1} note`} className="h-10 bg-card" maxLength={160} value={o.note} placeholder="Short note (optional)" onChange={(e) => setOpts(opts.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} />
+                  <Input aria-label={`Option ${i + 1} note`} className="h-10 bg-card" maxLength={160} value={o.note} placeholder={tr("Short note (optional)")} onChange={(e) => setOpts(opts.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} />
                 </div>
                 <Button type="button" size="icon" variant="ghost" aria-label={`Remove option ${i + 1}`} disabled={opts.length <= 3} onClick={() => setOpts(opts.filter((_, j) => j !== i))}><Trash2 className="size-4" /></Button>
               </li>
