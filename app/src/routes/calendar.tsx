@@ -4,7 +4,8 @@ import { useMemo, useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { dateKey,formatMomentDate,kindNames,monthCells,occurrencesForDate,parseCalendarDate,upcomingMoments,type FamilyMoment,type MomentKind } from "@/lib/familyCalendar";
+import { calendarWithMemberBirthdays,dateKey,formatMomentDate,kindNames,monthCells,occurrencesForDate,parseCalendarDate,upcomingMoments,type FamilyMoment,type MomentKind } from "@/lib/familyCalendar";
+import { sampleMembers,type Member } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
 import { uid,useLocalState } from "@/lib/storage";
 
@@ -18,15 +19,18 @@ function FamilyCalendarPage(){
  const {lang}=useI18n(),ar=lang==="ar";
  const today=useMemo(()=>new Date(),[]);
  const todayKey=dateKey(today);
- const [events,setEvents,ready]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const [events,setEvents,eventsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
+ const ready=eventsReady&&membersReady;
+ const allMoments=useMemo(()=>calendarWithMemberBirthdays(events,members,lang),[events,members,lang]);
  const [month,setMonth]=useState(()=>new Date(today.getFullYear(),today.getMonth(),1,12));
  const [selected,setSelected]=useState(todayKey);
  const [editing,setEditing]=useState(false);
  const [form,setForm]=useState<Draft>(()=>blank(todayKey));
  const [error,setError]=useState("");
  const cells=useMemo(()=>monthCells(month.getFullYear(),month.getMonth()),[month]);
- const chosen=useMemo(()=>occurrencesForDate(events,selected),[events,selected]);
- const upcoming=useMemo(()=>upcomingMoments(events,today,60).slice(0,8),[events,today]);
+ const chosen=useMemo(()=>occurrencesForDate(allMoments,selected),[allMoments,selected]);
+ const upcoming=useMemo(()=>upcomingMoments(allMoments,today,60).slice(0,8),[allMoments,today]);
  const move=(delta:number)=>setMonth(d=>new Date(d.getFullYear(),d.getMonth()+delta,1,12));
  const monthLabel=new Intl.DateTimeFormat(ar?"ar-JO":"en-US",{month:"long",year:"numeric"}).format(month);
  const weekNames=Array.from({length:7},(_,i)=>new Intl.DateTimeFormat(ar?"ar-JO":"en-US",{weekday:"short"}).format(new Date(2026,9,12+i,12)));
@@ -66,7 +70,7 @@ function FamilyCalendarPage(){
    <div className="mt-4 grid grid-cols-7 gap-1 text-center">
     {weekNames.map((s,i)=><span key={i} className="py-2 text-[11px] font-medium text-muted-foreground">{s}</span>)}
     {cells.map(cell=>{
-     const has=occurrencesForDate(events,cell.date).length>0;
+     const has=occurrencesForDate(allMoments,cell.date).length>0;
      const current=cell.date===todayKey,chosenDay=selected===cell.date;
      return <button key={cell.date} type="button" onClick={()=>setSelected(cell.date)}
        aria-label={localeDate(cell.date)} aria-pressed={chosenDay}
@@ -91,8 +95,10 @@ function FamilyCalendarPage(){
    <div className="mt-3 space-y-2">{chosen.length===0?<p className="rounded-xl bg-muted/40 p-3 text-sm text-muted-foreground">{ar?"لا توجد مناسبات مسجّلة لهذا اليوم.":"No occasions saved for this day yet."}</p>:chosen.map(item=><div key={item.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
     <span className={"grid size-9 shrink-0 place-items-center rounded-xl "+kindColor(item.kind)}>{item.kind==="birthday"?<Cake className="size-4"/>:item.kind==="celebration"?<Heart className="size-4"/>:<CalendarDays className="size-4"/>}</span>
     <div className="min-w-0 flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">{kindNames[item.kind][ar?"ar":"en"]}{item.time?" · "+item.time:""}{item.annual?" · "+(ar?"سنوي":"Yearly"):""}</p>{item.note&&<p className="mt-1 break-words text-xs text-muted-foreground">{item.note}</p>}</div>
+    {item.source==="member" ? <Link to="/space" className="shrink-0 rounded-xl bg-mint px-3 py-2 text-xs font-semibold text-brand">{ar?"تعديل في العائلة":"Edit in My Family"}</Link> : <>
     <button type="button" onClick={()=>startEdit(item)} aria-label={ar?"تعديل":"Edit"} className="rounded-lg p-2 text-brand hover:bg-mint"><Pencil className="size-4"/></button>
     <button type="button" onClick={()=>remove(item)} aria-label={ar?"حذف":"Delete"} className="rounded-lg p-2 text-destructive hover:bg-muted"><Trash2 className="size-4"/></button>
+    </>}
    </div>)}</div>
   </section>
   {editing&&<form onSubmit={save} className="card-soft mt-4 space-y-3 p-4 sm:p-5">
@@ -125,13 +131,13 @@ function FamilyCalendarPage(){
   </form>}
   <section className="mt-6">
    <h2 className="text-lg font-semibold">{ar?"قريباً في تقويمنا":"Coming up for your family"}</h2>
-   {!ready?<p className="mt-2 text-sm text-muted-foreground">{ar?"جارٍ تحميل المناسبات...":"Loading saved occasions…"}</p>:upcoming.length===0?<p className="mt-2 rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{ar?"عندما تضيف مناسبات، ستظهر هنا وعلى الصفحة الرئيسية.":"Once you add occasions, they'll appear here and on My Day."}</p>
+   {!ready?<p className="mt-2 text-sm text-muted-foreground">{ar?"جارٍ تحميل المناسبات...":"Loading saved occasions…"}</p>:upcoming.length===0?<p className="mt-2 rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{ar?"أضف تواريخ الميلاد والمناسبات في عائلتي أو في التقويم لتظهر في يومي.":"Add family birthdays or occasions in My Family or directly here to see them on My Day."}</p>
    :<div className="mt-3 space-y-2">{upcoming.map(item=><div key={item.id+item.occursOn} className="card-soft flex items-center gap-3 p-3">
     <Gift className="size-5 shrink-0 text-brand"/><div className="flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">{formatMomentDate(item.occursOn,ar)} · {kindNames[item.kind][ar?"ar":"en"]}</p></div>
    </div>)}</div>}
   </section>
   <div className="mt-5 rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
-   {ar?"هذا التقويم خاص بهذا المتصفح فقط ولا تتم مزامنته بين أفراد العائلة بعد. العطل الرسمية لا تُضاف تلقائيًا؛ أضفها يدويًا. لا تُرسل تذكيرات تلقائية أو إشعارات خارج التطبيق. بالنسبة لميلاد 29 فبراير، تظهر الذكرى فقط في السنوات الكبيسة.":"This calendar is private to this browser, not yet shared across family members. Public holidays must be entered manually. There are no background reminders or push notifications. A 29 February birthday appears only in leap years."}
+   {ar?"ترتبط أعياد الميلاد تلقائيًا بملفات أفراد العائلة. التقويم محفوظ في هذا المتصفح فقط ولا تتم مزامنته بين أفراد العائلة بعد. العطل الرسمية لا تُضاف تلقائيًا؛ أضفها يدويًا. لا تُرسل تذكيرات تلقائية أو إشعارات خارج التطبيق. بالنسبة لميلاد 29 فبراير، تظهر الذكرى فقط في السنوات الكبيسة.":"Family member birthdays are linked automatically to My Family profiles. This calendar stays on this browser, not yet shared across family members. Public holidays must be entered manually. There are no background reminders or push notifications. A 29 February birthday appears only in leap years."}
   </div>
   <Link to="/" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand">{ar?<ArrowRight className="size-4"/>:<ArrowLeft className="size-4"/>}{ar?"العودة إلى يومي":"Back to My Day"}</Link>
  </AppShell>;
