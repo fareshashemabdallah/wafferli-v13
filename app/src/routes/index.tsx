@@ -42,13 +42,13 @@ function Index() {
 
   return (
     <AppShell>
-      <section className="hero-surface rounded-3xl p-5 sm:p-7">
+      <section className="hero-surface rounded-3xl p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-semibold tracking-wider text-brand">{tr("Spend wisely. Live well.")}</p>
           <p className="text-xs text-muted-foreground">{new Intl.DateTimeFormat(lang==="ar"?"ar-JO":"en-US",{weekday:"long",day:"numeric",month:"short"}).format(new Date())}</p>
         </div>
-        <h1 className="mt-3 text-2xl font-semibold leading-snug text-ink sm:text-3xl">{lang==="ar"?"يوم أجمل، بقرارات أهدأ":"A little more life. A lot more ease."}</h1>
-        <p className="mt-2 max-w-md text-sm text-[#586F63]">{lang==="ar"?"مواعيدك وأفكارك وخياراتك المهمة، في مكان واحد دون ازدحام.":"Your moments, plans and thoughtful choices, all in one calm place."}</p>
+        <h1 className="mt-2 text-2xl font-semibold leading-snug text-ink sm:text-3xl">{lang==="ar"?"شو حابّين تعملوا اليوم؟":"What matters today?"}</h1>
+        <p className="mt-2 max-w-md text-sm text-[#586F63]">{lang==="ar"?"مكان واحد لخططك وخياراتك اليومية.":"A simple home for everyday plans and decisions."}</p>
       </section>
 
       <HomeJourneyHighlights />
