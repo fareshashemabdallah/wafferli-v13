@@ -2,6 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Copy, HeartHandshake, MessageCircle, Send, ShieldAlert, Users } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
+import { PlanContextBanner } from "@/components/PlanContextBanner";
+import {activeDecisionKey,activeJourney,type DecisionJourney} from "@/lib/decisionJourney";
+import {useLocalState} from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { communityDb as db, type Group, type ChatMessage, type GroupMember } from "@/lib/community";
@@ -14,6 +17,8 @@ export const Route = createFileRoute("/community")({
 });
 function Community(){
  const {lang}=useI18n(); const ar=lang==="ar";
+ const [savedDecision]=useLocalState<DecisionJourney|null>(activeDecisionKey,null);
+ const linkedOccasion=activeJourney(savedDecision);
  const [user,setUser]=useState<User|null>(null),[loading,setLoading]=useState(true);
  const [email,setEmail]=useState(""),[name,setName]=useState(""),[newName,setNewName]=useState(""),[desc,setDesc]=useState("");
  const [invite,setInvite]=useState(""),[groups,setGroups]=useState<Group[]>([]),[members,setMembers]=useState<GroupMember[]>([]);
@@ -69,6 +74,7 @@ function Community(){
    <div className="flex items-center gap-3"><HeartHandshake className="size-7 text-brand"/><h2 className="text-xl font-semibold">{ar?"مجتمعك الموثوق، باختيارك":"Your own trusted circle"}</h2></div>
    <p className="mt-2 text-sm">{ar?"أنشئ مجموعة خاصة لأهالي المدرسة أو الأصدقاء، ادعُ من تشاء، وتبادل الأسئلة والخبرات عن النزهات والخدمات.":"Create a private group for school parents or friends, invite people you trust and discuss outings, advice and everyday questions."}</p>
   </div>
+  <div className="mt-4"><PlanContextBanner/></div>
   <div className="mt-4 rounded-xl border bg-muted/40 p-3 text-xs text-muted-foreground"><ShieldAlert className="me-2 inline size-4"/>{ar?"المحادثات لأعضاء المجموعة فقط. لا تشارك بيانات أطفال حساسة أو معلومات مالية أو صحية.":"Group chats are visible only to members. Avoid private child, financial, or health details. Invites are bearer links: share them thoughtfully."}</div>
   {loading?<p className="mt-4">{ar?"جارٍ التحميل...":"Loading…"}</p>:!user?
    <form onSubmit={signIn} className="card-soft mt-4 space-y-3 p-5">
@@ -117,6 +123,12 @@ function Community(){
      </div>)}
     </div>
     <form onSubmit={send} className="space-y-2">
+     {linkedOccasion&&<div className="rounded-xl border border-[#D7E4D5] bg-[#F5F9F2] p-3">
+      <p className="text-xs text-muted-foreground">{ar?"لن تُشارك المناسبة إلا إذا اخترت إضافتها ثم إرسال الرسالة.":"Your occasion is private unless you deliberately add it to a message and send it."}</p>
+      <button type="button" className="mt-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-brand" onClick={()=>{setContext(linkedOccasion.goal==="outing"?"outing":"advice");setTopic(linkedOccasion.occasionTitle.slice(0,120));}}>
+       {ar?"أضف المناسبة كموضوع للنقاش":"Use occasion as discussion topic"}
+      </button>
+     </div>
      <div className="grid gap-2 sm:grid-cols-2">
       <label className="text-xs">{ar?"نوع النقاش":"Discussion type"}<select className="mt-1 w-full rounded-xl border bg-card p-2" value={context} onChange={e=>setContext(e.target.value as typeof context)}><option value="general">{ar?"سؤال عام":"General"}</option><option value="outing">{ar?"نزهة":"Outing"}</option><option value="advice">{ar?"طلب توصية":"Advice request"}</option></select></label>
       <label className="text-xs">{ar?"عنوان الموضوع (اختياري)":"Topic (optional)"}<Input className="mt-1" maxLength={120} value={topic} onChange={e=>setTopic(e.target.value)}/></label>
