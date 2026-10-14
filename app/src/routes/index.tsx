@@ -75,9 +75,9 @@ function Index() {
               <div className="card-soft max-w-[90%] p-4">
                 {m.intent ? (
                   <>
-                    <p className="text-sm">{m.intent.reply}</p>
+                    <p className="text-sm">{tr(m.intent.reply)}</p>
                     <Button className="mt-3" onClick={() => navigate({ to: m.intent!.to })}>
-                      {m.intent.label} <ArrowRight className="size-4 rtl:rotate-180" />
+                      {tr(m.intent.label)} <ArrowRight className="size-4 rtl:rotate-180" />
                     </Button>
                   </>
                 ) : (
