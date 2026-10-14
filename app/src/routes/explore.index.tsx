@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ListChecks, ShoppingBag, Users, UtensilsCrossed } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -22,8 +23,9 @@ const items = [
 ];
 
 function Explore() {
+  const { tr } = useI18n();
   return (
-    <AppShell title="Explore">
+    <AppShell title={tr("Explore")}>
       <div className="grid gap-3 sm:grid-cols-2">
         {items.map(({ to, title, desc, icon: Icon, live }) => (
           <Link key={to} to={to} className="card-soft flex gap-4 p-4 transition hover:-translate-y-0.5">
