@@ -121,7 +121,7 @@ function TogetherPage() {
       setSaved((s) => [{ ...r, title: publicTitle, whoPays: f.whoPays,
         activity: f.activity, childrenAttendance: children,
         ...(children === "yes" ? { childrenFocus: childFocus, childCount: kids, ageBands, stroller, quiet } : {}),
-        adultCount: parseAttendees(cost.adults) ?? undefined,
+        adultCount: parseAttendees(cost.adults)!, 
         ...(cost.adultRate.trim() !== "" ? { adultCostPerPerson: parseJod(cost.adultRate)! } : {}),
         ...(children === "yes" && cost.childRate.trim() !== "" ? { childCostPerPerson: parseJod(cost.childRate)! } : {}),
         travelCost: optionalJod(cost.transport) ?? 0,
