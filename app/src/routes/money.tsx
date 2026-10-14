@@ -96,13 +96,14 @@ function MoneyPage() {
         members={members}
         expenses={s.expenses}
         onChange={(expenses) => upd({ expenses })}
-        onDelete={(expense)=>setS(previous=>({
-          ...previous,expenses:previous.expenses.filter(e=>e.id!==expense.id),
-          commitments:expense.billId && expense.dueDate?
-            (previous.commitments??[]).map(b=>b.id===expense.billId?{
-              ...b,paidDates:(b.paidDates??[]).filter(d=>d!==expense.dueDate)
-            }:b):previous.commitments
-        }))}
+        onDelete={(expense)=>setS(previous=>{
+          const expenses=previous.expenses.filter(e=>e.id!==expense.id);
+          if(!expense.billId || !expense.dueDate)return {...previous,expenses};
+          const commitments=(previous.commitments??[]).map(b=>b.id===expense.billId?{
+            ...b,paidDates:(b.paidDates??[]).filter(d=>d!==expense.dueDate)
+          }:b);
+          return {...previous,expenses,commitments};
+        })}
       />
     </AppShell>
   );
