@@ -25,8 +25,24 @@ export function memberBirthdayMoments(members: Member[], arabic = false): Family
       annual: true,
     }));
 }
+/** Normalize common English/Arabic birthday titles to suppress duplicates from older manual entries. */
+function birthdaySubject(title:string):string {
+  return title.trim().toLocaleLowerCase()
+    .replace(/[’']/g,"")
+    .replace(/^(birthday of |birthday: |عيد ميلاد\s+)/u,"")
+    .replace(/(s birthday| birthday|\s+عيد ميلاد)$/u,"")
+    .replace(/\s+/g," ").trim();
+}
 export function allFamilyMoments(events: FamilyMoment[], members: Member[], arabic = false): FamilyMoment[] {
-  return [...events, ...memberBirthdayMoments(members, arabic)];
+  const linked=memberBirthdayMoments(members, arabic);
+  // Keep historical user-authored notes in storage; only hide an overlapping manual
+  // birthday on the calendar when the profile already supplies that person's birthday.
+  const visible=events.filter(event=>!linked.some(member=>
+    event.kind==="birthday" &&
+    event.date.slice(5)===member.date.slice(5) &&
+    birthdaySubject(event.title)===birthdaySubject(member.title)
+  ));
+  return [...visible,...linked];
 }
 export function isMemberBirthday(item: FamilyMoment): boolean {
   return item.id.startsWith(memberBirthdayPrefix);
