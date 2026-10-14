@@ -1,5 +1,6 @@
 /** Device-only family occasions. Public holidays are not populated by a remote calendar. */
-export type MomentKind = "birthday" | "holiday" | "celebration" | "school" | "activity" | "other";
+import type { Member } from "./money";
+export type MomentKind = "birthday" | "anniversary" | "holiday" | "celebration" | "school" | "activity" | "other";
 export type FamilyMoment = {
   id: string;
   title: string;
