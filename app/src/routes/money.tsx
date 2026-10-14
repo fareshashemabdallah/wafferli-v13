@@ -53,7 +53,8 @@ function MoneyPage() {
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
         <span className="text-xs text-muted-foreground">{tr("Saved on this device only. Use fictional figures during the pilot.")}</span>
-        <Button
+        <details className="ms-auto"><summary className="cursor-pointer text-xs font-medium text-muted-foreground">Settings / إعدادات</summary>
+        <div className="mt-2">        <Button
           variant="outline"
           size="sm"
           className="ms-auto"
@@ -68,16 +69,17 @@ function MoneyPage() {
       </div>
 
       {section==="overview"&&<>
-      <section className="hero-surface rounded-3xl p-5">
+      <section className="rounded-2xl border border-border bg-white p-5">
         <p className="text-sm opacity-80">{tr("Remaining allowance this month")}</p>
-        <p className="mt-1 font-display text-4xl font-semibold">{fmtJOD(c.remaining)}</p>
+        <p className="mt-1 text-3xl font-semibold tabular-nums">{fmtJOD(c.remaining)}</p>
         <p className="mt-1 text-sm opacity-80">{c.daysLeft} {tr("days left")} · {tr("spent")} {fmtJOD(c.spent)} {tr("of")} {fmtJOD(c.spendable)}</p>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-primary-foreground/20">
           <div className="h-full rounded-full bg-lime" style={{ width: `${Math.min(100, (c.spent / Math.max(1, c.spendable)) * 100)}%` }} />
         </div>
       </section>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <details className="group mt-4 rounded-xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"عرض بقية التفاصيل":"See more financial details"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
+      <div className="mt-4 grid grid-cols-2 gap-3">
         <Stat label={tr("Savings target")} value={fmtJOD(c.savingsTarget)} sub={`${s.savingsPct}% ${tr("of income")}`} />
         <Stat label={tr("Planned (budget)")} value={fmtJOD(c.planned)} sub={tr(c.overPlan ? "Above spendable!" : "Within spendable")} warn={c.overPlan} />
         <Stat label={tr("Actual spent")} value={fmtJOD(c.spent)} sub={tr("This month")} />
@@ -92,6 +94,7 @@ function MoneyPage() {
         Projection: fixed & periodic use the larger of planned or actual; variable extends your current daily pace to month-end.
       </p>
 
+      </details>
       </>}
       {section==="planning"&&<>
       <Settings income={c.monthlyIncome} pct={s.savingsPct} hasSources={s.incomeSources!==undefined}
@@ -211,7 +214,7 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
                 onClick={() => confirm(`${tr("Delete category")} "${c.name}"?`) && onChange(cats.filter((x) => x.id !== c.id))}
               >
                 <Trash2 className="size-4" />
-              </Button>
+              </Button></div></details>
             </li>
           );
         })}
