@@ -34,8 +34,8 @@ function About() {
   const { tr } = useI18n();
   return (
     <AppShell title={tr("About this pilot")}>
-      <section className="card-soft p-4"><h2 className="text-lg font-semibold">{tr("Working now")}</h2><ul className="mt-2 list-disc space-y-1 ps-5 text-sm">{working.map((w) => <li key={w}>{w}</li>)}</ul></section>
-      <section className="card-soft mt-4 p-4"><h2 className="text-lg font-semibold">{tr("Not connected yet")}</h2><ul className="mt-2 list-disc space-y-1 ps-5 text-sm">{notLive.map((w) => <li key={w}>{w}</li>)}</ul></section>
+      <section className="card-soft p-4"><h2 className="text-lg font-semibold">{tr("Working now")}</h2><ul className="mt-2 list-disc space-y-1 ps-5 text-sm">{working.map((w) => <li key={w}>{tr(w)}</li>)}</ul></section>
+      <section className="card-soft mt-4 p-4"><h2 className="text-lg font-semibold">{tr("Not connected yet")}</h2><ul className="mt-2 list-disc space-y-1 ps-5 text-sm">{notLive.map((w) => <li key={w}>{tr(w)}</li>)}</ul></section>
       <section className="card-soft mt-4 p-4 text-sm">
         <h2 className="text-lg font-semibold">{tr("Privacy")}</h2>
         <p className="mt-1">{tr("Money, shopping and household data are stored only in this browser. Clearing site data erases them — use fictional figures. A vote stores only: outing title, date, area, option names, optional organizer name, and each guest's choice + optional first name. Budget and \"who pays\" stay on the organizer's device.")}</p>
