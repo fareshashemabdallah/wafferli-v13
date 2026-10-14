@@ -17,9 +17,9 @@ import { fmtJOD, parseAmount, uid, useLocalState } from "@/lib/storage";
 export const Route = createFileRoute("/money")({
   head: () => ({
     meta: [
-      { title: "My Money — Dabberna" },
+      { title: "Our Finances — Dabberna" },
       { name: "description", content: "Plan your household budget, log expenses and see your real remaining allowance and savings projection." },
-      { property: "og:title", content: "My Money — Dabberna" },
+      { property: "og:title", content: "Our Finances — Dabberna" },
       { property: "og:description", content: "Household budget, actual spending and savings projection." },
     ],
   }),
@@ -37,7 +37,7 @@ function MoneyPage() {
 
   if (!ready)
     return (
-      <AppShell title={t("money")}>
+      <AppShell title={tr("Our Finances")}>
         <div className="grid gap-3 sm:grid-cols-2">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}</div>
       </AppShell>
     );
@@ -45,7 +45,8 @@ function MoneyPage() {
   const upd = (p: Partial<typeof s>) => setS((prev) => ({ ...prev, ...p, demo: prev.demo }));
 
   return (
-    <AppShell title={t("money")}>
+    <AppShell title={tr("Our Finances")}>
+      <p className="mb-4 text-sm text-muted-foreground">{tr("Plan for financial confidence and a good family life—not saving for its own sake.")}</p>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
         <span className="text-xs text-muted-foreground">{tr("Saved on this device only. Use fictional figures during the pilot.")}</span>

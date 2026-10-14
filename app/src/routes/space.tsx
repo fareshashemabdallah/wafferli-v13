@@ -13,9 +13,9 @@ import { uid, useLocalState } from "@/lib/storage";
 export const Route = createFileRoute("/space")({
   head: () => ({
     meta: [
-      { title: "My Space — Wafferli" },
+      { title: "My Family — Dabberna" },
       { name: "description", content: "Manage household member profiles, roles and preferences." },
-      { property: "og:title", content: "My Space — Wafferli" },
+      { property: "og:title", content: "My Family — Dabberna" },
       { property: "og:description", content: "Household profiles and privacy settings." },
     ],
   }),
@@ -37,7 +37,8 @@ function Space() {
     setEdit(null); setErr("");
   };
   return (
-    <AppShell title={tr("My Space")}>
+    <AppShell title={tr("My Family")}>
+      <p className="mb-4 text-sm text-muted-foreground">{tr("One place to reflect your household’s needs and priorities, with privacy in your control.")}</p>
       <Notice>{tr("Household profiles are role-based samples stored on this device. Nothing here is shared with friends — votes never include your finances or household data.")}</Notice>
       <div className="mt-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">{tr("Household members")} <PilotBadge>{tr("Sample")}</PilotBadge></h2>

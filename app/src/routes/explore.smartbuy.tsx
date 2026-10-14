@@ -2,7 +2,7 @@ import { useI18n } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { ImagePlus, Plus, Receipt, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AppShell, Notice, PilotBadge } from "@/components/AppShell";
+import { AppShell, Notice } from "@/components/AppShell";
 import { Field, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,9 +11,9 @@ import { fmtJOD, uid, useLocalState } from "@/lib/storage";
 export const Route = createFileRoute("/explore/smartbuy")({
   head: () => ({
     meta: [
-      { title: "Smart Buy — Dabberna" },
+      { title: "Compare & Choose — Dabberna" },
       { name: "description", content: "Compare buying options by total cost including delivery or travel, against your budget." },
-      { property: "og:title", content: "Smart Buy — Dabberna" },
+      { property: "og:title", content: "Compare & Choose — Dabberna" },
       { property: "og:description", content: "Honest manual price comparison with total cost." },
     ],
   }),
@@ -49,11 +49,12 @@ function SmartBuy() {
   const budget = Number(s.budget) || 0;
   const rows = s.alts.map((a) => ({ ...a, total: (Number(a.price) || 0) + (Number(a.extra) || 0) }));
   const valid = rows.filter((r) => Number(r.price) > 0);
-  const best = valid.length ? valid.reduce((a, b) => (b.total < a.total ? b : a)) : null;
+  const lowestCost = valid.length ? valid.reduce((a, b) => (b.total < a.total ? b : a)) : null;
   const setAlt = (id: string, p: Partial<Alt>) => setS({ ...s, alts: s.alts.map((a) => (a.id === id ? { ...a, ...p } : a)) });
 
   return (
-    <AppShell title={tr("Smart Buy")}>
+    <AppShell title={tr("Compare & Choose")}>
+      <div className="rounded-2xl bg-mint/60 p-4 text-sm text-ink">{tr("The lowest price is not always the best value. Consider quality, durability, convenience and support before choosing. This pilot compares your entered costs only.")}</div>
       <Notice>{tr("Enter prices you've seen yourself. Dabberna doesn't fetch live prices yet, so there are no automatic \"savings\" claims.")}</Notice>
       <div className="card-soft mt-4 grid gap-3 p-4 sm:grid-cols-2">
         <Field label={tr("What are you buying?")}><Input className={inputCls} maxLength={60} value={s.product} onChange={(e) => setS({ ...s, product: e.target.value })} /></Field>
@@ -61,7 +62,7 @@ function SmartBuy() {
       </div>
       <div className="mt-4 space-y-3">
         {rows.map((a) => (
-          <div key={a.id} className={`card-soft p-4 ${best?.id === a.id ? "ring-2 ring-brand-2" : ""}`}>
+          <div key={a.id} className="card-soft p-4">
             <div className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
               <Input aria-label={tr("Store")} className={inputCls} value={a.store} onChange={(e) => setAlt(a.id, { store: e.target.value.slice(0, 50) })} />
               <Input aria-label={tr("Price")} className={inputCls} inputMode="decimal" placeholder={tr("Price")} value={a.price} onChange={(e) => setAlt(a.id, { price: e.target.value })} />
@@ -71,7 +72,7 @@ function SmartBuy() {
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
               <span className="font-semibold">{tr("Total")} {fmtJOD(a.total)}</span>
               {budget > 0 && <span className={a.total > budget ? "text-destructive" : "text-brand"}>{a.total > budget ? `${fmtJOD(a.total - budget)} ${tr("over budget")}` : tr("Within budget")}</span>}
-              {best?.id === a.id && <PilotBadge>{tr("Lowest total")}</PilotBadge>}
+              {lowestCost?.id === a.id && <span className="rounded-full border border-border px-2 py-1 text-xs text-muted-foreground">{tr("Lowest entered total — not necessarily best value")}</span>}
               <label className="ms-auto flex items-center gap-1.5 text-xs">
                 <input type="checkbox" checked={a.verified} onChange={(e) => setAlt(a.id, { verified: e.target.checked })} /> {tr(a.verified ? "Price I verified" : "Unverified price")}
               </label>

@@ -14,9 +14,9 @@ import { fmtJOD, parseAmount, uid, useLocalState } from "@/lib/storage";
 export const Route = createFileRoute("/explore/shopping")({
   head: () => ({
     meta: [
-      { title: "Shopping List — Dabberna" },
+      { title: "My Basket — Dabberna" },
       { name: "description", content: "Grocery list with quantities, prices and basket total, saved on your device." },
-      { property: "og:title", content: "Shopping List — Dabberna" },
+      { property: "og:title", content: "My Basket — Dabberna" },
       { property: "og:description", content: "Build your grocery basket and record the spend." },
     ],
   }),
@@ -59,7 +59,8 @@ function Shopping() {
   };
 
   return (
-    <AppShell title={tr("Shopping List")}>
+    <AppShell title={tr("My Basket")}>
+      <p className="mb-4 text-sm text-muted-foreground">{tr("Plan what you need, see the total, and make room for what matters.")}</p>
       <p className="mb-3 flex items-center gap-2 text-sm text-muted-foreground"><PilotBadge>{tr("Device only")}</PilotBadge> {tr("Prices are what you enter — no live store prices.")}</p>
       <form onSubmit={add} className="card-soft flex flex-wrap gap-2 p-3">
         <Input aria-label={tr("Item name")} className={`${inputCls} min-w-0 flex-[2]`} placeholder={tr("Item")} value={name} onChange={(e) => setName(e.target.value)} />
