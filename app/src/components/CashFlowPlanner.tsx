@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { CalendarClock, Check, ChevronDown, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarClock, Check, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Field, NativeSelect, inputCls } from "./Field";
 import { Button } from "./ui/button";
