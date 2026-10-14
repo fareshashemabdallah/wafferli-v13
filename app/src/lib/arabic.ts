@@ -570,11 +570,11 @@ export function arabicUI(text:string):string {
   const direct=labels[key];
   if(direct)return direct;
   if(key.startsWith("e.g. "))return "مثلاً: "+key.slice(5);
-  const missing=key.match(/^(\\d+) income or bill schedule\\(s\\) need a valid date; excluded from forecast\\.$/);
+  const missing=key.match(/^(\d+) income or bill schedule\(s\) need a valid date; excluded from forecast\.$/);
   if(missing)return missing[1]+" جدول دخل أو فاتورة يحتاج إلى تاريخ صحيح، ولم يدخل في التوقعات.";
-  const overdue=key.match(/^(\\d+) bill installment\\(s\\) are overdue or unconfirmed\\.$/);
+  const overdue=key.match(/^(\d+) bill installment\(s\) are overdue or unconfirmed\.$/);
   if(overdue)return overdue[1]+" دفعة مستحقة متأخرة أو لم يُؤكَّد دفعها.";
-  const shortage=key.match(/^Warning: forecast cash shortage of ([\\d.]+) JOD\\. Consider rescheduling a flexible cost or verifying expected income\\.$/);
+  const shortage=key.match(/^Warning: forecast cash shortage of ([\d.]+) JOD\. Consider rescheduling a flexible cost or verifying expected income\.$/);
   if(shortage)return "تنبيه: نقص سيولة متوقع بمقدار "+shortage[1]+" دينار. فكّر بتأجيل مصروف مرن أو التأكد من موعد الدخل.";
   return text;
 }
