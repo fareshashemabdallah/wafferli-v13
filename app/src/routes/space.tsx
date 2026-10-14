@@ -30,7 +30,7 @@ function Space() {
   const [err, setErr] = useState("");
   const save = () => {
     if (!edit) return;
-    if (!edit.name.trim()) return setErr("Name is required.");
+    if (!edit.name.trim()) return setErr(tr("Name is required."));
     const m = { ...edit, name: edit.name.trim().slice(0, 30), prefs: edit.prefs.slice(0, 120) };
     setMembers(m.id ? members.map((x) => (x.id === m.id ? m : x)) : [...members, { ...m, id: uid() }]);
     setEdit(null); setErr("");
@@ -58,7 +58,7 @@ function Space() {
             <span className="grid size-11 place-items-center rounded-full bg-mint font-semibold text-brand">{m.name[0]?.toUpperCase()}</span>
             <div className="min-w-0 flex-1">
               <p className="font-medium">{m.name}</p>
-              <p className="text-xs text-muted-foreground">{m.role === "adult" ? "Adult" : "Child"} · {m.ageGroup}{m.prefs && ` · ${m.prefs}`}</p>
+              <p className="text-xs text-muted-foreground">{tr(m.role === "adult" ? "Adult" : "Child")} · {m.ageGroup}{m.prefs && ` · ${m.prefs}`}</p>
             </div>
             <Button size="icon" variant="ghost" aria-label={`Edit ${m.name}`} onClick={() => setEdit(m)}><Pencil className="size-4" /></Button>
             <Button size="icon" variant="ghost" aria-label={`Delete ${m.name}`} onClick={() => confirm(`Remove ${m.name}?`) && setMembers(members.filter((x) => x.id !== m.id))}><Trash2 className="size-4" /></Button>
