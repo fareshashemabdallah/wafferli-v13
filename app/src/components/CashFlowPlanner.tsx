@@ -211,7 +211,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
             const lastConfirmed=(item.receivedDates??[]).filter(d=>d<=today).sort().at(-1);
             return <div key={item.id} className="py-3 text-sm">
               <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0"><p className="font-semibold">{item.name}</p>
+                <div className="min-w-0"><p className="font-semibold">{tr(item.name)}</p>
                   <p className="text-xs text-muted-foreground">{fmtJOD(item.amount)} · {tr(frequencyNames[item.frequency])} · {item.owner??tr(item.shared?"Household":"Private")}</p>
                   <p className="text-xs text-muted-foreground">
                     {tr("Next forecast:")} {next?next.date:tr(item.nextDate?"No future payment in next 30 days":"Date needed")}
@@ -286,7 +286,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
             const paid=(bill.paidDates??[]).filter(d=>d>=futureDate(today,-45)&&d<=today).sort().reverse().slice(0,1);
             return <div key={bill.id} className="py-3 text-sm">
               <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0"><p className="font-semibold">{bill.name}</p>
+                <div className="min-w-0"><p className="font-semibold">{tr(bill.name)}</p>
                   <p className="text-xs text-muted-foreground">{fmtJOD(bill.amount)} · {tr(frequencyNames[bill.frequency])}</p>
                   <p className="text-xs text-muted-foreground">{tr("Next due:")} {next?.displayDate??(bill.dueDate||tr("Date needed"))}
                     {next?.overdue?" · "+tr("Overdue"):""}</p>
