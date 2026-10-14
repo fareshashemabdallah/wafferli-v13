@@ -191,7 +191,7 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
                   <div className={`h-full ${a > c.planned ? "bg-destructive" : "bg-brand-2"}`} style={{ width: `${pct}%` }} />
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">Actual {fmtJOD(a)} · Planned {fmtJOD(c.planned)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{tr("Actual")} {fmtJOD(a)} · {tr("Planned")} {fmtJOD(c.planned)}</p>
               </div>
               <Button size="icon" variant="ghost" aria-label={`Edit ${c.name}`} onClick={() => setEditing(c)}><Pencil className="size-4" /></Button>
               <Button
