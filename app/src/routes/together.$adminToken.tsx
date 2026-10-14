@@ -35,6 +35,10 @@ function AdminPage() {
   return (
     <AppShell title={d.title}>
       <p className="text-sm text-muted-foreground">{[d.event_at?.replace("T", " · "), d.neighborhood].filter(Boolean).join(" · ")}</p>
+      <Link to="/community" search={{kind:"outing",topic:d.title.slice(0,100),invite:undefined,category:"restaurant",item:"",area:""}} className="card-soft mt-4 flex items-start gap-3 p-4 text-sm hover:border-brand/40">
+        <MessageCircle className="size-5 shrink-0 text-brand"/>
+        <span><strong>{tr("Discuss this outing with a group")}</strong><span className="mt-1 block text-xs text-muted-foreground">{tr("Ask parents or friends for ideas before you choose a place. Only invited members can see the chat.")}</span></span>
+      </Link>
       <section className="card-soft mt-4 p-4">
         <h2 className="font-semibold">{tr("Share with friends")}</h2>
         <p className="mt-1 break-all rounded-lg bg-muted p-2 text-sm" data-testid="vote-url">{url}</p>
