@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { CashFlowPlanner } from "@/components/CashFlowPlanner";
+import { localToday } from "@/lib/cashflow";
 import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -24,7 +26,7 @@ export const Route = createFileRoute("/money")({
   component: MoneyPage,
 });
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = localToday;
 
 function MoneyPage() {
   const { t } = useI18n();
@@ -85,7 +87,9 @@ function MoneyPage() {
         Projection: fixed & periodic use the larger of planned or actual; variable extends your current daily pace to month-end.
       </p>
 
-      <Settings income={s.income} pct={s.savingsPct} onSave={(income, savingsPct) => upd({ income, savingsPct })} />
+      <Settings income={c.monthlyIncome} pct={s.savingsPct} hasSources={s.incomeSources!==undefined}
+        onSave={(income,savingsPct)=>upd(s.incomeSources===undefined?{income,savingsPct}:{savingsPct})} />
+      <CashFlowPlanner state={s} members={members} update={setS} />
       <Categories cats={s.categories} spentBy={c.spentBy} onChange={(categories) => upd({ categories })} />
       <Expenses
         cats={s.categories}
@@ -107,13 +111,13 @@ function Stat({ label, value, sub, warn }: { label: string; value: string; sub: 
   );
 }
 
-function Settings({ income, pct, onSave }: { income: number; pct: number; onSave: (i: number, p: number) => void }) {
+function Settings({ income, pct, hasSources, onSave }: { income: number; pct: number; hasSources:boolean; onSave: (i: number, p: number) => void }) {
   const [inc, setInc] = useState(String(income));
   const [p, setP] = useState(String(pct));
   const [err, setErr] = useState("");
   const save = (e: FormEvent) => {
     e.preventDefault();
-    const i = parseAmount(inc, 100000);
+    const i = hasSources ? income : parseAmount(inc, 100000);
     const pn = Number(p);
     if (i === null) return setErr("Income must be a positive amount up to 100,000.");
     if (!Number.isFinite(pn) || pn < 0 || pn > 80) return setErr("Savings must be between 0 and 80%.");
@@ -125,8 +129,10 @@ function Settings({ income, pct, onSave }: { income: number; pct: number; onSave
     <section className="card-soft mt-6 p-4">
       <h2 className="text-lg font-semibold">Income & savings goal</h2>
       <form onSubmit={save} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-        <Field label="Monthly household income (JOD)">
-          <Input className={inputCls} inputMode="decimal" value={inc} onChange={(e) => setInc(e.target.value)} />
+        <Field label={hasSources?"Estimated monthly income (JOD)":"Existing monthly household income (JOD)"}
+          hint={hasSources?"Calculated from your income sources below — edit there. One-time and irregular amounts aren't averaged into monthly income.":"Legacy monthly budget estimate. Add dated sources under Income Schedule below."}>
+          <Input className={inputCls} inputMode="decimal" value={hasSources?String(income):inc}
+            disabled={hasSources} onChange={(e) => setInc(e.target.value)} />
         </Field>
         <Field label="Savings target (%)">
           <Input className={inputCls} inputMode="numeric" value={p} onChange={(e) => setP(e.target.value)} />
