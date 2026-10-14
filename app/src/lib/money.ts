@@ -1,7 +1,15 @@
+import type { IncomeSource, Commitment } from "./cashflow";
+import { monthlyTotal } from "./cashflow";
 export type CatType = "fixed" | "variable" | "periodic";
 export type Category = { id: string; name: string; type: CatType; planned: number };
-export type Expense = { id: string; date: string; categoryId: string; amount: number; note?: string; owner?: string; shared: boolean };
-export type MoneyState = { income: number; savingsPct: number; categories: Category[]; expenses: Expense[]; demo: boolean };
+export type Expense = { id: string; date: string; categoryId: string; amount: number; note?: string; owner?: string; shared: boolean; billId?:string; dueDate?:string };
+export type MoneyState = {
+  /** Legacy monthly income: retained to preserve users' existing saved budgets. */
+  income:number; savingsPct:number; categories:Category[]; expenses:Expense[]; demo:boolean;
+  incomeSources?:IncomeSource[]; commitments?:Commitment[];
+  /** Manual actual cash available now, intentionally not inferred from historic expense entries. */
+  cashOnHand?:number|null; cashReserve?:number;
+};
 export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string };
 
 const today = new Date();
@@ -38,8 +46,9 @@ export function computeMoney(s: MoneyState, now = new Date()) {
   const ym = now.toISOString().slice(0, 7);
   const month = s.expenses.filter((e) => e.date.startsWith(ym));
   const spentBy = (id: string) => month.filter((e) => e.categoryId === id).reduce((a, e) => a + e.amount, 0);
-  const savingsTarget = (s.income * s.savingsPct) / 100;
-  const spendable = s.income - savingsTarget;
+  const monthlyIncome = s.incomeSources === undefined ? s.income : monthlyTotal(s.incomeSources);
+  const savingsTarget = (monthlyIncome * s.savingsPct) / 100;
+  const spendable = monthlyIncome - savingsTarget;
   const planned = s.categories.reduce((a, c) => a + c.planned, 0);
   const spent = month.reduce((a, e) => a + e.amount, 0);
   const day = now.getDate();
@@ -54,13 +63,14 @@ export function computeMoney(s: MoneyState, now = new Date()) {
   const known = new Set(s.categories.map((c) => c.id));
   projected += month.filter((e) => !known.has(e.categoryId)).reduce((a, e) => a + e.amount, 0);
   return {
+    monthlyIncome,
     savingsTarget,
     spendable,
     planned,
     spent,
     remaining: spendable - spent,
     projected,
-    projectedSavings: s.income - projected,
+    projectedSavings: monthlyIncome - projected,
     overPlan: planned > spendable,
     spentBy,
     daysLeft: days - day,
