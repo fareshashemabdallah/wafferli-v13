@@ -216,6 +216,7 @@ function TogetherPage() {
                   {tr(group.label)}
                 </label>)}
               </div>
+              </div>
             </details>
             <div className="grid gap-2">
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={stroller} onChange={e=>setStroller(e.target.checked)} /> {tr("Stroller or step-free access needed")}</label>
