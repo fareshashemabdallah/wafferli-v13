@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, CalendarClock, PiggyBank, ShieldCheck, Wallet } from "lucide-react";
+import { buildForecast, legacyIncome, localToday } from "@/lib/cashflow";
 import { useMemo } from "react";
 import { useI18n } from "@/lib/i18n";
 import { computeMoney, sampleMoney } from "@/lib/money";
@@ -9,6 +10,7 @@ export function FamilyFinanceSnapshot() {
   const { lang } = useI18n();
   const [money, , ready] = useLocalState("money", sampleMoney());
   const finance = useMemo(() => computeMoney(money), [money]);
+  const cashFlow = useMemo(() => buildForecast({incomes:money.incomeSources??legacyIncome(money.income),commitments:money.commitments??[],openingBalance:money.cashOnHand??null,reserve:money.cashReserve??0,today:localToday(),days:30}),[money]);
   const ar = lang === "ar";
   const demo = money.demo;
   const financialPlanShortfall = finance.projectedSavings < money.savingsPct / 100 * finance.monthlyIncome;
@@ -32,7 +34,7 @@ export function FamilyFinanceSnapshot() {
               { label: ar ? "الدخل الشهري" : "Monthly income", value: finance.monthlyIncome, Icon: Wallet },
               { label: ar ? "المصروف هذا الشهر" : "Spent this month", value: finance.spent, Icon: CalendarClock },
               { label: ar ? "هدف الادخار" : "Savings target", value: finance.savingsTarget, Icon: PiggyBank },
-              { label: ar ? "المتبقي من المخصص للصرف" : "Remaining spendable", value: finance.remaining, Icon: ShieldCheck }
+              { label: ar ? "متبقي مخصص الشهر" : "Monthly allowance left", value: finance.remaining, Icon: ShieldCheck }
             ].map(({label, value, Icon}) => (
               <div className="card-soft min-w-0 p-4" key={label}>
                 <Icon aria-hidden="true" className="size-5 text-brand" />
@@ -47,7 +49,7 @@ export function FamilyFinanceSnapshot() {
               <div className="min-w-0">
                 <p className="font-semibold text-ink">{demo
                   ? (ar ? "بيانات تجريبية — ليست تقييماً لوضعك المالي" : "Demo figures — not a financial assessment")
-                  : (financialPlanShortfall
+                  : (cashFlow.overdueCount>0 || (cashFlow.minimumBalance!==null && cashFlow.minimumBalance<0) || financialPlanShortfall
                     ? (ar ? "قد تحتاج خطة الإنفاق إلى مراجعة" : "Your spending plan may need a review")
                     : (ar ? "راجع الالتزامات والاحتياطي النقدي" : "Review upcoming bills and cash reserves"))}
                 </p>
@@ -56,6 +58,8 @@ export function FamilyFinanceSnapshot() {
                     ? (ar ? "الأرقام للعرض فقط. أدخل بياناتك التجريبية في صفحة أموالي لتجربة التوصيات." : "These are illustrative amounts. Adjust the sample budget in My Money to explore the tools.")
                     : (ar ? "التقديرات تعتمد على المصاريف المدخلة، ولا تثبت الأمان المالي من دون الالتزامات والسيولة والاحتياطي." : "This estimate is based on recorded spending; it cannot confirm financial safety without complete obligations, cash flow and reserves.")}
                 </p>
+                {cashFlow.safeToSpend!==null && !demo && <p className="mt-2 text-sm font-semibold">{ar?"متاح بحذر وفق الجدول النقدي: ":"Conservative cash available: "}{fmtJOD(cashFlow.safeToSpend)} <span className="text-xs font-normal text-muted-foreground">{ar?"(لا يشمل النفقات غير المدخلة)":"(excludes unrecorded expenses)"}</span></p>}
+                {cashFlow.events.some(e=>e.kind==="bill") && <p className="mt-1 text-xs text-muted-foreground">{ar?"الالتزامات المجدولة خلال ٣٠ يومًا: ":"Bills scheduled over 30 days: "}{fmtJOD(cashFlow.upcomingBills)}</p>}
               </div>
             </div>
           </div>
