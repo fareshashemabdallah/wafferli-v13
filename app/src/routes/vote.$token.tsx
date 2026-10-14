@@ -26,9 +26,8 @@ export const Route = createFileRoute("/vote/$token")({
 });
 
 function VotePage() {
-  const { tr } = useI18n();
+  const { tr,t,lang,setLang } = useI18n();
   const { token } = Route.useParams();
-  const { t, lang, setLang } = useI18n();
   const q = useQuery({ queryKey: ["vote", token], queryFn: () => getVote(token), refetchInterval: 5000 });
   const [pick, setPick] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -55,14 +54,14 @@ function VotePage() {
   if (!d) return shell(<div className="card-soft p-5">{t("notFound")}</div>);
 
   const submit = async () => {
-    if (!pick) return setErr("Please choose one option.");
+    if (!pick) return setErr(tr("Please choose one option."));
     setBusy(true); setErr("");
     try {
       await castVote(token, pick, name);
       writeLocal("voterName", name);
       setJustVoted(true);
       await q.refetch();
-    } catch (x) { setErr(x instanceof Error ? x.message : "Could not save vote."); }
+    } catch (x) { setErr(x instanceof Error ? x.message  : tr("Could not save vote.")); }
     finally { setBusy(false); }
   };
 
