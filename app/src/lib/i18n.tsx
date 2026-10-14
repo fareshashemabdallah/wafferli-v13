@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useLocalState } from "./storage";
+import { arabicUI } from "./arabic";
 
 export type Lang = "en" | "ar";
 
@@ -19,7 +20,7 @@ const dict = {
   shopList: { en: "Shopping list", ar: "قائمة التسوق" },
   smartBuy: { en: "Smart Buy", ar: "الشراء الذكي" },
   restaurants: { en: "Restaurants", ar: "المطاعم" },
-  together: { en: "Dabberna Together", ar: "وفّرلي سوا" },
+  together: { en: "Dabberna Together", ar: "دبّرنا سوا" },
   routerNote: { en: "Keyword routing (no AI connected)", ar: "توجيه بالكلمات المفتاحية (بدون ذكاء اصطناعي)" },
   // vote page
   voteFor: { en: "Pick one place", ar: "اختر مكاناً واحداً" },
@@ -36,10 +37,11 @@ const dict = {
 
 export type Key = keyof typeof dict;
 
-const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: Key) => string }>({
+const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: Key) => string; tr: (s:string)=>string }>({
   lang: "en",
   setLang: () => {},
   t: (k) => dict[k].en,
+  tr: (s) => s,
 });
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -48,7 +50,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
-  return <Ctx.Provider value={{ lang, setLang, t: (k) => dict[k][lang] }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ lang, setLang, t: (k) => dict[k][lang], tr: (s) => lang === "ar" ? arabicUI(s) : s }}>{children}</Ctx.Provider>;
 }
 
 export const useI18n = () => useContext(Ctx);
