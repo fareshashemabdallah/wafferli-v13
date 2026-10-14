@@ -160,8 +160,7 @@ function Restaurants() {
           </Button>
         </form>
         <p className="text-xs text-muted-foreground">
-          Cuisine filters rely on venue tags, which are often missing; a blank match doesn't prove the cuisine is unavailable. For best cuisine-specific discovery, choose Google Maps above.
-          Results are cached for 24 hours to minimize free API usage.
+          {tr("Cuisine filters rely on venue tags, which are often missing; a blank match doesn't prove the cuisine is unavailable. For best cuisine-specific discovery, choose Google Maps above. Results are cached for 24 hours to minimize free API usage.")}
         </p>
       </section>
       {error && <div role="alert" className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
