@@ -23,7 +23,7 @@ export function FamilyImportantEvents(){
   return sorted.filter(e=>{if(seen.has(e.id))return false;seen.add(e.id);return true;}).slice(0,6);
  },[important]);
  const startNew=(kind:MilestoneKind="anniversary")=>{
-  const title=kind==="anniversary"?"Wedding anniversary":"";
+  const title=kind==="anniversary"?(ar?"ذكرى زواجنا":"Wedding anniversary"):"";
   setDraft({...empty,kind,title,annual:kind==="anniversary"});
   setError("");
  };
