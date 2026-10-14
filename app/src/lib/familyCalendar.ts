@@ -13,6 +13,7 @@ export type FamilyMoment = {
 export type MomentOccurrence = FamilyMoment & { occursOn: string };
 export const kindNames: Record<MomentKind,{en:string;ar:string}> = {
   birthday:{en:"Birthday",ar:"عيد ميلاد"},
+  anniversary:{en:"Wedding anniversary",ar:"ذكرى الزواج"},
   holiday:{en:"Holiday",ar:"عطلة / مناسبة"},
   celebration:{en:"Special occasion",ar:"مناسبة خاصة"},
   school:{en:"School event",ar:"مناسبة مدرسية"},
