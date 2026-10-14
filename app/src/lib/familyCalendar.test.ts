@@ -49,6 +49,23 @@ describe("Family calendar",()=>{
   expect(occurrencesForDate(updated,"2026-11-03")).toHaveLength(1);
   expect(memberBirthdayMoments([])).toHaveLength(0);
  });
+ it("shows a birthday only once when it was previously entered directly in the calendar",()=>{
+  const member:Member={id:"sophia",name:"Sophia",role:"child",ageGroup:"0–5",prefs:"",birthday:"2021-10-19"};
+  const manuallySaved:FamilyMoment={id:"previous",title:"Sophia Birthday",date:"2026-10-19",kind:"birthday",annual:true,note:"Gift idea"};
+  const combined=allFamilyMoments([manuallySaved],[member]);
+  expect(occurrencesForDate(combined,"2026-10-19")).toHaveLength(1);
+  expect(combined[0]?.id).toBe("member-birthday:sophia");
+  // Suppression is only a display change; previously stored data remains untouched.
+  expect(manuallySaved.note).toBe("Gift idea");
+ });
+ it("keeps distinct birthdays and supports Arabic manually saved birthday names",()=>{
+  const member:Member={id:"faris",name:"فارس",role:"child",ageGroup:"0–5",prefs:"",birthday:"2022-08-16"};
+  const other:FamilyMoment={id:"someone-else",title:"Another birthday",date:"2022-08-16",kind:"birthday",annual:true};
+  const already:FamilyMoment={id:"arabic",title:"عيد ميلاد فارس",date:"2026-08-16",kind:"birthday",annual:true};
+  const combined=allFamilyMoments([other,already],[member],true);
+  expect(occurrencesForDate(combined,"2027-08-16")).toHaveLength(2);
+  expect(combined.some(e=>e.id==="arabic")).toBe(false);
+ });
  it("combines anniversaries and profile birthdays without persisting two versions of the birthday",()=>{
   const member:Member={id:"parent",name:"Parent",role:"adult",ageGroup:"30–44",prefs:"",birthday:"1988-02-12"};
   const anniversary:FamilyMoment={id:"anniversary",title:"Our wedding anniversary",date:"2018-10-22",kind:"anniversary",annual:true};
