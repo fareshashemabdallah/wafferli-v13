@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as ExperienceRouteImport } from './routes/experience'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as AdvisorRouteImport } from './routes/advisor'
@@ -43,6 +44,11 @@ const CommunityRoute = CommunityRouteImport.update({
 const ExperienceRoute = ExperienceRouteImport.update({
   id: '/experience',
   path: '/experience',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/advisor': typeof AdvisorRoute
   '/community': typeof CommunityRoute
   '/experience': typeof ExperienceRoute
+  '/calendar': typeof CalendarRoute
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/advisor': typeof AdvisorRoute
   '/community': typeof CommunityRoute
   '/experience': typeof ExperienceRoute
+  '/calendar': typeof CalendarRoute
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/advisor': typeof AdvisorRoute
   '/community': typeof CommunityRoute
   '/experience': typeof ExperienceRoute
+  '/calendar': typeof CalendarRoute
   '/about': typeof AboutRoute
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/advisor'
     | '/community'
     | '/experience'
+    | '/calendar'
     | '/about'
     | '/money'
     | '/space'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/advisor'
     | '/community'
     | '/experience'
+    | '/calendar'
     | '/about'
     | '/money'
     | '/space'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/advisor'
     | '/community'
     | '/experience'
+    | '/calendar'
     | '/about'
     | '/money'
     | '/space'
@@ -212,6 +224,7 @@ export interface RootRouteChildren {
   AdvisorRoute: typeof AdvisorRoute
   CommunityRoute: typeof CommunityRoute
   ExperienceRoute: typeof ExperienceRoute
+  CalendarRoute: typeof CalendarRoute
   AboutRoute: typeof AboutRoute
   MoneyRoute: typeof MoneyRoute
   SpaceRoute: typeof SpaceRoute
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/experience'
       fullPath: '/experience'
       preLoaderRoute: typeof ExperienceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -340,6 +360,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdvisorRoute: AdvisorRoute,
   CommunityRoute: CommunityRoute,
   ExperienceRoute: ExperienceRoute,
+  CalendarRoute: CalendarRoute,
   AboutRoute: AboutRoute,
   MoneyRoute: MoneyRoute,
   SpaceRoute: SpaceRoute,
