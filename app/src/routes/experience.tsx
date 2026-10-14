@@ -42,7 +42,7 @@ function Experience(){
  const lookup=async(t:string,n:string,l:string)=>{
   const key=itemKey(t,n,l);
   if(n.trim().length<2 || !l.trim()){setError(ar?"أدخل اسم الخدمة والمنطقة":"Enter the place or item and its area");return;}
-  const {data,error}=await db.from("family_experience_reviews").select("id,author_id,author_name,item_type,item_key,item_name,location,rating,experience,experience_type,created_at").eq("item_key",key).order("created_at",{ascending:false}).limit(100);
+  const {data,error}=await db.rpc("get_family_experience_reviews",{p_item_key:key});
   if(error)throw error;setCurrent({type:t,item:n,city:l,key});setReviews(data??[]);
  };
  const run=async(fn:()=>Promise<void>)=>{setBusy(true);setError("");setNotice("");try{await fn()}catch(e){setError(e instanceof Error?e.message:String(e))}finally{setBusy(false)}};
@@ -56,7 +56,7 @@ function Experience(){
   if(error)throw error;setBody("");setRating("");setNotice(ar?"تم نشر الرأي الشخصي ضمن صفحة هذه الجهة":"Your experience note is now visible in this item's context");await lookup(current.type,current.item,current.city);
  });};
  const report=(id:string)=>{if(!user)return;const reason=window.prompt(ar?"سبب الإبلاغ عن هذا التقييم":"Why report this review?");if(!reason||reason.trim().length<5)return;void run(async()=>{const {error}=await db.from("family_content_reports").insert({reporter_id:user.id,review_id:id,reason:reason.slice(0,400)});if(error)throw error;setNotice(ar?"تم تسجيل البلاغ للمراجعة":"Report submitted for review");});};
- const remove=(id:string)=>{if(!user)return;void run(async()=>{const {error}=await db.from("family_experience_reviews").delete().eq("id",id).eq("author_id",user.id);if(error)throw error;if(current)await lookup(current.type,current.item,current.city);});};
+ const remove=(id:string)=>{if(!user)return;void run(async()=>{const {error}=await db.rpc("delete_family_experience_review",{p_id:id});if(error)throw error;if(current)await lookup(current.type,current.item,current.city);});};
  return <AppShell title={ar?"تجارب العائلات":"Family Experiences"}>
   <div className="hero-surface rounded-3xl p-5">
    <div className="flex items-center gap-2"><MessageSquareText className="size-6 text-brand"/><h2 className="text-xl font-semibold">{ar?"تعلّم من تجارب الآخرين":"Learn from real people's experiences"}</h2></div>
