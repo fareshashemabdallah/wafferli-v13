@@ -1,10 +1,12 @@
+import { useI18n } from "@/lib/i18n";
 import type { VoteOption } from "@/lib/outings";
 
 export function Tally({ options, total, friends, mine, showVoters }: { options: VoteOption[]; total: number; friends: number; mine?: string | null; showVoters?: boolean }) {
+  const { tr } = useI18n();
   const max = Math.max(0, ...options.map((o) => o.votes));
   return (
     <div>
-      <p className="text-sm text-muted-foreground"><span className="font-semibold text-ink">{total}/{friends}</span> voted</p>
+      <p className="text-sm text-muted-foreground"><span className="font-semibold text-ink">{total}/{friends}</span> {tr("voted")}</p>
       <ul className="mt-3 space-y-3">
         {options.map((o) => {
           const pct = total ? Math.round((o.votes / total) * 100) : 0;
