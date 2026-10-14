@@ -10,6 +10,7 @@ const dict = {
   money: { en: "My Money", ar: "أموالي" },
   space: { en: "Family", ar: "عائلتي" },
   advisor: { en: "Advisor", ar: "المساعد" },
+  community: { en: "Groups", ar: "المجموعات" },
   about: { en: "About this pilot", ar: "عن هذه التجربة" },
   pilot: { en: "Pilot", ar: "تجريبي" },
   greeting: { en: "Welcome to your family space", ar: "أهلاً بكم في مساحة العائلة" },
