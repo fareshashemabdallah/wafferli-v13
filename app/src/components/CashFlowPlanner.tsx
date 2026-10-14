@@ -266,7 +266,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
               onChange={e=>setBillAmount(e.target.value)} /></Field>
             <Field label="Frequency"><NativeSelect value={editBill.frequency}
               onChange={e=>setEditBill({...editBill,frequency:e.target.value as Frequency})}>
-              {keys.map(key=><option key={key} value={key}>{frequencyNames[key]}</option>}
+              {keys.map(key=><option key={key} value={key}>{frequencyNames[key]}</option>)}
             </NativeSelect></Field>
             <Field label="Next due date"><Input className={inputCls} type="date" value={editBill.dueDate}
               onChange={e=>setEditBill({...editBill,dueDate:e.target.value})}/></Field>
