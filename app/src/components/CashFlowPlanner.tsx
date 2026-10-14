@@ -305,8 +305,22 @@ export function CashFlowPlanner({state,members,update}:Props) {
                     onClick={()=>{if(confirm(tr("Delete this bill schedule? Already recorded expenses stay in your history.")))update(s=>({...s,commitments:(s.commitments??[]).filter(x=>x.id!==bill.id)}));}}><Trash2 className="size-4"/></Button>
                 </div>
               </div>
-              {next && next.displayDate<=today && <Button type="button" className="mt-2" size="sm" variant="secondary"
-                onClick={()=>markPaid(bill,next.displayDate)}><Check className="size-3.5"/> {tr("Mark paid & log expense")}</Button>}
+              {next && next.displayDate<=today && <>
+                <Button type="button" className="mt-2" size="sm" variant="secondary"
+                  onClick={()=>{setPendingPaid({bill,dueDate:next.displayDate});setError("");}}><Check className="size-3.5"/> {tr("Mark paid & log expense")}</Button>
+                {pendingPaid?.bill.id===bill.id&&pendingPaid.dueDate===next.displayDate&&
+                  <div className="mt-3 rounded-xl border border-[#DAE6D7] bg-[#F5F8F1] p-3">
+                    <p className="text-sm font-semibold">{ar?"تأكيد دفع الفاتورة":"Confirm this bill was paid"}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{ar?"سنضيفها للمصاريف. هل رصيدك المُدخل يعكس هذا الدفع؟":"We'll log the expense. Does your entered cash balance already reflect this payment?"}</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button type="button" size="sm" variant="outline" onClick={()=>markPaid(bill,next.displayDate,"already")}>{ar?"نعم، الرصيد محدّث":"Yes, already reflected"}</Button>
+                      {state.cashOnHand!=null&&state.cashOnHand>=bill.amount&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"deduct")}>{ar?"لا، اخصمه الآن":"No, deduct it now"}</Button>}
+                      {state.cashOnHand==null&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"untracked")}>{ar?"الرصيد غير مُدخل":"No cash balance entered"}</Button>}
+                      <Button type="button" size="sm" variant="ghost" onClick={()=>setPendingPaid(null)}>{ar?"إلغاء":"Cancel"}</Button>
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">{ar?"لا تخصم المبلغ مجدداً إذا كان رصيد البنك يشمل الدفع.":"If your actual balance already includes this payment, do not deduct it again."}</p>
+                  </div>}
+              </>}
               {paid.map(date=><button key={date} type="button" className="mt-2 block text-xs text-brand underline"
                 onClick={()=>{if(confirm(tr("Undo this payment? Its linked expense will also be removed.")))undoPayment(bill.id,date);}}>
                 {tr("Paid")} {date} · {tr("Undo")}
