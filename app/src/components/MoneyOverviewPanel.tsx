@@ -29,11 +29,11 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#E8F1E7] text-brand"><Wallet className="size-6"/></span>
        <div className="min-w-0 flex-1">
         <p className="section-eyebrow">{ar?"الصورة المالية الآن":"YOUR CASH & COMMITMENTS"}</p>
-        <h2 className="mt-1 text-xl font-semibold">{v.cashSet?(ar?"بعد الفواتير والاحتياطي":"After scheduled bills & reserve"):(ar?"ابدأ برصيدك الحالي":"Let's begin with your current balance")}</h2>
+        <h2 className="mt-1 text-xl font-semibold">{v.cashSet?(v.cashAfterBills!==null&&v.cashAfterBills<0?(ar?"عجز بعد الفواتير والاحتياطي":"Shortfall after bills & reserve"):(ar?"بعد الفواتير والاحتياطي":"After scheduled bills & reserve")):(ar?"ابدأ برصيدك الحالي":"Let's begin with your current balance")}</h2>
        </div>
      </div>
      {v.cashSet?<>
-       <p className="mt-5 text-3xl font-semibold tabular-nums text-ink sm:text-4xl">{fmtJOD(v.billOnlyRemainder??0)}</p>
+       <p className="mt-5 text-3xl font-semibold tabular-nums text-ink sm:text-4xl">{fmtJOD(v.cashAfterBills??0)}</p>
        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?"هذا رصيدك المدخل ناقص الفواتير غير المدفوعة المسجلة خلال ٣٠ يوماً والاحتياطي. ليس مبلغاً آمناً للإنفاق: لا يشمل المصاريف اليومية التي لم تُجدول.":"Your manually entered cash minus recorded unpaid bills over the next 30 days and your reserve. Not a safe-to-spend amount: everyday costs without due dates are excluded."}</p>
      </>:<div className="mt-4">
         <p className="text-sm leading-relaxed text-muted-foreground">{ar?"حتى تكون الحسابات واضحة، أدخل الرصيد الحقيقي المتاح في البنك والنقد، ثم جدول الفواتير المستحقة.":"Enter the actual cash and bank balance you have today, then add due dates for your bills. Monthly budget estimates are not bank balances."}</p>
