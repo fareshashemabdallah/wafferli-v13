@@ -310,8 +310,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
 
       <section className="card-soft p-4">
         <h2 className="font-semibold">{tr("Your next 30 days · التدفق المتوقع")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">Projected end balance: {forecast.projectedEnd===null?
-          "Set today's actual cash balance":fmtJOD(forecast.projectedEnd)}. Future income is expected, not yet received.</p>
+        <p className="mt-1 text-xs text-muted-foreground">{tr("Projected end balance:")} {forecast.projectedEnd===null?tr("Set today's actual cash balance"):fmtJOD(forecast.projectedEnd)}. {tr("Future income is expected, not yet received.")}</p>
         {forecast.events.length===0&&<p className="mt-3 text-sm text-muted-foreground">{tr("Add expected payment and bill due dates to see a cash-flow timeline.")}</p>}
         <div className="mt-3 divide-y">
           {forecast.events.slice(0,20).map(e=><div key={e.key} className="flex items-center gap-3 py-2 text-sm">
