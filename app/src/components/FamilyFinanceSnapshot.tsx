@@ -1,8 +1,8 @@
 import {Link} from "@tanstack/react-router";
 import {AlertCircle,ChevronRight} from "lucide-react";
 import {useMemo} from "react";
-import {buildForecast,legacyIncome,localToday} from "@/lib/cashflow";
-import {computeMoney,sampleMoney} from "@/lib/money";
+import {sampleMoney} from "@/lib/money";
+import {getMoneyOverview} from "@/lib/moneyOverview";
 import {useLocalState} from "@/lib/storage";
 import {useI18n} from "@/lib/i18n";
 
@@ -10,17 +10,12 @@ import {useI18n} from "@/lib/i18n";
 export function FamilyFinanceSnapshot(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [money,,ready]=useLocalState("money",sampleMoney());
- const totals=useMemo(()=>computeMoney(money),[money]);
- const forecast=useMemo(()=>buildForecast({
-  incomes:money.incomeSources??legacyIncome(money.income),
-  commitments:money.commitments??[],
-  openingBalance:money.cashOnHand??null,
-  reserve:money.cashReserve??0,
-  today:localToday(),days:30
- }),[money]);
- const toReview=!money.demo&&(forecast.overdueCount>0 ||
-   (forecast.minimumBalance!==null&&forecast.minimumBalance<0) ||
-   totals.projectedSavings<totals.savingsTarget);
+ const overview=useMemo(()=>getMoneyOverview(money),[money]);
+ const toReview=!money.demo && (
+   overview.forecast.overdueCount>0 ||
+   (overview.cashAfterBills!==null&&overview.cashAfterBills<0) ||
+   overview.dateProblems>0
+ );
  // The primary Money action already appears at the top of My Day.
  // Only show this contextual nudge when real, non-demo data needs attention.
  if(!ready||money.demo||!toReview)return null;
