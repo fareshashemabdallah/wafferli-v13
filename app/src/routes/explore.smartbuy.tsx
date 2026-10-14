@@ -11,9 +11,9 @@ import { fmtJOD, uid, useLocalState } from "@/lib/storage";
 export const Route = createFileRoute("/explore/smartbuy")({
   head: () => ({
     meta: [
-      { title: "Smart Buy — Dabberna" },
+      { title: "Compare & Choose — Dabberna" },
       { name: "description", content: "Compare buying options by total cost including delivery or travel, against your budget." },
-      { property: "og:title", content: "Smart Buy — Dabberna" },
+      { property: "og:title", content: "Compare & Choose — Dabberna" },
       { property: "og:description", content: "Honest manual price comparison with total cost." },
     ],
   }),
@@ -53,7 +53,8 @@ function SmartBuy() {
   const setAlt = (id: string, p: Partial<Alt>) => setS({ ...s, alts: s.alts.map((a) => (a.id === id ? { ...a, ...p } : a)) });
 
   return (
-    <AppShell title={tr("Smart Buy")}>
+    <AppShell title={tr("Compare & Choose")}>
+      <div className="rounded-2xl bg-mint/60 p-4 text-sm text-ink">{tr("The lowest price is not always the best value. Consider quality, durability, convenience and support before choosing. This pilot compares your entered costs only.")}</div>
       <Notice>{tr("Enter prices you've seen yourself. Dabberna doesn't fetch live prices yet, so there are no automatic \"savings\" claims.")}</Notice>
       <div className="card-soft mt-4 grid gap-3 p-4 sm:grid-cols-2">
         <Field label={tr("What are you buying?")}><Input className={inputCls} maxLength={60} value={s.product} onChange={(e) => setS({ ...s, product: e.target.value })} /></Field>
