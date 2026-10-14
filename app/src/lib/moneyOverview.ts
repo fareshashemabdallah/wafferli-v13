@@ -20,6 +20,7 @@ export type MoneyOverview={
   billsNext7Days:number;
   plannedCategoriesWithoutBillLinks:number;
   billOnlyRemainder:number|null;
+  cashAfterBills:number|null;
 };
 const validMoney=(value:unknown):value is number=>typeof value==="number"&&Number.isFinite(value)&&value>=0;
 export function getMoneyOverview(state:MoneyState,now=new Date()):MoneyOverview {
@@ -45,7 +46,8 @@ export function getMoneyOverview(state:MoneyState,now=new Date()):MoneyOverview 
     billExpensesThisMonth:roundJod(paidExpenses.reduce((n,e)=>n+e.amount,0)),
     billsNext7Days:roundJod(forecast.events.filter(e=>e.kind==="bill" && e.date<=futureDate(today,7)).reduce((a,e)=>a+e.amount,0)),
     plannedCategoriesWithoutBillLinks:state.categories.filter(c=>c.planned>0&&!linkedCategories.has(c.id)).length,
-    billOnlyRemainder:forecast.safeToSpend
+    billOnlyRemainder:forecast.safeToSpend,
+    cashAfterBills:cash===null?null:roundJod(cash-forecast.upcomingBills-(validMoney(state.cashReserve)?state.cashReserve:0))
   };
 }
 export function emptyRealMoney():MoneyState {
