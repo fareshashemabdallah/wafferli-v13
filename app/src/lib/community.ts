@@ -23,7 +23,7 @@ export const communityAuth = {
   subscribe: (cb:(user:User|null)=>void) => supabase.auth.onAuthStateChange((_event,session)=>cb(session?.user??null)),
   sendEmail: (email:string) => supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser:true, emailRedirectTo: window.location.origin+window.location.pathname+"#/community" }
+    options: { shouldCreateUser:true, emailRedirectTo: window.location.origin+window.location.pathname+(window.location.hash.startsWith("#/community")?window.location.hash:"#/community") }
   }),
   confirmCode: (email:string,token:string) => supabase.auth.verifyOtp({email,token,type:"email"}),
   signOut: () => supabase.auth.signOut()
