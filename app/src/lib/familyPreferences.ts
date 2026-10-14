@@ -5,6 +5,7 @@ export type FamilyPreferences = {
   billReminders: boolean;
   shoppingTips: boolean;
   notificationFrequency: "off" | "important" | "gentle";
+  experienceMode?: "auto" | "individual" | "family";
   city: string;
   distanceKm: number;
   outingLimit: number;
@@ -16,6 +17,7 @@ export const defaultFamilyPreferences: FamilyPreferences = {
   billReminders: true,
   shoppingTips: false,
   notificationFrequency: "important",
+  experienceMode: "auto",
   city: "",
   distanceKm: 15,
   outingLimit: 50,
