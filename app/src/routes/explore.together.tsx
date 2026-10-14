@@ -4,6 +4,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AppShell, Notice } from "@/components/AppShell";
+import { PlanContextBanner } from "@/components/PlanContextBanner";
 import { Field, NativeSelect, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,6 +142,7 @@ function TogetherPage() {
 
   return (
     <AppShell title={tr("Plan Together")}>
+      <PlanContextBanner onUseBudget={amount=>updateCost("maximum",String(amount))}/>
       <p className="mb-4 text-sm text-muted-foreground">{tr("Plan a great experience together—balance everyone’s enjoyment, needs and your planned budget.")}</p>
       <div className="card-soft mb-4 space-y-1 p-4 text-sm"><p className="font-semibold">{tr("Plan together with your circle")}</p><p className="text-muted-foreground">{tr("Invite school parents or friends to a private discussion about activities and choices.")}</p><Link to="/community" className="font-semibold text-brand">{tr("Open group chat")} →</Link></div>
       <Notice>{tr("Plan")} <strong>{tr("any outing")}</strong> {tr("— a café, cinema, kids' activity, park, game or day trip. Consider children before choosing options. The vote works without an account. Safety, age restrictions and prices must be checked with each venue.")}</Notice>
