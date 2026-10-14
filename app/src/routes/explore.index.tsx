@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ListChecks, ShoppingBag, Stethoscope, Users, UtensilsCrossed } from "lucide-react";
+import { ListChecks, MessagesSquare, ShoppingBag, Stethoscope, Users, UtensilsCrossed } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/explore/")({
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/explore/")({
 });
 
 const items = [
+  { to: "/community" as const, title: "Parents & Friends Groups", desc: "Invitation-only chat, outing discussions and firsthand reviews for exact places and products.", icon: MessagesSquare, live: "Secure group backend requires activation" },
   { to: "/explore/together" as const, title: "Dabberna Together", desc: "Plan any outing. Choose whether children are joining and who the activity is for, then vote as a group.", icon: Users, live: "Child-aware planning & group voting" },
   { to: "/explore/smartbuy" as const, title: "Smart Buy", desc: "Compare options by total cost incl. delivery or travel.", icon: ShoppingBag, live: "Manual comparison" },
   { to: "/explore/shopping" as const, title: "Shopping List", desc: "Grocery basket with quantities and running total.", icon: ListChecks, live: "Saved on device" },
