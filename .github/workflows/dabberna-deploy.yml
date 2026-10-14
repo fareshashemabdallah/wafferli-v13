@@ -6,6 +6,8 @@ on:
       - 'app/**'
       - '.github/workflows/dabberna-deploy.yml'
   workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * *"
 permissions:
   contents: read
   pages: write
@@ -31,9 +33,11 @@ jobs:
       - name: Validate full app
         working-directory: app
         run: bun run typecheck
-      - name: Test cash flow and payment scheduling
+      - name: Test family finances, calendar and occasion planning
         working-directory: app
-        run: bunx vitest run src/lib/cashflow.test.ts src/lib/arabic.test.ts
+        run: bunx vitest run src/lib/cashflow.test.ts src/lib/arabic.test.ts src/lib/familyCalendar.test.ts src/lib/occasionAdvisor.test.ts
+      - name: Refresh public occasion articles (anonymous category queries only)
+        run: python3 app/scripts/occasion_trends.py
       - name: Build static React app
         working-directory: app
         run: bun run build
