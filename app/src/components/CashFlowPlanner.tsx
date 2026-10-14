@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Field, NativeSelect, inputCls } from "./Field";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { type Category, type Member, type MoneyState } from "@/lib/money";
+import { type Member, type MoneyState } from "@/lib/money";
 import {
   type IncomeSource, type Commitment, type Frequency,
   buildForecast, frequencyNames, futureDate, legacyIncome,
