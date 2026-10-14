@@ -4,11 +4,10 @@ import type { ReactNode } from "react";
 import { useI18n, type Key } from "@/lib/i18n";
 import { Logo } from "./Logo";
 
-const tabs: { to: "/" | "/explore" | "/money" | "/space" | "/advisor" | "/community"; key: Key; icon: typeof Home; exact?: boolean }[] = [
+const tabs: { to: "/" | "/explore" | "/money" | "/space" | "/community"; key: Key; icon: typeof Home; exact?: boolean }[] = [
   { to: "/", key: "home", icon: Home, exact: true },
   { to: "/explore", key: "explore", icon: Compass },
   { to: "/money", key: "money", icon: Wallet },
-  { to: "/advisor", key: "advisor", icon: Sparkles },
   { to: "/community", key: "circles", icon: MessageCircle },
   { to: "/space", key: "space", icon: UserRound },
 ];
@@ -67,18 +66,27 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
             </div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-5 md:px-8 md:pb-12 md:pt-10">
+        <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-40 pt-5 md:px-8 md:pb-20 md:pt-10">
           {title && <h1 className="mb-5 text-3xl font-semibold text-ink">{title}</h1>}
           {children}
         </main>
       </div>
+
+      {/* A genuine entry to the existing affordability advisor, always accessible without claiming live AI. */}
+      <Link
+        to="/advisor"
+        aria-label={t("advisor")}
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.4rem)] end-4 z-30 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:bottom-6 md:end-6"
+      >
+        <Sparkles className="size-4" aria-hidden="true" /> {t("advisor")}
+      </Link>
 
       {/* Mobile bottom nav */}
       <nav
         aria-label="Main"
         className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur md:hidden"
       >
-        <div className="grid grid-cols-6">
+        <div className="grid grid-cols-5">
           {tabs.map(({ to, key, icon: Icon, exact }) => (
             <Link
               key={to}
