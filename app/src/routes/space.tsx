@@ -57,7 +57,7 @@ function Space() {
           <li key={m.id} className="card-soft flex items-center gap-3 p-4">
             <span className="grid size-11 place-items-center rounded-full bg-mint font-semibold text-brand">{m.name[0]?.toUpperCase()}</span>
             <div className="min-w-0 flex-1">
-              <p className="font-medium">{m.name}</p>
+              <p className="font-medium">{tr(m.name)}</p>
               <p className="text-xs text-muted-foreground">{tr(m.role === "adult" ? "Adult" : "Child")} · {m.ageGroup}{m.prefs && ` · ${m.prefs}`}</p>
             </div>
             <Button size="icon" variant="ghost" aria-label={`Edit ${m.name}`} onClick={() => setEdit(m)}><Pencil className="size-4" /></Button>
