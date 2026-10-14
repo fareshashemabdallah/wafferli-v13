@@ -184,6 +184,7 @@ function Space() {
         <p className="mt-2 text-xs text-muted-foreground">{ar?"التواريخ محفوظة على هذا الجهاز فقط. لا توجد إشعارات تلقائية خارج التطبيق بعد.":"Dates stay in this browser; background reminders and automatic notifications are not yet available."}</p>
       </section>
 
+      <Link to="/occasions" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-mint px-4 py-3 text-sm font-semibold text-brand">{ar?"خطّط لهدية أو نشاط بمناسبة عائلية":"Plan a meaningful gift or family activity"} →</Link>
       <FamilyPreferences/>
       <section className="card-soft mt-6 p-4 text-sm">
         <h2 className="font-semibold">{tr("Shared vs private expenses")}</h2>

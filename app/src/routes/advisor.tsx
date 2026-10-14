@@ -27,7 +27,8 @@ function Advisor(){
     {href:"/money",en:"Review family money",ar:"راجع ميزانية العائلة",Icon:Receipt},
     {href:"/explore/together",en:"Plan a family outing",ar:"خطّط لنزهة عائلية",Icon:Compass},
     {href:"/explore/smartbuy",en:"Compare a purchase",ar:"قارن مشترياتك",Icon:ShoppingBag},
-    {href:"/explore/services",en:"Find a family service",ar:"ابحث عن خدمة للعائلة",Icon:Search}
+    {href:"/explore/services",en:"Find a family service",ar:"ابحث عن خدمة للعائلة",Icon:Search},
+    {href:"/occasions",en:"Plan an upcoming occasion",ar:"خطّط لمناسبة قادمة",Icon:Sparkles}
   ];
   return <AppShell title={ar?"قرارات ذكية":"Wise Decisions"}>
     <div className="hero-surface rounded-3xl p-6">

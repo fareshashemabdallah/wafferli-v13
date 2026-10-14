@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { AppShell, PilotBadge } from "@/components/AppShell";
 import { FamilyFinanceSnapshot } from "@/components/FamilyFinanceSnapshot";
 import { FamilyCalendarHighlights } from "@/components/FamilyCalendarHighlights";
+import { OccasionPreview } from "@/components/OccasionPreview";
 import { FamilyWeather } from "@/components/FamilyWeather";
 import { FamilyInsights } from "@/components/FamilyInsights";
 import { defaultFamilyPreferences } from "@/lib/familyPreferences";
@@ -65,6 +66,7 @@ function Index() {
 
       {prefs.weather && <FamilyWeather />}
       <FamilyCalendarHighlights />
+      <OccasionPreview />
       {prefs.notificationFrequency !== "off" && <FamilyInsights />}
       <FamilyFinanceSnapshot />
 
