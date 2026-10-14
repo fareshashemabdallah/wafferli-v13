@@ -56,8 +56,7 @@ function SmartBuy() {
   return (
     <AppShell title={tr("Compare & Choose")}>
       <PlanContextBanner onUseBudget={amount=>setS(old=>({...old,budget:String(amount)}))}/>
-      <div className="rounded-2xl bg-mint/60 p-4 text-sm text-ink">{tr("The lowest price is not always the best value. Consider quality, durability, convenience and support before choosing. This pilot compares your entered costs only.")}</div>
-      <Notice>{tr("Enter prices you've seen yourself. Dabberna doesn't fetch live prices yet, so there are no automatic \"savings\" claims.")}</Notice>
+      <p className="mb-3 text-sm text-muted-foreground">{tr("Compare price, quality and convenience before choosing.")}</p>
       <div className="card-soft mt-4 grid gap-3 p-4 sm:grid-cols-2">
         <Field label={tr("What are you buying?")}><Input className={inputCls} maxLength={60} value={s.product} onChange={(e) => setS({ ...s, product: e.target.value })} /></Field>
         <Field label={tr("Your budget (JOD)")}><Input className={inputCls} inputMode="decimal" value={s.budget} onChange={(e) => setS({ ...s, budget: e.target.value })} /></Field>
@@ -104,10 +103,12 @@ function SmartBuy() {
         ))}
         <Button variant="secondary" disabled={s.alts.length >= 8} onClick={() => setS({ ...s, alts: [...s.alts, { id: uid(), store: "", price: "", extra: "", verified: false }] })}><Plus className="size-4" /> {tr("Add alternative")}</Button>
       </div>
-      <div className="mt-6 grid grid-cols-2 gap-3">
+      <details className="mt-5 rounded-2xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{tr("Add photos (optional)")}</summary>
+      <div className="mt-3 grid grid-cols-2 gap-3">
         <Photo label={tr("Product photo")} icon={ImagePlus} />
         <Photo label={tr("Receipt photo")} icon={Receipt} />
       </div>
+      </details>
     </AppShell>
   );
 }
