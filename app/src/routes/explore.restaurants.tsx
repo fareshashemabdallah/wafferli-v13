@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MapPin, Search, ExternalLink, Plus, Clock3, KeyRound } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { AppShell, Notice } from "@/components/AppShell";
+import { PlanContextBanner } from "@/components/PlanContextBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, NativeSelect } from "@/components/Field";
@@ -87,6 +88,7 @@ function Restaurants() {
   };
   return (
     <AppShell title={tr("Eat & Enjoy")}>
+      <PlanContextBanner/>
       <p className="mb-4 text-sm text-muted-foreground">{tr("Find the right dining experience for your family, the occasion and your budget—not just a cheaper meal.")}</p>
       <Notice>
         <strong>{tr("The old community map server repeatedly timed out.")}</strong> {tr("We no longer rely on it for this screen. Search Google Maps without any API key, or connect a personal free Geoapify key to show actual mapped venues")} <strong>{tr("inside")}</strong> {tr("Dabberna. This is place lookup, not yet AI.")} </Notice>
