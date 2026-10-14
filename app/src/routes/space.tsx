@@ -68,7 +68,7 @@ function Space() {
       </ul>
       <section className="card-soft mt-6 p-4 text-sm">
         <h2 className="font-semibold">{tr("Shared vs private expenses")}</h2>
-        <p className="mt-1 text-muted-foreground">In My Money, each expense is marked shared (household) or private. In this pilot everything stays on this one device; multi-user household sharing isn't live yet.</p>
+        <p className="mt-1 text-muted-foreground">{tr("In My Money, each expense is marked shared (household) or private. In this pilot everything stays on this one device; multi-user household sharing isn't live yet.")}</p>
       </section>
     </AppShell>
   );
