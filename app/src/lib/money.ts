@@ -10,7 +10,7 @@ export type MoneyState = {
   /** Manual actual cash available now, intentionally not inferred from historic expense entries. */
   cashOnHand?:number|null; cashReserve?:number;
   /** Date on which the user last refreshed the manually entered cash balance. */
-  cashUpdatedAt?:string;
+  cashUpdatedAt?:string | undefined;
 };
 export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string; /** Date of birth, stored on this device only. */ birthday?: string | undefined };
 
