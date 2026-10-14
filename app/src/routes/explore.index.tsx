@@ -31,9 +31,9 @@ function Explore() {
           <Link key={to} to={to} className="card-soft flex gap-4 p-4 transition hover:-translate-y-0.5">
             <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-mint text-brand"><Icon className="size-6" /></span>
             <span>
-              <span className="block font-semibold">{title}</span>
-              <span className="block text-sm text-muted-foreground">{desc}</span>
-              <span className="mt-1 inline-block rounded-full bg-lime px-2 text-[11px] font-semibold text-ink">{live}</span>
+              <span className="block font-semibold">{tr(title)}</span>
+              <span className="block text-sm text-muted-foreground">{tr(desc)}</span>
+              <span className="mt-1 inline-block rounded-full bg-lime px-2 text-[11px] font-semibold text-ink">{tr(live)}</span>
             </span>
           </Link>
         ))}
