@@ -31,6 +31,9 @@ jobs:
       - name: Validate full app
         working-directory: app
         run: bun run typecheck
+      - name: Test cash flow and payment scheduling
+        working-directory: app
+        run: bunx vitest run src/lib/cashflow.test.ts
       - name: Build static React app
         working-directory: app
         run: bun run build
