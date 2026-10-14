@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CashFlowPlanner } from "@/components/CashFlowPlanner";
+import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
 import { localToday } from "@/lib/cashflow";
-import { ArrowRight, Pencil, Plus, RotateCcw, ShieldCheck, Trash2, Wallet } from "lucide-react";
+import { Pencil, Plus, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AppShell, PilotBadge } from "@/components/AppShell";
@@ -82,36 +83,7 @@ function MoneyPage() {
         </div></details>
       </div>
 
-      {section==="overview"&&<>
-      <section className="editorial-card relative overflow-hidden p-5 sm:p-6">
-        <div className="mb-2 inline-flex size-10 items-center justify-center rounded-xl bg-[#E8F1E7] text-brand"><Wallet className="size-5"/></div>
-        <p className="text-sm font-medium text-muted-foreground">{tr("Remaining allowance this month")}</p>
-        <p className="mt-2 text-3xl font-semibold tabular-nums text-ink sm:text-4xl">{fmtJOD(c.remaining)}</p>
-        <p className="mt-1 text-sm opacity-80">{c.daysLeft} {tr("days left")} · {tr("spent")} {fmtJOD(c.spent)} {tr("of")} {fmtJOD(c.spendable)}</p>
-        <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-[#E5EDE2]">
-          <div className="h-full rounded-full bg-brand-2" style={{ width: `${Math.min(100, (c.spent / Math.max(1, c.spendable)) * 100)}%` }} />
-        </div>
-        <button type="button" onClick={()=>setSection("spending")} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white transition hover:bg-[#244D3C]">{ar?"سجّل مصروف":"Record spending"} <ArrowRight className="size-4 rtl:rotate-180"/></button>
-      </section>
-
-      <details className="group mt-4 rounded-xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"عرض بقية التفاصيل":"See more financial details"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <Stat label={tr("Savings target")} value={fmtJOD(c.savingsTarget)} sub={`${s.savingsPct}% ${tr("of income")}`} />
-        <Stat label={tr("Planned (budget)")} value={fmtJOD(c.planned)} sub={tr(c.overPlan ? "Above spendable!" : "Within spendable")} warn={c.overPlan} />
-        <Stat label={tr("Actual spent")} value={fmtJOD(c.spent)} sub={tr("This month")} />
-        <Stat
-          label={tr("Projected month-end")}
-          value={fmtJOD(c.projected)}
-          sub={`${tr("Savings")} ≈ ${fmtJOD(c.projectedSavings)}`}
-          warn={c.projectedSavings < c.savingsTarget}
-        />
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Projection: fixed & periodic use the larger of planned or actual; variable extends your current daily pace to month-end.
-      </p>
-
-      </details>
-      </>}
+      {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}/>}
       {section==="planning"&&<>
       <CashFlowPlanner state={s} members={members} update={setS} />
       <details className="editorial-card mt-4 px-4 py-3">
