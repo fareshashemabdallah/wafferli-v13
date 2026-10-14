@@ -41,21 +41,21 @@ function Shopping() {
   const add = (e: FormEvent) => {
     e.preventDefault();
     const p = price === "" ? 0 : parseAmount(price, 5000);
-    if (!name.trim()) return setErr("Item name is required.");
-    if (p === null) return setErr("Price must be a positive number.");
+    if (!name.trim()) return setErr(tr("Item name is required."));
+    if (p === null) return setErr(tr("Price must be a positive number."));
     setErr("");
     setItems([...items, { id: uid(), name: name.trim().slice(0, 60), qty: 1, price: p, done: false }]);
     setName(""); setPrice("");
   };
 
   const record = () => {
-    if (total <= 0) { toast.error("Basket total is zero"); return; }
+    if (total <= 0) { toast.error(tr("Basket total is zero")); return; }
     setMoney((m) => {
       const cat = m.categories.find((c) => /grocer/i.test(c.name)) ?? m.categories[0];
       if (!cat) return m;
       return { ...m, expenses: [{ id: uid(), date: new Date().toISOString().slice(0, 10), categoryId: cat.id, amount: Math.round(total * 100) / 100, note: "Shopping basket", shared: true }, ...m.expenses] };
     });
-    toast.success(`Recorded ${fmtJOD(total)} in My Money`);
+    toast.success(`${tr("Recorded")} ${fmtJOD(total)} ${tr("in My Money")}`);
   };
 
   return (
@@ -73,7 +73,7 @@ function Shopping() {
         <ul className="card-soft mt-4 divide-y">
           {items.map((i) => (
             <li key={i.id} className="flex items-center gap-2 p-3">
-              <Checkbox checked={i.done} onCheckedChange={(v) => upd(i.id, { done: v === true })} aria-label={`Got ${i.name}`} />
+              <Checkbox checked={i.done} onCheckedChange={(v) => upd(i.id, { done: v === true })} aria-label={`${tr("Got")} ${i.name}`} />
               <Input aria-label={tr("Name")} className={`h-10 min-w-0 flex-1 border-transparent bg-transparent ${i.done ? "line-through opacity-60" : ""}`} value={i.name} onChange={(e) => upd(i.id, { name: e.target.value.slice(0, 60) })} />
               <div className="flex items-center">
                 <Button size="icon" variant="ghost" aria-label={tr("Decrease")} onClick={() => upd(i.id, { qty: Math.max(1, i.qty - 1) })}><Minus className="size-4" /></Button>
@@ -81,7 +81,7 @@ function Shopping() {
                 <Button size="icon" variant="ghost" aria-label={tr("Increase")} onClick={() => upd(i.id, { qty: Math.min(99, i.qty + 1) })}><Plus className="size-4" /></Button>
               </div>
               <Input aria-label={tr("Price")} className="h-10 w-20 bg-card" inputMode="decimal" defaultValue={i.price} onBlur={(e) => { const p = parseAmount(e.target.value, 5000); if (p !== null) upd(i.id, { price: p }); else e.target.value = String(i.price); }} />
-              <Button size="icon" variant="ghost" aria-label={`Remove ${i.name}`} onClick={() => setItems(items.filter((x) => x.id !== i.id))}><Trash2 className="size-4" /></Button>
+              <Button size="icon" variant="ghost" aria-label={`${tr("Remove")} ${i.name}`} onClick={() => setItems(items.filter((x) => x.id !== i.id))}><Trash2 className="size-4" /></Button>
             </li>
           ))}
         </ul>
