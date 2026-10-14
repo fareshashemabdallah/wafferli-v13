@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createOuting, type SavedOuting } from "@/lib/outings";
 import { useLocalState } from "@/lib/storage";
+import { estimateOutingCost, formatJod, optionalJod, parseAttendees, parseJod } from "@/lib/outingCosts";
 
 export const Route = createFileRoute("/explore/together")({
   head: () => ({
@@ -55,10 +56,13 @@ const focusNames: Record<ChildFocus,string> = {
 function TogetherPage() {
   const navigate = useNavigate();
   const [saved, setSaved] = useLocalState<SavedOuting[]>("outings", []);
-  const [f, setF] = useState({ title: "Our outing", event_at: "", neighborhood: "Amman", friends: "6", organizer: "", budget: "", whoPays: "later", activity:"other" as ActivityType });
+  const [f, setF] = useState({ title: "Our outing", event_at: "", neighborhood: "Amman", friends: "6", organizer: "", whoPays: "later", activity:"other" as ActivityType });
   const [children, setChildren] = useState<ChildAttendance>("unsure");
   const [childFocus, setChildFocus] = useState<ChildFocus>("mixed");
   const [childCount, setChildCount] = useState("1");
+  const [cost, setCost] = useState({
+    adults: "2", adultRate: "", childRate: "", transport: "", extras: "", maximum: ""
+  });
   const [ageBands, setAgeBands] = useState<string[]>([]);
   const [stroller, setStroller] = useState(false);
   const [quiet, setQuiet] = useState(false);
@@ -74,6 +78,8 @@ function TogetherPage() {
     activityTypes[f.activity].query, f.neighborhood.trim() || "Amman", "Jordan"
   ].filter(Boolean).join(" ");
   const googleActivitiesLink = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(lookupSuggestion);
+  const estimate = estimateOutingCost({...cost, children, childCount});
+  const updateCost = (field: keyof typeof cost, value: string) => setCost(old=>({...old,[field]:value}));
   const [opts, setOpts] = useState(() => {
     // Share selected real venues between the Places and Together screens, on this device only.
     try {
@@ -97,6 +103,11 @@ function TogetherPage() {
     const kids = Number(childCount);
     if (children === "yes" && (!Number.isInteger(kids) || kids < 1 || kids > 30))
       return setErr("Enter the approximate number of children (1–30).");
+    if (parseAttendees(cost.adults) === null)
+      return setErr("Enter the number of adults attending (1–30), separately from the voters.");
+    if ([cost.adultRate,cost.transport,cost.extras,cost.maximum,...(children === "yes" ? [cost.childRate] : [])]
+        .some(value => value.trim() !== "" && parseJod(value) === null))
+      return setErr("Enter valid costs in JOD (0–100,000, maximum two decimal places).");
     if (!Number.isInteger(n) || n < 2 || n > 30) return setErr("Number of friends must be 2–30.");
     if (clean.length < 3 || clean.length > 10) return setErr("Add 3 to 10 named venues or activities.");
     setErr(""); setBusy(true);
@@ -107,10 +118,16 @@ function TogetherPage() {
         children === "unsure" ? " · Kids TBD" : "";
       const publicTitle = shareTheme && theme ? f.title.trim().slice(0, 80 - theme.length) + theme : f.title.trim();
       const r = await createOuting({ title: publicTitle, event_at: f.event_at, neighborhood: f.neighborhood, friend_count: n, organizer_name: f.organizer, options: clean });
-      setSaved((s) => [{ ...r, title: publicTitle,
-        ...(f.budget ? { budget: f.budget } : {}), whoPays: f.whoPays,
+      setSaved((s) => [{ ...r, title: publicTitle, whoPays: f.whoPays,
         activity: f.activity, childrenAttendance: children,
         ...(children === "yes" ? { childrenFocus: childFocus, childCount: kids, ageBands, stroller, quiet } : {}),
+        adultCount: parseAttendees(cost.adults) ?? undefined,
+        ...(cost.adultRate.trim() !== "" ? { adultCostPerPerson: parseJod(cost.adultRate)! } : {}),
+        ...(children === "yes" && cost.childRate.trim() !== "" ? { childCostPerPerson: parseJod(cost.childRate)! } : {}),
+        travelCost: optionalJod(cost.transport) ?? 0,
+        otherCost: optionalJod(cost.extras) ?? 0,
+        ...(estimate.maximum !== null ? { totalBudget: estimate.maximum } : {}),
+        ...(estimate.estimatedTotal !== null ? { estimatedTotal: estimate.estimatedTotal } : {}),
         created: new Date().toISOString(),
       }, ...s].slice(0, 20));
       toast.success("Vote created");
@@ -151,8 +168,7 @@ function TogetherPage() {
           <Input className={inputCls} inputMode="numeric" value={f.friends} onChange={(e) => setF({ ...f, friends: e.target.value })} />
         </Field>
         <Field label="Your display name (optional)" hint="Shown to friends"><Input className={inputCls} maxLength={40} value={f.organizer} onChange={(e) => setF({ ...f, organizer: e.target.value })} /></Field>
-        <Field label="Budget per person (optional, private)" hint="Only you see this — never shared"><Input className={inputCls} maxLength={30} value={f.budget} onChange={(e) => setF({ ...f, budget: e.target.value })} /></Field>
-        <section className="sm:col-span-2 space-y-3 rounded-2xl border bg-muted/30 p-4" aria-label="Children joining the outing">
+         <section className="sm:col-span-2 space-y-3 rounded-2xl border bg-muted/30 p-4" aria-label="Children joining the outing">
           <h2 className="font-semibold">Are children joining? · هل الأطفال معنا؟</h2>
           <Field label="Children attending">
             <NativeSelect value={children} onChange={e=>setChildren(e.target.value as ChildAttendance)}>
@@ -197,6 +213,76 @@ function TogetherPage() {
             Include a general family/kids label in the shared outing title
           </label>
           <p className="text-xs text-muted-foreground">Counts, age groups and preferences remain only in your organizer notes on this device. Only a general label is shared when selected.</p>
+        </section>
+        <section className="sm:col-span-2 space-y-3 rounded-2xl border bg-card p-4" aria-label="Outing cost calculator">
+          <div>
+            <h2 className="font-semibold">Outing budget calculator · ميزانية الطلعة</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Private estimates in Jordanian dinars (JOD). Adult and child prices are separate; do not assume children pay adult prices.
+              Leave a price blank if unknown, or enter 0 for free admission.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Adults attending" hint="Separate from number of voters">
+              <Input className={inputCls} type="number" inputMode="numeric" min="1" max="30" step="1"
+                value={cost.adults} onChange={e=>updateCost("adults",e.target.value)} />
+            </Field>
+            <Field label="Estimated cost per adult (JOD)" hint="Entry, food or activity for one adult">
+              <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
+                placeholder="e.g. 20" value={cost.adultRate} onChange={e=>updateCost("adultRate",e.target.value)} />
+            </Field>
+            {children === "yes" && <Field label="Estimated cost per child (JOD)" hint="Enter 0 if children enter free; check age-based discounts">
+              <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
+                placeholder="e.g. 10" value={cost.childRate} onChange={e=>updateCost("childRate",e.target.value)} />
+            </Field>}
+            <Field label="Transport for the whole group (JOD)" hint="Total cost, not per person">
+              <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
+                placeholder="e.g. 8" value={cost.transport} onChange={e=>updateCost("transport",e.target.value)} />
+            </Field>
+            <Field label="Other shared costs (JOD)" hint="Parking, equipment, babysitting, extras, etc.">
+              <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
+                placeholder="e.g. 5" value={cost.extras} onChange={e=>updateCost("extras",e.target.value)} />
+            </Field>
+            <Field label="Maximum budget for entire outing (JOD)" hint="Optional spending limit for everyone together">
+              <Input className={inputCls} type="number" inputMode="decimal" min="0" max="100000" step="0.01"
+                placeholder="e.g. 100" value={cost.maximum} onChange={e=>updateCost("maximum",e.target.value)} />
+            </Field>
+          </div>
+          <div className="rounded-2xl bg-muted p-4" aria-live="polite">
+            <h3 className="font-semibold">Estimated cost for the whole outing</h3>
+            <div className="mt-2 space-y-1 text-sm">
+              <div className="flex justify-between gap-2">
+                <span>Adults ({estimate.adults ?? "?"})</span>
+                <span className="font-semibold">{estimate.adultSubtotal !== null ? formatJod(estimate.adultSubtotal) : "Price needed"}</span>
+              </div>
+              {children === "yes" && <div className="flex justify-between gap-2">
+                <span>Children ({estimate.children ?? "?"})</span>
+                <span className="font-semibold">{estimate.childSubtotal !== null ? formatJod(estimate.childSubtotal) : "Price needed"}</span>
+              </div>}
+              <div className="flex justify-between gap-2"><span>Transport + other shared costs</span>
+                <span>{estimate.transport !== null && estimate.extras !== null ? formatJod(estimate.transport + estimate.extras) : "Check amounts"}</span>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 border-t pt-3">
+              <strong>Estimated total</strong>
+              <strong className="text-xl">{estimate.estimatedTotal !== null ? formatJod(estimate.estimatedTotal) : "Not available yet"}</strong>
+            </div>
+            {children === "unsure" && <p className="mt-2 text-xs text-muted-foreground">
+              Children may join: the final total remains unknown until attendance and children's costs are confirmed.
+            </p>}
+            {children === "yes" && estimate.childRate === null && <p className="mt-2 text-xs text-muted-foreground">
+              Please enter an estimated child price (0 if free) to calculate the full group total.
+            </p>}
+            {estimate.adultRate === null && <p className="mt-2 text-xs text-muted-foreground">
+              Enter the estimated adult price to calculate the full group total.
+            </p>}
+            {estimate.remaining !== null && <p className={"mt-3 font-semibold " + (estimate.remaining >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-destructive")}>
+              {estimate.remaining >= 0 ? "Within budget — " + formatJod(estimate.remaining) + " remaining" : "Over budget by " + formatJod(-estimate.remaining)}
+            </p>}
+            <p className="mt-3 text-xs text-muted-foreground">
+              Planning estimate only. Actual venue prices, taxes, tips, transport and child discounts may differ. Blank optional extras are treated as 0.
+            </p>
+          </div>
         </section>
         <div className="sm:col-span-2 rounded-xl border p-3 text-sm">
           <div className="font-medium">Find activity ideas</div>
