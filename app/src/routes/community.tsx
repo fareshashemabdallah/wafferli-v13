@@ -9,7 +9,7 @@ import { useI18n } from "@/lib/i18n";
 import type { User } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/community")({
- head:()=>({meta:[{title:"Family Circles — Dabberna"},{name:"description",content:"Invite-only family circles for parents, friends and outing discussions."}]}),
+ head:()=>({meta:[{title:"Family & Friends Circles — Dabberna"},{name:"description",content:"Invite-only family circles for parents, friends and outing discussions."}]}),
  component:Community
 });
 function Community(){
@@ -64,7 +64,7 @@ function Community(){
   if(error)throw error;setBody("");await loadMessages(active);
  });};
  const selected=groups.find(g=>g.id===active);
- return <AppShell title={ar?"دوائر العائلة":"Family Circles"}>
+ return <AppShell title={ar?"دوائر العائلة والأصدقاء":"Family & Friends Circles"}>
   <div className="hero-surface rounded-3xl p-5">
    <div className="flex items-center gap-3"><HeartHandshake className="size-7 text-brand"/><h2 className="text-xl font-semibold">{ar?"مجتمعك الموثوق، باختيارك":"Your own trusted circle"}</h2></div>
    <p className="mt-2 text-sm">{ar?"أنشئ مجموعة خاصة لأهالي المدرسة أو الأصدقاء، ادعُ من تشاء، وتبادل الأسئلة والخبرات عن النزهات والخدمات.":"Create a private group for school parents or friends, invite people you trust and discuss outings, advice and everyday questions."}</p>
