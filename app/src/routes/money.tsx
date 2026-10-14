@@ -29,6 +29,7 @@ export const Route = createFileRoute("/money")({
 const today = localToday;
 
 function MoneyPage() {
+  const { tr } = useI18n();
   const { t } = useI18n();
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
@@ -46,8 +47,8 @@ function MoneyPage() {
   return (
     <AppShell title={t("money")}>
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {s.demo && <PilotBadge>Demo data</PilotBadge>}
-        <span className="text-xs text-muted-foreground">Saved on this device only. Use fictional figures during the pilot.</span>
+        {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
+        <span className="text-xs text-muted-foreground">{tr("Saved on this device only. Use fictional figures during the pilot.")}</span>
         <Button
           variant="outline"
           size="sm"
@@ -59,12 +60,11 @@ function MoneyPage() {
             }
           }}
         >
-          <RotateCcw className="size-4" /> Reset sample data
-        </Button>
+          <RotateCcw className="size-4" /> {tr("Reset sample data")} </Button>
       </div>
 
       <section className="hero-surface rounded-3xl p-5">
-        <p className="text-sm opacity-80">Remaining allowance this month</p>
+        <p className="text-sm opacity-80">{tr("Remaining allowance this month")}</p>
         <p className="mt-1 font-display text-4xl font-semibold">{fmtJOD(c.remaining)}</p>
         <p className="mt-1 text-sm opacity-80">{c.daysLeft} days left · spent {fmtJOD(c.spent)} of {fmtJOD(c.spendable)}</p>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-primary-foreground/20">
@@ -73,11 +73,11 @@ function MoneyPage() {
       </section>
 
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Savings target" value={fmtJOD(c.savingsTarget)} sub={`${s.savingsPct}% of income`} />
-        <Stat label="Planned (budget)" value={fmtJOD(c.planned)} sub={c.overPlan ? "Above spendable!" : "Within spendable"} warn={c.overPlan} />
-        <Stat label="Actual spent" value={fmtJOD(c.spent)} sub="This month" />
+        <Stat label={tr("Savings target")} value={fmtJOD(c.savingsTarget)} sub={`${s.savingsPct}% of income`} />
+        <Stat label={tr("Planned (budget)")} value={fmtJOD(c.planned)} sub={c.overPlan ? "Above spendable!" : "Within spendable"} warn={c.overPlan} />
+        <Stat label={tr("Actual spent")} value={fmtJOD(c.spent)} sub="This month" />
         <Stat
-          label="Projected month-end"
+          label={tr("Projected month-end")}
           value={fmtJOD(c.projected)}
           sub={`Savings ≈ ${fmtJOD(c.projectedSavings)}`}
           warn={c.projectedSavings < c.savingsTarget}
@@ -110,6 +110,7 @@ function MoneyPage() {
 }
 
 function Stat({ label, value, sub, warn }: { label: string; value: string; sub: string; warn?: boolean }) {
+  const { tr } = useI18n();
   return (
     <div className="card-soft p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -120,6 +121,7 @@ function Stat({ label, value, sub, warn }: { label: string; value: string; sub: 
 }
 
 function Settings({ income, pct, hasSources, onSave }: { income: number; pct: number; hasSources:boolean; onSave: (i: number, p: number) => void }) {
+  const { tr } = useI18n();
   const [inc, setInc] = useState(String(income));
   const [p, setP] = useState(String(pct));
   const [err, setErr] = useState("");
@@ -135,17 +137,17 @@ function Settings({ income, pct, hasSources, onSave }: { income: number; pct: nu
   };
   return (
     <section className="card-soft mt-6 p-4">
-      <h2 className="text-lg font-semibold">Income & savings goal</h2>
+      <h2 className="text-lg font-semibold">{tr("Income & savings goal")}</h2>
       <form onSubmit={save} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
         <Field label={hasSources?"Estimated monthly income (JOD)":"Existing monthly household income (JOD)"}
           hint={hasSources?"Calculated from your income sources below — edit there. One-time and irregular amounts aren't averaged into monthly income.":"Legacy monthly budget estimate. Add dated sources under Income Schedule below."}>
           <Input className={inputCls} inputMode="decimal" value={hasSources?String(income):inc}
             disabled={hasSources} onChange={(e) => setInc(e.target.value)} />
         </Field>
-        <Field label="Savings target (%)">
+        <Field label={tr("Savings target (%)")}>
           <Input className={inputCls} inputMode="numeric" value={p} onChange={(e) => setP(e.target.value)} />
         </Field>
-        <Button type="submit" className="h-11">Save</Button>
+        <Button type="submit" className="h-11">{tr("Save")}</Button>
       </form>
       {err && <p className="mt-2 text-sm text-destructive" role="alert">{err}</p>}
     </section>
@@ -155,14 +157,14 @@ function Settings({ income, pct, hasSources, onSave }: { income: number; pct: nu
 const typeLabel: Record<CatType, string> = { fixed: "Fixed", variable: "Variable", periodic: "Periodic" };
 
 function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (id: string) => number; onChange: (c: Category[]) => void }) {
+  const { tr } = useI18n();
   const [editing, setEditing] = useState<Category | null>(null);
   return (
     <section className="card-soft mt-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Spending categories</h2>
+        <h2 className="text-lg font-semibold">{tr("Spending categories")}</h2>
         <Button size="sm" variant="secondary" onClick={() => setEditing({ id: "", name: "", type: "variable", planned: 0 })}>
-          <Plus className="size-4" /> Add
-        </Button>
+          <Plus className="size-4" /> {tr("Add")} </Button>
       </div>
       {editing && (
         <CategoryForm
@@ -174,7 +176,7 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
           }}
         />
       )}
-      {cats.length === 0 && <p className="mt-3 text-sm text-muted-foreground">No categories yet. Add your first one.</p>}
+      {cats.length === 0 && <p className="mt-3 text-sm text-muted-foreground">{tr("No categories yet. Add your first one.")}</p>}
       <ul className="mt-3 divide-y">
         {cats.map((c) => {
           const a = spentBy(c.id);
@@ -209,6 +211,7 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
 }
 
 function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave: (c: Category) => void; onCancel: () => void }) {
+  const { tr } = useI18n();
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState<CatType>(initial.type);
   const [planned, setPlanned] = useState(initial.planned ? String(initial.planned) : "");
@@ -224,18 +227,18 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
         onSave({ id: initial.id, name: name.trim().slice(0, 40), type, planned: p });
       }}
     >
-      <Field label="Name"><Input className={inputCls} value={name} maxLength={40} onChange={(e) => setName(e.target.value)} /></Field>
-      <Field label="Type">
+      <Field label={tr("Name")}><Input className={inputCls} value={name} maxLength={40} onChange={(e) => setName(e.target.value)} /></Field>
+      <Field label={tr("Type")}>
         <NativeSelect value={type} onChange={(e) => setType(e.target.value as CatType)}>
-          <option value="fixed">Fixed (rent, bills)</option>
-          <option value="variable">Variable (groceries, fuel)</option>
-          <option value="periodic">Periodic (school, insurance)</option>
+          <option value="fixed">{tr("Fixed (rent, bills)")}</option>
+          <option value="variable">{tr("Variable (groceries, fuel)")}</option>
+          <option value="periodic">{tr("Periodic (school, insurance)")}</option>
         </NativeSelect>
       </Field>
-      <Field label="Planned per month (JOD)"><Input className={inputCls} inputMode="decimal" value={planned} onChange={(e) => setPlanned(e.target.value)} /></Field>
+      <Field label={tr("Planned per month (JOD)")}><Input className={inputCls} inputMode="decimal" value={planned} onChange={(e) => setPlanned(e.target.value)} /></Field>
       <div className="flex items-end gap-2">
-        <Button type="submit" className="h-11 flex-1">Save</Button>
-        <Button type="button" variant="outline" className="h-11" onClick={onCancel}>Cancel</Button>
+        <Button type="submit" className="h-11 flex-1">{tr("Save")}</Button>
+        <Button type="button" variant="outline" className="h-11" onClick={onCancel}>{tr("Cancel")}</Button>
       </div>
       {err && <p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
     </form>
@@ -246,6 +249,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
   cats: Category[]; members: Member[]; expenses: Expense[];
   onChange: (e: Expense[]) => void; onDelete: (e:Expense)=>void;
 }) {
+  const { tr } = useI18n();
   const blank: Expense = { id: "", date: today(), categoryId: cats[0]?.id ?? "", amount: 0, shared: true };
   const [editing, setEditing] = useState<Expense | null>(null);
   const [quickAmount, setQuickAmount] = useState("");
@@ -267,28 +271,24 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
   return (
     <section className="card-soft mt-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Actual expenses</h2>
+        <h2 className="text-lg font-semibold">{tr("Actual expenses")}</h2>
         <Button size="sm" variant="outline" onClick={() => setEditing(blank)} disabled={cats.length === 0}>
-          <Plus className="size-4" /> More details
-        </Button>
+          <Plus className="size-4" /> {tr("More details")} </Button>
       </div>
       <form onSubmit={recordQuick} className="mt-3 grid gap-2 rounded-xl bg-muted/40 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-        <Field label="Amount (JOD)">
+        <Field label={tr("Amount (JOD)")}>
           <Input className={inputCls} inputMode="decimal" value={quickAmount}
-            placeholder="e.g. 12.50" onChange={e=>setQuickAmount(e.target.value)} />
+            placeholder={tr("e.g. 12.50")} onChange={e=>setQuickAmount(e.target.value)} />
         </Field>
-        <Field label="Category">
+        <Field label={tr("Category")}>
           <NativeSelect value={selectedCategory} onChange={e=>setQuickCategory(e.target.value)}>
-            {cats.length===0&&<option value="">Add category first</option>}
+            {cats.length===0&&<option value="">{tr("Add category first")}</option>}
             {cats.map(cat=><option key={cat.id} value={cat.id}>{cat.name}</option>)}
           </NativeSelect>
         </Field>
-        <Button type="submit" className="h-11" disabled={!selectedCategory}><Plus className="size-4"/> Save</Button>
+        <Button type="submit" className="h-11" disabled={!selectedCategory}><Plus className="size-4"/> {tr("Save")}</Button>
         {quickError&&<p role="alert" className="text-sm text-destructive sm:col-span-3">{quickError}</p>}
-        <p className="text-xs text-muted-foreground sm:col-span-3">
-          Quick entry: today · shared household · your device only.
-          Need a different date, private expense, owner or note? Choose More details.
-        </p>
+        <p className="text-xs text-muted-foreground sm:col-span-3"> {tr("Quick entry: today · shared household · your device only. Need a different date, private expense, owner or note? Choose More details.")} </p>
       </form>
       {editing && (
         <ExpenseForm
@@ -304,7 +304,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
         />
       )}
       {sorted.length === 0 ? (
-        <p className="mt-4 rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">No expenses logged yet.</p>
+        <p className="mt-4 rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">{tr("No expenses logged yet.")}</p>
       ) : (
         <ul className="mt-3 divide-y">
           {sorted.map((e) => (
@@ -316,8 +316,8 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
                 </p>
               </div>
               <span className="font-semibold tabular-nums">{fmtJOD(e.amount)}</span>
-              <Button size="icon" variant="ghost" aria-label="Edit expense" onClick={() => setEditing(e)}><Pencil className="size-4" /></Button>
-              <Button size="icon" variant="ghost" aria-label="Delete expense" onClick={() => confirm("Delete this expense?") && onDelete(e)}>
+              <Button size="icon" variant="ghost" aria-label={tr("Edit expense")} onClick={() => setEditing(e)}><Pencil className="size-4" /></Button>
+              <Button size="icon" variant="ghost" aria-label={tr("Delete expense")} onClick={() => confirm("Delete this expense?") && onDelete(e)}>
                 <Trash2 className="size-4" />
               </Button>
             </li>
@@ -329,6 +329,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
 }
 
 function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Expense; cats: Category[]; members: Member[]; onSave: (e: Expense) => void; onCancel: () => void }) {
+  const { tr } = useI18n();
   const [f, setF] = useState({ ...initial, amountStr: initial.amount ? String(initial.amount) : "" });
   const [err, setErr] = useState("");
   return (
@@ -343,29 +344,29 @@ function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Ex
         onSave({ ...rest, amount, note: (f.note ?? "").slice(0, 60) });
       }}
     >
-      <Field label="Amount (JOD)"><Input className={inputCls} inputMode="decimal" autoFocus value={f.amountStr} onChange={(e) => setF({ ...f, amountStr: e.target.value })} /></Field>
-      <Field label="Date"><Input className={inputCls} type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
-      <Field label="Category">
+      <Field label={tr("Amount (JOD)")}><Input className={inputCls} inputMode="decimal" autoFocus value={f.amountStr} onChange={(e) => setF({ ...f, amountStr: e.target.value })} /></Field>
+      <Field label={tr("Date")}><Input className={inputCls} type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
+      <Field label={tr("Category")}>
         <NativeSelect value={f.categoryId} onChange={(e) => setF({ ...f, categoryId: e.target.value })}>
           {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </NativeSelect>
       </Field>
-      <Field label="Owner (optional)">
+      <Field label={tr("Owner (optional)")}>
         <NativeSelect value={f.owner ?? ""} onChange={(e) => setF((previous) => { const { owner: _owner, ...withoutOwner } = previous; return e.target.value ? { ...withoutOwner, owner: e.target.value } : withoutOwner; })}>
           <option value="">—</option>
-          <option value="Household">Household</option>
+          <option value="Household">{tr("Household")}</option>
           {members.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
         </NativeSelect>
       </Field>
-      <Field label="Note (optional)"><Input className={inputCls} maxLength={60} value={f.note ?? ""} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
+      <Field label={tr("Note (optional)")}><Input className={inputCls} maxLength={60} value={f.note ?? ""} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
       <label className="flex items-center justify-between gap-3 rounded-md border bg-card px-3 text-sm font-medium">
         {f.shared ? "Shared household expense" : "Private (only you)"}
         <Switch checked={f.shared} onCheckedChange={(v) => setF({ ...f, shared: v })} />
       </label>
       {err && <p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
       <div className="flex gap-2 sm:col-span-2">
-        <Button type="submit" className="h-11 flex-1">Save expense</Button>
-        <Button type="button" variant="outline" className="h-11" onClick={onCancel}>Cancel</Button>
+        <Button type="submit" className="h-11 flex-1">{tr("Save expense")}</Button>
+        <Button type="button" variant="outline" className="h-11" onClick={onCancel}>{tr("Cancel")}</Button>
       </div>
     </form>
   );
