@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAdmin, voteUrl, waLink, type SavedOuting } from "@/lib/outings";
 import { readLocal } from "@/lib/storage";
+import { formatJod } from "@/lib/outingCosts";
 
 export const Route = createFileRoute("/together/$adminToken")({
   ssr: false,
@@ -52,7 +53,28 @@ function AdminPage() {
           <h2 className="font-semibold">Organizer-only planning notes</h2>
           <p className="mt-1 text-xs text-muted-foreground">These details are stored on this device and are not included in the shared vote.</p>
           {local.activity && <p className="mt-2">Outing type: {{food:"Food & cafés",family:"Family & kids",entertainment:"Entertainment & events",outdoors:"Outdoor adventures",sports:"Sports & games",culture:"Culture & learning",trip:"Trips & experiences",other:"Other / undecided"}[local.activity]}</p>}
-          {local.budget && <p>Adult budget per person: {local.budget}</p>}
+          {local.budget && <p>Previous per-person budget note: {local.budget}</p>}
+          {local.adultCount !== undefined && <div className="mt-3 rounded-xl border bg-muted/40 p-3">
+            <h3 className="font-semibold">Private outing cost estimate · JOD</h3>
+            <p className="mt-1">Adults attending: {local.adultCount}</p>
+            {local.adultCostPerPerson !== undefined && <p>Adults: {local.adultCount} × {formatJod(local.adultCostPerPerson)} = {formatJod(local.adultCount * local.adultCostPerPerson)}</p>}
+            {local.childrenAttendance === "yes" && <p>Children: {local.childCount ?? "?"}
+              {local.childCostPerPerson !== undefined && local.childCount !== undefined
+                ? " × " + formatJod(local.childCostPerPerson) + " = " + formatJod(local.childCostPerPerson * local.childCount)
+                : " — cost not entered"}</p>}
+            {local.travelCost !== undefined && <p>Transport (group): {formatJod(local.travelCost)}</p>}
+            {local.otherCost !== undefined && <p>Other shared costs: {formatJod(local.otherCost)}</p>}
+            {local.estimatedTotal !== undefined
+              ? <p className="mt-2 font-semibold">Estimated total: {formatJod(local.estimatedTotal)}</p>
+              : <p className="mt-2 text-muted-foreground">Final estimate incomplete — check missing rates or child attendance.</p>}
+            {local.totalBudget !== undefined && <p>Whole-outing spending limit: {formatJod(local.totalBudget)}</p>}
+            {local.totalBudget !== undefined && local.estimatedTotal !== undefined && <p className={"font-semibold " + (local.estimatedTotal <= local.totalBudget ? "text-emerald-700 dark:text-emerald-300" : "text-destructive")}>
+              {local.estimatedTotal <= local.totalBudget
+                ? "Within budget by " + formatJod(local.totalBudget - local.estimatedTotal)
+                : "Over budget by " + formatJod(local.estimatedTotal - local.totalBudget)}
+            </p>}
+            <p className="mt-2 text-xs text-muted-foreground">Estimated by the organizer, not verified live prices. These amounts are not shared with voters.</p>
+          </div>}
           {local.whoPays && <p>Who pays: {pays[local.whoPays]}</p>}
           {local.childrenAttendance && <p>Children attending: {{no:"No",yes:"Yes",unsure:"Not decided"}[local.childrenAttendance]}</p>}
           {local.childrenAttendance === "yes" && <>
