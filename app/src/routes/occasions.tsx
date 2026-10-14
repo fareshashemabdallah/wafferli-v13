@@ -8,7 +8,9 @@ import {useI18n} from "@/lib/i18n";
 import {type FamilyMoment,formatMomentDate} from "@/lib/familyCalendar";
 import {sampleMembers,sampleMoney,type Member} from "@/lib/money";
 import {daysUntil,eventBudgetGuidance,ideaCategory,leadAdvice,occasionIdeas,planKey,planningMilestones,upcomingPlanEvents,type OccasionPlan,type OccasionPlans} from "@/lib/occasionAdvisor";
-import {useLocalState} from "@/lib/storage";
+import {useLocalState,writeLocal} from "@/lib/storage";
+import {activeDecisionKey,startDecisionJourney,externalMapLink} from "@/lib/decisionJourney";
+import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 
 export const Route=createFileRoute("/occasions")({
  head:()=>({meta:[{title:"Plan a Special Occasion — Dabberna"},{name:"description",content:"Plan meaningful gifts and experiences before an occasion. Discover fresh public online inspiration while keeping family data private."}]}),
@@ -45,6 +47,7 @@ function OccasionPlanner(){
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [money]=useLocalState("money",sampleMoney());
  const [plans,setPlans]=useLocalState<OccasionPlans>("occasionPlans",{});
+ const [prefs]=useLocalState("familyPreferences",defaultFamilyPreferences);
  const [chosen,setChosen]=useState("");
  const [feed,setFeed]=useState<TrendFeed|null>(null);
  const [feedState,setFeedState]=useState<"loading"|"loaded"|"unavailable">("loading");
@@ -164,10 +167,24 @@ function OccasionPlanner(){
      </a>
      <p className="mt-3 text-xs text-muted-foreground">{ar?"لا يتم تأكيد الأسعار أو التوفر أو الترند. تحقق من جودة المنتج وتكلفة التوصيل والمصدر قبل الشراء.":"Prices, availability and trend popularity are unverified. Check quality, delivery, returns and local availability before buying."}</p>
     </section>
-    <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold">
-      <Link className="text-brand underline" to="/explore/smartbuy">{ar?"قارن الخيارات والتكلفة الكاملة":"Compare the full cost"}</Link>
-      <Link className="text-brand underline" to="/community">{ar?"اسأل دائرة عائلتك وأصدقائك":"Ask Family & Friends Circles"}</Link>
-    </div>
+    <section className="mt-6 rounded-2xl border border-border bg-white p-4 sm:p-5" aria-label={ar?"من الفكرة إلى الخطة":"From idea to real choices"}>
+      <div className="flex items-center gap-2"><Sparkles className="size-5 text-brand"/><h2 className="text-lg font-semibold">{ar?"من الفكرة إلى التنفيذ":"Turn your idea into a plan"}</h2></div>
+      <p className="mt-1 text-sm text-muted-foreground">{ar?"يمكنك نقل سقف الميزانية إلى النزهة أو المقارنة بالاختيار. لن نغيّر بياناتك الحالية من دون موافقتك.":"Carry your chosen spending ceiling into an outing or product comparison if you want. Existing entries are never overwritten automatically."}</p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        {[
+          {to:"/explore/together" as const,goal:"outing" as const,en:"Plan an outing",ar:"خطّط لنزهة"},
+          {to:"/explore/smartbuy" as const,goal:"gift" as const,en:"Compare gifts & prices",ar:"قارن الهدايا والأسعار"},
+          {to:"/explore/restaurants" as const,goal:"places" as const,en:"Explore restaurants",ar:"اكتشف المطاعم"},
+          {to:"/community" as const,goal:"advice" as const,en:"Ask trusted friends",ar:"اسأل من تثق بهم"},
+        ].map(a=><Link key={a.goal} to={a.to}
+           onClick={()=>writeLocal(activeDecisionKey,startDecisionJourney(active,plan,a.goal))}
+           className="inline-flex items-center justify-between rounded-xl border border-border bg-[#F9FBF7] px-3 py-3 text-sm font-semibold text-brand transition hover:bg-mint">
+           {ar?a.ar:a.en} <ArrowUpRight className="size-4"/>
+        </Link>)}
+      </div>
+      <a href={externalMapLink("outing",prefs.city||"Amman")} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand">{ar?"استكشف أنشطة قريبة على الخريطة":"See nearby activity ideas on Maps"} <ArrowUpRight className="size-4"/></a>
+      <p className="mt-2 text-xs text-muted-foreground">{ar?"يستخدم بحث الخرائط اسم المدينة فقط، ولا يرسل اسم صاحب المناسبة أو الميزانية.":"The map search sends only the city and a general activity category, never family identities or budget."}</p>
+    </section>
     <p className="mt-5 text-xs text-muted-foreground">{ar?"خطتك وميزانيتك محفوظتان على هذا المتصفح فقط. الاقتراحات تظهر عند فتح التطبيق، وليست تنبيهات خارجية أو إشعارات فورية.":"Your plan and budget remain in this browser. Preparations appear when you open the app; background personal notifications are not enabled."}</p>
    </>}
   </>}
