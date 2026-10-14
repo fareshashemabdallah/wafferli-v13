@@ -10,7 +10,7 @@ export type MoneyState = {
   /** Manual actual cash available now, intentionally not inferred from historic expense entries. */
   cashOnHand?:number|null; cashReserve?:number;
 };
-export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string };
+export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string; /** Optional, date-only birth date; retained with the family profile on this device. */ birthday?: string };
 
 const today = new Date();
 const d = (day: number) =>
