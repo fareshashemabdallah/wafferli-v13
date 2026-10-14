@@ -54,9 +54,9 @@ function MoneyPage() {
           size="sm"
           className="ms-auto"
           onClick={() => {
-            if (confirm("Reset all money data to the demo sample?")) {
+            if (confirm(tr("Reset all money data to the demo sample?"))) {
               setS(sampleMoney());
-              toast.success("Sample data restored");
+              toast.success(tr("Sample data restored"));
             }
           }}
         >
@@ -66,20 +66,20 @@ function MoneyPage() {
       <section className="hero-surface rounded-3xl p-5">
         <p className="text-sm opacity-80">{tr("Remaining allowance this month")}</p>
         <p className="mt-1 font-display text-4xl font-semibold">{fmtJOD(c.remaining)}</p>
-        <p className="mt-1 text-sm opacity-80">{c.daysLeft} days left · spent {fmtJOD(c.spent)} of {fmtJOD(c.spendable)}</p>
+        <p className="mt-1 text-sm opacity-80">{c.daysLeft} {tr("days left")} · {tr("spent")} {fmtJOD(c.spent)} {tr("of")} {fmtJOD(c.spendable)}</p>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-primary-foreground/20">
           <div className="h-full rounded-full bg-lime" style={{ width: `${Math.min(100, (c.spent / Math.max(1, c.spendable)) * 100)}%` }} />
         </div>
       </section>
 
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label={tr("Savings target")} value={fmtJOD(c.savingsTarget)} sub={`${s.savingsPct}% of income`} />
-        <Stat label={tr("Planned (budget)")} value={fmtJOD(c.planned)} sub={c.overPlan ? "Above spendable!" : "Within spendable"} warn={c.overPlan} />
-        <Stat label={tr("Actual spent")} value={fmtJOD(c.spent)} sub="This month" />
+        <Stat label={tr("Savings target")} value={fmtJOD(c.savingsTarget)} sub={`${s.savingsPct}% ${tr("of income")}`} />
+        <Stat label={tr("Planned (budget)")} value={fmtJOD(c.planned)} sub={tr(c.overPlan ? "Above spendable!" : "Within spendable")} warn={c.overPlan} />
+        <Stat label={tr("Actual spent")} value={fmtJOD(c.spent)} sub={tr("This month")} />
         <Stat
           label={tr("Projected month-end")}
           value={fmtJOD(c.projected)}
-          sub={`Savings ≈ ${fmtJOD(c.projectedSavings)}`}
+          sub={`${tr("Savings")} ≈ ${fmtJOD(c.projectedSavings)}`}
           warn={c.projectedSavings < c.savingsTarget}
         />
       </div>
@@ -129,11 +129,11 @@ function Settings({ income, pct, hasSources, onSave }: { income: number; pct: nu
     e.preventDefault();
     const i = hasSources ? income : parseAmount(inc, 100000);
     const pn = Number(p);
-    if (i === null) return setErr("Income must be a positive amount up to 100,000.");
-    if (!Number.isFinite(pn) || pn < 0 || pn > 80) return setErr("Savings must be between 0 and 80%.");
+    if (i === null) return setErr(tr("Income must be a positive amount up to 100,000."));
+    if (!Number.isFinite(pn) || pn < 0 || pn > 80) return setErr(tr("Savings must be between 0 and 80%."));
     setErr("");
     onSave(i, pn);
-    toast.success("Income & savings updated");
+    toast.success(tr("Income & savings updated"));
   };
   return (
     <section className="card-soft mt-6 p-4">
@@ -185,8 +185,8 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
             <li key={c.id} className="flex items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="truncate font-medium">{c.name}</span>
-                  <span className="rounded-full bg-mint px-2 text-[11px] text-brand">{typeLabel[c.type]}</span>
+                  <span className="truncate font-medium">{tr(c.name)}</span>
+                  <span className="rounded-full bg-mint px-2 text-[11px] text-brand">{tr(typeLabel[c.type])}</span>
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
                   <div className={`h-full ${a > c.planned ? "bg-destructive" : "bg-brand-2"}`} style={{ width: `${pct}%` }} />
@@ -198,7 +198,7 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
                 size="icon"
                 variant="ghost"
                 aria-label={`Delete ${c.name}`}
-                onClick={() => confirm(`Delete category "${c.name}"?`) && onChange(cats.filter((x) => x.id !== c.id))}
+                onClick={() => confirm(`${tr("Delete category")} "${c.name}"?`) && onChange(cats.filter((x) => x.id !== c.id))}
               >
                 <Trash2 className="size-4" />
               </Button>
@@ -222,8 +222,8 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
       onSubmit={(e) => {
         e.preventDefault();
         const p = planned === "" || planned === "0" ? 0 : parseAmount(planned, 100000);
-        if (!name.trim()) return setErr("Name is required.");
-        if (p === null) return setErr("Planned amount must be 0 or a positive number.");
+        if (!name.trim()) return setErr(tr("Name is required."));
+        if (p === null) return setErr(tr("Planned amount must be 0 or a positive number."));
         onSave({ id: initial.id, name: name.trim().slice(0, 40), type, planned: p });
       }}
     >
@@ -259,12 +259,12 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
   const recordQuick=(ev:FormEvent)=>{
     ev.preventDefault();
     const amount=parseAmount(quickAmount,50000);
-    if(amount===null)return setQuickError("Enter a valid amount greater than zero (up to 50,000 JOD).");
-    if(!selectedCategory)return setQuickError("Add a spending category first.");
+    if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
+    if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
     const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:true};
     onChange([entry,...expenses]);
     setQuickAmount("");setQuickError("");
-    toast.success("Expense recorded");
+    toast.success(tr("Expense recorded"));
   };
   const sorted = [...expenses].sort((a, b) => b.date.localeCompare(a.date));
   const catName = (id: string) => cats.find((c) => c.id === id)?.name ?? "Uncategorized";
@@ -283,7 +283,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
         <Field label={tr("Category")}>
           <NativeSelect value={selectedCategory} onChange={e=>setQuickCategory(e.target.value)}>
             {cats.length===0&&<option value="">{tr("Add category first")}</option>}
-            {cats.map(cat=><option key={cat.id} value={cat.id}>{cat.name}</option>)}
+            {cats.map(cat=><option key={cat.id} value={cat.id}>{tr(cat.name)}</option>)}
           </NativeSelect>
         </Field>
         <Button type="submit" className="h-11" disabled={!selectedCategory}><Plus className="size-4"/> {tr("Save")}</Button>
@@ -299,7 +299,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
           onSave={(x) => {
             onChange(x.id ? expenses.map((e) => (e.id === x.id ? x : e)) : [{ ...x, id: uid() }, ...expenses]);
             setEditing(null);
-            toast.success("Expense saved");
+            toast.success(tr("Expense saved"));
           }}
         />
       )}
@@ -310,14 +310,14 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
           {sorted.map((e) => (
             <li key={e.id} className="flex items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{e.note || catName(e.categoryId)}</p>
+                <p className="truncate font-medium">{e.note || tr(catName(e.categoryId))}</p>
                 <p className="text-xs text-muted-foreground">
-                  {e.date} · {catName(e.categoryId)} {e.owner ? `· ${e.owner}` : ""} · {e.shared ? "Shared" : "Private"}
+                  {e.date} · {tr(catName(e.categoryId))} {e.owner ? `· ${e.owner}` : ""} · {tr(e.shared ? "Shared" : "Private")}
                 </p>
               </div>
               <span className="font-semibold tabular-nums">{fmtJOD(e.amount)}</span>
               <Button size="icon" variant="ghost" aria-label={tr("Edit expense")} onClick={() => setEditing(e)}><Pencil className="size-4" /></Button>
-              <Button size="icon" variant="ghost" aria-label={tr("Delete expense")} onClick={() => confirm("Delete this expense?") && onDelete(e)}>
+              <Button size="icon" variant="ghost" aria-label={tr("Delete expense")} onClick={() => confirm(tr("Delete this expense?")) && onDelete(e)}>
                 <Trash2 className="size-4" />
               </Button>
             </li>
@@ -338,8 +338,8 @@ function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Ex
       onSubmit={(e) => {
         e.preventDefault();
         const amount = parseAmount(f.amountStr, 50000);
-        if (amount === null) return setErr("Amount must be a positive number up to 50,000.");
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) return setErr("Please pick a valid date.");
+        if (amount === null) return setErr(tr("Amount must be a positive number up to 50,000."));
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) return setErr(tr("Please pick a valid date."));
         const { amountStr: _a, ...rest } = f;
         onSave({ ...rest, amount, note: (f.note ?? "").slice(0, 60) });
       }}
@@ -348,7 +348,7 @@ function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Ex
       <Field label={tr("Date")}><Input className={inputCls} type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
       <Field label={tr("Category")}>
         <NativeSelect value={f.categoryId} onChange={(e) => setF({ ...f, categoryId: e.target.value })}>
-          {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {cats.map((c) => <option key={c.id} value={c.id}>{tr(c.name)}</option>)}
         </NativeSelect>
       </Field>
       <Field label={tr("Owner (optional)")}>
