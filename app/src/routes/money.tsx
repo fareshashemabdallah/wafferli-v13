@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CashFlowPlanner } from "@/components/CashFlowPlanner";
 import { localToday } from "@/lib/cashflow";
-import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowRight, Pencil, Plus, RotateCcw, ShieldCheck, Trash2, Wallet } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AppShell, PilotBadge } from "@/components/AppShell";
@@ -48,8 +48,21 @@ function MoneyPage() {
 
   return (
     <AppShell title={tr("Our Finances")}>
-      <p className="mb-4 text-sm text-muted-foreground">{ar?"أنفق بذكاء وراجع التفاصيل وقت الحاجة.":"Make confident choices, one step at a time."}</p>
-      <div role="tablist" aria-label={ar?"أقسام المالية":"Money sections"} className="mb-4 grid grid-cols-3 gap-2">{([{id:"overview",en:"Overview",ar:"لمحة"},{id:"spending",en:"Spending",ar:"مصاريف"},{id:"planning",en:"Bills & plan",ar:"الفواتير"}] as const).map(v=><button role="tab" aria-selected={section===v.id} key={v.id} type="button" onClick={()=>setSection(v.id)} className={"min-h-12 rounded-xl px-2 text-xs font-semibold sm:text-sm "+(section===v.id?"bg-brand text-white":"border border-border bg-white text-brand")}>{ar?v.ar:v.en}</button>)}</div>
+      <section className="page-intro relative mb-5 overflow-hidden">
+        <div className="pointer-events-none absolute -end-10 -top-16 size-44 rounded-full border-[22px] border-white/30" aria-hidden="true"/>
+        <div className="relative flex items-center gap-3">
+          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/85 text-brand"><ShieldCheck className="size-6"/></span>
+          <div>
+            <p className="section-eyebrow">{ar?"قرارات مالية أهدأ":"FINANCIAL PEACE OF MIND"}</p>
+            <p className="mt-1 text-sm leading-relaxed text-[#4B6758]">{ar?"خطة بسيطة تساعدك تعيش براحة، مش بس توفّر.":"A clearer plan for living well—not simply spending less."}</p>
+          </div>
+        </div>
+      </section>
+      <div role="tablist" aria-label={ar?"أقسام المالية":"Money sections"} className="mb-5 grid grid-cols-3 gap-1 rounded-2xl border border-[#E1E8DF] bg-[#EEF2EB] p-1.5">
+        {([{id:"overview",en:"Overview",ar:"لمحة"},{id:"spending",en:"Spending",ar:"مصاريف"},{id:"planning",en:"Bills & plan",ar:"الفواتير"}] as const)
+          .map(v=><button role="tab" aria-selected={section===v.id} key={v.id} type="button" onClick={()=>setSection(v.id)}
+            className={"min-h-11 rounded-xl px-2 text-xs font-semibold transition sm:text-sm "+(section===v.id?"bg-white text-brand shadow-sm":"text-[#64796C] hover:bg-white/60")}>{ar?v.ar:v.en}</button>)}
+      </div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
         <span className="text-xs text-muted-foreground">{tr("Saved on this device only. Use fictional figures during the pilot.")}</span>
@@ -70,13 +83,15 @@ function MoneyPage() {
       </div>
 
       {section==="overview"&&<>
-      <section className="rounded-2xl border border-border bg-white p-5">
-        <p className="text-sm opacity-80">{tr("Remaining allowance this month")}</p>
-        <p className="mt-1 text-3xl font-semibold tabular-nums">{fmtJOD(c.remaining)}</p>
+      <section className="editorial-card relative overflow-hidden p-5 sm:p-6">
+        <div className="mb-2 inline-flex size-10 items-center justify-center rounded-xl bg-[#E8F1E7] text-brand"><Wallet className="size-5"/></div>
+        <p className="text-sm font-medium text-muted-foreground">{tr("Remaining allowance this month")}</p>
+        <p className="mt-2 text-3xl font-semibold tabular-nums text-ink sm:text-4xl">{fmtJOD(c.remaining)}</p>
         <p className="mt-1 text-sm opacity-80">{c.daysLeft} {tr("days left")} · {tr("spent")} {fmtJOD(c.spent)} {tr("of")} {fmtJOD(c.spendable)}</p>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-primary-foreground/20">
-          <div className="h-full rounded-full bg-lime" style={{ width: `${Math.min(100, (c.spent / Math.max(1, c.spendable)) * 100)}%` }} />
+        <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-[#E5EDE2]">
+          <div className="h-full rounded-full bg-brand-2" style={{ width: `${Math.min(100, (c.spent / Math.max(1, c.spendable)) * 100)}%` }} />
         </div>
+        <button type="button" onClick={()=>setSection("spending")} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white transition hover:bg-[#244D3C]">{ar?"سجّل مصروف":"Record spending"} <ArrowRight className="size-4 rtl:rotate-180"/></button>
       </section>
 
       <details className="group mt-4 rounded-xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"عرض بقية التفاصيل":"See more financial details"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
@@ -98,12 +113,14 @@ function MoneyPage() {
       </details>
       </>}
       {section==="planning"&&<>
-      <Settings income={c.monthlyIncome} pct={s.savingsPct} hasSources={s.incomeSources!==undefined}
-        onSave={(income,savingsPct)=>upd(s.incomeSources===undefined?{income,savingsPct}:{savingsPct})} />
       <CashFlowPlanner state={s} members={members} update={setS} />
+      <details className="editorial-card mt-4 px-4 py-3">
+        <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إعداد الدخل وأهداف الادخار":"Income & savings settings"} +</summary>
+        <Settings income={c.monthlyIncome} pct={s.savingsPct} hasSources={s.incomeSources!==undefined}
+         onSave={(income,savingsPct)=>upd(s.incomeSources===undefined?{income,savingsPct}:{savingsPct})}/>
+      </details>
       </>}
       {section==="spending"&&<>
-      <Categories cats={s.categories} spentBy={c.spentBy} onChange={(categories) => upd({ categories })} />
       <Expenses
         cats={s.categories}
         members={members}
@@ -118,6 +135,10 @@ function MoneyPage() {
           return {...previous,expenses,commitments};
         })}
       />
+      <details className="editorial-card mt-4 px-4 py-3">
+        <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إدارة فئات المصاريف":"Manage spending categories"} +</summary>
+        <Categories cats={s.categories} spentBy={c.spentBy} onChange={(categories) => upd({categories})}/>
+      </details>
       </>}
     </AppShell>
   );
