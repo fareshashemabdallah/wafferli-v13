@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Calculator, Compass, Receipt, Search, ShoppingBag, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { buildForecast, legacyIncome, localToday } from "@/lib/cashflow";
+import { getMoneyOverview } from "@/lib/moneyOverview";
 import { sampleMoney } from "@/lib/money";
 import { fmtJOD, useLocalState } from "@/lib/storage";
 import { useI18n } from "@/lib/i18n";
@@ -17,12 +17,13 @@ function Advisor(){
   const [money]=useLocalState("money",sampleMoney());
   const [amount,setAmount]=useState("");
   const [purpose,setPurpose]=useState("family outing");
-  const forecast=useMemo(()=>buildForecast({incomes:money.incomeSources??legacyIncome(money.income),commitments:money.commitments??[],openingBalance:money.cashOnHand??null,reserve:money.cashReserve??0,today:localToday(),days:30}),[money]);
+  const overview=useMemo(()=>getMoneyOverview(money),[money]);
   const numeric=amount.trim()===""?null:Number(amount);
   const valid=numeric!==null&&Number.isFinite(numeric)&&numeric>0&&numeric<=100000;
-  const safe=forecast.safeToSpend;
-  const assessed=valid&&safe!==null;
-  const affordable=assessed && safe>=numeric;
+  const afterBills=overview.cashAfterBills;
+  const assessed=valid&&!money.demo&&overview.cashSet&&overview.hasBillSchedule&&overview.dateProblems===0&&afterBills!==null;
+  const coversScheduled=assessed && afterBills>=numeric;
+  const moreDetailsNeeded=money.demo||!overview.cashSet||!overview.hasBillSchedule||overview.dateProblems>0;
   const shortcuts=[
     {href:"/money",en:"Review family money",ar:"راجع ميزانية العائلة",Icon:Receipt},
     {href:"/explore/together",en:"Plan a family outing",ar:"خطّط لنزهة عائلية",Icon:Compass},
@@ -51,10 +52,10 @@ function Advisor(){
         </label>
       </div>
       {valid && <div role="status" className="mt-4 rounded-2xl bg-mint/70 p-4">
-        <p className="font-semibold">{!assessed?(ar?"بيانات إضافية مطلوبة":"More information needed"):affordable?(ar?"المبلغ ضمن الحد المحسوب بحذر":"Within the conservative spending estimate"):(ar?"المبلغ يتجاوز الحد المحسوب":"Beyond the current spending estimate")}</p>
-        <p className="mt-2 text-sm">{safe===null?
-          (ar?"أدخل رصيدك النقدي الحالي ومواعيد الالتزامات واحتياطي الطوارئ في صفحة أموالي للحصول على تقدير حذر.":"Enter today's cash balance, scheduled bills and reserve in Our Finances before relying on this estimate.")
-          :(ar?"الحد المحسوب للصرف الآن: ":"Estimated uncommitted cash: ")+fmtJOD(safe)+". "+(ar?"التقدير لا يشمل نفقات لم تُسجّل.":"This does not account for unrecorded expenses.")}</p>
+        <p className="font-semibold">{!assessed?(ar?"نحتاج تفاصيل مالية قبل المقارنة":"More financial information needed"):coversScheduled?(ar?"قد تسمح الأرقام المدخلة بذلك — بعد مراجعة المصاريف اليومية":"Recorded cash may cover it — review everyday expenses too"):(ar?"الشراء قد يتجاوز الرصيد بعد الالتزامات":"May exceed cash after recorded commitments")}</p>
+        <p className="mt-2 text-sm">{moreDetailsNeeded?
+          (ar?"هذه البيانات غير مكتملة أو تجريبية. أدخل الرصيد الفعلي والفواتير المستحقة وتواريخها في المالية.":"These figures are incomplete or demo data. Enter actual cash, unpaid bills and valid due dates in Money.")
+          :(ar?"الرصيد بعد الفواتير المسجلة والاحتياطي: ":"Cash after scheduled bills and reserve: ")+fmtJOD(afterBills??0)+". "+(ar?"هذا ليس مبلغاً آمناً للإنفاق؛ المصاريف غير المجدولة غير محسوبة.":"This is not safe-to-spend money: costs without due dates are excluded.")}</p>
         <p className="mt-2 text-xs text-muted-foreground">{ar?"النتيجة للمراجعة فقط ولا تضمن القدرة المالية أو تعوض التخطيط." : "This is a planning aid, not a financial guarantee."}</p>
       </div>}
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{ar?"هذه مساعدة حسابية بناءً على بياناتك، وليست ذكاءً اصطناعيًا متصلًا أو نصيحة مالية متخصصة.":"This is an on-device calculation, not a connected AI chatbot or professional financial advice."}</p>
