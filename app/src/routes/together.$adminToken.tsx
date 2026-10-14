@@ -23,7 +23,7 @@ function AdminPage() {
   const { adminToken } = Route.useParams();
   const q = useQuery({ queryKey: ["admin", adminToken], queryFn: () => getAdmin(adminToken), refetchInterval: 5000 });
   const [local, setLocal] = useState<SavedOuting | undefined>();
-  useEffect(() => {tr("setLocal(readLocal")}<SavedOuting[]>("outings", []).find((o) => o.admin_token === adminToken)), [adminToken]);
+  useEffect(() => setLocal(readLocal<SavedOuting[]>("outings", []).find((o) => o.admin_token === adminToken)), [adminToken]);
 
   if (q.isPending) return <AppShell title={tr("Results")}><Skeleton className="h-64 rounded-2xl" /></AppShell>;
   if (q.isError) return <AppShell title={tr("Results")}><p className="text-destructive">{q.error.message}</p><Button className="mt-3" onClick={() => q.refetch()}>{tr("Try again")}</Button></AppShell>;
