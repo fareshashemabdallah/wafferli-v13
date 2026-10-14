@@ -5,9 +5,9 @@ import { arabicUI } from "./arabic";
 export type Lang = "en" | "ar";
 
 const dict = {
-  home: { en: "My Day", ar: "يومي" },
+  home: { en: "Today", ar: "اليوم" },
   explore: { en: "Discover", ar: "اكتشف" },
-  money: { en: "Finances", ar: "المالية" },
+  money: { en: "Money", ar: "المالية" },
   space: { en: "Family", ar: "العائلة" },
   advisor: { en: "Help Me Decide", ar: "ساعدني أختار" },
   circles: { en: "Circles", ar: "مجموعاتي" },

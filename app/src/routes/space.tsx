@@ -73,9 +73,13 @@ function Space() {
   };
   return (
     <AppShell title={tr("My Family")}>
-      <p className="mb-4 text-sm text-muted-foreground">{ar?"أضف أفراد العائلة والمناسبات المهمة.":"Your people and the dates that matter."}</p>
+      <section className="page-intro relative overflow-hidden">
+        <div className="pointer-events-none absolute -end-5 -top-10 size-32 rounded-full border-[18px] border-white/40" aria-hidden="true"/>
+        <p className="section-eyebrow">{ar?"الأشخاص واللحظات المهمة":"THE PEOPLE & MOMENTS THAT MATTER"}</p>
+        <p className="relative mt-2 max-w-lg text-sm leading-relaxed text-[#4E6B5A]">{ar?"تفاصيل العائلة وأيامها المهمة، محفوظة بمكان واحد.":"Your people, birthdays and meaningful dates, thoughtfully kept together."}</p>
+      </section>
 
-      <section className="mt-5">
+      <section className="mt-7">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">{tr("Household members")}</h2>
@@ -110,8 +114,8 @@ function Space() {
           </div>
         )}
         <ul className="mt-3 space-y-2">
-          {members.map(m=><li key={m.id} className="card-soft flex items-center gap-3 p-4">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-mint font-semibold text-brand">{m.name[0]?.toUpperCase()}</span>
+          {members.map(m=><li key={m.id} className="editorial-card flex items-center gap-3 p-4">
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#E9F0E8] font-display text-lg font-semibold text-brand">{m.name[0]?.toUpperCase()}</span>
             <div className="min-w-0 flex-1">
               <p className="font-medium">{tr(m.name)}</p>
               <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")} · {m.ageGroup}{m.prefs&&" · "+m.prefs}</p>
@@ -167,7 +171,7 @@ function Space() {
             <Heart className="me-2 inline size-4 text-[#BA806B]"/>
             {ar?"أضف ذكرى زواج أو مناسبة عائلية مهمة لنساعدك على تذكّرها.":"Add a wedding anniversary or another meaningful occasion to remember."}
           </div>:events.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(event=>
-            <div key={event.id} className="card-soft flex items-center gap-3 p-3">
+            <div key={event.id} className="editorial-card flex items-center gap-3 p-3">
               <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#FCEEE7] text-[#B47B6B]"><Heart className="size-4"/></span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">{event.title}</p>
@@ -183,8 +187,8 @@ function Space() {
         <p className="mt-2 text-xs text-muted-foreground">{ar?"التواريخ محفوظة على هذا الجهاز فقط. لا توجد إشعارات تلقائية خارج التطبيق بعد.":"Dates stay in this browser; background reminders and automatic notifications are not yet available."}</p>
       </section>
 
-      <Link to="/occasions" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-mint px-4 py-3 text-sm font-semibold text-brand">{ar?"خطّط لهدية أو نشاط بمناسبة عائلية":"Plan a meaningful gift or family activity"} →</Link>
-      <details className="group mt-6 rounded-2xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"التفضيلات والخصوصية":"Preferences & privacy"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
+      <Link to="/occasions" className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#244D3C]">{ar?"خطّط لهدية أو نشاط بمناسبة عائلية":"Plan a meaningful gift or family activity"} →</Link>
+      <details className="group editorial-card mt-6 p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"التفضيلات والخصوصية":"Preferences & privacy"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
       <FamilyPreferences/>
       <section className="card-soft mt-6 p-4 text-sm">
         <h2 className="font-semibold">{tr("Shared vs private expenses")}</h2>
