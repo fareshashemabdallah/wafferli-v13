@@ -7,27 +7,27 @@ export type Intent = {
 const rules: { words: string[]; intent: Intent }[] = [
   {
     words: ["vote", "friends", "outing", "argeeleh", "arguileh", "shisha", "hangout", "together", "اصدقاء", "أصدقاء", "طلعة", "اركيلة", "أرجيلة", "شباب"],
-    intent: { to: "/explore/together", label: "Open Dabberna Together", reply: "Sounds like a group plan. Create a vote and share one link with your friends — they don't need an account." },
+    intent: { to: "/explore/together", label: "Open Plan Together", reply: "Sounds like a group plan. Create a vote and share one link with your friends — they don't need an account." },
   },
   {
     words: ["restaurant", "dinner", "lunch", "eat", "food", "cafe", "مطعم", "عشاء", "غداء", "أكل", "اكل", "كافيه"],
-    intent: { to: "/explore/restaurants", label: "Browse restaurants", reply: "Let's look at places to eat. Browse actual OpenStreetMap entries in Amman. Ratings, argeeleh, prices and opening hours are not verified." },
+    intent: { to: "/explore/restaurants", label: "Eat & Enjoy", reply: "Let's look at places to eat. Browse actual OpenStreetMap entries in Amman. Ratings, argeeleh, prices and opening hours are not verified." },
   },
   {
     words: ["budget", "spend", "spent", "salary", "income", "save", "saving", "expense", "bill", "money", "ميزانية", "مصروف", "راتب", "توفير", "فاتورة", "مصاريف"],
-    intent: { to: "/money", label: "Open My Money", reply: "This is about your household budget. Check your remaining allowance or log a new expense." },
+    intent: { to: "/money", label: "Our Finances", reply: "Know what your family can comfortably afford, and enjoy spending on what matters." },
   },
   {
     words: ["grocer", "supermarket", "milk", "bread", "list", "compare", "carrefour", "basket", "بقالة", "سوبرماركت", "حليب", "خبز", "قائمة", "مقارنة"],
-    intent: { to: "/explore/shopping", label: "Open Shopping List", reply: "Let's build your basket. Add items with quantities and prices to see the total." },
+    intent: { to: "/explore/shopping", label: "Open My Basket", reply: "Let's build your basket. Add items with quantities and prices to see the total." },
   },
   {
     words: ["buy", "shoe", "shirt", "dress", "clothes", "jacket", "phone", "laptop", "price", "اشتري", "شراء", "حذاء", "ملابس", "قميص", "جاكيت", "سعر", "موبايل"],
-    intent: { to: "/explore/smartbuy", label: "Open Smart Buy", reply: "Thinking of buying something? Compare options by total cost, including delivery or travel." },
+    intent: { to: "/explore/smartbuy", label: "Compare & Choose", reply: "Compare the total cost, then consider quality and convenience before choosing." },
   },
   {
     words: ["family", "kids", "child", "wife", "husband", "household", "عائلة", "أطفال", "اطفال", "زوجة", "زوج"],
-    intent: { to: "/space", label: "Open My Space", reply: "Manage your household members and preferences in My Space." },
+    intent: { to: "/space", label: "My Family", reply: "Personalize your household preferences in My Family." },
   },
 ];
 
