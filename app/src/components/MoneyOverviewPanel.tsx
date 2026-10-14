@@ -64,6 +64,9 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
      {!v.hasBillSchedule&&<div className="mt-4 flex items-start gap-2 rounded-xl bg-[#FFF3E5] p-3 text-sm text-[#835C39]">
        <Info className="mt-0.5 size-4 shrink-0"/><span>{ar?"لا توجد فواتير مجدولة بعد؛ لذلك لا يمكن اعتبار المتبقي متاحاً للإنفاق.":"No bills have been scheduled yet. The number above cannot represent a reliable spending limit."}</span>
      </div>}
+     {v.hasBillSchedule&&v.uncategorizedBills>0&&<button type="button" onClick={()=>goTo("planning")} className="mt-3 flex w-full items-start gap-2 rounded-xl bg-[#F0F5ED] p-3 text-start text-sm text-[#496952]">
+       <Info className="mt-0.5 size-4 shrink-0"/><span>{ar?"بعض الفواتير غير مرتبطة بفئة مصروف. يمكنك ربطها لتظهر دفعاتها ضمن الفئة الصحيحة.":"Some bills have no spending category. Link them so paid bills appear under the right spending category."}</span>
+     </button>}
      {v.dateProblems>0&&<div className="mt-3 flex items-start gap-2 rounded-xl bg-[#FFF3E5] p-3 text-sm text-[#835C39]">
        <AlertCircle className="mt-0.5 size-4 shrink-0"/><span>{ar?"هناك مواعيد دخل أو فواتير غير مكتملة ولن تظهر في التوقعات.":"Some income or bill dates are missing, so those amounts are excluded from the forecast."}</span>
      </div>}
