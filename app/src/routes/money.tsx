@@ -96,6 +96,13 @@ function MoneyPage() {
         members={members}
         expenses={s.expenses}
         onChange={(expenses) => upd({ expenses })}
+        onDelete={(expense)=>setS(previous=>({
+          ...previous,expenses:previous.expenses.filter(e=>e.id!==expense.id),
+          commitments:expense.billId && expense.dueDate?
+            (previous.commitments??[]).map(b=>b.id===expense.billId?{
+              ...b,paidDates:(b.paidDates??[]).filter(d=>d!==expense.dueDate)
+            }:b):previous.commitments
+        }))}
       />
     </AppShell>
   );
@@ -234,17 +241,54 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
   );
 }
 
-function Expenses({ cats, members, expenses, onChange }: { cats: Category[]; members: Member[]; expenses: Expense[]; onChange: (e: Expense[]) => void }) {
+function Expenses({ cats, members, expenses, onChange, onDelete }: {
+  cats: Category[]; members: Member[]; expenses: Expense[];
+  onChange: (e: Expense[]) => void; onDelete: (e:Expense)=>void;
+}) {
   const blank: Expense = { id: "", date: today(), categoryId: cats[0]?.id ?? "", amount: 0, shared: true };
   const [editing, setEditing] = useState<Expense | null>(null);
+  const [quickAmount, setQuickAmount] = useState("");
+  const [quickCategory, setQuickCategory] = useState(cats[0]?.id ?? "");
+  const [quickError, setQuickError] = useState("");
+  const selectedCategory=cats.some(x=>x.id===quickCategory)?quickCategory:(cats[0]?.id??"");
+  const recordQuick=(ev:FormEvent)=>{
+    ev.preventDefault();
+    const amount=parseAmount(quickAmount,50000);
+    if(amount===null)return setQuickError("Enter a valid amount greater than zero (up to 50,000 JOD).");
+    if(!selectedCategory)return setQuickError("Add a spending category first.");
+    const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:true};
+    onChange([entry,...expenses]);
+    setQuickAmount("");setQuickError("");
+    toast.success("Expense recorded");
+  };
   const sorted = [...expenses].sort((a, b) => b.date.localeCompare(a.date));
   const catName = (id: string) => cats.find((c) => c.id === id)?.name ?? "Uncategorized";
   return (
     <section className="card-soft mt-6 p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Actual expenses</h2>
-        <Button size="sm" onClick={() => setEditing(blank)} disabled={cats.length === 0}><Plus className="size-4" /> Add expense</Button>
+        <Button size="sm" variant="outline" onClick={() => setEditing(blank)} disabled={cats.length === 0}>
+          <Plus className="size-4" /> More details
+        </Button>
       </div>
+      <form onSubmit={recordQuick} className="mt-3 grid gap-2 rounded-xl bg-muted/40 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <Field label="Amount (JOD)">
+          <Input className={inputCls} inputMode="decimal" value={quickAmount}
+            placeholder="e.g. 12.50" onChange={e=>setQuickAmount(e.target.value)} />
+        </Field>
+        <Field label="Category">
+          <NativeSelect value={selectedCategory} onChange={e=>setQuickCategory(e.target.value)}>
+            {cats.length===0&&<option value="">Add category first</option>}
+            {cats.map(cat=><option key={cat.id} value={cat.id}>{cat.name}</option>)}
+          </NativeSelect>
+        </Field>
+        <Button type="submit" className="h-11" disabled={!selectedCategory}><Plus className="size-4"/> Save</Button>
+        {quickError&&<p role="alert" className="text-sm text-destructive sm:col-span-3">{quickError}</p>}
+        <p className="text-xs text-muted-foreground sm:col-span-3">
+          Quick entry: today · shared household · your device only.
+          Need a different date, private expense, owner or note? Choose More details.
+        </p>
+      </form>
       {editing && (
         <ExpenseForm
           initial={editing}
@@ -272,7 +316,7 @@ function Expenses({ cats, members, expenses, onChange }: { cats: Category[]; mem
               </div>
               <span className="font-semibold tabular-nums">{fmtJOD(e.amount)}</span>
               <Button size="icon" variant="ghost" aria-label="Edit expense" onClick={() => setEditing(e)}><Pencil className="size-4" /></Button>
-              <Button size="icon" variant="ghost" aria-label="Delete expense" onClick={() => confirm("Delete this expense?") && onChange(expenses.filter((x) => x.id !== e.id))}>
+              <Button size="icon" variant="ghost" aria-label="Delete expense" onClick={() => confirm("Delete this expense?") && onDelete(e)}>
                 <Trash2 className="size-4" />
               </Button>
             </li>
