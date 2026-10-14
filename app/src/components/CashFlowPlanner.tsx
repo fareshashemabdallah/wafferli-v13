@@ -209,7 +209,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
           {incomes.map(item=>{
             const next=forecast.events.find(e=>e.kind==="income"&&e.sourceId===item.id);
             const recent=dueIncome.filter(x=>x.source.id===item.id).slice(0,2);
-            const lastConfirmed=(item.receivedDates??[]).filter(d=>{tr("d")}<=today).sort().at(-1);
+            const lastConfirmed=(item.receivedDates??[]).filter(d=>d<=today).sort().at(-1);
             return <div key={item.id} className="py-3 text-sm">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0"><p className="font-semibold">{item.name}</p>
