@@ -4,6 +4,9 @@ import { useState, type FormEvent } from "react";
 import { AppShell, PilotBadge } from "@/components/AppShell";
 import { FamilyFinanceSnapshot } from "@/components/FamilyFinanceSnapshot";
 import { FamilyWeather } from "@/components/FamilyWeather";
+import { FamilyInsights } from "@/components/FamilyInsights";
+import { defaultFamilyPreferences } from "@/lib/familyPreferences";
+import { useLocalState } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { routeIntent, type Intent } from "@/lib/intent";
@@ -28,6 +31,7 @@ function Index() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [prefs] = useLocalState("familyPreferences", defaultFamilyPreferences);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -70,7 +74,8 @@ function Index() {
       </section>
 
       <FamilyFinanceSnapshot />
-      <FamilyWeather />
+      {prefs.weather && <FamilyWeather />}
+      {prefs.notificationFrequency !== "off" && <FamilyInsights />}
 
       {msgs.length > 0 && (
         <section className="mt-5 space-y-3" aria-live="polite">
