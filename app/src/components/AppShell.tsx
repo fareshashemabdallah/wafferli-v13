@@ -76,9 +76,9 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
       <Link
         to="/advisor"
         aria-label={t("advisor")}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.4rem)] end-4 z-30 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:bottom-6 md:end-6"
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+5rem)] end-4 z-30 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand px-3 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:bottom-6 md:end-6 md:px-4"
       >
-        <Sparkles className="size-4" aria-hidden="true" /> {t("advisor")}
+        <Sparkles className="size-5" aria-hidden="true" /> <span className="hidden md:inline">{t("advisor")}</span>
       </Link>
 
       {/* Mobile bottom nav */}
