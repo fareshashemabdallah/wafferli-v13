@@ -14,10 +14,10 @@ import { routeIntent, type Intent } from "@/lib/intent";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dabberna — A caring companion for family life" },
-      { name: "description", content: "Ask once, Dabberna routes you to budgeting, smart buying, shopping lists or a friends' restaurant vote in Amman." },
-      { property: "og:title", content: "Dabberna — Personal Pilot" },
-      { property: "og:description", content: "Household budgeting, smart buying and group restaurant votes for Amman." },
+      { title: "My Day — Spend Wisely. Live Well. | Dabberna" },
+      { name: "description", content: "Make everyday family decisions with more confidence: affordability, value for money, and living well." },
+      { property: "og:title", content: "My Day — Dabberna" },
+      { property: "og:description", content: "Spend Wisely. Live Well. A helpful home for family finances, outings and purchases." },
     ],
   }),
   component: Index,
@@ -52,7 +52,7 @@ function Index() {
   return (
     <AppShell>
       <section className="hero-surface rounded-3xl p-6 md:p-8">
-        <p className="text-sm opacity-80">{tr("Marhaba 👋 · Amman")}</p>
+        <p className="text-sm opacity-80">{tr("Spend wisely. Live well.")}</p>
         <h1 className="mt-2 text-3xl font-semibold leading-tight md:text-4xl">{t("greeting")}</h1>
         <form onSubmit={submit} className="mt-5 flex gap-2 rounded-2xl bg-card p-1.5">
           <label htmlFor="ask" className="sr-only">{t("ask")}</label>
@@ -103,7 +103,7 @@ function Index() {
       <section className="mt-7">
         <div className="mb-3 flex items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">{t("shortcuts")}</h2>
-          <Link to="/explore/services" className="text-sm font-semibold text-brand">{tr("Find family services")} ↗</Link>
+          <Link to="/explore/services" className="text-sm font-semibold text-brand">{tr("Find the Right Service")} ↗</Link>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {shortcuts.map(({ to, label, icon: Icon }) => (
@@ -118,7 +118,7 @@ function Index() {
       <section className="card-soft mt-7 flex items-center justify-between gap-3 p-4">
         <div>
           <div className="flex items-center gap-2 font-medium">{tr("Personal pilot")} <PilotBadge>{tr("V13")}</PilotBadge></div>
-          <p className="text-sm text-muted-foreground">{tr("Your money data stays on this device. Only restaurant votes are shared.")}</p>
+          <p className="text-sm text-muted-foreground">{tr("Financial details stay on this device. Circle messages, experiences and outing votes are shared only when you choose.")}</p>
         </div>
         <Link to="/about" className="shrink-0 text-sm font-semibold text-brand underline-offset-4 hover:underline">{tr("Details")}</Link>
       </section>
