@@ -4,6 +4,9 @@ import {sampleMoney,sampleMembers,type MoneyState} from "./money";
 import {defaultFamilyPreferences} from "./familyPreferences";
 import type {FamilyMoment} from "./familyCalendar";
 import type {FamilyPlan} from "./familyPlans";
+import {makeFamilyTask} from "./familyTasks";
+import {makeWishlistItem} from "./familyWishlist";
+import {makeServiceEntry} from "./serviceShortlist";
 const now=new Date(2026,9,15,12);
 const money:MoneyState={...sampleMoney(),demo:false,income:2200,
  cashOnHand:1200,cashReserve:300,cashUpdatedAt:"2026-10-15",
@@ -21,7 +24,10 @@ describe("family question advisor",()=>{
   expect(detectAdvisorIntent("سعر مشتريات الأطفال")).toBe("family");
   expect(detectAdvisorIntent("How much have we saved?")).toBe("savings");
   expect(detectAdvisorIntent("Our cash balance safe?")).toBe("safety");
-  expect(guidedPrompts).toHaveLength(6);
+  expect(detectAdvisorIntent("Tasks due tomorrow")).toBe("tasks");
+  expect(detectAdvisorIntent("هدايا العيلة")).toBe("gifts");
+  expect(detectAdvisorIntent("best pediatrician")).toBe("services");
+  expect(guidedPrompts).toHaveLength(10);
  });
  it("never passes demo figures as real household safety data",()=>{
   const a=answerFamilyQuestion("Is our spending safe?",args({money:sampleMoney()}));
@@ -56,8 +62,44 @@ describe("family question advisor",()=>{
   expect(a.textEn).toContain("manually entered");
   expect(a.textEn).toContain("not verified");
  });
+
+ it("answers actual due family responsibilities without inventing sent assignments",()=>{
+  const task=makeFamilyTask({id:"t",title:"Pack school bags",priority:"high",dueDate:"2026-10-18"},now)!;
+  const a=answerFamilyQuestion("What family tasks are due?",args({tasks:[task]}));
+  expect(a.intent).toBe("tasks");
+  expect(a.textEn).toContain("Pack school bags");
+  expect(a.textEn).toContain("not confirmed messages");
+  expect(a.route).toBe("/space");
+ });
+ it("grounds upcoming gift answer only in the parent's wishlist and price history",()=>{
+  const gift=makeWishlistItem({id:"g",name:"Birthday puzzle",kind:"gift",
+   targetDate:"2026-10-20"},now)!;
+  const a=answerFamilyQuestion("Are any gifts coming up?",args({wishlist:[gift]}));
+  expect(a.textEn).toContain("Birthday puzzle");
+  expect(a.textEn).toContain("not entered a checked price");
+  expect(a.route).toBe("/occasions");
+ });
+ it("reports stored outing options but never invents a verified venue",()=>{
+  const a=answerFamilyQuestion("What outings suit our family?",args({
+   outings:[{id:"venue1",name:"Garden",kind:"outdoor",checkedOn:"2026-10-14",
+    childAdmission:"yes",ageFit:"unknown",accessible:"unknown",noise:"quiet"}]
+  }));
+  expect(a.intent).toBe("outings");
+  expect(a.textEn).toContain("1 venues saved");
+  expect(a.textEn).toContain("not verified");
+  expect(a.route).toBe("/explore/together");
+ });
+ it("guides parent to independent provider verification, not doctor ranking",()=>{
+  const svc=makeServiceEntry({id:"doc",category:"doctor",name:"Clinic Test",city:"Amman",
+   checkedAt:"2026-10-15"},now);
+  const a=answerFamilyQuestion("Tell me the best pediatrician in Amman",args({services:[svc]}));
+  expect(a.intent).toBe("services");
+  expect(a.textEn).toContain("credentials check");
+  expect(a.textEn).toContain("not verified");
+  expect(a.route).toBe("/explore/services");
+ });
  it("clearly discloses unsupported open questions and no connected AI",()=>{
-  const a=answerFamilyQuestion("Tell me the best pediatrician in Amman",args());
+  const a=answerFamilyQuestion("Can you guarantee the stock market will rise",args());
   expect(a.intent).toBe("unsupported");
   expect(a.textEn).toContain("cannot");
   expect(a.sourceEn).toContain("no external AI");

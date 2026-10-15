@@ -6,19 +6,26 @@ import type {FamilyMoment} from "./familyCalendar";
 import type {MoneyState,Member} from "./money";
 import type {FamilyPlan} from "./familyPlans";
 import type {FamilyPreferences} from "./familyPreferences";
+import {taskSummary,type FamilyTask} from "./familyTasks";
+import {nextWishlistReminder} from "./wishlistAttention";
+import {summarizeWishlistPrice,type WishlistItem} from "./familyWishlist";
+import type {ServiceEntry} from "./serviceShortlist";
+import type {OutingOption} from "./childAwareOutingCompare";
 
-export type AdvisorIntent="safety"|"bills"|"savings"|"family"|"shopping"|"plans"|"unsupported";
+export type AdvisorIntent="safety"|"bills"|"savings"|"family"|"shopping"|"plans"|"tasks"|"gifts"|"outings"|"services"|"unsupported";
 export type GuidedAnswer={
  intent:AdvisorIntent;
  titleEn:string;titleAr:string;
  textEn:string;textAr:string;
  sourceEn:string;sourceAr:string;
- route:"/money"|"/calendar"|"/plans"|"/explore/smartbuy"|"/explore/together";
+ route:"/money"|"/calendar"|"/plans"|"/explore/smartbuy"|"/explore/together"|"/space"|"/occasions"|"/explore/services";
  actionEn:string;actionAr:string;
 };
 export type AdvisorContext={
  money:MoneyState;members:readonly Member[];moments:readonly FamilyMoment[];
  plans:readonly FamilyPlan[];preferences:FamilyPreferences;now?:Date;
+ tasks?:readonly FamilyTask[];wishlist?:readonly WishlistItem[];
+ services?:readonly ServiceEntry[];outings?:readonly OutingOption[];
 };
 export const guidedPrompts=[
  {id:"safety" as const,en:"Is our spending safe?",ar:"هل وضع مصروف العائلة آمن؟"},
@@ -26,14 +33,22 @@ export const guidedPrompts=[
  {id:"savings" as const,en:"How are our savings goals?",ar:"كيف ماشيين بأهداف الادخار؟"},
  {id:"family" as const,en:"What's coming up for the children?",ar:"شو في مناسبات للأطفال قريباً؟"},
  {id:"plans" as const,en:"What should we plan next?",ar:"شو لازم نخطّط له؟"},
- {id:"shopping" as const,en:"How can we buy more wisely?",ar:"كيف نشتري بذكاء؟"}
+ {id:"shopping" as const,en:"How can we buy more wisely?",ar:"كيف نشتري بذكاء؟"},
+ {id:"tasks" as const,en:"What family tasks are due?",ar:"شو مهام العائلة المستحقة؟"},
+ {id:"gifts" as const,en:"Are any gifts coming up?",ar:"عنا هدايا لازم نجهزها؟"},
+ {id:"outings" as const,en:"What outings suit our family?",ar:"شو الطلعات المناسبة للعائلة؟"},
+ {id:"services" as const,en:"How can we compare family services?",ar:"كيف نقارن خدمات العائلة؟"}
 ];
 const hit=(q:string,words:RegExp)=>words.test(q);
 export function detectAdvisorIntent(question:string):AdvisorIntent{
  const q=question.toLocaleLowerCase().trim().slice(0,400);
  if(!q)return "unsupported";
+ if(hit(q,/task|chore|responsibilit|to.?do|مهمات|مهام|مهمة|واجبات|مسؤوليات/i))return "tasks";
  if(hit(q,/bill|due|overdue|invoice|payment date|فواتير|فاتورة|مستحق|دفعات|دفع/i))return "bills";
  if(hit(q,/sav(?:e|ed|ing|ings)|goal|هدف|ادخار|توفير|نوفر/i))return "savings";
+ if(hit(q,/gift|present|هدايا|هدية|هدية|هديه/i))return "gifts";
+ if(hit(q,/doctor|pediatrician|clinic|provider|service|dentist|physician|طبيب|دكتور|مستشفى|عيادة|خدمات|خدمة/i))return "services";
+ if(hit(q,/outing|weekend|playground|park|excursion|نزهة|طلعة|حديقة|منتزه|مشوار/i))return "outings";
  if(hit(q,/birthday|child|children|school|occasion|anniversary|عيد|طفل|اطفال|أطفال|مدرسة|مدرسي|مناسب/i))return "family";
  if(hit(q,/shopping|buy|price|purchase|gift|store|discount|شراء|اشتري|نشتري|هدية|سعر|تسوق|خصم|مشتريات/i))return "shopping";
  if(hit(q,/plan|outing|trip|weekend|activity|نزهة|طلعة|رحلة|خطة|خطط|عطلة|نشاط/i))return "plans";
@@ -142,13 +157,75 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
     " التخطيط لا يعني الدفع أو الحجز.",
    "Plans: saved local status and dates","الخطط: الحالة والتواريخ المسجلة","/plans","Review the plan","راجع الخطة");
  }
+ if(intent==="tasks"){
+  const summary=taskSummary(ctx.tasks??[],now);
+  if(!summary.open)return answer(intent,"No open household tasks on this device","ما في مهام مفتوحة مسجّلة",
+   "Add responsibilities with due dates in My Family. Tasks stay local and no assignment is sent to another parent.",
+   "أضف المهام ومواعيدها في عائلتي. تبقى على جهازك ولا تُرسل لوالد آخر.",
+   "My Family: parent-entered tasks","عائلتي: المهام التي أدخلتها","/space","Add a task","أضف مهمة");
+  const next=summary.next[0];
+  return answer(intent,"Your household responsibilities","مسؤوليات البيت",
+   summary.overdue+" overdue, "+summary.dueSoon+" due within seven days. "+
+   (next?"First to review: "+next.title+" ("+next.dueDate+"). ":"")+
+   "These are locally recorded responsibilities, not confirmed messages to another family member.",
+   summary.overdue+" متأخرة و"+summary.dueSoon+" خلال سبعة أيام. "+
+   (next?"الأولى للمراجعة: "+next.title+" ("+next.dueDate+"). ":"")+
+   "هذه مهام محلية وليست رسائل تم تسليمها لأحد.",
+   "My Family: local task dates and status","عائلتي: تواريخ وحالة المهام","/space","Review tasks","راجع المهام");
+ }
+ if(intent==="gifts"){
+  const wishlist=(ctx.wishlist??[]).filter(x=>x.kind==="gift"&&x.status==="considering");
+  if(!wishlist.length)return answer(intent,"Start a thoughtful gift list","أنشئ قائمة هدايا للعائلة",
+   "No unpurchased gift is recorded yet. Save a gift idea and target date, then check prices yourself.",
+   "ما في هدايا مخططة مسجلة. احفظ فكرة وموعدها، وقارن الأسعار بنفسك.",
+   "Gifts: saved private wishlist","الهدايا: القائمة الخاصة","/occasions","Open gifts","افتح الهدايا");
+  const next=nextWishlistReminder(wishlist,now);
+  const gift=next?.item??[...wishlist].sort((a,b)=>(a.targetDate??"9999").localeCompare(b.targetDate??"9999"))[0]!;
+  const latest=summarizeWishlistPrice(gift).latest;
+  return answer(intent,"Review an upcoming gift before spending","راجع الهدية قبل الشراء",
+   gift.name+(gift.targetDate?" · needed by "+gift.targetDate:" · no deadline recorded")+
+   ". "+(latest?"Your last recorded price is "+latest.amountJod.toFixed(2)+" JOD; verify it again with the retailer.":"You have not entered a checked price.")+
+   " Marking a gift purchased does not create a payment.",
+   gift.name+(gift.targetDate?" · مطلوبة قبل "+gift.targetDate:" · بلا موعد مسجل")+
+   ". "+(latest?"آخر سعر سجلته "+latest.amountJod.toFixed(2)+" د.أ؛ تأكد منه مع المحل.":"لم تدخل سعراً بعد.")+
+   " اعتبار الهدية مشتراة لا ينشئ عملية دفع.",
+   "Gifts: private wishlist and user-checked prices","الهدايا: قائمة خاصة وأسعار أدخلتها","/occasions","Review gift ideas","راجع أفكار الهدايا");
+ }
+ if(intent==="outings"){
+  const count=(ctx.outings??[]).length;
+  const children=ctx.preferences.typicalChildrenAttendance==="yes";
+  return answer(intent,"Choose an outing around the family's needs","اختر طلعة تناسب احتياجات العائلة",
+   (count?count+" venues saved in your private comparison. ":"No venue is saved for comparison yet. ")+
+   (children?"Your preferences indicate children usually join. ":"Confirm whether children are attending. ")+
+   "Set a whole-family budget and distance limit, check age rules, access and real weather. Venues are not verified or booked.",
+   (count?count+" أماكن محفوظة للمقارنة الخاصة. ":"ما في أماكن محفوظة بعد. ")+
+   (children?"تفضيلاتك تشير أن الأطفال عادةً يشاركون. ":"حدد إذا كان الأطفال سيشاركون. ")+
+   "حدد الميزانية والمسافة، وتأكد من ملاءمة الأعمار والطقس الحقيقي. لا يوجد تحقق أو حجز.",
+   "Plan Together: parent choices and personal venue notes","خططنا سوا: تفضيلاتك وملاحظاتك","/explore/together","Compare outings","قارن الطلعات");
+ }
+ if(intent==="services"){
+  const saved=ctx.services??[];
+  if(!saved.length)return answer(intent,"Compare providers with independent evidence","قارن الخدمات بأدلة واضحة",
+   "No provider is on your private list. Search independently, check official credentials and service terms, then record source links and costs. Dabberna cannot verify providers or diagnose conditions.",
+   "ما في مزود خدمة محفوظ. ابحث وتأكد من التراخيص والشروط من مصادر رسمية ثم سجل الروابط والأسعار. دبّرنا لا يتحقق من الجهات ولا يشخّص الأمراض.",
+   "Family Services: private comparison checklist","خدمات العائلة: قائمة مقارنة خاصة","/explore/services","Review service options","راجع خيارات الخدمات");
+  const incomplete=saved.filter(x=>x.category==="doctor"&&!x.credentialsConfirmedByParent).length;
+  return answer(intent,"Review your own provider comparisons","راجع مقارنات الخدمات الخاصة",
+   saved.length+" providers saved in your private list. "+
+   (incomplete?incomplete+" clinician entries still lack your credentials check. ":"")+
+   "These are personal notes, not verified provider reviews, licensing records or availability.",
+   saved.length+" مزودي خدمات محفوظين في قائمتك. "+
+   (incomplete?incomplete+" سجلات لأطباء تحتاج لتدقيق المؤهلات من جانبك. ":"")+
+   "هذه ملاحظات شخصية وليست مراجعات موثقة أو تأكيداً على الترخيص أو التوفر.",
+   "Family Services: entered provider notes","خدمات العائلة: ملاحظاتك المسجلة","/explore/services","Review providers","راجع الجهات");
+ }
  if(intent==="shopping")
   return answer(intent,"Compare the complete cost, not just the sticker","قارن التكلفة الكاملة مش السعر وحده",
    "Enter at least two actual offers including delivery or travel and review durability and suitability. Prices are manually entered, not verified live feeds; don't call the lowest entry a confirmed saving.",
    "أدخل عرضين فعليين على الأقل مع التوصيل أو النقل وراجع المتانة والملاءمة. الأسعار مدخلة يدوياً وليست أسعاراً مباشرة مؤكدة؛ الأرخص ليس وفراً مضموناً.",
    "Compare & Choose: entered prices and quality","قارن واختر: أسعار وتقييمات مدخلة يدوياً","/explore/smartbuy","Compare choices","قارن الخيارات");
  return answer("unsupported","Here are the questions I can answer safely","هذه الأسئلة التي يمكنني الإجابة عليها",
-  "I can help review recorded cash risks, bills, savings, family occasions, plans and shopping decisions. I cannot search providers, diagnose conditions, verify bank balances or hold a free-form AI conversation in this pilot.",
+  "I can review cash risks, bills, tasks, gifts, local service notes, outings and shopping. I cannot verify providers, diagnose conditions, access bank accounts or hold a free-form AI conversation in this pilot.",
   "بقدر أساعدك بمراجعة الرصيد والفواتير والادخار والمناسبات والخطط والشراء. ما بقدر أتحقق من الحسابات البنكية أو أشخّص مشاكل صحية أو أقدّم محادثة ذكاء اصطناعي حرّة بهالنسخة.",
   "Device-only guided rules · no external AI","إرشادات محلية فقط دون ذكاء اصطناعي خارجي","/plans","See your plans","افتح الخطط");
 }

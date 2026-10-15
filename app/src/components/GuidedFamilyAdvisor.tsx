@@ -6,6 +6,10 @@ import {useI18n} from "@/lib/i18n";
 import {useLocalState} from "@/lib/storage";
 import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
+import {FAMILY_TASKS_KEY,type FamilyTask} from "@/lib/familyTasks";
+import {FAMILY_WISHLIST_KEY,type WishlistItem} from "@/lib/familyWishlist";
+import {SERVICE_SHORTLIST_KEY,type ServiceEntry} from "@/lib/serviceShortlist";
+import {OUTING_SHORTLIST_KEY,type OutingOption} from "@/lib/childAwareOutingCompare";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 import {answerFamilyQuestion,guidedPrompts,type GuidedAnswer} from "@/lib/guidedFamilyAdvisor";
 import type {FamilyMoment} from "@/lib/familyCalendar";
@@ -19,14 +23,18 @@ export function GuidedFamilyAdvisor(){
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [moments,,calendarReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
+ const [wishlist,,wishlistReady]=useLocalState<WishlistItem[]>(FAMILY_WISHLIST_KEY,[]);
+ const [services,,servicesReady]=useLocalState<ServiceEntry[]>(SERVICE_SHORTLIST_KEY,[]);
+ const [outings,,outingsReady]=useLocalState<OutingOption[]>(OUTING_SHORTLIST_KEY,[]);
  const [prefs,,prefsReady]=useLocalState("familyPreferences",defaultFamilyPreferences);
  const [question,setQuestion]=useState("");
  const [history,setHistory]=useState<Exchange[]>([]);
- const ready=moneyReady&&membersReady&&calendarReady&&plansReady&&prefsReady;
+ const ready=moneyReady&&membersReady&&calendarReady&&plansReady&&tasksReady&&wishlistReady&&servicesReady&&outingsReady&&prefsReady;
  const ask=(value:string)=>{
   if(!ready||value.trim().length===0)return;
   const q=value.trim().slice(0,400);
-  const reply=answerFamilyQuestion(q,{money,members,moments,plans,preferences:prefs});
+  const reply=answerFamilyQuestion(q,{money,members,moments,plans,tasks,wishlist,services,outings,preferences:prefs});
   setHistory(prev=>[...prev.slice(-4),{question:q,reply}]);
   setQuestion("");
  };
@@ -42,7 +50,7 @@ export function GuidedFamilyAdvisor(){
     <h2 className="mt-1 text-lg font-semibold">{ar?"شو بدك تراجع اليوم؟":"What would you like to review?"}</h2>
     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
      "اسأل عن مصروف البيت أو الفواتير أو الادخار أو الأطفال أو الخطط. الإجابات مبنية فقط على البيانات اللي أدخلتها في هذا المتصفح—وليست محادثة AI متصلة.":
-     "Ask about spending, bills, savings, children, plans or shopping. Answers use only your records on this device—this is guided logic, not a connected AI chatbot."}</p>
+     "Ask about money, family tasks, gifts, outings, services or shopping. Answers use only your records on this device—guided logic, not a connected AI chatbot."}</p>
    </div>
   </div>
   <div className="mt-4 grid gap-2 sm:grid-cols-2">
