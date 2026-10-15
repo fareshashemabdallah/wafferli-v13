@@ -32,8 +32,9 @@ describe("bill payments reconcile with expenses and cash",()=>{
   expect(restored.commitments?.[0]?.paidDates).toEqual([]);
   expect(restored.expenses).toHaveLength(0);
  });
- it("rejects future dates and deductions greater than recorded cash",()=>{
-  expect(recordBillPayment(initial(),"rent","2026-10-14","2026-10-13","x","already").expenses).toEqual([]);
+ it("accepts confirmed early payments and rejects deductions greater than entered cash",()=>{
+  const early=recordBillPayment(initial(),"rent","2026-10-14","2026-10-13","x","already",375);
+  expect(early.expenses[0]).toMatchObject({amount:375,plannedAmount:400});
   const low={...initial(),cashOnHand:100};
   expect(recordBillPayment(low,"rent","2026-10-14","2026-10-14","x","deduct")).toBe(low);
  });
