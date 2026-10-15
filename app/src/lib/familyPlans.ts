@@ -13,6 +13,8 @@ export type FamilyPlan={
  choice?:{label:string;estimatedJod?:number;source:"comparison"|"outing"|"occasion"|"manual";verified?:boolean};
  actualJod?:number;completedAt?:string;expenseId?:string;note?:string;
  sourceRef?:string;
+ /** Optional link to a named Money savings goal; linking never spends money. */
+ savingsGoalId?:string;
 };
 const value=(n:unknown):n is number=>typeof n==="number"&&Number.isFinite(n)&&n>=0&&n<=100000;
 const dateOk=(s:string)=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s+"T12:00:00"));
