@@ -1,7 +1,6 @@
 import type {MoneyState,Expense} from "./money";
 import {computeMoney} from "./money";
 import {allocationOptions,varianceOf,type AllocationChoice} from "./financeAlignment";
-import {monthCarryover} from "./monthlyCarryover";
 import {roundJod,buildForecast,legacyIncome} from "./cashflow";
 
 export type SmartVarianceGuidance={
@@ -31,7 +30,6 @@ export function smartVarianceGuidance(state:MoneyState,expense:Expense,now=new D
   reserve:state.cashReserve??0,today,days:30});
  const risk=forecast.overdueCount>0||(forecast.minimumBalance!==null&&forecast.minimumBalance<0);
  const spare=ranked.find(x=>x.kind==="variable");
- const nextMonth=monthCarryover(state,ym);
  if(delta>0)return {
   en:spare?"First consider flexible spending before touching savings.":
    "Keep this difference visible in next month's plan rather than silently reducing savings.",
