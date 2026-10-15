@@ -152,6 +152,8 @@ BEGIN
  IF NOT FOUND OR v_inv.revoked_at IS NOT NULL OR v_inv.accepted_at IS NOT NULL
     OR v_inv.expires_at<=now()
  THEN RAISE EXCEPTION 'Invitation expired, used or revoked'; END IF;
+ -- Serialize membership count across DIFFERENT valid invitation codes.
+ PERFORM 1 FROM public.dabberna_households WHERE id=v_inv.household_id FOR UPDATE;
  IF EXISTS (SELECT 1 FROM public.dabberna_household_members
    WHERE household_id=v_inv.household_id AND user_id=v_user)
  THEN RAISE EXCEPTION 'Membership already exists; contact the owner'; END IF;
