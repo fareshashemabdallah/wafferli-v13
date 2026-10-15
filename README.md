@@ -60,6 +60,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Each reply uses existing **browser-local**, explicitly entered family and finance records and discloses its source, missing information and next action. Answers are temporary in-memory UI state, not saved or uploaded.
 - This is **rule-driven advisory guidance, not generative conversational AI**, a bank-account connection, a professional financial assessment or a provider price/booking verification. Unsupported questions are handled transparently.
 
+## Family calendar reminder export
+- Parents may **explicitly select upcoming recorded bills and/or actual family dates**, inspect the list and download a local `.ics` calendar file containing a one-day VALARM reminder. Available on My Day's attention list and Family Calendar.
+- Reminder files are downloaded in the browser, not sent to Dabberna services. Importing a file into a calendar application **may transfer event names and dates to that provider**; parents must acknowledge this.
+- **No background push/SMS/email is active in Dabberna.** Device/calendar notification delivery depends on the user's calendar app, system permissions, and import behavior. Sample finance and sample-member birthdays are excluded.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
