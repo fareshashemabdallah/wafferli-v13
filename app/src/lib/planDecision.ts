@@ -32,7 +32,7 @@ export function evaluatePlan(plan:FamilyPlan,money:MoneyState,all:FamilyPlan[]=[
   name:c.name,room:roundJod(Math.max(0,finance.plannedBy(c.id)-finance.spentBy(c.id)))
  })).filter(c=>c.room>0).sort((a,b)=>b.room-a.room).slice(0,3):[];
  const overview=getMoneyOverview(money,now);
- const canCheckCash=!money.demo&&overview.cashSet&&overview.hasBillSchedule&&overview.dateProblems===0&&overview.cashAfterBills!==null;
+ const canCheckCash=cost!==null&&!money.demo&&overview.cashSet&&overview.hasBillSchedule&&overview.dateProblems===0&&overview.cashAfterBills!==null;
  const today=localDay(now);
  // 30-day forecast covers only a dated horizon; never imply the current balance is future cash.
  const withinCashWindow=day>=today&&day<=futureDate(today,30);
