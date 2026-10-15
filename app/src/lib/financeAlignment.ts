@@ -15,7 +15,10 @@ export function varianceOf(expense:Expense):number{
  return expense.status==="planned"||!valid(expense.plannedAmount)||!!expense.allocation?0:roundJod(expense.amount-expense.plannedAmount);
 }
 export function allocationOptions(state:MoneyState,delta:number,expenseCategory?:string):AllocationChoice[]{
- if(Math.abs(delta)<.005||state.demo)return [];
+ if(Math.abs(delta)<.005||state.demo||!state.categories.some(c=>c.id===expenseCategory))return [];
+ const source=state.categories.find(c=>c.id===expenseCategory);
+ const ownSpent=computeMoney(state).spentBy(expenseCategory!);
+ if(delta<0&&source&&roundJod(source.planned+delta)+.005<ownSpent)return [];
  const actual=computeMoney(state),abs=roundJod(Math.abs(delta));
  const variable=state.categories.filter(c=>c.type==="variable"&&c.id!==expenseCategory&&
   (delta>0?roundJod(c.planned-actual.spentBy(c.id))>=abs:true)).map(c=>({kind:"variable" as const,categoryId:c.id}));
@@ -24,7 +27,7 @@ export function allocationOptions(state:MoneyState,delta:number,expenseCategory?
 }
 export function applyVarianceAllocation(state:MoneyState,expenseId:string,choice:AllocationChoice,now:string):MoneyState{
  const e=state.expenses.find(x=>x.id===expenseId);
- if(!e||state.demo||!valid(e.plannedAmount)||e.status==="planned"||e.allocation)return state;
+ if(!e||state.demo||!valid(e.plannedAmount)||e.status==="planned"||e.allocation||!state.categories.some(c=>c.id===e.categoryId))return state;
  const delta=varianceOf(e),amount=roundJod(Math.abs(delta));
  if(amount===0)return state;
  if(!allocationOptions(state,delta,e.categoryId).some(x=>x.kind===choice.kind&&x.categoryId===choice.categoryId))return state;
