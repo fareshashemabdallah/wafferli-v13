@@ -101,6 +101,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Each screen gives a clear offline notice when the device reports no connection. Sign-in, outing voting, maps, live price sources and new uncached chunks remain unavailable offline; some reloads may fail if they were never opened online.
 - Service worker static checks run in CI. Real-device offline reload, updates and installation require acceptance tests; this is **not** background push notifications or native App Store deployment.
 
+## Financial intelligence — new locally grounded analysis
+- Money Overview includes a six-month chart of user-entered PAID expenses, clearly distinguished from the current planning budget. Missing entries are not treated as proof of no spending.
+- Review flags compare categories only when at least two previous months contain recorded entries. They are prompts to double-check timing or missing data, not fraud alerts or verified spending judgments.
+- An explicit, read-only 3/6/12-month what-if tool models changes to monthly income and additional costs, including a one-time event in a selected month. No bank balance, dated bill settlement, financial guarantee or hidden ledger mutation. **Do not enter bills already allocated in regular budget categories again.**
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
