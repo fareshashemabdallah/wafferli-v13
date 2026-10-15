@@ -20,7 +20,8 @@ const working = [
   "My Day — financial snapshot, weather and helpful family suggestions",
   "Our Finances — income, commitments, expenses and cash-flow planning (this device only)",
   "My Basket — plan quantities, review totals and record an expense (this device only)",
-  "Compare & Choose — manual total-cost comparison; quality must be evaluated separately",
+  "Compare & Choose — manual total-cost comparison and private quotation tracking; no merchant connection",
+  "Family Services — personal provider shortlists and checklists, not verified clinical or service ratings",
   "My Family — household profiles and preferences (this device only)",
   "Plan Together — share outing votes and organize child-aware experiences",
 ];
