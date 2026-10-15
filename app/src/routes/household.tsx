@@ -29,6 +29,7 @@ function HouseholdAccountsPage(){
  const [email,setEmail]=useState("");
  const [householdName,setHouseholdName]=useState("");
  const [displayName,setDisplayName]=useState("");
+ const [adultAttested,setAdultAttested]=useState(false);
  const [invitationInput,setInvitationInput]=useState("");
  const [issuedCode,setIssuedCode]=useState("");
  const [households,setHouseholds]=useState<AuthenticatedHousehold[]>([]);
@@ -104,7 +105,7 @@ function HouseholdAccountsPage(){
  const create=(e:FormEvent)=>{
   e.preventDefault();
   void run(async()=>{
-   const id=await createHousehold(householdName,displayName);
+   const id=await createHousehold(householdName,displayName,adultAttested);
    await reload();setActiveId(id);setHouseholdName("");
    setMessage(ar?"تم إنشاء مساحة الأسرة. لم يتم رفع أي بيانات مالية.":"Household created. No financial data was uploaded.");
   });
@@ -112,7 +113,7 @@ function HouseholdAccountsPage(){
  const join=(e:FormEvent)=>{
   e.preventDefault();
   void run(async()=>{
-   const id=await acceptAdultInvitation(invitationInput,displayName);
+   const id=await acceptAdultInvitation(invitationInput,displayName,adultAttested);
    await reload();setActiveId(id);setInvitationInput("");
    setMessage(ar?"تم قبول الدعوة. لم يتم مشاركة المصاريف أو نقلها.":"Invitation accepted. No spending data was transferred or shared.");
   });
@@ -164,8 +165,8 @@ function HouseholdAccountsPage(){
    <div className="flex items-start gap-3"><ShieldCheck className="size-7 shrink-0 text-brand"/>
     <div><h2 className="text-lg font-semibold">{ar?"حسابات موثقة مع خصوصية واضحة":"Verified membership, clear privacy"}</h2>
      <p className="mt-2 text-sm leading-relaxed">{ar?
-       "هذه مساحة عضوية منفصلة عن مجموعات الأصدقاء. الدخول والدعوات للبالغين فقط. ميزانية البيت والمصاريف الخاصة تبقى على هذا الجهاز—ولا تتم مزامنتها هنا.":
-       "Household membership is separate from friends' circles. Invitations are for verified adult accounts only. Your private expenses, cash and family plans remain on this device; this page does not synchronize them."}</p></div>
+       "هذه مساحة منفصلة عن مجموعات الأصدقاء. الدخول موثّق، لكن سنّ البلوغ مبني على إقرار المستخدم وليس تحققاً مستقلاً. الميزانية والمصاريف الخاصة تبقى على جهازك ولا تتم مزامنتها.":
+       "Household membership is separate from friends' circles. Sign-in is authenticated; adult status is self-declared, not independently verified. Your private expenses, cash and family plans remain on this device; this page does not synchronize them."}</p></div>
    </div>
   </section>
   {error&&<p role="alert" className="mt-4 rounded-xl border border-[#EDC9C9] bg-[#FFF2F2] p-3 text-sm text-[#92474B]">{error}</p>}
@@ -193,19 +194,23 @@ function HouseholdAccountsPage(){
        placeholder={ar?"الاسم الذي تريد إظهاره":"Name to show other adults"}/>
      <p className="text-xs text-muted-foreground">{ar?"اختياري حتى تقرر إنشاء أو قبول دعوة. ليس له علاقة باسمك في مجموعات الأصدقاء.":"Used only when creating or joining a household; separate from your community display name."}</p>
     </div>
-    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+    <label className="mt-4 flex items-start gap-3 rounded-xl border border-[#DCE7DC] bg-[#F3F8F0] p-4 text-sm">
+    <input type="checkbox" className="mt-1 size-4 shrink-0 accent-[#426958]" checked={adultAttested} onChange={e=>setAdultAttested(e.target.checked)}/>
+    <span>{ar?"أؤكد أنني بالغ (18 سنة أو أكثر)، وأوافق على الانضمام لهذه المساحة. هذا تأكيد مني وليس تحققاً رسمياً من العمر.":"I confirm I am 18 or older and agree to household membership. This is self-attestation, not independent age verification."}</span>
+   </label>
+   <div className="mt-4 grid gap-3 sm:grid-cols-2">
      <form onSubmit={create} className="editorial-card space-y-3 p-4">
       <h3 className="flex items-center gap-2 font-semibold"><Users className="size-5 text-brand"/>{ar?"إنشاء مساحة الأسرة":"Create a household"}</h3>
       <Input required minLength={2} maxLength={70} value={householdName} onChange={e=>setHouseholdName(e.target.value)}
        placeholder={ar?"مثل: بيتنا":"e.g. Our home"}/>
-      <Button type="submit" disabled={busy||displayName.trim().length<2}>{ar?"أنشئ":"Create"}</Button>
+      <Button type="submit" disabled={busy||!adultAttested||displayName.trim().length<2}>{ar?"أنشئ":"Create"}</Button>
      </form>
      <form onSubmit={join} className="editorial-card space-y-3 p-4">
       <h3 className="flex items-center gap-2 font-semibold"><UserPlus className="size-5 text-brand"/>{ar?"الانضمام بدعوة":"Join with an invitation"}</h3>
       <Input required minLength={64} maxLength={64} autoComplete="off" spellCheck={false}
        value={invitationInput} onChange={e=>setInvitationInput(e.target.value)}
        placeholder={ar?"رمز دعوة من الشخص المسؤول":"Private invitation code from the owner"}/>
-      <Button type="submit" disabled={busy||displayName.trim().length<2||invitationInput.trim().length!==64}>{ar?"قبول الدعوة":"Accept invitation"}</Button>
+      <Button type="submit" disabled={busy||!adultAttested||displayName.trim().length<2||invitationInput.trim().length!==64}>{ar?"قبول الدعوة":"Accept invitation"}</Button>
      </form>
     </div>
     <section className="editorial-card mt-5 p-4">
