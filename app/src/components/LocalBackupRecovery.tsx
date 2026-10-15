@@ -3,6 +3,7 @@ import {FileCheck2,RotateCcw,ShieldAlert} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
 import {buildLocalBackup} from "@/lib/localDataControls";
+import {decryptPrivateBackup,validVaultEnvelope,type EncryptedVaultEnvelope} from "@/lib/privateVaultCrypto";
 import {inspectLocalBackup,restoreLocalSections,type RecoveryPreview,
  type RestorableKey} from "@/lib/backupRestore";
 
@@ -26,23 +27,46 @@ export function LocalBackupRecovery(){
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const [loading,setLoading]=useState(false);
+ const [encrypted,setEncrypted]=useState<EncryptedVaultEnvelope|null>(null);
+ const [encryptedPass,setEncryptedPass]=useState("");
  const inputRef=useRef<HTMLInputElement>(null);
  const setNewSelection=(keys:RestorableKey[])=>{
   setSelected(keys);setConfirm("");setHasSafetyCopy(false);setNotice("");
  };
  const chooseFile=async(file:File|undefined)=>{
-  setPreview(null);setNewSelection([]);setError("");setNotice("");
+  setPreview(null);setEncrypted(null);setEncryptedPass("");setNewSelection([]);setError("");setNotice("");
   if(!file)return;
-  if(file.size>5_000_000){
+  if(file.size>8_000_000){
    setError(ar?"الملف أكبر من ٥ ميغابايت.":"Backup file exceeds the 5 MB safety limit.");
    return;
   }
   setLoading(true);
   try{
-   const inspected=inspectLocalBackup(await file.text(),window.localStorage);
+   const raw=await file.text();
+   let parsed:unknown;
+   try{parsed=JSON.parse(raw) as unknown;}catch{throw new Error("Invalid JSON backup file");}
+   if(validVaultEnvelope(parsed)){
+    setEncrypted(parsed);
+    setNotice(ar?"هذه نسخة مشفّرة. أدخل كلمة المرور لفك التشفير على هذا الجهاز فقط.":"Encrypted backup detected. Enter its passphrase to decrypt here, without uploading anything.");
+    return;
+   }
+   const inspected=inspectLocalBackup(raw,window.localStorage);
    setPreview(inspected);
    setSelected(inspected.sections.map(s=>s.key));
   }catch(e){setError(e instanceof Error?e.message:String(e));}
+  finally{setLoading(false);}
+ };
+ const decryptSelected=async()=>{
+  if(!encrypted||loading)return;
+  setLoading(true);setError("");
+  try{
+   const raw=await decryptPrivateBackup(encrypted,encryptedPass);
+   const inspected=inspectLocalBackup(raw,window.localStorage);
+   setPreview(inspected);
+   setSelected(inspected.sections.map(s=>s.key));
+   setEncrypted(null);setEncryptedPass("");
+   setNotice(ar?"تم فك تشفير النسخة وفحصها محلياً. راجع الأقسام قبل الاستعادة.":"Backup decrypted and validated locally. Review the sections before restoring.");
+  }catch(e){setError(e instanceof Error?e.message:String(e));setEncryptedPass("");}
   finally{setLoading(false);}
  };
  const needsSafetyCopy=!!preview&&preview.sections.some(s=>selected.includes(s.key)&&s.currentlyStored);
@@ -96,6 +120,15 @@ export function LocalBackupRecovery(){
   {loading&&<p className="mt-2 text-xs text-muted-foreground">{ar?"نفحص الملف...":"Validating file…"}</p>}
   {error&&<p role="alert" className="mt-3 rounded-lg bg-[#FFF1EE] p-3 text-xs text-[#984C42]">{error}</p>}
   {notice&&<p role="status" className="mt-3 rounded-lg bg-[#EAF4E8] p-3 text-xs text-brand">{notice}</p>}
+  {encrypted&&<div className="mt-3 rounded-xl border border-[#DBE8D9] bg-white p-3">
+   <label className="block text-xs font-semibold">{ar?"كلمة مرور الملف المشفر":"Encrypted file passphrase"}
+    <input type="password" value={encryptedPass} maxLength={200} autoComplete="off"
+     onChange={e=>setEncryptedPass(e.target.value)}
+     className="mt-1 min-h-11 w-full rounded-xl border px-3 text-sm"/>
+   </label>
+   <Button type="button" className="mt-3" disabled={encryptedPass.length<14||loading}
+    onClick={()=>void decryptSelected()}>{ar?"فك التشفير وعرض المحتوى":"Decrypt & preview locally"}</Button>
+  </div>}
   {preview&&<div className="mt-4 space-y-3">
    <div className="rounded-xl border border-[#DCE4D9] bg-white p-3 text-xs">
     <p className="font-semibold"><FileCheck2 className="me-1 inline size-4 text-brand"/>
