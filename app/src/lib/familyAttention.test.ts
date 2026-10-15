@@ -30,6 +30,7 @@ describe("family attention queue",()=>{
   expect(got.filter(x=>x.severity==="critical").every(x=>!x.canSnooze)).toBe(true);
   const first=got[0]!;
   expect(snoozeAttention({},first,now)).toEqual({});
+  expect(assemble({money:m,snoozes:{[first.key]:"2030-01-01"}}).some(x=>x.key===first.key)).toBe(true);
  });
  it("flags upcoming unpaid bills only when parents opted into bill reminders",()=>{
   const m={...money(),cashOnHand:900,cashUpdatedAt:"2026-10-15",
