@@ -91,7 +91,8 @@ export function compareOutingOptions(
   const age=new Date(option.checkedOn+"T12:00:00Z"),current=new Date(today(now)+"T12:00:00Z");
   if((current.getTime()-age.getTime())/86400000>14)
    reason("Your venue notes are older than 14 days; recheck prices and admission.","ملاحظات المكان أقدم من ١٤ يوماً؛ أعد التحقق من السعر والدخول.");
-  return {option,suitability:blocked?"not-suitable":en.length?"needs-confirmation":"provisional",
+  const suitability:OutingAssessment["suitability"]=blocked?"not-suitable":en.length?"needs-confirmation":"provisional";
+  return {option,suitability,
    reasonsEn:en.length?en:["No contradictions found in your notes; venue safety and availability still need checking."],
    reasonsAr:ar.length?ar:["لم تظهر تعارضات ضمن ملاحظاتك؛ لا يزال التحقق من الأمان والتوفر ضرورياً."],
    costWithinBudget:budget,distanceWithinLimit:distance};
