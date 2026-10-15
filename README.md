@@ -126,6 +126,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - The local Restore panel accepts both traditional unencrypted JSON and a protected envelope. An encrypted file must first be decrypted with its passphrase on the device, then pass all existing schema checks and explicit section-choice/safety-backup confirmation before writing.
 - A lost passphrase cannot be recovered. Unlike the separate staged cloud vault, this offline download needs **no Supabase database, sign-in or environment flag**. Unsupported token-bearing local sections are intentionally omitted; older plain exports are still supported.
 
+## Family attention inbox and device-local expense privacy review
+- The Today family attention list now offers an expanded (up to 20) priority inbox and local snooze visibility/reversal while preserving the initial four-card overview and unsnoozable critical financial warnings. All alerts remain **in-app only**.
+- My Family → Preferences & privacy now includes a recent, paid-expense label review. Parents may re-label entered expenses `private` or `household` on this device; changing to household requires confirmation.
+- A local household label is **NOT an access permission**. No expense is automatically sent or visible to another adult; the staged backend's explicit per-item sharing/consent remains separate and disabled.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
