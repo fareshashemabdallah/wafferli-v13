@@ -4,6 +4,7 @@ import { Cake, CalendarHeart, Heart, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AppShell, Notice, PilotBadge } from "@/components/AppShell";
 import { FamilyPreferences } from "@/components/FamilyPreferences";
+import {isSampleFamilyMember} from "@/lib/familySetup";
 import { Field, NativeSelect, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ function Space() {
   const { tr,lang } = useI18n();
   const ar=lang==="ar";
   const [members,setMembers] = useLocalState<Member[]>("members",sampleMembers());
+  const samples=members.filter(isSampleFamilyMember);
   const [events,setEvents,eventsReady] = useLocalState<FamilyMoment[]>("familyCalendar",[]);
   const [edit,setEdit] = useState<Member|null>(null);
   const [err,setErr] = useState("");
@@ -79,7 +81,15 @@ function Space() {
         <p className="relative mt-2 max-w-lg text-sm leading-relaxed text-[#4E6B5A]">{ar?"تفاصيل العائلة وأيامها المهمة، محفوظة بمكان واحد.":"Your people, birthdays and meaningful dates, thoughtfully kept together."}</p>
       </section>
 
-      <section className="mt-7">
+      <section className="mt-7" id="household-members">
+        {samples.length>0&&<div className="mb-4 rounded-2xl border border-[#E6D7C5] bg-[#FFF8F0] p-4">
+          <p className="text-sm font-semibold">{ar?"أسماء تجريبية، ليست عيلتك":"Example profiles, not your family"}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{ar?"هؤلاء أشخاص للتجربة فقط. فيك تشيلهم وتضيف أفراد عيلتك، من دون تغيير المصاريف أو المناسبات المسجلة.":"These are demonstration people. Remove them before personalizing family advice. This won\u0027t alter your existing money or family occasions."}</p>
+          <button type="button" className="mt-3 min-h-10 rounded-full border border-[#DBC5AF] bg-white px-4 text-xs font-semibold text-brand"
+           onClick={()=>{if(window.confirm(ar?"إزالة الأسماء التجريبية فقط؟ سنحافظ على ملفات العائلة الحقيقية والمناسبات والمصاريف.":"Remove example profiles only? Your real profiles, calendar and Money records will remain unchanged."))setMembers(old=>old.filter(m=>!isSampleFamilyMember(m)));}}>
+           {ar?"احذف الأسماء التجريبية":"Remove example profiles"}
+          </button>
+        </div>}
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">{tr("Household members")}</h2>
