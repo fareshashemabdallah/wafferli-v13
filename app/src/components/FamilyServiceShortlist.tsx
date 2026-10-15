@@ -5,7 +5,7 @@ import {useI18n} from "@/lib/i18n";
 import {dateKey} from "@/lib/familyCalendar";
 import {useLocalState,uid} from "@/lib/storage";
 import {SERVICE_SHORTLIST_KEY,makeServiceEntry,assessServiceShortlist,
- type ServiceEntry,type ServiceType} from "@/lib/serviceShortlist";
+ type ServiceEntry,type ServiceType,type ServiceAssessment} from "@/lib/serviceShortlist";
 import {compareParentSelectedServices} from "@/lib/serviceSideBySide";
 
 export function FamilyServiceShortlist({category}:{category:ServiceType}){
@@ -156,13 +156,13 @@ export function FamilyServiceShortlist({category}:{category:ServiceType}){
      {comparison.options.map(x=><th key={x.entry.id} className="p-2 text-start">{x.entry.name}</th>)}
     </tr></thead><tbody>
      {([
-      {label:ar?"المدينة":"City",value:(x:typeof comparison.options[number])=>x.entry.city},
-      {label:ar?"تكلفة تقريبية":"Entered cost",value:(x:typeof comparison.options[number])=>x.entry.costJod===undefined?"—":x.entry.costJod.toFixed(2)+" JOD"},
-      {label:ar?"تقييمك الشخصي":"Your subjective fit",value:(x:typeof comparison.options[number])=>x.entry.parentFit?x.entry.parentFit+"/5":"—"},
-      {label:ar?"تاريخ المراجعة":"Last checked",value:(x:typeof comparison.options[number])=>x.entry.checkedAt},
-      {label:ar?"قائمة التحقق":"Missing checks",value:(x:typeof comparison.options[number])=>x.missingChecks.join(", ")||"None recorded"},
-      {label:ar?"الأطفال":"Your child-friendly checkbox",value:(x:typeof comparison.options[number])=>x.entry.childFriendly?"✓":"—"},
-      {label:ar?"الوصول":"Your accessibility checkbox",value:(x:typeof comparison.options[number])=>x.entry.stepFreeAccess?"✓":"—"}
+      {label:ar?"المدينة":"City",value:(x:ServiceAssessment)=>x.entry.city},
+      {label:ar?"تكلفة تقريبية":"Entered cost",value:(x:ServiceAssessment)=>x.entry.costJod===undefined?"—":x.entry.costJod.toFixed(2)+" JOD"},
+      {label:ar?"تقييمك الشخصي":"Your subjective fit",value:(x:ServiceAssessment)=>x.entry.parentFit?x.entry.parentFit+"/5":"—"},
+      {label:ar?"تاريخ المراجعة":"Last checked",value:(x:ServiceAssessment)=>x.entry.checkedAt},
+      {label:ar?"قائمة التحقق":"Missing checks",value:(x:ServiceAssessment)=>x.missingChecks.join(", ")||"None recorded"},
+      {label:ar?"الأطفال":"Your child-friendly checkbox",value:(x:ServiceAssessment)=>x.entry.childFriendly?"✓":"—"},
+      {label:ar?"الوصول":"Your accessibility checkbox",value:(x:ServiceAssessment)=>x.entry.stepFreeAccess?"✓":"—"}
      ]).map(row=><tr key={row.label} className="border-b border-[#EBF0E8]">
       <th className="p-2 text-start font-medium">{row.label}</th>
       {comparison.options.map(x=><td key={x.entry.id} className="p-2">{row.value(x)}</td>)}
