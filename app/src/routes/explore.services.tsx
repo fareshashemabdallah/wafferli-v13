@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ExternalLink, Search, ShieldAlert, Stethoscope } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
+import {FamilyServiceShortlist} from "@/components/FamilyServiceShortlist";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,7 @@ function Services() {
         {ar?"افتح نتائج خرائط Google":"Open Google Maps results"} <ExternalLink className="size-4"/>
       </a>}
     </form>
+    <FamilyServiceShortlist category={category}/>
     <div className="card-soft mt-4 p-4 text-sm">
       <p className="mb-3 text-sm"><Link to="/community" className="font-semibold text-brand">{ar?"اسأل الأصدقاء أو أهالي المدرسة داخل مجموعتك":"Ask your parent or friends circle for firsthand advice"} →</Link></p>
       <p className="mb-3 text-sm"><Link to="/experience" className="font-semibold text-brand">{ar?"ابحث عن تجارب المستخدمين الخاصة بجهة محددة":"Read experiences for a specific provider or place"} →</Link></p>
