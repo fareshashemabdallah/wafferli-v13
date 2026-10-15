@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
 import {MerchantQuoteDraft} from "@/components/MerchantQuoteDraft";
+import {PrivateOfferWorkspace} from "@/components/PrivateOfferWorkspace";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import {dateKey} from "@/lib/familyCalendar";
 import { Field, inputCls } from "@/components/Field";
@@ -140,6 +141,7 @@ function SmartBuy() {
         <Button variant="secondary" disabled={s.alts.length >= 8} onClick={() => setS({ ...s, alts: [...s.alts, { id: uid(), store: "", price: "", extra: "", verified: false }] })}><Plus className="size-4" /> {tr("Add alternative")}</Button>
       </div>
       <MerchantQuoteDraft product={s.product} budget={s.budget}/>
+      <PrivateOfferWorkspace/>
       <details className="mt-5 rounded-2xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{tr("Add photos (optional)")}</summary>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <Photo label={tr("Product photo")} icon={ImagePlus} />
