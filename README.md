@@ -7,6 +7,8 @@
 
 In GitHub Settings → Pages select **GitHub Actions** as the deployment source. The validated full app lives in `app/`, not the old top-level `index.html` fallback.
 
+**Implementation status and production release gates:** [Dabberna feature implementation register](docs/dabberna-feature-implementation-register.md). Use this to distinguish enabled pilot features, staged code and external blockers.
+
 ## Features in this pilot
 - **Home:** financial snapshot using the same browser-local household budget as My Money; upcoming obligations, practical family insights and a family-friendly style.
 - **Weather:** real Open-Meteo forecast when the parent chooses a city. Practical clothing and umbrella suggestions; no passive location tracking. A provider outage shows an honest error.
