@@ -1,5 +1,5 @@
 import {createFileRoute,Link} from "@tanstack/react-router";
-import {ArrowRight,CalendarDays,CheckCircle2,Compass,Plus,ShieldCheck,Trash2,Wallet} from "lucide-react";
+import {ArrowRight,CalendarDays,CheckCircle2,Compass,Plus,ShieldCheck,Trash2} from "lucide-react";
 import {useState,type FormEvent} from "react";
 import {toast} from "sonner";
 import {AppShell} from "@/components/AppShell";
