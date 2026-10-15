@@ -23,8 +23,9 @@ export function makeFamilyTask(input:{
 }
 export function setTaskComplete(task:FamilyTask,done:boolean,now=new Date()):FamilyTask{
  if((task.status==="done")===done)return task;
- return {...task,status:done?"done":"open",updatedAt:now.toISOString(),
-  ...(done?{completedAt:now.toISOString()}:{completedAt:undefined})};
+ const {completedAt:_previousCompletion,...base}=task;
+ return {...base,status:done?"done":"open",updatedAt:now.toISOString(),
+  ...(done?{completedAt:now.toISOString()}:{})};
 }
 export type TaskSummary={open:number;overdue:number;dueSoon:number;completed:number;next:FamilyTask[]};
 export function taskSummary(tasks:readonly FamilyTask[],now=new Date()):TaskSummary{
