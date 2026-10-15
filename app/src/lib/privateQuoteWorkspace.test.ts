@@ -1,7 +1,8 @@
 import {describe,expect,it} from "vitest";
-import {addEnteredOffer,compareEnteredOffers,makePrivateQuote,offerTotalJod,
+import {addEnteredOffer,compareEnteredOffers,chooseEnteredOfferForPlan,makePrivateQuote,offerTotalJod,
  privateQuoteSummary,recordUserSharedRequest} from "./privateQuoteWorkspace";
 import {buildLocalBackup,eraseLocalAppData} from "./localDataControls";
+import {makeFamilyPlan} from "./familyPlans";
 const now=new Date(2026,9,15,12);
 const draft={product:"School backpacks",quantity:2,deliveryCity:"Amman",neededBy:"2026-10-25",budgetCeilingJod:100};
 const q=()=>makePrivateQuote(draft,"test-quote",now);
@@ -60,4 +61,29 @@ describe("user-controlled local quotation lifecycle",()=>{
   expect(eraseLocalAppData(store)).toBe(1);
   expect(store.getItem("sb-tenant-auth-token")).toBe("secret");
  });
+ it("moves only a manually chosen UNVERIFIED current total into an active purchase Plan",()=>{
+  const now=new Date(2026,9,15,12);
+  const offerQuote=addEnteredOffer(q(),offer(),now);
+  const p=makeFamilyPlan({id:"plan-1",title:"School items",kind:"purchase",
+   budgetJod:100},now)!;
+  const changed=chooseEnteredOfferForPlan(offerQuote,"o1",p,now);
+  expect(changed.status).toBe("decided");
+  expect(changed.choice).toMatchObject({
+   estimatedJod:84,source:"comparison",verified:false
+  });
+  expect(changed.expenseId).toBeUndefined();
+  expect(changed.actualJod).toBeUndefined();
+  expect(p.status).toBe("planning");
+ });
+ it("rejects expired, removed or closed quote options and completed plans",()=>{
+  const validQuote=addEnteredOffer(q(),offer(),now);
+  const plan=makeFamilyPlan({id:"p",title:"School kits",kind:"purchase"},now)!;
+  expect(()=>chooseEnteredOfferForPlan(validQuote,"unknown",plan,now)).toThrow();
+  expect(()=>chooseEnteredOfferForPlan(validQuote,"o1",plan,new Date(2026,9,23,12))).toThrow(/expired/i);
+  expect(()=>chooseEnteredOfferForPlan({...validQuote,status:"closed"},"o1",plan,now)).toThrow();
+  expect(()=>chooseEnteredOfferForPlan(validQuote,"o1",{...plan,status:"completed"},now)).toThrow();
+  const outing=makeFamilyPlan({id:"o",title:"Walk",kind:"outing"},now)!;
+  expect(()=>chooseEnteredOfferForPlan(validQuote,"o1",outing,now)).toThrow();
+ });
+
 });

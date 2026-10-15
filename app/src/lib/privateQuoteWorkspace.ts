@@ -1,4 +1,5 @@
 import {validateQuoteRequest,type QuoteRequestDraft} from "./merchantQuoteDraft";
+import {setPlanChoice,type FamilyPlan} from "./familyPlans";
 
 export type PrivateOffer={
  id:string; merchant:string; itemCostJod:number;
@@ -86,4 +87,25 @@ export function privateQuoteSummary(quote:PrivateQuote):{activeCount:number;ente
  const ranked=compareEnteredOffers(quote);
  return {activeCount:ranked.filter(r=>!r.expired).length,enteredCount:ranked.length,
   lowestActiveJod:ranked.find(r=>!r.expired)?.totalJod??null};
+}
+
+/** An explicitly chosen MANUAL quotation becomes a Plan estimate only.
+ * It NEVER means provider verification, reservation, order or payment.
+ * Expired quotes and completed plans are not eligible.
+ */
+export function chooseEnteredOfferForPlan(
+ quote:PrivateQuote,offerId:string,plan:FamilyPlan,now=new Date()
+):FamilyPlan{
+ if(quote.status==="closed"||plan.kind!=="purchase"||plan.status==="completed")
+  throw new Error("Choose an active purchase plan and open quote request");
+ const offer=quote.offers.find(o=>o.id===offerId);
+ if(!offer||!day(offer.expiresOn)||offer.expiresOn<today(now))
+  throw new Error("This manually entered offer is missing or expired");
+ if(!amount(offer.itemCostJod)||!amount(offer.deliveryJod)||
+    !amount(offer.taxesJod))throw new Error("Invalid stored JOD costs");
+ const total=offerTotalJod(offer);
+ if(!Number.isFinite(total)||total<=0||total>100000)
+  throw new Error("Offer total is outside supported planning limits");
+ const label=quote.request.product.slice(0,65)+" · "+offer.merchant.slice(0,45);
+ return setPlanChoice(plan,{label,estimatedJod:total,source:"comparison",verified:false},now);
 }

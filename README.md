@@ -90,6 +90,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Added a **separate manually invoked** `npm run security:staging` runner: tests owner/co-parent/unrelated Supabase Auth accounts for invitation replay, adult attestation, RLS isolation, explicit expense consent, author-only withdrawal, vault version conflicts and member-revocation purge.
 - **This runner was not used on a real Supabase instance yet**. It explicitly rejects the current public project and demands a disposable staging project and three seeded test accounts. No live database changes or production-ready claims. [Full staging test setup and remaining gates](docs/staging-security-gates.md).
 
+## From manual merchant quote to family Plan
+- With an active unfinished purchase Plan, a parent can **explicitly choose** a still-current, manually entered merchant option and record its **full item + delivery + tax** JOD amount as an **unverified planning estimate**.
+- Completed plans, closed requests and expired offers cannot be linked. No expense is automatically booked, no cash is deducted, and no merchant is contacted.
+- The original quote list and the Plan are both device-local and independently editable. This is not synchronization, provider verification, purchase fulfillment or payment authorization.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.

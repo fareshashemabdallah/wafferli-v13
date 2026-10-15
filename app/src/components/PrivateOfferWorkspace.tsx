@@ -1,9 +1,11 @@
 import {useState,type FormEvent} from "react";
+import {Link} from "@tanstack/react-router";
+import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {Archive,ClipboardList,Plus,Trash2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,uid} from "@/lib/storage";
-import {addEnteredOffer,compareEnteredOffers,
+import {addEnteredOffer,compareEnteredOffers,chooseEnteredOfferForPlan,
  PRIVATE_QUOTES_KEY,type PrivateQuote,recordUserSharedRequest} from "@/lib/privateQuoteWorkspace";
 
 const defaultOffer={merchant:"",itemCost:"",delivery:"0",taxes:"0",expiresOn:"",source:"",note:""};
@@ -12,12 +14,15 @@ const defaultOffer={merchant:"",itemCost:"",delivery:"0",taxes:"0",expiresOn:"",
 export function PrivateOfferWorkspace(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [requests,setRequests,ready]=useLocalState<PrivateQuote[]>(PRIVATE_QUOTES_KEY,[]);
+ const [plans,setPlans,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [activePlanId]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
+ const purchasePlan=plans.find(p=>p.id===activePlanId&&p.kind==="purchase"&&p.status!=="completed");
  const [active,setActive]=useState("");
  const [draft,setDraft]=useState(defaultOffer);
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const selected=requests.find(r=>r.id===active)??requests[0];
- if(!ready)return null;
+ if(!ready||!plansReady)return null;
  const update=(fn:(r:PrivateQuote)=>PrivateQuote)=>{
   if(!selected)return;
   setRequests(old=>old.map(r=>r.id===selected.id?fn(r):r));
@@ -94,6 +99,22 @@ export function PrivateOfferWorkspace(){
         <p className="mt-1 text-muted-foreground">{ar?"المنتج":"Item"} {row.offer.itemCostJod.toFixed(2)} · {ar?"التوصيل":"Delivery"} {row.offer.deliveryJod.toFixed(2)} · {ar?"الضريبة":"Tax"} {row.offer.taxesJod.toFixed(2)}</p>
         <p className="mt-1 text-muted-foreground">{ar?"صالح حسب إدخالك لغاية ":"Entered expiry: "}{row.offer.expiresOn} · {row.expired?(ar?"منتهي":"Expired"):(ar?"غير منتهي حسب التاريخ":"Not expired by entered date")}
          {row.withinCeiling!==null?" · "+(row.withinCeiling?(ar?"ضمن السقف":"Under your ceiling"):(ar?"يتجاوز السقف":"Over your ceiling")):""}</p>
+        {purchasePlan&&selected.status!=="closed"&&!row.expired&&<div className="mt-2 rounded-lg border border-[#DAE8D9] bg-[#F5F9F2] p-2">
+         <p className="text-[11px] text-muted-foreground">{ar?"خطة الشراء المختارة: ":"Active purchase plan: "}{purchasePlan.title}</p>
+         <Button type="button" variant="outline" size="sm" className="mt-2"
+          onClick={()=>{
+           if(!window.confirm(ar?
+            "إضافة السعر الذي أدخلته بنفسك كتكلفة تقديرية للخطة؟ لن يتم شراء أو دفع شيء، والتاجر غير متحقق منه.":
+            "Save this manually entered total as an UNVERIFIED estimate for your active purchase plan? No merchant order, checkout or payment will occur."))return;
+           try{
+            const updated=chooseEnteredOfferForPlan(selected,row.offer.id,purchasePlan);
+            setPlans(old=>old.map(p=>p.id===purchasePlan.id&&p.status!=="completed"?updated:p));
+            setNotice(ar?"تمت إضافة الخيار إلى الخطة كتكلفة تقديرية فقط.":"Manual price saved as a Plan estimate, not a payment or verified offer.");
+            setError("");
+           }catch(e){setError(e instanceof Error?e.message:String(e));}
+          }}>{ar?"اختَر السعر للخطة":"Use this estimate in Plan"}</Button>
+         <Link to="/plans" className="ms-2 text-xs font-semibold text-brand underline">{ar?"راجع الخطة":"Review plan"}</Link>
+        </div>}
         {row.offer.evidenceUrl&&<a href={row.offer.evidenceUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-brand underline">{ar?"رابط المصدر الذي أضفته":"Your evidence link"}</a>}
        </div>
        <Button variant="ghost" size="sm" onClick={()=>deleteOffer(row.offer.id)}><Trash2 className="size-3.5"/>{ar?"حذف":"Remove"}</Button>
