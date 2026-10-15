@@ -14,7 +14,7 @@ import {
  * be mistaken for a real merchant account or server-side moderation.
  */
 export const MERCHANT_SANDBOX_ENABLED=import.meta.env.DEV&&
- import.meta.env.VITE_ENABLE_MERCHANT_WORKFLOW_DEMO==="true";
+ import.meta.env["VITE_ENABLE_MERCHANT_WORKFLOW_DEMO"]==="true";
 export function MerchantWorkflowSandbox(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [actor,setActor]=useState<SandboxActor>("merchant");
