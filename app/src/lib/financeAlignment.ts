@@ -2,15 +2,15 @@ import {roundJod} from "./cashflow";
 import {computeMoney,type Expense,type MoneyState} from "./money";
 
 export type AllocationChoice={kind:"variable"|"savings";categoryId?:string};
-export type Alignment={income:number;savings:number;categories:number;gap:number;status:"balanced"|"deficit"|"surplus"|"incomplete"};
+export type Alignment={income:number;savings:number;categories:number;carryover:number;gap:number;status:"balanced"|"deficit"|"surplus"|"incomplete"};
 const valid=(n:unknown):n is number=>typeof n==="number"&&Number.isFinite(n)&&n>=0;
 const monthDate=(month:string)=>new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,15);
 const monthKey=(d:Date)=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 export const plannedSavings=(s:MoneyState,month=monthKey(new Date())):number=>roundJod(computeMoney(s,monthDate(month)).savingsTarget);
-export function budgetAlignment(state:MoneyState):Alignment{
- const m=computeMoney(state),income=roundJod(m.monthlyIncome),savings=roundJod(m.savingsTarget),categories=roundJod(m.planned);
- const gap=roundJod(income-savings-categories),incomplete=state.demo||income<=0||state.categories.length===0;
- return {income,savings,categories,gap,status:incomplete?"incomplete":Math.abs(gap)<.005?"balanced":gap<0?"deficit":"surplus"};
+export function budgetAlignment(state:MoneyState,now=new Date()):Alignment{
+ const m=computeMoney(state,now),income=roundJod(m.monthlyIncome),savings=roundJod(m.savingsTarget),categories=roundJod(m.planned);
+ const carryover=m.carryover.net,gap=roundJod(income+carryover-savings-categories),incomplete=state.demo||income<=0||state.categories.length===0;
+ return {income,savings,categories,carryover,gap,status:incomplete?"incomplete":Math.abs(gap)<.005?"balanced":gap<0?"deficit":"surplus"};
 }
 export function varianceOf(expense:Expense):number{
  return expense.status==="planned"||!valid(expense.plannedAmount)||!!expense.allocation?0:roundJod(expense.amount-expense.plannedAmount);
@@ -44,10 +44,30 @@ export function applyVarianceAllocation(state:MoneyState,expenseId:string,choice
   expenses:state.expenses.map(x=>x.id===expenseId?{...x,allocation:{...choice,delta,approvedAt:now}}:x)
  };
 }
-export function applyAlignmentSuggestion(state:MoneyState,choice:AllocationChoice):MoneyState{
- const a=budgetAlignment(state);
+export function applyAlignmentSuggestion(state:MoneyState,choice:AllocationChoice,now=new Date()):MoneyState{
+ const a=budgetAlignment(state,now);
  if(a.status==="incomplete"||a.status==="balanced")return state;
- const delta=roundJod(a.gap),actual=computeMoney(state);
+ const delta=roundJod(a.gap),actual=computeMoney(state,now);
+ // One-off prior-month carryover must never rewrite the recurring savings goal
+ // or the recurring category envelope for every future month.
+ if(Math.abs(a.carryover)>=.005){
+  const ym=monthKey(now);
+  const prev=state.monthlyAdjustments?.[ym]??{savingsDelta:0,categoryDeltas:{}};
+  if(choice.kind==="savings"){
+   const target=roundJod(actual.savingsTarget+delta);
+   if(target<0||target>actual.monthlyIncome+Math.max(0,a.carryover))return state;
+   return {...state,monthlyAdjustments:{...state.monthlyAdjustments,[ym]:{
+    ...prev,savingsDelta:roundJod(prev.savingsDelta+delta)
+   }}};
+  }
+  const category=state.categories.find(c=>c.id===choice.categoryId&&c.type==="variable");
+  if(!category)return state;
+  const target=roundJod(actual.plannedBy(category.id)+delta);
+  if(target<0||target+.005<actual.spentBy(category.id))return state;
+  return {...state,monthlyAdjustments:{...state.monthlyAdjustments,[ym]:{
+   ...prev,categoryDeltas:{...prev.categoryDeltas,[category.id]:roundJod((prev.categoryDeltas[category.id]??0)+delta)}
+  }}};
+ }
  if(choice.kind==="savings"){
   const base=typeof state.savingsTargetAmount==="number"?state.savingsTargetAmount:
     roundJod(actual.monthlyIncome*state.savingsPct/100);
