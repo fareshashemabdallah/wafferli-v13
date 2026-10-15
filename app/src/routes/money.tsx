@@ -270,6 +270,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
   const blank: Expense = { id: "", date: today(), categoryId: cats[0]?.id ?? "", amount: 0, shared: true };
   const [editing, setEditing] = useState<Expense | null>(null);
   const [quickAmount, setQuickAmount] = useState("");
+  const [quickExpected,setQuickExpected]=useState("");
   const [quickMode,setQuickMode]=useState<"planned"|"paid">("paid");
   const [plannedDate,setPlannedDate]=useState(today());
   const [confirming,setConfirming]=useState<string|null>(null);
@@ -282,10 +283,11 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
     const amount=parseAmount(quickAmount,50000);
     if(quickMode==="planned"&&!/^\d{4}-\d{2}-\d{2}$/.test(plannedDate))return setQuickError(ar?"اختر تاريخاً متوقعاً صحيحاً.":"Choose a valid planned payment date.");
     if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
+    if(quickMode==="paid"&&quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":"Enter a valid expected amount.");
     if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
-    const entry:Expense={id:uid(),date:quickMode==="planned"?plannedDate:today(),categoryId:selectedCategory,amount,shared:true,status:quickMode,...(quickMode==="planned"?{plannedAmount:amount}:{})};
+    const entry:Expense={id:uid(),date:quickMode==="planned"?plannedDate:today(),categoryId:selectedCategory,amount,shared:true,status:quickMode,...(quickMode==="planned"?{plannedAmount:amount}:quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
     onChange([entry,...expenses]);
-    setQuickAmount("");setQuickError("");
+    setQuickAmount("");setQuickExpected("");setQuickError("");
     toast.success(quickMode==="planned"?(ar?"تم حفظ المصروف كمخطط، دون احتسابه كمدفوع.":"Expense planned, not counted as paid."):(ar?"تم تسجيل المصروف المدفوع.":"Paid expense recorded."));
   };
   const sorted = [...expenses].sort((a, b) => b.date.localeCompare(a.date));
@@ -318,6 +320,13 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
           </NativeSelect>
         </Field>
         <Button type="submit" className="h-11" disabled={!selectedCategory}><Plus className="size-4"/> {tr("Save")}</Button>
+        {quickMode==="paid"&&<details className="sm:col-span-3 rounded-xl border border-border bg-white p-3">
+          <summary className="cursor-pointer text-xs font-semibold text-brand">{ar?"هل المبلغ مختلف عن المتوقع؟ (اختياري)":"Compare with an expected amount (optional)"} +</summary>
+          <label className="mt-2 block text-xs font-medium">{ar?"كم كنت تتوقع أن تدفع؟ (د.أ)":"What did you expect to pay? (JOD)"}
+            <Input type="number" step=".01" min={0} max={50000} className="mt-1 max-w-44" value={quickExpected} onChange={e=>setQuickExpected(e.target.value)}/>
+          </label>
+          <p className="mt-2 text-xs text-muted-foreground">{ar?"إذا في فرق، يظهر اقتراح تعديل مخصصاتك بعد التسجيل، وتؤكده أنت.":"If actual differs, you'll be offered a budget adjustment to approve."}</p>
+        </details>}
         {quickError&&<p role="alert" className="text-sm text-destructive sm:col-span-3">{quickError}</p>}
         <p className="text-xs text-muted-foreground sm:col-span-3"> {quickMode==="planned"?(ar?"المبلغ المتوقع لا يُحتسب كمدفوع حتى تأكيد الدفع الفعلي.":"Estimated amount is not counted as spent until you confirm the actual payment."):(ar?"المبلغ المدفوع سيظهر ضمن مصاريف هذا الشهر.":"Paid amount appears in this month’s actual spending.")} </p>
       </form>
