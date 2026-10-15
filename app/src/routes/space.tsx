@@ -4,6 +4,7 @@ import { Cake, CalendarHeart, Heart, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AppShell, Notice, PilotBadge } from "@/components/AppShell";
 import { FamilyPreferences } from "@/components/FamilyPreferences";
+import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {isSampleFamilyMember} from "@/lib/familySetup";
 import {HOUSEHOLD_ACCOUNTS_ENABLED} from "@/lib/householdAccounts";
 import { Field, NativeSelect, inputCls } from "@/components/Field";
@@ -198,6 +199,7 @@ function Space() {
         <p className="mt-2 text-xs text-muted-foreground">{ar?"التواريخ محفوظة على هذا الجهاز فقط. لا توجد إشعارات تلقائية خارج التطبيق بعد.":"Dates stay in this browser; background reminders and automatic notifications are not yet available."}</p>
       </section>
 
+      <FamilyTasksPanel/>
       <Link to="/occasions" className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#244D3C]">{ar?"خطّط لهدية أو نشاط بمناسبة عائلية":"Plan a meaningful gift or family activity"} →</Link>
       {HOUSEHOLD_ACCOUNTS_ENABLED&&<section className="editorial-card mt-5 p-4">
         <h2 className="font-semibold">{ar?"حسابات الأسرة الموثّقة":"Verified household accounts"}</h2>
