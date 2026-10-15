@@ -2,6 +2,7 @@ import { useI18n } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { LocalDataControls } from "@/components/LocalDataControls";
+import { PrivateVaultPanel } from "@/components/PrivateVaultPanel";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -42,6 +43,7 @@ function About() {
         <p className="mt-1">{tr("Money, shopping and household data are stored only in this browser. Clearing site data erases them — use fictional figures. A vote stores only: outing title, date, area, option names, optional organizer name, and each guest's choice + optional first name. Budget and \"who pays\" stay on the organizer's device.")}</p>
       </section>
       <LocalDataControls/>
+      <PrivateVaultPanel/>
       <section className="card-soft mt-4 p-4 text-sm">
         <h2 className="text-lg font-semibold">{tr("How to test")}</h2>
         <ol className="mt-1 list-decimal space-y-1 ps-5"><li>{tr("Discover → Plan Together → create a vote.")}</li><li>{tr("Copy the vote link or send via WhatsApp.")}</li><li>{tr("Open it on another phone, vote, then watch your organizer page update.")}</li></ol>
