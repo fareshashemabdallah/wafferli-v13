@@ -55,6 +55,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - [Staging-only private vault database migration](app/supabase/private_vault_v1.sql) has per-user RLS, explicit write/delete RPCs and revision conflicts. **Not deployed** and gated off in public builds by default: `VITE_ENABLE_PRIVATE_VAULT=true` only for a reviewed staging deployment.
 - A co-parent, friend, group or household membership does not gain access. This is **manual cloud backup transfer**, NOT continuous two-way synchronization, family-account data sharing or production security approval. [Privacy/threat model and rollout gates](docs/encrypted-personal-vault.md).
 
+## Guided family question advisor (device-only)
+- The **Wise Decisions** screen now supports bilingual suggested questions and short free-text prompts about household cash risk, dated bills, savings goals, family occasions, open plans and manual shopping decisions.
+- Each reply uses existing **browser-local**, explicitly entered family and finance records and discloses its source, missing information and next action. Answers are temporary in-memory UI state, not saved or uploaded.
+- This is **rule-driven advisory guidance, not generative conversational AI**, a bank-account connection, a professional financial assessment or a provider price/booking verification. Unsupported questions are handled transparently.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
