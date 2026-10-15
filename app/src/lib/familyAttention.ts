@@ -23,7 +23,7 @@ export type AttentionSnoozes=Record<string,string>;
 export const FAMILY_ATTENTION_SNOOZES_KEY="familyAttentionSnoozes";
 
 const dateSnoozed=(until:unknown,now:Date):boolean=>
- typeof until==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(until)&&until>=dateKey(now);
+ typeof until==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(until)&&until>dateKey(now);
 /** Snooze is device-local and temporary. Critical warnings are never snoozed.
  * The dismissal changes the display only, not a bill, plan or payment status.
  */
