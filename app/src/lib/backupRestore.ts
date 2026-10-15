@@ -31,6 +31,7 @@ const numMap=z.record(maxNumber);
 const strict=(shape:z.ZodRawShape)=>z.object(shape).strict();
 const smallMoney=z.number().finite().min(0).max(100000)
  .refine(n=>Math.abs(n*100-Math.round(n*100))<=0.00001,"JOD must have two decimal places");
+const positiveSmallMoney=smallMoney.refine(n=>n>0,"Positive amount required");
 const url=z.string().max(700).refine(raw=>{
  try{const parsed=new URL(raw);return parsed.protocol==="https:"&&!parsed.username&&!parsed.password&&
   parsed.hostname.includes(".")&&!parsed.hostname.endsWith(".local")&&
@@ -116,11 +117,11 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   request:strict({
    product:z.string().min(3).max(100),quantity:z.number().int().min(1).max(10000),
    deliveryCity:z.string().min(2).max(70),neededBy:isoDate,
-   budgetCeilingJod:smallMoney.positive().optional()
+   budgetCeilingJod:positiveSmallMoney.optional()
   }),
   offers:many(strict({
    id:z.string().min(1).max(120),merchant:z.string().min(2).max(90),
-   itemCostJod:smallMoney.positive(),deliveryJod:smallMoney,taxesJod:smallMoney,
+   itemCostJod:positiveSmallMoney,deliveryJod:smallMoney,taxesJod:smallMoney,
    enteredAt:isoTime,expiresOn:isoDate,
    evidenceUrl:url.optional(),note:z.string().max(250).optional()
   }),20)
