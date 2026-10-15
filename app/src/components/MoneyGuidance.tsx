@@ -10,15 +10,15 @@ const key=(a:AllocationChoice)=>a.kind+":"+(a.categoryId??"");
 export function MoneyGuidance({state,setState,scope}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
  const [proposal,setProposal]=useState<string|null>(null);
- const [reviewed,setReviewed]=useState<string[]>([]);
  const alignment=budgetAlignment(state);
- const item=state.expenses.find(e=>varianceOf(e)!==0&&!reviewed.includes(e.id));
+ const ym=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
+ const item=state.expenses.find(e=>e.date.startsWith(ym)&&varianceOf(e)!==0&&!e.varianceDismissed);
  const delta=item?varianceOf(item):0;
  const choices:AllocationChoice[]=scope==="alignment"?(alignment.status==="balanced"||alignment.status==="incomplete"?[]:[
   ...state.categories.filter(c=>c.type==="variable" && (alignment.gap>0||
-   c.planned+alignment.gap>=Math.max(0,state.expenses.filter(e=>e.status!=="planned"&&e.categoryId===c.id&&e.date.slice(0,7)===new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")).reduce((n,e)=>n+e.amount,0)))).map(c=>({kind:"variable" as const,categoryId:c.id})),
+   (c.planned+(state.monthlyAdjustments?.[ym]?.categoryDeltas[c.id]??0))+alignment.gap>=Math.max(0,state.expenses.filter(e=>e.status!=="planned"&&e.categoryId===c.id&&e.date.slice(0,7)===new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")).reduce((n,e)=>n+e.amount,0)))).map(c=>({kind:"variable" as const,categoryId:c.id})),
   ...(alignment.gap>0||alignment.savings>=-alignment.gap?[{kind:"savings" as const}]:[])
- ]) : item?allocationOptions(state,delta,item.categoryId):[];
+ ]) : item?allocationOptions(state,delta,item.categoryId,item.date.slice(0,7)):[];
  if(state.demo)return null;
  if(scope==="variance"&&!item)return null;
  const selected=choices.find(c=>key(c)===proposal);
@@ -69,7 +69,7 @@ export function MoneyGuidance({state,setState,scope}:Props){
     <button type="button" onClick={()=>setProposal(null)} className="min-h-11 px-3 text-sm text-muted-foreground">{ar?"إلغاء":"Cancel"}</button>
    </div>}
   </div>:<p className="mt-3 text-xs text-muted-foreground">{ar?"لا يوجد مخصص متاح يكفي لتغطية الفرق تلقائياً. عدّل هدف الادخار أو مخصصات الفئات من الأماكن الحالية.":"No eligible category or savings target can cover the entire difference. Adjust your budgets or goal in the existing Money settings."}</p>}
-  {scope==="variance"&&<button type="button" onClick={()=>{setReviewed(xs=>[...xs,item!.id]);setProposal(null);}} className="mt-3 min-h-9 text-xs font-medium text-muted-foreground underline underline-offset-2">{ar?"اترك المخصصات كما هي":"Keep budgets unchanged"}</button>}
-  <div className="mt-3 flex gap-2 text-xs text-muted-foreground"><ShieldCheck className="size-4 shrink-0"/><p>{ar?"الاقتراح مبني على أرقامك المدخلة، لا يحوّل مالاً بين الحسابات ولا يغيّر رصيد البنك.":"Rule-based guidance using your entries. It moves no money and never changes your bank balance."}</p></div>
+  {scope==="variance"&&<button type="button" onClick={()=>{setState(old=>({...old,expenses:old.expenses.map(e=>e.id===item!.id?{...e,varianceDismissed:true}:e)}));setProposal(null);}} className="mt-3 min-h-9 text-xs font-medium text-muted-foreground underline underline-offset-2">{ar?"اترك المخصصات كما هي":"Keep budgets unchanged"}</button>}
+  <div className="mt-3 flex gap-2 text-xs text-muted-foreground"><ShieldCheck className="size-4 shrink-0"/><p>{ar?"الاقتراح مبني على أرقامك المدخلة، لا يحوّل مالاً بين الحسابات ولا يغيّر رصيد البنك. فروقات الدفع تعدّل مخصصات الشهر المعني فقط.":"Rule-based guidance using your entries. It moves no money and never changes your bank balance."}</p></div>
  </section>;
 }
