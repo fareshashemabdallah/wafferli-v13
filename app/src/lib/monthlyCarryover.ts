@@ -17,6 +17,13 @@ export function previousMonthKey(month:string):string {
  if(m<1||m>12)return "";
  return [m===1?year-1:year,String(m===1?12:m-1).padStart(2,"0")].join("-");
 }
+export function nextMonthKey(month:string):string {
+ const match=/^(\d{4})-(\d{2})$/.exec(month);
+ if(!match)return "";
+ const y=Number(match[1]),m=Number(match[2]);
+ if(m<1||m>12)return "";
+ return [m===12?y+1:y,String(m===12?1:m+1).padStart(2,"0")].join("-");
+}
 export function eligibleCarryover(expense:Expense):number {
  if(expense.status==="planned"||expense.allocation||
    typeof expense.plannedAmount!=="number"||!Number.isFinite(expense.plannedAmount)||
