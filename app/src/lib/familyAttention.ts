@@ -150,5 +150,5 @@ export function buildFamilyAttention(input:{
   unique.add(item.key);
   return p.notificationFrequency==="gentle"||item.severity!=="gentle";
  }).sort((a,b)=>a.priority-b.priority||a.key.localeCompare(b.key))
- .slice(0,Math.max(1,Math.min(4,input.maxItems??4)));
+ .slice(0,Math.max(1,Math.min(20,input.maxItems??4)));
 }
