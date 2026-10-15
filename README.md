@@ -151,6 +151,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - The automated Vitest/jsdom suite now exercises actual component interactions for a saved gift and manually checked price, local family task creation/completion, child-aware outing privacy, and Arabic RTL presentation.
 - These tests also assert that those interactions **do not write a family Money ledger or a public outing vote**. This supplements pure function tests but **does not replace** real-device, real-network, independent security testing, accessibility audit or release QA.
 
+## Wider guided family advice — grounded and device-only
+- Wise Decisions now covers **ten** bilingual guided topics: existing financial safety, bills, savings, children/family dates, plans and shopping plus **family responsibilities, gifts, child-aware outings and saved service/provider comparisons**.
+- Answers are computed from each parent’s existing local records and explain the source, missing facts and next action; unsupported queries still clearly disclose that live, free-form AI is not connected.
+- Clinician information is a **parent-entered checklist, not medical advice, credential verification or a provider ranking**. Venues and prices remain unverified; no private family data is sent to an AI API.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
