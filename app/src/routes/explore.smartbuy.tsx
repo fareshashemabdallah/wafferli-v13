@@ -26,7 +26,7 @@ export const Route = createFileRoute("/explore/smartbuy")({
   component: SmartBuy,
 });
 
-type Alt = { id: string; store: string; price: string; extra: string; verified: boolean; quality?: string; fit?: string; note?: string; sourceUrl?:string; checkedDate?:string };
+type Alt = { id: string; store: string; price: string; extra: string; verified: boolean; quality?: string; fit?: string; note?: string; sourceUrl?:string; checkedDate?:string|undefined };
 
 function Photo({ label, icon: Icon }: { label: string; icon: typeof Receipt }) {
   const { tr } = useI18n();
