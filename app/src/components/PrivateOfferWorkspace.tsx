@@ -3,7 +3,7 @@ import {Archive,ClipboardList,Plus,Trash2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,uid} from "@/lib/storage";
-import {addEnteredOffer,compareEnteredOffers,offerTotalJod,
+import {addEnteredOffer,compareEnteredOffers,
  PRIVATE_QUOTES_KEY,type PrivateQuote,recordUserSharedRequest} from "@/lib/privateQuoteWorkspace";
 
 const defaultOffer={merchant:"",itemCost:"",delivery:"0",taxes:"0",expiresOn:"",source:"",note:""};
