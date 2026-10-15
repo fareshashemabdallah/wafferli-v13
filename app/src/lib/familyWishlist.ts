@@ -34,7 +34,7 @@ export function makeWishlistItem(input:{
   ...(input.budgetJod!==undefined?{budgetJod:input.budgetJod}:{}),
   ...(input.recipientLabel?.trim()?{recipientLabel:clean(input.recipientLabel,60)}:{}),
   ...(input.note?.trim()?{note:clean(input.note,240)}:{}),
-  ...(input.repeatMonths?{repeatMonths:input.repeatMonths,repeatAnchorDate:input.targetDate}:{})};
+  ...(input.repeatMonths?{repeatMonths:input.repeatMonths,repeatAnchorDate:input.targetDate!}:{})};
 }
 export function recordWishlistPrice(item:WishlistItem,input:{
  id:string;amountJod:number;checkedAt:string;store:string;sourceUrl?:string
