@@ -147,6 +147,10 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - The attention item states when no price is recorded, a checked price is older than 14 days, or a manually recorded price exceeds the parent's optional budget ceiling. It links to Gifts or SmartBuy, with the same optional local snooze behavior as other non-critical alerts.
 - No live price verification, merchant push message, purchase order, background notification or financial expense is created. Purchased or undated wishlist items do not generate shopping reminders.
 
+## Parent-journey UI regression coverage
+- The automated Vitest/jsdom suite now exercises actual component interactions for a saved gift and manually checked price, local family task creation/completion, child-aware outing privacy, and Arabic RTL presentation.
+- These tests also assert that those interactions **do not write a family Money ledger or a public outing vote**. This supplements pure function tests but **does not replace** real-device, real-network, independent security testing, accessibility audit or release QA.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
