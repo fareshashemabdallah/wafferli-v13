@@ -131,6 +131,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - My Family → Preferences & privacy now includes a recent, paid-expense label review. Parents may re-label entered expenses `private` or `household` on this device; changing to household requires confirmation.
 - A local household label is **NOT an access permission**. No expense is automatically sent or visible to another adult; the staged backend's explicit per-item sharing/consent remains separate and disabled.
 
+## Proposed Free/Plus and multi-market readiness — no billing
+- The About page now exposes a candid **Free pilot vs proposed Plus** feature map. It does not offer checkout, live Plus subscriptions, paid unlocks or a price.
+- A country registry covers Jordan, Lebanon, UAE and Oman as **future market configuration** with explicit payment, legal and currency readiness gates; financial records remain JOD-only, including when previewing another market. No silent currency conversion.
+- No market launch or merchant commission settlement is enabled. [Future commercial and country rollout requirements](docs/plus-and-markets-gates.md).
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
