@@ -50,6 +50,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - **Safety:** Refuses invalid or unknown backup schemas, stale previews and duplicate record IDs; skips unreviewed modules and *does not* restore invitation tokens, passwords or API keys. The file is handled locally. Backups are **unencrypted**.
 - **Not cloud sync:** A restored file replaces local sections only, without merging, uploading, or granting co-parent access. [Backup-recovery policy & limits](docs/validated-local-backup-recovery.md).
 
+## Encrypted personal vault — staged, NOT public
+- Source includes an explicitly opt-in, AES-256-GCM / PBKDF2 encrypted **personal** backup to move validated core sections between an individual's devices. A parent chooses every category, retains the passphrase and must manually decrypt, download and review before using the local Restore tool.
+- [Staging-only private vault database migration](app/supabase/private_vault_v1.sql) has per-user RLS, explicit write/delete RPCs and revision conflicts. **Not deployed** and gated off in public builds by default: `VITE_ENABLE_PRIVATE_VAULT=true` only for a reviewed staging deployment.
+- A co-parent, friend, group or household membership does not gain access. This is **manual cloud backup transfer**, NOT continuous two-way synchronization, family-account data sharing or production security approval. [Privacy/threat model and rollout gates](docs/encrypted-personal-vault.md).
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
