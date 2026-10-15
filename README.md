@@ -95,6 +95,12 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Completed plans, closed requests and expired offers cannot be linked. No expense is automatically booked, no cash is deducted, and no merchant is contacted.
 - The original quote list and the Plan are both device-local and independently editable. This is not synchronization, provider verification, purchase fulfillment or payment authorization.
 
+## Mobile and limited offline app-shell support
+- The GitHub Pages manifest now points to the correct `/wafferli-v13/` scope and uses a Dabberna-branded SVG icon. Browser and iOS home-screen installation support depends on the browser; SVG icon metadata does not guarantee every app store or device will accept it.
+- The production-only service worker caches the **static SPA shell and same-origin app assets only**, enabling limited reload of previously visited pages when offline. **It does not cache any API responses, Auth tokens, cloud finance data, merchant offers, third-party results or user records.**
+- Each screen gives a clear offline notice when the device reports no connection. Sign-in, outing voting, maps, live price sources and new uncached chunks remain unavailable offline; some reloads may fail if they were never opened online.
+- Service worker static checks run in CI. Real-device offline reload, updates and installation require acceptance tests; this is **not** background push notifications or native App Store deployment.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
