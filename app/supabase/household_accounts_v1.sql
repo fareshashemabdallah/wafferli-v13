@@ -233,6 +233,24 @@ BEGIN
 END;
 $$;
 
+
+-- Owner may view pending invitation metadata, but NEVER see the original
+-- one-time invitation code after it is initially issued.
+CREATE OR REPLACE FUNCTION public.dabberna_pending_invites(p_household_id uuid)
+RETURNS TABLE(invite_id uuid,created_at timestamptz,expires_at timestamptz)
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
+AS $
+BEGIN
+ IF auth.uid() IS NULL OR public.dabberna_active_household_role(p_household_id) IS DISTINCT FROM 'owner'
+ THEN RAISE EXCEPTION 'Household owner required'; END IF;
+ RETURN QUERY SELECT i.id,i.created_at,i.expires_at
+ FROM public.dabberna_household_invites i
+ WHERE i.household_id=p_household_id
+   AND i.accepted_at IS NULL AND i.revoked_at IS NULL AND i.expires_at>now()
+ ORDER BY i.created_at DESC;
+END;
+$;
+
 -- Check privileges on every new definer function; no anonymous RPC access.
 REVOKE ALL ON FUNCTION
  public.dabberna_create_household(text,text),
@@ -242,7 +260,8 @@ REVOKE ALL ON FUNCTION
  public.dabberna_revoke_adult(uuid,uuid),
  public.dabberna_leave_household(uuid),
  public.dabberna_my_households(),
- public.dabberna_household_roster(uuid)
+ public.dabberna_household_roster(uuid),
+ public.dabberna_pending_invites(uuid)
 FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION
  public.dabberna_create_household(text,text),
@@ -252,7 +271,8 @@ GRANT EXECUTE ON FUNCTION
  public.dabberna_revoke_adult(uuid,uuid),
  public.dabberna_leave_household(uuid),
  public.dabberna_my_households(),
- public.dabberna_household_roster(uuid)
+ public.dabberna_household_roster(uuid),
+ public.dabberna_pending_invites(uuid)
 TO authenticated;
 
 -- Must pass before any production activation:
