@@ -1,5 +1,6 @@
 import type { IncomeSource, Commitment } from "./cashflow";
 import { monthlyTotal } from "./cashflow";
+import { monthCarryover } from "./monthlyCarryover";
 export type CatType = "fixed" | "variable" | "periodic";
 export type Category = { id: string; name: string; type: CatType; planned: number };
 export type BudgetAllocation = {kind:"variable"|"savings"; categoryId?:string; delta:number; approvedAt:string};
@@ -60,7 +61,8 @@ export function computeMoney(s: MoneyState, now = new Date()) {
     ? s.savingsTargetAmount : Math.round(monthlyIncome*s.savingsPct)/100;
   const monthly=s.monthlyAdjustments?.[ym];
   const savingsTarget=Math.round((baseSavings+(monthly?.savingsDelta??0))*100)/100;
-  const spendable = monthlyIncome - savingsTarget;
+  const carryover=monthCarryover(s,ym);
+  const spendable = monthlyIncome - savingsTarget + carryover.net;
   const plannedBy=(id:string)=>Math.round(((s.categories.find(c=>c.id===id)?.planned??0)+(monthly?.categoryDeltas[id]??0))*100)/100;
   const planned = Math.round(s.categories.reduce((a, c) => a + plannedBy(c.id), 0)*100)/100;
   const spent = month.reduce((a, e) => a + e.amount, 0);
@@ -78,12 +80,13 @@ export function computeMoney(s: MoneyState, now = new Date()) {
   return {
     monthlyIncome,
     savingsTarget,
+    carryover,
     spendable,
     planned,
     spent,
     remaining: spendable - spent,
     projected,
-    projectedSavings: monthlyIncome - projected,
+    projectedSavings: monthlyIncome + carryover.net - projected,
     overPlan: planned > spendable,
     spentBy,
     plannedBy,
