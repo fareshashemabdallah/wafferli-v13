@@ -4,12 +4,13 @@ import {dateKey,shiftDays,allFamilyMoments,upcomingMoments,type FamilyMoment} fr
 import {realFamilyMembers} from "./familySetup";
 import {getMoneyOverview} from "./moneyOverview";
 import type {FamilyPlan} from "./familyPlans";
+import {taskAttention,type FamilyTask} from "./familyTasks";
 import type {FamilyPreferences} from "./familyPreferences";
 import type {MoneyState,Member} from "./money";
 
 export type AttentionItem={
  key:string;
- category:"finance"|"bill"|"plan"|"occasion"|"inspiration";
+ category:"finance"|"bill"|"plan"|"occasion"|"inspiration"|"task";
  severity:"critical"|"important"|"gentle";
  priority:number;
  titleEn:string;titleAr:string;
@@ -44,6 +45,7 @@ export function buildFamilyAttention(input:{
  preferencesConfirmed:boolean;
  plans:readonly FamilyPlan[];
  moments:readonly FamilyMoment[];
+ tasks?:readonly FamilyTask[];
  snoozes?:AttentionSnoozes;
  now?:Date;
  maxItems?:number;
@@ -94,6 +96,18 @@ export function buildFamilyAttention(input:{
     actionEn:"Check due dates",actionAr:"راجع المواعيد",link:"/money"
    });
   }
+ }
+ if(p.lifestyle){
+  const pending=taskAttention(input.tasks??[],now);
+  if(pending)signals.push({
+   key:"task:"+pending.id+":"+pending.date,
+   category:"task",severity:pending.urgent?"important":"gentle",priority:pending.urgent?9:35,
+   titleEn:pending.urgent?"A family responsibility needs attention":"Family task due soon",
+   titleAr:pending.urgent?"مهمة عائلية تستحق انتباهك":"موعد مهمة عائلية قريب",
+   detailEn:pending.title+" · "+pending.date+" ("+pending.count+" due or overdue task(s) recorded).",
+   detailAr:pending.title+" · "+pending.date+" ("+pending.count+" مهام مسجلة قريبة أو متأخرة).",
+   actionEn:"Review responsibilities",actionAr:"راجع المهام",link:"/space",canSnooze:!pending.urgent
+  });
  }
  const advice=selectFamilyLifeAdvice({money,members,preferences:p,
   preferencesConfirmed:input.preferencesConfirmed,plans,moments,now});
