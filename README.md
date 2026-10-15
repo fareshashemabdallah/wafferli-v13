@@ -111,6 +111,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Due and overdue items feed the existing Today attention list when family-life guidance is enabled. This **does not send assignments, notifications or access permissions to anyone**; family member IDs are local labels only.
 - Task records are included in explicit local JSON export, validated selective recovery and the opt-in, off-by-default personal vault. No teen/child login, cloud sync or co-parent task sharing is activated.
 
+## Connected family decisions — rule-driven version 2
+- Today adds a combined, parent-controlled family brief linking upcoming **actual entered purchase/outing Plans**, a conservative cash-flow stress check of a proposed Plan's estimated cost, **locally recorded family tasks**, and upcoming actual family dates. It presents up to three ordered next steps with practical reasons and links.
+- Respects disabled finance/lifestyle advice and explicit preferences. Sample family members do not generate fake birthdays or actual child profiles; no inferred merchant prices, booking, bank balances or automatic payments.
+- This is **not a connected generative AI model**, nor does it transmit data to third parties or co-parent accounts. It is read-only and is available when family preferences have been confirmed.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.

@@ -2,6 +2,7 @@ import {createFileRoute,Link} from "@tanstack/react-router";
 import {ArrowRight,CalendarHeart,ChevronRight,CloudSun,Compass,Heart,Sparkles,Wallet} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {FamilyAttentionPanel} from "@/components/FamilyAttentionPanel";
+import {FamilyDecisionBriefPanel} from "@/components/FamilyDecisionBriefPanel";
 import {FamilySetupCard} from "@/components/FamilySetupCard";
 import {HomeJourneyHighlights} from "@/components/HomeJourneyHighlights";
 import {FamilyWeather} from "@/components/FamilyWeather";
@@ -100,6 +101,7 @@ function Index(){
   {daily&&<>
    <FamilySetupCard/>
    <FamilyAttentionPanel/>
+   <FamilyDecisionBriefPanel/>
    <section className="mt-6" aria-label={ar?"خطوات سريعة":"Everyday choices"}>
     <div className="flex items-baseline justify-between gap-2">
      <h2 className="text-xl font-semibold text-ink">{ar?"شو بتحب تعمل؟":"What feels right today?"}</h2>
