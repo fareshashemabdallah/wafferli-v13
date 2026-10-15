@@ -23,7 +23,8 @@ export function makeFamilyTask(input:{
 }
 export function setTaskComplete(task:FamilyTask,done:boolean,now=new Date()):FamilyTask{
  if((task.status==="done")===done)return task;
- const {completedAt:_previousCompletion,...base}=task;
+ const base={...task};
+ delete base.completedAt;
  return {...base,status:done?"done":"open",updatedAt:now.toISOString(),
   ...(done?{completedAt:now.toISOString()}:{})};
 }
