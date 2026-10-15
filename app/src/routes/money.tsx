@@ -122,7 +122,7 @@ function MoneyPage() {
       />
       <details className="editorial-card mt-4 px-4 py-3">
         <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إدارة فئات المصاريف":"Manage spending categories"} +</summary>
-        <Categories cats={s.categories} spentBy={c.spentBy} onChange={(categories) => upd({categories})}/>
+        <Categories cats={s.categories} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={(categories) => upd({categories})}/>
       </details>
       </>}
     </AppShell>
@@ -169,8 +169,8 @@ function Settings({income,target,hasSources,onSave}:{income:number;target:number
 
 const typeLabel: Record<CatType, string> = { fixed: "Fixed", variable: "Variable", periodic: "Periodic" };
 
-function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (id: string) => number; onChange: (c: Category[]) => void }) {
-  const { tr } = useI18n();
+function Categories({ cats, spentBy, plannedBy, onChange }: { cats: Category[]; spentBy: (id: string) => number; plannedBy:(id:string)=>number; onChange: (c: Category[]) => void }) {
+  const { tr,lang } = useI18n();
   const [editing, setEditing] = useState<Category | null>(null);
   return (
     <section className="card-soft mt-6 p-4">
@@ -193,7 +193,8 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
       <ul className="mt-3 divide-y">
         {cats.map((c) => {
           const a = spentBy(c.id);
-          const pct = c.planned ? Math.min(100, (a / c.planned) * 100) : 0;
+          const effective=plannedBy(c.id);
+          const pct = effective ? Math.min(100, (a / effective) * 100) : 0;
           return (
             <li key={c.id} className="flex items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
@@ -202,9 +203,9 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
                   <span className="rounded-full bg-mint px-2 text-[11px] text-brand">{tr(typeLabel[c.type])}</span>
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div className={`h-full ${a > c.planned ? "bg-destructive" : "bg-brand-2"}`} style={{ width: `${pct}%` }} />
+                  <div className={`h-full ${a > effective ? "bg-destructive" : "bg-brand-2"}`} style={{ width: `${pct}%` }} />
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{tr("Actual")} {fmtJOD(a)} · {tr("Planned")} {fmtJOD(c.planned)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{tr("Actual")} {fmtJOD(a)} · {tr("Planned")} {fmtJOD(effective)} {effective!==c.planned&&(lang==="ar"?"(معدل لهذا الشهر)":"(adjusted this month)")}</p>
               </div>
               <Button size="icon" variant="ghost" aria-label={`Edit ${c.name}`} onClick={() => setEditing(c)}><Pencil className="size-4" /></Button>
               <Button
