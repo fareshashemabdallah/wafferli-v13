@@ -4,6 +4,8 @@ import { CheckCircle2, ImagePlus, Plus, Receipt, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
+import {MerchantQuoteDraft} from "@/components/MerchantQuoteDraft";
+import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import { Field, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +25,7 @@ export const Route = createFileRoute("/explore/smartbuy")({
   component: SmartBuy,
 });
 
-type Alt = { id: string; store: string; price: string; extra: string; verified: boolean; quality?: string; fit?: string; note?: string };
+type Alt = { id: string; store: string; price: string; extra: string; verified: boolean; quality?: string; fit?: string; note?: string; sourceUrl?:string; checkedDate?:string };
 
 function Photo({ label, icon: Icon }: { label: string; icon: typeof Receipt }) {
   const { tr } = useI18n();
@@ -81,8 +83,14 @@ function SmartBuy() {
               {budget > 0 && <span className={a.total > budget ? "text-destructive" : "text-brand"}>{a.total > budget ? `${fmtJOD(a.total - budget)} ${tr("over budget")}` : tr("Within budget")}</span>}
               {lowestCost?.id === a.id && <span className="rounded-full border border-border px-2 py-1 text-xs text-muted-foreground">{tr("Lowest entered total — not necessarily best value")}</span>}
               <label className="ms-auto flex items-center gap-1.5 text-xs">
-                <input type="checkbox" checked={a.verified} onChange={(e) => setAlt(a.id, { verified: e.target.checked })} /> {tr(a.verified ? "Price I verified" : "Unverified price")}
+                <input type="checkbox" checked={a.verified} onChange={(e) => setAlt(a.id, {
+                 verified: e.target.checked,checkedDate:e.target.checked?(a.checkedDate||new Date().toLocaleDateString("en-CA")):undefined
+                })} /> {ar?"تحققتُ من هذا السعر":"Price I checked myself"}
               </label>
+              {(()=>{const evidence=evaluatePriceEvidence(a.sourceUrl,a.checkedDate,a.verified);return <span
+                className={"text-[11px] "+(evidence.status==="recent"?"text-brand":"text-muted-foreground")}>
+                 {ar?evidence.reasonAr:evidence.reasonEn}
+                </span>;})()}
             </div>
             {selectedPlan&&Number(a.price)>0&&Number.isFinite(a.total)&&a.total>=0&&a.store.trim()&&<div className="mt-3 rounded-xl border border-[#D7E6DA] bg-[#F2F7F0] p-3">
               <p className="text-xs font-medium text-muted-foreground">{ar?"اختيار لخطة: ":"Choose for plan: "}{selectedPlan.title}</p>
@@ -101,6 +109,15 @@ function SmartBuy() {
                 <span>{tr("More than a price: assess this choice")}</span><span className="text-xs group-open:hidden">+</span><span className="hidden text-xs group-open:inline">−</span>
               </summary>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-xs font-medium sm:col-span-2">{ar?"رابط المصدر (اختياري — رابط HTTPS عام)":"Source link (optional public HTTPS page)"}
+                 <Input type="url" className="mt-1" maxLength={700} value={a.sourceUrl??""}
+                  onChange={e=>setAlt(a.id,{sourceUrl:e.target.value,verified:false,checkedDate:undefined})}
+                  placeholder="https://example.com/product"/>
+                </label>
+                <label className="text-xs font-medium sm:col-span-2">{ar?"تاريخ آخر تحقق قمت به":"Date you personally checked the price"}
+                 <Input type="date" className="mt-1" value={a.checkedDate??""}
+                  onChange={e=>setAlt(a.id,{checkedDate:e.target.value})}/>
+                </label>
                 <label className="text-xs font-medium">{tr("Quality & durability (your view)")}
                   <select value={a.quality??""} onChange={e=>setAlt(a.id,{quality:e.target.value})} className="mt-1 w-full rounded-xl border bg-card p-2.5">
                     <option value="">{tr("Not assessed")}</option>{[1,2,3,4,5].map(n=><option key={n} value={String(n)}>{n}/5</option>)}
@@ -121,6 +138,7 @@ function SmartBuy() {
         ))}
         <Button variant="secondary" disabled={s.alts.length >= 8} onClick={() => setS({ ...s, alts: [...s.alts, { id: uid(), store: "", price: "", extra: "", verified: false }] })}><Plus className="size-4" /> {tr("Add alternative")}</Button>
       </div>
+      <MerchantQuoteDraft product={s.product} budget={s.budget}/>
       <details className="mt-5 rounded-2xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{tr("Add photos (optional)")}</summary>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <Photo label={tr("Product photo")} icon={ImagePlus} />
