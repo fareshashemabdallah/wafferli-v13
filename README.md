@@ -85,6 +85,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Saved records are included in explicit JSON export and local-data deletion. They are **not included in automated validated restore or the staged encrypted vault** because those modules support only reviewed core sections; the file itself can still be retained.
 - Do not enter personal medical histories, children’s identifying information or contact credentials in comparison notes.
 
+## Staging RLS security test harness — not executed yet
+- Repaired two broken PostgreSQL dollar-quoted function bodies in the proposed household / selected-shared-expense migrations. The regular Vitest suite now checks structural safety of all three stage-only SQL files.
+- Added a **separate manually invoked** `npm run security:staging` runner: tests owner/co-parent/unrelated Supabase Auth accounts for invitation replay, adult attestation, RLS isolation, explicit expense consent, author-only withdrawal, vault version conflicts and member-revocation purge.
+- **This runner was not used on a real Supabase instance yet**. It explicitly rejects the current public project and demands a disposable staging project and three seeded test accounts. No live database changes or production-ready claims. [Full staging test setup and remaining gates](docs/staging-security-gates.md).
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
