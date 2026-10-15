@@ -1,6 +1,6 @@
 import {computeMoney,type MoneyState} from "./money";
 import {getMoneyOverview} from "./moneyOverview";
-import {roundJod,futureDate} from "./cashflow";
+import {roundJod,futureDate,scheduleDates} from "./cashflow";
 import type {FamilyPlan} from "./familyPlans";
 
 export type PlanDecision={
@@ -32,7 +32,10 @@ export function evaluatePlan(plan:FamilyPlan,money:MoneyState,all:FamilyPlan[]=[
   name:c.name,room:roundJod(Math.max(0,finance.plannedBy(c.id)-finance.spentBy(c.id)))
  })).filter(c=>c.room>0).sort((a,b)=>b.room-a.room).slice(0,3):[];
  const overview=getMoneyOverview(money,now);
- const canCheckCash=cost!==null&&!money.demo&&overview.cashSet&&overview.hasBillSchedule&&overview.dateProblems===0&&overview.cashAfterBills!==null;
+ // Monthly income without a receipt date cannot be included as expected cash,
+ // but it must not make a separately recorded cash-after-bills check unusable.
+ const invalidBillDates=(money.commitments??[]).filter(b=>scheduleDates(b.dueDate,"once",b.dueDate,b.dueDate).length!==1).length;
+ const canCheckCash=cost!==null&&!money.demo&&overview.cashSet&&overview.hasBillSchedule&&invalidBillDates===0&&overview.cashAfterBills!==null;
  const today=localDay(now);
  // 30-day forecast covers only a dated horizon; never imply the current balance is future cash.
  const withinCashWindow=day>=today&&day<=futureDate(today,30);
@@ -46,7 +49,7 @@ export function evaluatePlan(plan:FamilyPlan,money:MoneyState,all:FamilyPlan[]=[
   if(!validBudget)missing.push("monthly-income-and-budgets");
   if(!overview.cashSet)missing.push("actual-cash");
   if(!overview.hasBillSchedule)missing.push("unpaid-bills");
-  if(overview.dateProblems>0)missing.push("bill-dates");
+  if(invalidBillDates>0)missing.push("bill-dates");
  }
  if(cost===null)missing.push("plan-cost");
  const choiceExceedsLimit=valid(plan.budgetJod)&&valid(plan.choice?.estimatedJod)?
