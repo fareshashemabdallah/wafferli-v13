@@ -244,7 +244,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.dabberna_pending_invites(p_household_id uuid)
 RETURNS TABLE(invite_id uuid,created_at timestamptz,expires_at timestamptz)
 LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
-AS $
+AS $$
 BEGIN
  IF auth.uid() IS NULL OR public.dabberna_active_household_role(p_household_id) IS DISTINCT FROM 'owner'
  THEN RAISE EXCEPTION 'Household owner required'; END IF;
@@ -254,7 +254,7 @@ BEGIN
    AND i.accepted_at IS NULL AND i.revoked_at IS NULL AND i.expires_at>now()
  ORDER BY i.created_at DESC;
 END;
-$;
+$$;
 
 -- Check privileges on every new definer function; no anonymous RPC access.
 REVOKE ALL ON FUNCTION
