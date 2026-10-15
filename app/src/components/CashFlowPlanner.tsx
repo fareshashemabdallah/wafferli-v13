@@ -195,7 +195,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
         <div className="mt-2 divide-y">
           {bills.map(bill=>{
             const next=upcomingBills.find(e=>e.sourceId===bill.id);
-            const paid=(bill.paidDates??[]).filter(d=>d>=futureDate(today,-45)&&d<=today).sort().reverse().slice(0,1);
+            const paid=(bill.paidDates??[]).filter(d=>d>=futureDate(today,-45)&&d<=futureDate(today,30)).sort().reverse().slice(0,1);
             return <div key={bill.id} className="py-3 text-sm">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0"><p className="font-semibold">{tr(bill.name)}</p>
