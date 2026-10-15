@@ -1,7 +1,7 @@
 import {describe,expect,it} from "vitest";
 import {
  isAuthenticatedHousehold,isHouseholdRosterMember,isPendingHouseholdInvite,
- HOUSEHOLD_ACCOUNTS_ENABLED
+ HOUSEHOLD_ACCOUNTS_ENABLED,createHousehold,acceptAdultInvitation
 } from "./householdAccounts";
 
 const uuid="be02ac77-1d70-4ecc-980e-34d1124e24d1";
@@ -40,6 +40,10 @@ describe("authenticated household API boundaries",()=>{
    expires_at:"2026-10-18T12:00:00Z"
   })).toBe(true);
   expect(isPendingHouseholdInvite({invite_id:"local",expires_at:"tomorrow"})).toBe(false);
+ });
+ it("never allows a household to be created or joined without explicit adult confirmation",async()=>{
+  await expect(createHousehold("Our home","Parent",false)).rejects.toThrow(/Adult confirmation/);
+  await expect(acceptAdultInvitation("a".repeat(64),"Parent",false)).rejects.toThrow(/Adult confirmation/);
  });
  it("requires an explicitly enabled build flag before authenticated RPC calls",()=>{
   expect(typeof HOUSEHOLD_ACCOUNTS_ENABLED).toBe("boolean");
