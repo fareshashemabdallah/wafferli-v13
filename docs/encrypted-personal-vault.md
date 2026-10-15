@@ -5,7 +5,7 @@
 ## Data model and strict privacy boundaries
 
 - Vault is keyed exclusively to `auth.uid()` from verified Supabase authentication. Neither co-parent membership nor family/community circle membership gives access to someone else's vault.
-- The parent chooses **each** data category explicitly from validated local sections. If they choose Money only, family profiles, birthdays, other members, calendar, plans and shopping are NOT uploaded.
+- The parent chooses **each** data category explicitly from validated local sections, including optional private quotation records and private family-service notes if deliberately selected. If they choose Money only, family profiles, birthdays, other members, calendar, plans and shopping are NOT uploaded.
 - The application refuses to include unreviewed local tokens, group invitations, supplier/admin keys, API credentials or Supabase login sessions.
 - The file is encrypted in the browser using PBKDF2-HMAC-SHA-256 (310,000 iterations, fresh 16-byte salt) to derive a 256-bit AES-GCM key (fresh 12-byte IV). No passphrase or derived key is sent to the server. Vault uses an authenticated ciphertext tag, not just reversible obfuscation.
 - SQL stores `user_id`, `revision`, the encrypted envelope and update timestamp. Row-level security allows owner-only SELECT, and narrow authenticated RPCs handle create/replace/delete.
