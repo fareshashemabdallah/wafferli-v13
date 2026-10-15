@@ -43,9 +43,9 @@ const hit=(q:string,words:RegExp)=>words.test(q);
 export function detectAdvisorIntent(question:string):AdvisorIntent{
  const q=question.toLocaleLowerCase().trim().slice(0,400);
  if(!q)return "unsupported";
+ if(hit(q,/task|chore|responsibilit|to.?do|مهمات|مهام|مهمة|واجبات|مسؤوليات/i))return "tasks";
  if(hit(q,/bill|due|overdue|invoice|payment date|فواتير|فاتورة|مستحق|دفعات|دفع/i))return "bills";
  if(hit(q,/sav(?:e|ed|ing|ings)|goal|هدف|ادخار|توفير|نوفر/i))return "savings";
- if(hit(q,/task|chore|responsibilit|to.?do|مهمات|مهام|مهمة|واجبات|مسؤوليات/i))return "tasks";
  if(hit(q,/gift|present|هدايا|هدية|هدية|هديه/i))return "gifts";
  if(hit(q,/doctor|pediatrician|clinic|provider|service|dentist|physician|طبيب|دكتور|مستشفى|عيادة|خدمات|خدمة/i))return "services";
  if(hit(q,/outing|weekend|playground|park|excursion|نزهة|طلعة|حديقة|منتزه|مشوار/i))return "outings";
