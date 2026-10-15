@@ -7,7 +7,7 @@ import {LOCAL_APP_KEYS,type LocalBackup} from "./localDataControls";
  * Outing admin/vote tokens and other unreviewed modules are EXCLUDED.
  */
 export const RESTORABLE_KEYS=[
- "money","members","familyCalendar","familyPreferences","familyPlans","shopping",
+ "money","members","familyCalendar","familyPreferences","familyPlans","shopping","moneyMonthReviews",
  "privateQuoteRequests","privateServiceShortlist","familyTasks","familyWishlist","privateOutingOptions"
 ] as const;
 export type RestorableKey=typeof RESTORABLE_KEYS[number];
@@ -126,6 +126,12 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
    evidenceUrl:url.optional(),note:z.string().max(250).optional()
   }),20)
  }),30),
+ moneyMonthReviews:many(strict({
+  month:z.string().regex(/^\d{4}-\d{2}$/).refine(m=>{const d=new Date(m+"-01T12:00:00Z");return Number.isFinite(d.getTime())&&d.toISOString().slice(0,7)===m;}),
+  reviewedAt:isoTime,revision:z.string().regex(/^[a-f0-9]{16}$/),
+  paidCount:z.number().int().min(0).max(10000),enteredSpendJod:maxNumber,
+  capturedPlanJod:maxNumber
+ }),24),
  familyWishlist:many(strict({
   id:z.string().min(1).max(130),name:z.string().min(2).max(120),
   kind:z.enum(["gift","household","children","other"]),
@@ -212,6 +218,7 @@ const labels:Record<RestorableKey,string>={
  privateServiceShortlist:"Private family-service comparison notes",
  familyTasks:"Parent-managed family responsibilities",
  familyWishlist:"Family gift and purchase wishlists with price checks",
+ moneyMonthReviews:"Parent-reviewed historical spending entries and captured budget envelopes",
  privateOutingOptions:"Private parent-reviewed outing comparisons"
 };
 /** Parsing a file never writes to local storage. The original backup export
@@ -248,6 +255,8 @@ export function inspectLocalBackup(
   const payload=entries[key];
   if(["members","familyCalendar","familyPlans","shopping","privateQuoteRequests","privateServiceShortlist","familyTasks","familyWishlist","privateOutingOptions"].includes(typed)&&!uniqueIds(payload))
    throw new Error("Duplicate item IDs in "+typed+"; no changes were made");
+  if(typed==="moneyMonthReviews"&&Array.isArray(payload)&&new Set(payload.filter(record).map(x=>x["month"])).size!==payload.length)
+   throw new Error("Duplicate months in moneyMonthReviews; no changes were made");
   if(typed==="familyWishlist"&&Array.isArray(payload)&&payload.some(item=>record(item)&&!uniqueIds(item["prices"])))
    throw new Error("Duplicate price IDs in familyWishlist; no changes were made");
   if(typed==="privateQuoteRequests"&&Array.isArray(payload)&&payload.some(q=>
