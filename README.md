@@ -33,6 +33,12 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Public pilot leaves household functionality disabled. Full steps and threat cases: [household accounts rollout](docs/household-accounts-rollout.md).
 - **Still missing:** reviewed backend migration, verified deployment, explicit consent-based private/shared financial sync, account deletion and age-assurance review.
 
+## Selective household expense sharing — staged only
+- Added per-item adult consent: one actual, locally household-marked expense can be reviewed and copied to an authenticated household, **only when both explicit staging flags are enabled**. Nothing uploads automatically, and private expenses, notes, children, income, cash and savings remain local.
+- Added author-only withdrawal and automatic purge of the author's shared server copies on leaving or revoked membership in the **proposed staging database**. Shared categories, dates and amounts may still be sensitive.
+- [Staged expense-sharing SQL](app/supabase/household_shared_expenses_v1.sql) and [privacy & deployment checks](docs/household-expense-sharing.md) must be security reviewed and tested with separate real accounts. **Neither migration is installed by CI; public GitHub Pages remains disabled for household accounts and expense sharing.**
+- This is not full two-way family-money synchronization or card/merchant payment processing.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.

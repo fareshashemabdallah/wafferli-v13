@@ -3,6 +3,8 @@ import {Copy,KeyRound,LockKeyhole,ShieldCheck,UserPlus,Users,Trash2} from "lucid
 import {useEffect,useState,type FormEvent} from "react";
 import type {User} from "@supabase/supabase-js";
 import {AppShell} from "@/components/AppShell";
+import {HouseholdExpenseSharing} from "@/components/HouseholdExpenseSharing";
+import {HOUSEHOLD_EXPENSE_SHARING_ENABLED} from "@/lib/householdExpenseApi";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {useI18n} from "@/lib/i18n";
@@ -258,6 +260,7 @@ function HouseholdAccountsPage(){
        {ar?"مغادرة مساحة الأسرة":"Leave household"}
       </Button>}
      </div>}
+     {chosen&&HOUSEHOLD_EXPENSE_SHARING_ENABLED&&<HouseholdExpenseSharing key={chosen.household_id+":"+user.id} householdId={chosen.household_id} userId={user.id}/>}
     </section>
    </>
   )}
