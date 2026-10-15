@@ -27,7 +27,7 @@ export type PendingHouseholdInvite={
 };
 
 type RpcResult={data:unknown;error:{message:string}|null};
-type RpcClient={rpc:(name:string,args?:Record<string,string>)=>Promise<RpcResult>};
+type RpcClient={rpc:(name:string,args?:Record<string,string|boolean>)=>Promise<RpcResult>};
 const rpcClient=supabase as unknown as RpcClient;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const invite=/^[0-9a-f]{64}$/i;
@@ -44,7 +44,7 @@ const checkedName=(v:string,min:number,max:number)=>{
  if(trimmed.length<min||trimmed.length>max)throw new Error("Please check the name length");
  return trimmed;
 };
-async function call(name:string,args?:Record<string,string>):Promise<unknown>{
+async function call(name:string,args?:Record<string,string|boolean>):Promise<unknown>{
  assertEnabled();
  const {data,error}=await rpcClient.rpc(name,args);
  if(error)throw new Error(error.message);
@@ -66,9 +66,10 @@ export async function loadMyHouseholds():Promise<AuthenticatedHousehold[]> {
   throw new Error("Could not verify the household records");
  return data;
 }
-export async function createHousehold(name:string,displayName:string):Promise<string>{
+export async function createHousehold(name:string,displayName:string,adultAttested:boolean):Promise<string>{
+ if(adultAttested!==true)throw new Error("Adult confirmation is required");
  const data=await call("dabberna_create_household",{
-  p_name:checkedName(name,2,70),p_display_name:checkedName(displayName,2,40)
+  p_name:checkedName(name,2,70),p_display_name:checkedName(displayName,2,40),p_adult_attested:true
  });
  if(!isUuid(data))throw new Error("Invalid household creation response");
  return data;
@@ -79,11 +80,12 @@ export async function createAdultInvitation(householdId:string):Promise<string>{
  if(typeof data!=="string"||!invite.test(data))throw new Error("Invalid invitation response");
  return data;
 }
-export async function acceptAdultInvitation(code:string,displayName:string):Promise<string>{
+export async function acceptAdultInvitation(code:string,displayName:string,adultAttested:boolean):Promise<string>{
+ if(adultAttested!==true)throw new Error("Adult confirmation is required");
  const normalized=code.trim().toLowerCase();
  if(!invite.test(normalized))throw new Error("Enter a valid invitation code");
  const data=await call("dabberna_accept_adult_invite",{
-  p_code:normalized,p_display_name:checkedName(displayName,2,40)
+  p_code:normalized,p_display_name:checkedName(displayName,2,40),p_adult_attested:true
  });
  if(!isUuid(data))throw new Error("Invalid invitation acceptance response");
  return data;
