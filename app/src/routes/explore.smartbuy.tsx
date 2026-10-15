@@ -6,6 +6,7 @@ import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
 import {MerchantQuoteDraft} from "@/components/MerchantQuoteDraft";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
+import {dateKey} from "@/lib/familyCalendar";
 import { Field, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,9 +74,9 @@ function SmartBuy() {
         {rows.map((a) => (
           <div key={a.id} className="card-soft p-4">
             <div className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
-              <Input aria-label={tr("Store")} className={inputCls} value={a.store} onChange={(e) => setAlt(a.id, { store: e.target.value.slice(0, 50) })} />
-              <Input aria-label={tr("Price")} className={inputCls} inputMode="decimal" placeholder={tr("Price")} value={a.price} onChange={(e) => setAlt(a.id, { price: e.target.value })} />
-              <Input aria-label={tr("Delivery or travel")} className={inputCls} inputMode="decimal" placeholder={tr("Delivery/travel")} value={a.extra} onChange={(e) => setAlt(a.id, { extra: e.target.value })} />
+              <Input aria-label={tr("Store")} className={inputCls} value={a.store} onChange={(e) => setAlt(a.id, { store: e.target.value.slice(0, 50),verified:false,checkedDate:undefined })} />
+              <Input aria-label={tr("Price")} className={inputCls} inputMode="decimal" placeholder={tr("Price")} value={a.price} onChange={(e) => setAlt(a.id, { price: e.target.value,verified:false,checkedDate:undefined })} />
+              <Input aria-label={tr("Delivery or travel")} className={inputCls} inputMode="decimal" placeholder={tr("Delivery/travel")} value={a.extra} onChange={(e) => setAlt(a.id, { extra: e.target.value,verified:false,checkedDate:undefined })} />
               <Button variant="ghost" size="icon" aria-label={tr("Remove")} onClick={() => setS({ ...s, alts: s.alts.filter((x) => x.id !== a.id) })}><Trash2 className="size-4" /></Button>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
@@ -84,12 +85,12 @@ function SmartBuy() {
               {lowestCost?.id === a.id && <span className="rounded-full border border-border px-2 py-1 text-xs text-muted-foreground">{tr("Lowest entered total — not necessarily best value")}</span>}
               <label className="ms-auto flex items-center gap-1.5 text-xs">
                 <input type="checkbox" checked={a.verified} onChange={(e) => setAlt(a.id, {
-                 verified: e.target.checked,checkedDate:e.target.checked?(a.checkedDate||new Date().toLocaleDateString("en-CA")):undefined
+                 verified: e.target.checked,checkedDate:e.target.checked?(a.checkedDate||dateKey(new Date())):undefined
                 })} /> {ar?"تحققتُ من هذا السعر":"Price I checked myself"}
               </label>
               {(()=>{const evidence=evaluatePriceEvidence(a.sourceUrl,a.checkedDate,a.verified);return <span
                 className={"text-[11px] "+(evidence.status==="recent"?"text-brand":"text-muted-foreground")}>
-                 {ar?evidence.reasonAr:evidence.reasonEn}
+                 {ar?evidence.reasonAr:evidence.reasonEn}{evidence.link&&<a href={evidence.link} target="_blank" rel="noopener noreferrer" className="ms-2 underline">{ar?"رابط المصدر":"View source"}</a>}
                 </span>;})()}
             </div>
             {selectedPlan&&Number(a.price)>0&&Number.isFinite(a.total)&&a.total>=0&&a.store.trim()&&<div className="mt-3 rounded-xl border border-[#D7E6DA] bg-[#F2F7F0] p-3">
