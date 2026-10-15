@@ -4,6 +4,7 @@ import {sampleMoney,type MoneyState} from "./money";
 const now=new Date(2026,9,15,12);
 const s=():MoneyState=>({...sampleMoney(),
  demo:false,income:2000,cashOnHand:1000,cashReserve:300,cashUpdatedAt:"2026-10-15",
+ incomeSources:[{id:"salary",name:"Salary",amount:2000,frequency:"monthly",nextDate:"2026-10-30",shared:true}],
  commitments:[{id:"school",name:"School bill",amount:300,frequency:"once",dueDate:"2026-10-20"}]
 });
 describe("conservative one-off purchase scenario",()=>{
