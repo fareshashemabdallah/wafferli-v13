@@ -7,8 +7,8 @@ const valid=(n:unknown):n is number=>typeof n==="number"&&Number.isFinite(n)&&n>
 const monthDate=(month:string)=>new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,15);
 const monthKey=(d:Date)=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
 export const plannedSavings=(s:MoneyState,month=monthKey(new Date())):number=>roundJod(computeMoney(s,monthDate(month)).savingsTarget);
-export function budgetAlignment(state:MoneyState):Alignment{
- const m=computeMoney(state),income=roundJod(m.monthlyIncome),savings=roundJod(m.savingsTarget),categories=roundJod(m.planned);
+export function budgetAlignment(state:MoneyState,now=new Date()):Alignment{
+ const m=computeMoney(state,now),income=roundJod(m.monthlyIncome),savings=roundJod(m.savingsTarget),categories=roundJod(m.planned);
  const carryover=m.carryover.net,gap=roundJod(income+carryover-savings-categories),incomplete=state.demo||income<=0||state.categories.length===0;
  return {income,savings,categories,carryover,gap,status:incomplete?"incomplete":Math.abs(gap)<.005?"balanced":gap<0?"deficit":"surplus"};
 }
@@ -44,14 +44,14 @@ export function applyVarianceAllocation(state:MoneyState,expenseId:string,choice
   expenses:state.expenses.map(x=>x.id===expenseId?{...x,allocation:{...choice,delta,approvedAt:now}}:x)
  };
 }
-export function applyAlignmentSuggestion(state:MoneyState,choice:AllocationChoice):MoneyState{
- const a=budgetAlignment(state);
+export function applyAlignmentSuggestion(state:MoneyState,choice:AllocationChoice,now=new Date()):MoneyState{
+ const a=budgetAlignment(state,now);
  if(a.status==="incomplete"||a.status==="balanced")return state;
- const delta=roundJod(a.gap),actual=computeMoney(state);
+ const delta=roundJod(a.gap),actual=computeMoney(state,now);
  // One-off prior-month carryover must never rewrite the recurring savings goal
  // or the recurring category envelope for every future month.
  if(Math.abs(a.carryover)>=.005){
-  const ym=monthKey(new Date());
+  const ym=monthKey(now);
   const prev=state.monthlyAdjustments?.[ym]??{savingsDelta:0,categoryDeltas:{}};
   if(choice.kind==="savings"){
    const target=roundJod(actual.savingsTarget+delta);
