@@ -1,5 +1,7 @@
 import {AlertCircle,ArrowRight,CalendarClock,Info,Landmark,Plus,Wallet} from "lucide-react";
-import {fmtJOD} from "@/lib/storage";
+import {fmtJOD,useLocalState} from "@/lib/storage";
+import {Link} from "@tanstack/react-router";
+import {FAMILY_PLANS_KEY,upcomingFamilyPlans,type FamilyPlan} from "@/lib/familyPlans";
 import type {MoneyState} from "@/lib/money";
 import {emptyRealMoney,getMoneyOverview} from "@/lib/moneyOverview";
 import {budgetAlignment} from "@/lib/financeAlignment";
@@ -11,6 +13,8 @@ type Section="overview"|"spending"|"planning";
 type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(s:Section)=>void};
 export function MoneyOverviewPanel({state,setState,goTo}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
+ const [familyPlans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const plannedItems=upcomingFamilyPlans(familyPlans);
  const v=getMoneyOverview(state);
  const f=v.forecast,c=v.month;
  const alignment=budgetAlignment(state);
@@ -70,6 +74,20 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
      </details>}
      <MoneyGuidance scope="alignment" state={state} setState={setState}/>
    </section>
+   {plansReady&&plannedItems.length>0&&<section className="editorial-card p-4 sm:p-5" aria-label={ar?"الخطط القادمة":"Upcoming family plans"}>
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <div><h2 className="text-base font-semibold">{ar?"خطط عائلية قادمة":"Upcoming family plans"}</h2>
+      <p className="mt-1 text-xs text-muted-foreground">{ar?"هذه أفكار أو التزامات محتملة، وليست مصاريف مدفوعة أو فواتير مسجلة.":"Plans are potential future costs—not paid expenses or scheduled bills."}</p></div>
+      <Link to="/plans" className="inline-flex min-h-10 items-center text-sm font-semibold text-brand">{ar?"راجع الخطط":"Review plans"} →</Link>
+    </div>
+    <div className="mt-3 divide-y divide-border/70">
+      {plannedItems.map(p=><div key={p.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+       <span className="min-w-0 flex-1 truncate">{p.title}</span>
+       <span className="shrink-0 text-xs font-semibold tabular-nums">{p.budgetJod!==undefined?fmtJOD(p.budgetJod):(ar?"لا يوجد سقف":"No ceiling")}</span>
+      </div>)}
+    </div>
+    <p className="mt-2 text-xs text-muted-foreground">{ar?"لا يُخصم مجموع هذه الخطط من الرصيد النقدي تلقائياً لتجنّب الحساب المزدوج.":"These plans are deliberately not deducted from bank cash or booked twice."}</p>
+   </section>}
    <section className="editorial-card overflow-hidden p-5 sm:p-6" aria-label={ar?"السيولة والالتزامات":"Cash and commitments"}>
      <div className="flex items-start gap-3">
        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#E8F1E7] text-brand"><Wallet className="size-6"/></span>
