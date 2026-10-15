@@ -2,6 +2,7 @@ import {createFileRoute,Link} from "@tanstack/react-router";
 import {ArrowUpRight,CalendarHeart,Check,CheckCircle2,Gift,Globe2,Heart,Lightbulb,Search,ShieldCheck,Sparkles} from "lucide-react";
 import {useEffect,useMemo,useState} from "react";
 import {AppShell} from "@/components/AppShell";
+import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
@@ -208,5 +209,6 @@ function OccasionPlanner(){
     <p className="mt-5 text-xs text-muted-foreground">{ar?"خطتك وميزانيتك محفوظتان على هذا المتصفح فقط. الاقتراحات تظهر عند فتح التطبيق، وليست تنبيهات خارجية أو إشعارات فورية.":"Your plan and budget remain in this browser. Preparations appear when you open the app; background personal notifications are not enabled."}</p>
    </>}
   </>}
+  <FamilyWishlistPanel mode="gifts"/>
  </AppShell>;
 }

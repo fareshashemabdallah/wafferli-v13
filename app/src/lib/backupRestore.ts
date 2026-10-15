@@ -8,7 +8,7 @@ import {LOCAL_APP_KEYS,type LocalBackup} from "./localDataControls";
  */
 export const RESTORABLE_KEYS=[
  "money","members","familyCalendar","familyPreferences","familyPlans","shopping",
- "privateQuoteRequests","privateServiceShortlist","familyTasks"
+ "privateQuoteRequests","privateServiceShortlist","familyTasks","familyWishlist"
 ] as const;
 export type RestorableKey=typeof RESTORABLE_KEYS[number];
 const PREFIX="wafferli.v13.";
@@ -126,6 +126,16 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
    evidenceUrl:url.optional(),note:z.string().max(250).optional()
   }),20)
  }),30),
+ familyWishlist:many(strict({
+  id:z.string().min(1).max(130),name:z.string().min(2).max(120),
+  kind:z.enum(["gift","household","children","other"]),
+  status:z.enum(["considering","purchased","removed"]),
+  createdAt:isoTime,updatedAt:isoTime,targetDate:isoDate.optional(),
+  budgetJod:smallMoney.optional(),recipientLabel:z.string().max(60).optional(),
+  note:z.string().max(240).optional(),repeatMonths:z.union([z.literal(1),z.literal(3),z.literal(6),z.literal(12)]).optional(),
+  prices:many(strict({id:z.string().min(1).max(130),amountJod:positiveSmallMoney,
+    checkedAt:isoDate,store:z.string().min(2).max(90),sourceUrl:url.optional()}),24)
+ }),150),
  familyTasks:many(strict({
   id:z.string().min(1).max(130),title:z.string().min(1).max(140),dueDate:isoDate,
   priority:z.enum(["high","normal","low"]),status:z.enum(["open","done"]),
@@ -191,7 +201,8 @@ const labels:Record<RestorableKey,string>={
  shopping:"Shopping list",
  privateQuoteRequests:"Private quotation drafts and entered offers",
  privateServiceShortlist:"Private family-service comparison notes",
- familyTasks:"Parent-managed family responsibilities"
+ familyTasks:"Parent-managed family responsibilities",
+ familyWishlist:"Family gift and purchase wishlists with price checks"
 };
 /** Parsing a file never writes to local storage. The original backup export
  * contains more modules than this validator can safely restore; these appear
@@ -225,8 +236,10 @@ export function inspectLocalBackup(
   const result=schemas[typed].safeParse(entries[key]);
   if(!result.success)throw new Error("Backup has invalid "+typed+" data; no changes were made");
   const payload=entries[key];
-  if(["members","familyCalendar","familyPlans","shopping","privateQuoteRequests","privateServiceShortlist","familyTasks"].includes(typed)&&!uniqueIds(payload))
+  if(["members","familyCalendar","familyPlans","shopping","privateQuoteRequests","privateServiceShortlist","familyTasks","familyWishlist"].includes(typed)&&!uniqueIds(payload))
    throw new Error("Duplicate item IDs in "+typed+"; no changes were made");
+  if(typed==="familyWishlist"&&Array.isArray(payload)&&payload.some(item=>record(item)&&!uniqueIds(item["prices"])))
+   throw new Error("Duplicate price IDs in familyWishlist; no changes were made");
   if(typed==="privateQuoteRequests"&&Array.isArray(payload)&&payload.some(q=>
    record(q)&&!uniqueIds(q["offers"])))
    throw new Error("Duplicate offer IDs in privateQuoteRequests; no changes were made");

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
 import {MerchantQuoteDraft} from "@/components/MerchantQuoteDraft";
+import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
 import {PrivateOfferWorkspace} from "@/components/PrivateOfferWorkspace";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import {dateKey} from "@/lib/familyCalendar";
@@ -142,6 +143,7 @@ function SmartBuy() {
       </div>
       <MerchantQuoteDraft product={s.product} budget={s.budget}/>
       <PrivateOfferWorkspace/>
+      <FamilyWishlistPanel mode="shopping"/>
       <details className="mt-5 rounded-2xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{tr("Add photos (optional)")}</summary>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <Photo label={tr("Product photo")} icon={ImagePlus} />
