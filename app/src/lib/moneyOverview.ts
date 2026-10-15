@@ -40,7 +40,7 @@ export function getMoneyOverview(state:MoneyState,now=new Date()):MoneyOverview 
   return {
     forecast,month,demo:state.demo,cashSet:cash!==null,
     hasIncomeSchedule:incomes.some(i=>/^\d{4}-\d{2}-\d{2}$/.test(i.nextDate)),
-    hasBillSchedule:commitments.length>0,dateProblems:forecast.missingDates,
+    hasBillSchedule:commitments.length>0||state.noBillsConfirmedMonth===today.slice(0,7),dateProblems:forecast.missingDates,
     uncategorizedBills:commitments.filter(b=>!b.categoryId||!state.categories.some(c=>c.id===b.categoryId)).length,
     paidBillsThisMonth:new Set([...paidMarked,...paidBillKeys]).size,
     billExpensesThisMonth:roundJod(paidExpenses.reduce((n,e)=>n+e.amount,0)),

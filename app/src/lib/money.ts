@@ -1,4 +1,5 @@
 import type { IncomeSource, Commitment } from "./cashflow";
+import type {SavingsGoal} from "./savingsGoals";
 import { monthlyTotal } from "./cashflow";
 import { monthCarryover } from "./monthlyCarryover";
 export type CatType = "fixed" | "variable" | "periodic";
@@ -17,6 +18,10 @@ export type MoneyState = {
   savingsTargetAmount?:number;
   /** Approved one-off reallocations affect their payment month, not future months. */
   monthlyAdjustments?:Record<string,{savingsDelta:number;categoryDeltas:Record<string,number>}>;
+  /** Manually stated goals, not bank balances or actual cash transfers. */
+  savingsGoals?:SavingsGoal[];
+  /** User attested there are no scheduled bills this calendar month. */
+  noBillsConfirmedMonth?:string;
 };
 export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string; /** Date of birth, stored on this device only. */ birthday?: string | undefined };
 

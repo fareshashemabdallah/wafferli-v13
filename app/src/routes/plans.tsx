@@ -116,6 +116,24 @@ function PlansPage(){
      {currentPlan.date&&<span className="inline-flex items-center gap-1 rounded-full bg-[#F8F2E9] px-3 py-2"><CalendarDays className="size-3.5"/>{currentPlan.date}</span>}
     </div>
     {moneyReady&&currentPlan.status!=="completed"&&<PlanDecisionPanel key={currentPlan.id} plan={currentPlan} money={money} plans={plans} onUpdate={update} setMoney={setMoney}/>}
+    {!money.demo&&(money.savingsGoals??[]).length>0&&currentPlan.status!=="completed"&&<div className="mt-3 rounded-2xl border border-[#D8E5D8] bg-[#F7FAF5] p-4">
+      <label className="block text-sm font-semibold">{ar?"هل تدّخر لهذا الهدف؟":"Saving up for this plan?"}
+       <select className="mt-2 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm" value={currentPlan.savingsGoalId??""}
+        onChange={e=>{const id=e.target.value;const next={...currentPlan,updatedAt:new Date().toISOString()};if(id)next.savingsGoalId=id;else delete next.savingsGoalId;update(next);}}>
+        <option value="">{ar?"بدون هدف مرتبط":"No linked savings goal"}</option>
+        {(money.savingsGoals??[]).map(g=><option key={g.id} value={g.id}>{g.name}</option>)}
+       </select>
+      </label>
+      {money.savingsGoals?.filter(g=>g.id===currentPlan.savingsGoalId).map(g=>{
+       const cost=currentPlan.choice?.estimatedJod??currentPlan.budgetJod;
+       return <div key={g.id} className="mt-3 rounded-xl bg-white p-3 text-sm">
+        <p>{ar?"المدّخر لهذا الهدف حسب إدخالك: ":"Manually recorded savings for this goal: "}<strong>{fmtJOD(g.savedJod)}</strong></p>
+        {cost!==undefined&&<p className="mt-1">{g.savedJod>=cost?(ar?"الهدف المسجل يغطي المبلغ، بشرط توفره فعلياً.":"Recorded savings cover the estimate, if those funds remain available."):
+         (ar?"المتبقي للهدف بالنسبة لهذه الخطة: ":"Still to save toward this plan: ")+fmtJOD(cost-g.savedJod)}</p>}
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?"الربط لا يخصم أي مبلغ ولا يثبت توفر النقد في البنك.":"Linking a goal does not move or reserve funds, and does not verify bank cash."}</p>
+       </div>;
+      })}
+    </div>}
     {currentPlan.status!=="completed"&&<>
       <div className="mt-5 rounded-xl bg-[#F4F7F0] p-4">
        <h3 className="font-semibold">{ar?"الخطوة التالية: قارن الخيارات":"Next step: compare suitable options"}</h3>
