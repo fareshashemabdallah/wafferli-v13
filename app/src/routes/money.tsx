@@ -87,13 +87,13 @@ function MoneyPage() {
 
       {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}/>}
       {section==="planning"&&<>
-      <MoneyGuidance scope="variance" state={s} setState={setS}/>
-      <CashFlowPlanner state={s} members={members} update={setS} />
-      <details className="editorial-card mt-4 px-4 py-3">
-        <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إعداد الدخل وأهداف الادخار":"Income & savings settings"} +</summary>
+      <section className="editorial-card mb-4 p-4 sm:p-5">
+        <h2 className="text-lg font-semibold">{ar?"دخل الشهر وهدف الادخار":"Monthly income & savings goal"}</h2>
         <Settings key={`${c.monthlyIncome}:${c.savingsTarget}`} income={c.monthlyIncome} target={c.savingsTarget} hasSources={s.incomeSources!==undefined}
          onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
-      </details>
+      </section>
+      <MoneyGuidance scope="variance" state={s} setState={setS}/>
+      <CashFlowPlanner state={s} members={members} update={setS} />
       </>}
       {section==="spending"&&<>
       <MoneyGuidance scope="variance" state={s} setState={setS}/>
@@ -263,6 +263,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
   const [editing, setEditing] = useState<Expense | null>(null);
   const [quickAmount, setQuickAmount] = useState("");
   const [quickMode,setQuickMode]=useState<"planned"|"paid">("paid");
+  const [plannedDate,setPlannedDate]=useState(today());
   const [confirming,setConfirming]=useState<string|null>(null);
   const [actualValue,setActualValue]=useState("");
   const [quickCategory, setQuickCategory] = useState(cats[0]?.id ?? "");
@@ -271,9 +272,10 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
   const recordQuick=(ev:FormEvent)=>{
     ev.preventDefault();
     const amount=parseAmount(quickAmount,50000);
+    if(quickMode==="planned"&&!/^\d{4}-\d{2}-\d{2}$/.test(plannedDate))return setQuickError(ar?"اختر تاريخاً متوقعاً صحيحاً.":"Choose a valid planned payment date.");
     if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
     if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
-    const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:true,status:quickMode,...(quickMode==="planned"?{plannedAmount:amount}:{})};
+    const entry:Expense={id:uid(),date:quickMode==="planned"?plannedDate:today(),categoryId:selectedCategory,amount,shared:true,status:quickMode,...(quickMode==="planned"?{plannedAmount:amount}:{})};
     onChange([entry,...expenses]);
     setQuickAmount("");setQuickError("");
     toast.success(quickMode==="planned"?(ar?"تم حفظ المصروف كمخطط، دون احتسابه كمدفوع.":"Expense planned, not counted as paid."):(ar?"تم تسجيل المصروف المدفوع.":"Paid expense recorded."));
@@ -292,6 +294,11 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
           <button type="button" onClick={()=>setQuickMode("paid")} aria-pressed={quickMode==="paid"} className={"min-h-10 rounded-full px-4 text-sm font-semibold "+(quickMode==="paid"?"bg-brand text-white":"border border-border bg-white text-brand")}>{ar?"مدفوع الآن":"Already paid"}</button>
           <button type="button" onClick={()=>setQuickMode("planned")} aria-pressed={quickMode==="planned"} className={"min-h-10 rounded-full px-4 text-sm font-semibold "+(quickMode==="planned"?"bg-brand text-white":"border border-border bg-white text-brand")}>{ar?"سأدفع لاحقاً":"Plan for later"}</button>
         </div>
+        {quickMode==="planned"&&<div className="sm:col-span-3">
+          <label className="block text-xs font-semibold">{ar?"تاريخ الدفع المتوقع":"Expected payment date"}
+            <Input type="date" className="mt-1 max-w-52" value={plannedDate} onChange={e=>setPlannedDate(e.target.value)}/>
+          </label>
+        </div>}
         <Field label={tr("Amount (JOD)")}>
           <Input className={inputCls} inputMode="decimal" value={quickAmount}
             placeholder={tr("e.g. 12.50")} onChange={e=>setQuickAmount(e.target.value)} />
