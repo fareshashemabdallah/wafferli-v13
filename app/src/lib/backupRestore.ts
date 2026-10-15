@@ -127,7 +127,7 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   }),20)
  }),30),
  moneyMonthReviews:many(strict({
-  month:z.string().regex(/^\\d{4}-\\d{2}$/).refine(m=>{const d=new Date(m+"-01T12:00:00Z");return Number.isFinite(d.getTime())&&d.toISOString().slice(0,7)===m;}),
+  month:z.string().regex(/^\d{4}-\d{2}$/).refine(m=>{const d=new Date(m+"-01T12:00:00Z");return Number.isFinite(d.getTime())&&d.toISOString().slice(0,7)===m;}),
   reviewedAt:isoTime,revision:z.string().regex(/^[a-f0-9]{16}$/),
   paidCount:z.number().int().min(0).max(10000),enteredSpendJod:maxNumber,
   capturedPlanJod:maxNumber
