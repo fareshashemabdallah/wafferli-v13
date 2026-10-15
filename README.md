@@ -116,6 +116,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Respects disabled finance/lifestyle advice and explicit preferences. Sample family members do not generate fake birthdays or actual child profiles; no inferred merchant prices, booking, bank balances or automatic payments.
 - This is **not a connected generative AI model**, nor does it transmit data to third parties or co-parent accounts. It is read-only and is available when family preferences have been confirmed.
 
+## Family gift and purchase wishlists
+- Occasion gifts and upcoming household/child purchases can be saved as local plans with a target date, optional budget/recipient label and optional repeat interval for household supplies.
+- Parents explicitly enter **dated price checks** and source/store names, can review the earliest-to-latest difference and mark an item as purchased manually. No live feed, verified savings, retailer order, automatic repeat order or Money deduction is implied.
+- Wishlist records are part of explicit local JSON export, strict selective restore and optional off-by-default encrypted personal vault, never household-shared by default.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
