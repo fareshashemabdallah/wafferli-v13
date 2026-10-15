@@ -51,13 +51,13 @@ async function call(name:string,args?:Record<string,string|boolean>):Promise<unk
  return data;
 }
 export const isAuthenticatedHousehold=(x:unknown):x is AuthenticatedHousehold=>
- isRecord(x)&&isUuid(x.household_id)&&isText(x.household_name,2,70)&&
- (x.my_role==="owner"||x.my_role==="adult")&&isText(x.my_display_name,2,40);
+ isRecord(x)&&isUuid(x['household_id'])&&isText(x['household_name'],2,70)&&
+ (x['my_role']==="owner"||x['my_role']==="adult")&&isText(x['my_display_name'],2,40);
 export const isHouseholdRosterMember=(x:unknown):x is HouseholdRosterMember=>
- isRecord(x)&&isUuid(x.user_id)&&isText(x.display_name,2,40)&&
- (x.member_role==="owner"||x.member_role==="adult")&&isTime(x.joined_at);
+ isRecord(x)&&isUuid(x['user_id'])&&isText(x['display_name'],2,40)&&
+ (x['member_role']==="owner"||x['member_role']==="adult")&&isTime(x['joined_at']);
 export const isPendingHouseholdInvite=(x:unknown):x is PendingHouseholdInvite=>
- isRecord(x)&&isUuid(x.invite_id)&&isTime(x.created_at)&&isTime(x.expires_at);
+ isRecord(x)&&isUuid(x['invite_id'])&&isTime(x['created_at'])&&isTime(x['expires_at']);
 
 /** All records must originate from authenticated Supabase RPCs, never local profiles. */
 export async function loadMyHouseholds():Promise<AuthenticatedHousehold[]> {
