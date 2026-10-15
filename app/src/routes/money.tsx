@@ -3,6 +3,7 @@ import { CashFlowPlanner } from "@/components/CashFlowPlanner";
 import { MoneyGuidance } from "@/components/MoneyGuidance";
 import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
+import {FinancialIntelligencePanel} from "@/components/FinancialIntelligencePanel";
 import { localToday } from "@/lib/cashflow";
 import { Pencil, Plus, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
@@ -87,6 +88,7 @@ function MoneyPage() {
       </div>
 
       {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}/>}
+      {section==="overview"&&<FinancialIntelligencePanel state={s}/> }
       {section==="planning"&&<>
       <section className="editorial-card mb-4 p-4 sm:p-5">
         <h2 className="text-lg font-semibold">{ar?"دخل الشهر وهدف الادخار":"Monthly income & savings goal"}</h2>
