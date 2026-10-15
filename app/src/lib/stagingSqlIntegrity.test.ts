@@ -20,5 +20,5 @@ describe("staging SQL migration structural safeguards",()=>{
   expect(sql).toContain("ENABLE ROW LEVEL SECURITY");
   expect(sql).toContain("REVOKE ALL ON");
   expect(sql).not.toMatch(/\bGRANT\s+(?:ALL|INSERT|UPDATE|DELETE)\b[^;]*\bTO authenticated\b/i);
- }));
+ });
 });
