@@ -4,6 +4,7 @@ import type {MoneyState} from "@/lib/money";
 import {emptyRealMoney,getMoneyOverview} from "@/lib/moneyOverview";
 import {budgetAlignment} from "@/lib/financeAlignment";
 import {MoneyGuidance} from "@/components/MoneyGuidance";
+import {monthCarryover,nextMonthKey} from "@/lib/monthlyCarryover";
 import {useI18n} from "@/lib/i18n";
 
 type Section="overview"|"spending"|"planning";
@@ -13,6 +14,8 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
  const v=getMoneyOverview(state);
  const f=v.forecast,c=v.month;
  const alignment=budgetAlignment(state);
+ const today=new Date(),ym=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0");
+ const upcomingCarryover=monthCarryover(state,nextMonthKey(ym));
  const cash=state.cashOnHand;
  const needReview=f.overdueCount>0||(f.minimumBalance!==null&&f.minimumBalance<0);
  const resetToActual=()=>{
@@ -43,6 +46,28 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
         alignment.status==="balanced"?(ar?"الخطة متوازنة":"Your plan is balanced"):
         (alignment.gap<0?(ar?"عجز في الخطة: ":"Plan exceeds income by "):(ar?"غير موزّع في الخطة: ":"Not yet allocated: "))+fmtJOD(Math.abs(alignment.gap))}</p>
      <p className="mt-1 text-xs text-muted-foreground">{ar?"هذه مقارنة مخصصات وهدف ادخار، وليست رصيد البنك أو مصروفاً تم دفعه.":"This compares monthly budget envelopes and the savings goal, not actual bank cash or payments made."}</p>
+     {Math.abs(c.carryover.net)>=.005&&<div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D9E5D8] bg-[#F2F7EE] px-3 py-3 text-sm">
+       <div><p className="font-semibold">{ar?"رصيد التخطيط المرحّل من الشهر الماضي":"Budget carryover from last month"}</p>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?"يتضمنه حساب التوازن أعلاه، وليس إضافة لرصيد البنك.":"Included in the alignment math above—not added to your bank balance."}</p></div>
+       <strong className={"tabular-nums "+(c.carryover.net<0?"text-[#A54D53]":"text-[#3E7551]")}>{c.carryover.net>0?"+":""}{fmtJOD(c.carryover.net)}</strong>
+     </div>}
+     {Math.abs(upcomingCarryover.net)>=.005&&<div className={"mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-3 text-sm "+(upcomingCarryover.net<0?"border-[#F1CFD1] bg-[#FFF2F2]":"border-[#D2E6D5] bg-[#F2F8F0]")}>
+       <div>
+         <p className="font-semibold">{ar?"تأثير المصاريف الحالية على ميزانية الشهر القادم":"Next month's budget carryover"}</p>
+         <p className="mt-1 text-xs text-muted-foreground">{ar?"المدفوع فوق المتوقع يُخصم الشهر القادم؛ الوفر يُضاف. لا يشمل الفروقات التي عالجتها ضمن هذا الشهر.":"Overpayments reduce next month's room; underspending increases it. Differences already covered this month are excluded."}</p>
+       </div>
+       <strong className={"tabular-nums "+(upcomingCarryover.net<0?"text-[#A54D53]":"text-[#3E7551]")}>{upcomingCarryover.net>0?"+":""}{fmtJOD(upcomingCarryover.net)}</strong>
+     </div>}
+     {(Math.abs(c.carryover.net)>=.005||Math.abs(upcomingCarryover.net)>=.005)&&<details className="mt-2 rounded-lg border border-border bg-white px-3 py-2">
+       <summary className="cursor-pointer text-xs font-semibold text-brand">{ar?"كيف حُسب الترحيل؟":"View carryover calculation"} +</summary>
+       <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+       {(Math.abs(c.carryover.net)>=.005?c.carryover.entries:upcomingCarryover.entries).map(e=><div key={e.id} className="flex flex-wrap justify-between gap-2 border-b border-border/60 py-1">
+         <span>{e.title} · {ar?"متوقع ":"Planned "}{fmtJOD(e.planned)} → {ar?"مدفوع ":"Paid "}{fmtJOD(e.actual)}</span>
+         <span className="font-semibold">{e.change>0?"+":""}{fmtJOD(e.change)}</span>
+       </div>)}
+       </div>
+       <p className="mt-2 text-xs text-muted-foreground">{ar?"ترحيل ضمن الميزانية للشهر التالي فقط. لا يحوّل نقداً أو يغيّر موعد الفاتورة المتكررة.":"Carryover lasts for the next budget month only. It does not move cash or change a recurring bill."}</p>
+     </details>}
      <MoneyGuidance scope="alignment" state={state} setState={setState}/>
    </section>
    <section className="editorial-card overflow-hidden p-5 sm:p-6" aria-label={ar?"السيولة والالتزامات":"Cash and commitments"}>
