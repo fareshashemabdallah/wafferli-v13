@@ -1,23 +1,34 @@
 import {emptyRealMoney} from "./moneyOverview";
-import type {MoneyState} from "./money";
+import {computeMoney,type MoneyState} from "./money";
 
 export type StarterBudgetInput={income:number;spending:number;savings:number};
 const valid=(n:number)=>Number.isFinite(n)&&n>=0&&n<=100000;
+const near=(a:number,b:number)=>Math.abs(a-b)<.01;
+/** True when an example or incomplete monthly budget prevents plan comparisons.
+ * It can be incomplete even when real bills, actual cash and expenses exist. */
 export function needsStarterBudget(s:MoneyState):boolean{
- return s.demo||(s.incomeSources===undefined||s.incomeSources.length===0)&&
-   s.categories.length===0&&s.expenses.length===0&&(s.commitments??[]).length===0;
+ const m=computeMoney(s);
+ return s.demo||m.monthlyIncome<=0||s.categories.length===0;
 }
 export function applyStarterBudget(s:MoneyState,input:StarterBudgetInput):MoneyState{
  if(!needsStarterBudget(s)||!valid(input.income)||input.income<=0||
    !valid(input.spending)||!valid(input.savings))return s;
  const base=s.demo?emptyRealMoney():s;
- // Old-style income is deliberate here: users have not supplied a pay date, so
- // monthly income is a planning estimate and not an expected bank deposit.
+ const previous=computeMoney(base);
+ // Preserve all existing real income sources, spending envelopes, unpaid bills,
+ // actual expenses, bank cash and reserve. Prefilled/disabled figures cannot
+ // silently rewrite an existing income schedule or planned categories.
+ const hasSources=!!base.incomeSources?.length;
+ const hasCategories=base.categories.length>0;
+ if(hasSources&&!near(previous.monthlyIncome,input.income)||
+   hasCategories&&!near(previous.planned,input.spending))return s;
  const result:MoneyState={...base,demo:false,
-  income:Math.round(input.income*100)/100,
+  ...(hasSources?{}:{income:Math.round(input.income*100)/100}),
   savingsTargetAmount:Math.round(input.savings*100)/100,
-  categories:[{id:"household-starter",name:"Household spending (estimate)",type:"fixed",planned:Math.round(input.spending*100)/100}]
+  ...(hasCategories?{}:{categories:[{id:"household-starter",name:"Household spending (estimate)",type:"fixed",planned:Math.round(input.spending*100)/100}]})
  };
- delete result.incomeSources;
+ // No pay-date was entered, so use monthly income for planning only, never
+ // fabricate a future bank credit or a dated income schedule.
+ if(!hasSources)delete result.incomeSources;
  return result;
 }
