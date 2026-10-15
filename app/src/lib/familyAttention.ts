@@ -132,7 +132,7 @@ export function buildFamilyAttention(input:{
  }
  const unique=new Set<string>();
  return signals.filter(item=>{
-  if(unique.has(item.key)||dateSnoozed(snoozes[item.key],now))return false;
+  if(unique.has(item.key)||(item.canSnooze&&dateSnoozed(snoozes[item.key],now)))return false;
   unique.add(item.key);
   return p.notificationFrequency==="gentle"||item.severity!=="gentle";
  }).sort((a,b)=>a.priority-b.priority||a.key.localeCompare(b.key))
