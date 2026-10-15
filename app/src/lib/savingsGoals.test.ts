@@ -4,10 +4,13 @@ import {getFinancialReadiness} from "./financialReadiness";
 import {emptyRealMoney,getMoneyOverview} from "./moneyOverview";
 import {computeMoney,sampleMoney,type MoneyState} from "./money";
 const now=new Date(2026,9,15,12);
-const base=():MoneyState=>({...emptyRealMoney(),incomeSources:undefined,income:1800,savingsTargetAmount:300,categories:[
- {id:"housing",name:"Housing",type:"fixed",planned:750},
- {id:"food",name:"Food",type:"variable",planned:450}
-],cashOnHand:900,cashReserve:150,cashUpdatedAt:"2026-10-14"});
+const base=():MoneyState=>{
+ const start=emptyRealMoney();delete start.incomeSources;
+ return {...start,income:1800,savingsTargetAmount:300,categories:[
+  {id:"housing",name:"Housing",type:"fixed",planned:750},
+  {id:"food",name:"Food",type:"variable",planned:450}
+ ],cashOnHand:900,cashReserve:150,cashUpdatedAt:"2026-10-14"};
+};
 describe("Named savings goals are not fake bank deposits",()=>{
  it("creates a goal and tracks reported savings without editing bank cash or expenses",()=>{
   const g=createSavingsGoal({id:"g1",name:"  School fees ",targetJod:1200,savedJod:200,monthlyJod:100},now)!;
