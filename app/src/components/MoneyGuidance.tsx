@@ -4,7 +4,8 @@ import {toast} from "sonner";
 import {fmtJOD} from "@/lib/storage";
 import {useI18n} from "@/lib/i18n";
 import type {MoneyState} from "@/lib/money";
-import {allocationOptions,applyAlignmentSuggestion,applyVarianceAllocation,budgetAlignment,varianceOf,type AllocationChoice} from "@/lib/financeAlignment";
+import {applyAlignmentSuggestion,applyVarianceAllocation,budgetAlignment,varianceOf,type AllocationChoice} from "@/lib/financeAlignment";
+import {smartVarianceGuidance} from "@/lib/smartBudgetGuidance";
 type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;scope:"alignment"|"variance"};
 const key=(a:AllocationChoice)=>a.kind+":"+(a.categoryId??"");
 export function MoneyGuidance({state,setState,scope}:Props){
@@ -14,11 +15,12 @@ export function MoneyGuidance({state,setState,scope}:Props){
  const ym=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
  const item=state.expenses.find(e=>e.date.startsWith(ym)&&varianceOf(e)!==0&&!e.varianceDismissed);
  const delta=item?varianceOf(item):0;
+ const reasoning=item?smartVarianceGuidance(state,item):null;
  const choices:AllocationChoice[]=scope==="alignment"?(alignment.status==="balanced"||alignment.status==="incomplete"?[]:[
   ...state.categories.filter(c=>c.type==="variable" && (alignment.gap>0||
    (c.planned+(state.monthlyAdjustments?.[ym]?.categoryDeltas[c.id]??0))+alignment.gap>=Math.max(0,state.expenses.filter(e=>e.status!=="planned"&&e.categoryId===c.id&&e.date.slice(0,7)===new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")).reduce((n,e)=>n+e.amount,0)))).map(c=>({kind:"variable" as const,categoryId:c.id})),
   ...(alignment.gap>0||alignment.savings>=-alignment.gap?[{kind:"savings" as const}]:[])
- ]) : item?allocationOptions(state,delta,item.categoryId,item.date.slice(0,7)):[];
+ ]) : reasoning?.ranked??[];
  if(state.demo)return null;
  if(scope==="variance"&&!item)return null;
  const selected=choices.find(c=>key(c)===proposal);
@@ -57,10 +59,20 @@ export function MoneyGuidance({state,setState,scope}:Props){
     </p>
    </div>
   </div>
+  {scope==="variance"&&reasoning&&<div className="mt-3 rounded-xl border border-[#DBE6DC] bg-white p-3">
+    <p className="text-sm font-semibold text-brand">{ar?reasoning.ar:reasoning.en}</p>
+    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?reasoning.detailsAr:reasoning.detailsEn}</p>
+    <p className="mt-2 text-xs text-[#825F44]">{ar?reasoning.cautionAr:reasoning.cautionEn}</p>
+   </div>}
+   {scope==="alignment"&&Math.abs(alignment.carryover)>=.005&&<div className="mt-3 rounded-xl bg-white p-3 text-xs leading-relaxed text-muted-foreground">
+     {ar?"يتضمّن حساب هذا الشهر فرق المصروف المرحّل من الشهر السابق: ":"This month's calculation includes last month's unmatched difference: "}
+     <strong>{alignment.carryover>0?"+":""}{fmtJOD(alignment.carryover)}</strong>.
+     {" "}{ar?"أي تعديل هنا يخصّ هذا الشهر فقط.":"Any adjustment made for this carryover applies to this month only."}
+   </div>}
   {choices.length>0?<div className="mt-3 space-y-2">
    {choices.map(c=><button key={key(c)} type="button" aria-pressed={proposal===key(c)} onClick={()=>setProposal(proposal===key(c)?null:key(c))}
     className={"flex min-h-11 w-full items-center gap-2 rounded-xl border px-3 py-2 text-start text-sm "+(proposal===key(c)?"border-brand bg-[#E8F1E6] text-brand":"border-border bg-white text-ink")}>
-    <span className="flex-1">{label(c)}</span><span className="text-xs font-semibold tabular-nums">{fmtJOD(amount)}</span>
+    <span className="flex-1">{label(c)}{scope==="variance"&&reasoning?.ranked[0]&&key(reasoning.ranked[0])===key(c)&&<span className="ms-2 text-[11px] font-semibold text-brand">{ar?"(مقترح)":"(suggested)"}</span>}</span><span className="text-xs font-semibold tabular-nums">{fmtJOD(amount)}</span>
    </button>)}
    {selected&&<div className="flex flex-wrap items-center gap-2 pt-1">
     <button type="button" onClick={submit} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
@@ -70,6 +82,6 @@ export function MoneyGuidance({state,setState,scope}:Props){
    </div>}
   </div>:<p className="mt-3 text-xs text-muted-foreground">{ar?"لا يوجد مخصص متاح يكفي لتغطية الفرق تلقائياً. عدّل هدف الادخار أو مخصصات الفئات من الأماكن الحالية.":"No eligible category or savings target can cover the entire difference. Adjust your budgets or goal in the existing Money settings."}</p>}
   {scope==="variance"&&<button type="button" onClick={()=>{setState(old=>({...old,expenses:old.expenses.map(e=>e.id===item!.id?{...e,varianceDismissed:true}:e)}));setProposal(null);}} className="mt-3 min-h-9 text-xs font-medium text-muted-foreground underline underline-offset-2">{ar?"اترك المخصصات كما هي":"Keep budgets unchanged"}</button>}
-  <div className="mt-3 flex gap-2 text-xs text-muted-foreground"><ShieldCheck className="size-4 shrink-0"/><p>{ar?"الاقتراح مبني على أرقامك المدخلة، لا يحوّل مالاً بين الحسابات ولا يغيّر رصيد البنك. فروقات الدفع تعدّل مخصصات الشهر المعني فقط.":"Rule-based guidance using your entries. It moves no money and never changes your bank balance."}</p></div>
+  <div className="mt-3 flex gap-2 text-xs text-muted-foreground"><ShieldCheck className="size-4 shrink-0"/><p>{ar?"توصيات ذكية قابلة للتفسير مبنية على بياناتك، وليست نموذج ذكاء اصطناعي متصل. لا يتم تحويل أي أموال أو تعديل رصيد البنك. فروقات الدفع تعدّل مخصصات الشهر المعني فقط.":"Intelligent, explainable recommendations based on your figures—not a connected AI model. No money is moved or bank balance changed."}</p></div>
  </section>;
 }
