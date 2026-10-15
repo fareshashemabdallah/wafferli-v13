@@ -75,7 +75,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.dabberna_unshare_one_expense(
  p_household_id uuid,p_expense_id uuid
 ) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
-AS $
+AS $$
 DECLARE v_role text;
 BEGIN
  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Authentication required'; END IF;

@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
+    "security:staging": "node scripts/verify-staging-security.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
