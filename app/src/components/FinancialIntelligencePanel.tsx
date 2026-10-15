@@ -1,7 +1,8 @@
 import {useMemo,useState} from "react";
 import {BarChart3,LineChart,ShieldAlert} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
-import {fmtJOD} from "@/lib/storage";
+import {fmtJOD,useLocalState} from "@/lib/storage";
+import {MONTH_REVIEW_KEY,captureSpendingReview,reviewState,reviewedBaselineMonths,type MonthReview} from "@/lib/spendingMonthReview";
 import {spendingHistory,detectSpendingChanges,forecastBudgetScenarios,type LongRangeAssumptions} from "@/lib/financialIntelligence";
 import type {MoneyState} from "@/lib/money";
 
@@ -12,12 +13,18 @@ export function FinancialIntelligencePanel({state}:{state:MoneyState}){
  const [when,setWhen]=useState("1");
  const [monthlyExtra,setMonthlyExtra]=useState("0");
  const [incomeChange,setIncomeChange]=useState("0");
+ const [reviews,setReviews,reviewsReady]=useLocalState<MonthReview[]>(MONTH_REVIEW_KEY,[]);
+ const currentMonth=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
  const history=useMemo(()=>spendingHistory(state),[state]);
- const flags=useMemo(()=>detectSpendingChanges(state),[state]);
+ const reviewed=useMemo(()=>reviewedBaselineMonths(state,reviews),[state,reviews]);
+ const flags=useMemo(()=>detectSpendingChanges(state,new Date(),reviewed),[state,reviewed]);
+ const showPlan=(month:string,defaultPlan:number)=>reviewState(state,month,reviews)==="reviewed"?
+  (reviews.find(r=>r.month===month)?.capturedPlanJod??defaultPlan):defaultPlan;
  const args:LongRangeAssumptions={months:horizon,onceOffJod:Number(oneOff),onceOffMonth:Number(when),
   monthlyExtraJod:Number(monthlyExtra),monthlyIncomeChangeJod:Number(incomeChange)};
  const scenario=forecastBudgetScenarios(state,args);
- const largest=Math.max(1,...history.map(h=>Math.max(h.spentJod,h.plannedJod)));
+ const largest=Math.max(1,...history.map(h=>Math.max(h.spentJod,showPlan(h.month,h.plannedJod))));
+ if(!reviewsReady)return null;
  return <section className="editorial-card mb-4 p-4 sm:p-5" aria-label={ar?"تحليل مصروف العائلة":"Family financial intelligence"}>
   <div className="flex items-start gap-3">
    <BarChart3 className="mt-0.5 size-6 shrink-0 text-brand"/>
@@ -35,16 +42,36 @@ export function FinancialIntelligencePanel({state}:{state:MoneyState}){
     {history.map(h=><div key={h.month}>
      <div className="mb-1 flex flex-wrap justify-between gap-1 text-[11px]">
       <span className="font-semibold">{h.month} · {h.transactionCount} {ar?"مصروف مسجّل":"recorded expenses"}</span>
-      <span>{fmtJOD(h.spentJod)} / {fmtJOD(h.plannedJod)} {ar?"مخطط":"planned"}</span>
+      <span>{fmtJOD(h.spentJod)} / {fmtJOD(showPlan(h.month,h.plannedJod))} {ar?"مخطط":"planned"}</span>
      </div>
      <div className="relative h-3 overflow-hidden rounded-full bg-[#EDF1EA]">
-      <div className="absolute inset-y-0 start-0 rounded-full bg-[#BCD1BE]" style={{width:(h.plannedJod/largest*100)+"%"}}/>
+      <div className="absolute inset-y-0 start-0 rounded-full bg-[#BCD1BE]" style={{width:(showPlan(h.month,h.plannedJod)/largest*100)+"%"}}/>
       <div className="absolute inset-y-0 start-0 rounded-full bg-[#4C8066]" style={{width:(h.spentJod/largest*100)+"%"}}/>
+     </div>
+     <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+      <span className="text-muted-foreground">{h.month===currentMonth?
+       (ar?"الشهر ما زال جارياً — غير مكتمل":"Current month is still in progress"):
+       reviewState(state,h.month,reviews)==="reviewed"?
+       (ar?"راجعتُ المصاريف المسجلة":"Parent reviewed recorded entries"):
+       reviewState(state,h.month,reviews)==="changed"?
+       (ar?"تغيرت المصاريف بعد المراجعة":"Entries changed since review"):
+       (ar?"لم تراجع البيانات المسجلة":"Recorded entries not yet reviewed")}</span>
+      {h.month<currentMonth&&<button type="button"
+       className="min-h-9 rounded-lg border border-[#D4E2D1] bg-white px-2 font-semibold text-brand"
+       onClick={()=>setReviews(old=>[...old.filter(x=>x.month!==h.month),
+        captureSpendingReview(state,h.month)].slice(-24))}>
+       {reviewState(state,h.month,reviews)==="unreviewed"?
+        (ar?"راجعتُ الإدخالات":"I reviewed these entries"):
+        (ar?"أعد تأكيد المراجعة":"Re-review entries")}
+      </button>}
      </div>
     </div>)}
     <p className="text-[11px] text-muted-foreground">{ar?
-     "الأخضر الداكن: المدفوع المسجل · الفاتح: الميزانية الحالية المطبقة على الشهر (قد تكون عدّلتها لاحقاً).":
-     "Dark green: recorded actuals · light green: current budget applied to that month (which may have changed since then)."}</p>
+     "الأخضر الداكن: مصاريف مسجلة. الفاتح: الميزانية كما كانت وقت تأكيدك مراجعة الشهر، أو ميزانية اليوم قبل المراجعة؛ ليس تأكيداً لميزانيات الماضي.":
+     "Dark green: recorded actuals. Light green: the budget captured when you manually reviewed that month, or the current budget if unreviewed. This is not proof those historical budgets originally applied."}</p>
+    {reviewed.size<2&&<p className="text-[11px] text-muted-foreground">{ar?
+     "لتفادي تنبيهات مضلّلة، لا نقارن الزيادات قبل مراجعة إدخالات شهرين سابقين على الأقل. المراجعة ذاتية ولا تؤكد شمول المصاريف الفعلية.":
+     "Spending-change warnings wait for at least two past months you reviewed. Reviewing confirms only that you inspected these entries—not that all real spending was captured."}</p>}
     {flags.length>0&&<div className="mt-3 rounded-xl border border-[#E9D8CB] bg-[#FFF9F1] p-3">
      <div className="flex items-center gap-2 text-sm font-semibold"><ShieldAlert className="size-4"/>
       {ar?"زيادة تستحق المراجعة":"Spending increases worth reviewing"}</div>
