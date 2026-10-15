@@ -2,16 +2,19 @@ import {buildForecast,legacyIncome} from "./cashflow";
 import {allFamilyMoments,dateKey,shiftDays,upcomingMoments,type FamilyMoment} from "./familyCalendar";
 import {realFamilyMembers} from "./familySetup";
 import type {MoneyState,Member} from "./money";
+import type {FamilyTask} from "./familyTasks";
+import type {WishlistItem} from "./familyWishlist";
 
-export type ReminderSource="bill"|"family";
+export type ReminderSource="bill"|"family"|"task"|"shopping";
 export type CalendarReminder={key:string;date:string;title:string;kind:ReminderSource};
-export type ReminderChoices={bills:boolean;family:boolean};
+export type ReminderChoices={bills:boolean;family:boolean;tasks?:boolean;shopping?:boolean};
 /** Calendar entries are authored only from user-entered dates and optionally
  * actual family profiles, never from instructional sample household members.
  * No write to Money, calendar, accounts or an external service occurs here.
  */
 export function collectCalendarReminders(args:{
  money:MoneyState;members:readonly Member[];moments:readonly FamilyMoment[];
+ tasks?:readonly FamilyTask[];wishlist?:readonly WishlistItem[];
  options:ReminderChoices;now?:Date;days?:number
 }):CalendarReminder[]{
  const now=args.now??new Date(),today=dateKey(now);
@@ -29,7 +32,7 @@ export function collectCalendarReminders(args:{
    const title=e.name.trim().slice(0,120);
    if(!title)continue;
    result.push({key:"bill:"+e.sourceId+":"+e.displayDate,date:e.displayDate,
-    title:"Review due bill: "+title,kind:"bill"});
+    title:("Review due bill: "+title).slice(0,120),kind:"bill"});
   }
  }
  if(args.options.family){
@@ -41,6 +44,25 @@ export function collectCalendarReminders(args:{
    if(!title)continue;
    result.push({key:"family:"+event.id+":"+event.occursOn,date:event.occursOn,
     title,kind:"family"});
+  }
+ }
+ if(args.options.tasks){
+  for(const task of args.tasks??[]){
+   if(task.status!=="open"||task.dueDate<today||task.dueDate>end)continue;
+   const title=task.title.trim().slice(0,110);
+   if(!title)continue;
+   result.push({key:"task:"+task.id+":"+task.dueDate,date:task.dueDate,
+    title:("Review task: "+title).slice(0,120),kind:"task"});
+  }
+ }
+ if(args.options.shopping){
+  for(const wish of args.wishlist??[]){
+   if(wish.status!=="considering"||!wish.targetDate||
+     wish.targetDate<today||wish.targetDate>end)continue;
+   const title=wish.name.trim().slice(0,105);
+   if(!title)continue;
+   result.push({key:"shopping:"+wish.id+":"+wish.targetDate,date:wish.targetDate,
+    title:((wish.kind==="gift"?"Plan gift: ":"Review purchase: ")+title).slice(0,120),kind:"shopping"});
   }
  }
  const seen=new Set<string>();
@@ -62,15 +84,20 @@ const utc=(d:Date)=>d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
 export function buildReminderCalendar(events:readonly CalendarReminder[],now=new Date()):string{
  if(!events.length||events.length>100)throw new Error("Choose 1–100 reminders");
  if(events.some(e=>!validDay(e.date)||!e.title.trim()||e.title.length>120||
-  e.key.length>220||!["bill","family"].includes(e.kind)))
+  e.key.length>220||!["bill","family","task","shopping"].includes(e.kind)))
   throw new Error("One or more calendar entries are invalid");
  const stamp=utc(now);
  const entries=events.map((e,i)=>{
   const start=new Date(e.date+"T12:00:00Z");
   const next=new Date(start.getTime()+86400000).toISOString().slice(0,10);
   const uid="dabberna-"+stamp+"-"+i+"@local-reminder.invalid";
-  const description=e.kind==="bill"?
-   "User-recorded bill reminder. Payment status was not verified.":"User-recorded family date. Check details yourself.";
+  const descriptions:Record<ReminderSource,string>={
+   bill:"User-recorded bill reminder. Payment status was not verified.",
+   family:"User-recorded family date. Check details yourself.",
+   task:"Private family task entered by the parent; completion has not been verified.",
+   shopping:"Private purchase or gift idea. No price, stock, merchant or transaction has been verified."
+  };
+  const description=descriptions[e.kind];
   return [
    "BEGIN:VEVENT","UID:"+uid,"DTSTAMP:"+stamp,
    "DTSTART;VALUE=DATE:"+icsDate(e.date),
@@ -78,7 +105,7 @@ export function buildReminderCalendar(events:readonly CalendarReminder[],now=new
    "SUMMARY:"+icsEscape(e.title),
    "DESCRIPTION:"+icsEscape(description),
    "BEGIN:VALARM","TRIGGER:-P1D","ACTION:DISPLAY",
-   "DESCRIPTION:"+icsEscape(e.kind==="bill"?"Review bill":"Family event"),
+   "DESCRIPTION:"+icsEscape(e.kind==="bill"?"Review bill":e.kind==="task"?"Review task":e.kind==="shopping"?"Review planned purchase":"Family event"),
    "END:VALARM","END:VEVENT"
   ].join("\r\n");
  });
