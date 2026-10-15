@@ -196,7 +196,17 @@ export function CashFlowPlanner({state,members,update}:Props) {
           {bills.map(bill=>{
             const next=upcomingBills.find(e=>e.sourceId===bill.id);
             const paid=(bill.paidDates??[]).filter(d=>d>=futureDate(today,-45)&&d<=futureDate(today,30)).sort().reverse().slice(0,1);
-            return <div key={bill.id} className="py-3 text-sm">
+            const latest=state.expenses.filter(e=>e.billId===bill.id&&e.status!=="planned"&&
+              typeof e.plannedAmount==="number"&&e.date>=futureDate(today,-65))
+              .sort((x,y)=>y.date.localeCompare(x.date))[0];
+            const difference=latest?roundJod(latest.amount-(latest.plannedAmount??bill.amount)):0;
+            const percent=latest&&latest.plannedAmount?roundJod(difference/latest.plannedAmount*100):null;
+            const currentMonth=today.slice(0,7),paidMonth=latest?.date.slice(0,7);
+            const monthRelation=paidMonth===currentMonth?"next":
+              paidMonth===futureDate(today,-33).slice(0,7)?"current":"other";
+            return <div key={bill.id} className={"my-2 rounded-xl border px-3 py-3 text-sm transition-colors "+(difference>0.004?
+              "border-[#F0C8CA] bg-[#FFF0F1]":difference<-.004?
+              "border-[#D1E5D4] bg-[#EDF7F0]":"border-transparent bg-[#F8FAF6]")}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0"><p className="font-semibold">{tr(bill.name)}</p>
                   <p className="text-xs text-muted-foreground">{fmtJOD(bill.amount)} · {tr(frequencyNames[bill.frequency])}</p>
@@ -209,6 +219,21 @@ export function CashFlowPlanner({state,members,update}:Props) {
                     onClick={()=>{if(confirm(tr("Delete this bill schedule? Already recorded expenses stay in your history.")))update(s=>({...s,commitments:(s.commitments??[]).filter(x=>x.id!==bill.id)}));}}><Trash2 className="size-4"/></Button>
                 </div>
               </div>
+              {latest&&Math.abs(difference)>=.005&&<div className={"mt-2 rounded-lg border px-3 py-2 text-xs leading-relaxed "+(difference>0?
+                "border-[#F0C6C9] bg-white/75 text-[#99494E]":"border-[#CDE1D1] bg-white/70 text-[#3E7551]")}>
+                <p className="font-semibold">{difference>0?(ar?"دفعت أكثر من المخطط":"Overpaid"):(ar?"دفعت أقل من المخطط":"Under budget")} · {latest.date}</p>
+                <p className="mt-1 tabular-nums">{ar?"المتوقع ":"Planned "}{fmtJOD(latest.plannedAmount??bill.amount)}
+                  {" → "}{ar?"المدفوع ":"Paid "}{fmtJOD(latest.amount)}
+                  {" · "}{difference>0?"+":""}{fmtJOD(difference)}
+                  {percent!==null?" ("+(percent>0?"+":"")+percent+"%)":""}
+                </p>
+                <p className="mt-1">
+                  {latest.allocation?(ar?"تم تعديل مخصصات شهر الدفع بموافقتك؛ لن يُرحّل الفرق مرة أخرى.":"Adjusted in the payment month with your approval; no further carryover."):
+                   monthRelation==="next"?(ar?"تأثير الشهر القادم على الميزانية: ":"Next month's budget impact: ")+(difference>0?"−":"+")+fmtJOD(Math.abs(difference)):
+                   monthRelation==="current"?(ar?"هذا الفرق محسوب في ميزانية هذا الشهر.":"This difference is included in this month's budget.") :
+                   (ar?"الفرق ظاهر للمراجعة، ولا يُرحّل لأكثر من شهر واحد.":"Shown for reference; carryover lasts only one month.")}
+                </p>
+              </div>}
               {next && <>
                 <Button type="button" className="mt-2" size="sm" variant="secondary"
                   onClick={()=>{setPendingPaid({bill,dueDate:next.displayDate,actual:String(bill.amount)});setError("");}}><Check className="size-3.5"/> {tr("Mark paid & log expense")}</Button>
