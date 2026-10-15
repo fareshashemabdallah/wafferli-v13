@@ -9,7 +9,7 @@ export function MoneyReadinessCard({state,setState,goTo}:Props){
  const title=r.level==="ready"?(ar?"الأرقام جاهزة للتقدير":"Figures ready for an estimate"):
   r.level==="caution"?(ar?"هناك التزامات تحتاج مراجعة":"Review upcoming commitments"):
   (ar?"خطوة صغيرة لتحسين دقة النصيحة":"One more step for clearer advice");
- const details:r["next"][]=["income","savings","cash","bills","cash-date","risk"];
+ const details=["income","savings","cash","bills","cash-date","risk"] as const;
  const step=(k:typeof details[number])=>k==="income"?(ar?"أكمل الدخل ومخصصات المصاريف":"Complete income & spending budgets"):
   k==="savings"?(ar?"أدخل هدف الادخار الشهري":"Enter a monthly savings target"):
   k==="cash"?(ar?"أدخل رصيدك النقدي الفعلي":"Enter your actual cash balance"):
