@@ -33,7 +33,7 @@ export function detectAdvisorIntent(question:string):AdvisorIntent{
  const q=question.toLocaleLowerCase().trim().slice(0,400);
  if(!q)return "unsupported";
  if(hit(q,/bill|due|overdue|invoice|payment date|فواتير|فاتورة|مستحق|دفعات|دفع/i))return "bills";
- if(hit(q,/saving|goal|هدف|ادخار|توفير|نوفر/i))return "savings";
+ if(hit(q,/sav(?:e|ed|ing|ings)|goal|هدف|ادخار|توفير|نوفر/i))return "savings";
  if(hit(q,/birthday|child|children|school|occasion|anniversary|عيد|طفل|اطفال|أطفال|مدرسة|مدرسي|مناسب/i))return "family";
  if(hit(q,/shopping|buy|price|purchase|gift|store|discount|شراء|اشتري|نشتري|هدية|سعر|تسوق|خصم|مشتريات/i))return "shopping";
  if(hit(q,/plan|outing|trip|weekend|activity|نزهة|طلعة|رحلة|خطة|خطط|عطلة|نشاط/i))return "plans";
