@@ -1,7 +1,7 @@
 /**
  * Browser-local privacy controls; no cloud, auth tokens or API credentials
- * are included in the export. Restoration is intentionally NOT offered
- * without a schema/migration verification workflow.
+ * are included in the export. Validated local restoration supports only reviewed core sections;
+ * legacy cloud/group tokens and unsupported sections are never imported.
  */
 export const LOCAL_APP_KEYS=[
  "money","members","familyCalendar","familyPreferences",
@@ -50,7 +50,7 @@ export function buildLocalBackup(
  return {
   app:"dabberna",schemaVersion:1,exportedAt:now.toISOString(),
   storage:"browser-local",
-  warning:"This JSON backup is unencrypted and contains private family information. Store it securely. Import/restore is not yet supported.",
+  warning:"This JSON backup is unencrypted and contains private family information. Store it securely. Only reviewed core sections can be restored locally after schema validation and confirmation; no cloud sync or automatic restore.",
   entries
  };
 }

@@ -41,9 +41,14 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 
 ## Family Intelligence attention and personal data controls
 - **One prioritized Today attention list** now combines cash risks, upcoming unpaid bill dates, family plans and calendar moments rather than displaying duplicate finance/plan advice cards. It honors parental preferences, supports temporary local snoozing of noncritical items, and never hides critical financial warnings.
-- **Local personal data management** in About: explicit browser-generated JSON export and two-step local data erasure. The export is **unencrypted**; Supabase login sessions and external API keys are excluded. There is no restore/import yet.
+- **Local personal data management** in About: explicit browser-generated JSON export and two-step local data erasure. The export is **unencrypted**; Supabase login sessions and external API keys are excluded. Validated core local-data restore is available; other sections remain unsupported.
 - Signals refresh when Dabberna is opened. **No background push alerts, conversational AI, verified bank data or cloud financial sync have been activated.**
 - Technical scope: [Family attention and data controls](docs/family-attention-and-data-controls.md).
+
+## Validated browser-local backup recovery
+- **Working in this pilot:** Import an exported Dabberna JSON file via About, preview six vetted categories (Money, Family profiles, Calendar, Preferences, Plans, Shopping), choose the sections to replace, download a current-data safety copy, and explicitly confirm. A failed write triggers rollback.
+- **Safety:** Refuses invalid or unknown backup schemas, stale previews and duplicate record IDs; skips unreviewed modules and *does not* restore invitation tokens, passwords or API keys. The file is handled locally. Backups are **unencrypted**.
+- **Not cloud sync:** A restored file replaces local sections only, without merging, uploading, or granting co-parent access. [Backup-recovery policy & limits](docs/validated-local-backup-recovery.md).
 
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
