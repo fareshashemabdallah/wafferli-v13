@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS public.dabberna_household_members (
  role text NOT NULL CHECK(role IN ('owner','adult')),
  status text NOT NULL DEFAULT 'active' CHECK(status IN ('active','revoked')),
  joined_at timestamptz NOT NULL DEFAULT now(),
+ adult_attested_at timestamptz NOT NULL,
  revoked_at timestamptz,
  PRIMARY KEY (household_id,user_id),
  CONSTRAINT owner_cannot_be_revoked CHECK(role <> 'owner' OR status = 'active'),
@@ -86,12 +87,13 @@ GRANT SELECT ON public.dabberna_households,public.dabberna_household_members TO 
 
 -- Transactional creation: a verified adult signs in, supplies display name
 -- and explicitly creates a separate household. No inferred membership.
-CREATE OR REPLACE FUNCTION public.dabberna_create_household(p_name text,p_display_name text)
+CREATE OR REPLACE FUNCTION public.dabberna_create_household(p_name text,p_display_name text,p_adult_attested boolean)
 RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
 AS $$
 DECLARE v_id uuid; v_user uuid := auth.uid();
 BEGIN
  IF v_user IS NULL THEN RAISE EXCEPTION 'Authentication required'; END IF;
+ IF p_adult_attested IS DISTINCT FROM true THEN RAISE EXCEPTION 'Adult confirmation required'; END IF;
  IF char_length(btrim(coalesce(p_name,''))) NOT BETWEEN 2 AND 70
    OR char_length(btrim(coalesce(p_display_name,''))) NOT BETWEEN 2 AND 40
  THEN RAISE EXCEPTION 'Invalid household or display name'; END IF;
@@ -101,8 +103,8 @@ BEGIN
  THEN RAISE EXCEPTION 'Household creation limit reached'; END IF;
  INSERT INTO public.dabberna_households(name,created_by)
  VALUES(btrim(p_name),v_user) RETURNING id INTO v_id;
- INSERT INTO public.dabberna_household_members(household_id,user_id,display_name,role,status)
- VALUES(v_id,v_user,btrim(p_display_name),'owner','active');
+ INSERT INTO public.dabberna_household_members(household_id,user_id,display_name,role,status,adult_attested_at)
+ VALUES(v_id,v_user,btrim(p_display_name),'owner','active',now());
  RETURN v_id;
 END;
 $$;
@@ -133,13 +135,14 @@ $$;
 -- Adults must opt in from their own verified login. The token is
 -- single-use, expiring and checked under row lock to stop race conditions.
 -- A revoked member cannot secretly rejoin by exchanging an older code.
-CREATE OR REPLACE FUNCTION public.dabberna_accept_adult_invite(p_code text,p_display_name text)
+CREATE OR REPLACE FUNCTION public.dabberna_accept_adult_invite(p_code text,p_display_name text,p_adult_attested boolean)
 RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
 AS $$
 DECLARE v_user uuid:=auth.uid(); v_inv public.dabberna_household_invites%ROWTYPE;
   v_code text:=lower(btrim(coalesce(p_code,'')));
 BEGIN
  IF v_user IS NULL THEN RAISE EXCEPTION 'Authentication required'; END IF;
+ IF p_adult_attested IS DISTINCT FROM true THEN RAISE EXCEPTION 'Adult confirmation required'; END IF;
  IF char_length(btrim(coalesce(p_display_name,''))) NOT BETWEEN 2 AND 40
  THEN RAISE EXCEPTION 'Invalid display name'; END IF;
  IF v_code !~ '^[0-9a-f]{64}$' THEN RAISE EXCEPTION 'Invalid invitation'; END IF;
@@ -155,8 +158,8 @@ BEGIN
  IF (SELECT count(*) FROM public.dabberna_household_members
    WHERE household_id=v_inv.household_id AND status='active')>=8
  THEN RAISE EXCEPTION 'Household membership limit reached'; END IF;
- INSERT INTO public.dabberna_household_members(household_id,user_id,display_name,role,status)
- VALUES(v_inv.household_id,v_user,btrim(p_display_name),'adult','active');
+ INSERT INTO public.dabberna_household_members(household_id,user_id,display_name,role,status,adult_attested_at)
+ VALUES(v_inv.household_id,v_user,btrim(p_display_name),'adult','active',now());
  UPDATE public.dabberna_household_invites SET accepted_by=v_user,accepted_at=now()
  WHERE id=v_inv.id;
  RETURN v_inv.household_id;
@@ -253,9 +256,9 @@ $;
 
 -- Check privileges on every new definer function; no anonymous RPC access.
 REVOKE ALL ON FUNCTION
- public.dabberna_create_household(text,text),
+ public.dabberna_create_household(text,text,boolean),
  public.dabberna_create_adult_invite(uuid),
- public.dabberna_accept_adult_invite(text,text),
+ public.dabberna_accept_adult_invite(text,text,boolean),
  public.dabberna_revoke_invite(uuid,uuid),
  public.dabberna_revoke_adult(uuid,uuid),
  public.dabberna_leave_household(uuid),
@@ -264,9 +267,9 @@ REVOKE ALL ON FUNCTION
  public.dabberna_pending_invites(uuid)
 FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION
- public.dabberna_create_household(text,text),
+ public.dabberna_create_household(text,text,boolean),
  public.dabberna_create_adult_invite(uuid),
- public.dabberna_accept_adult_invite(text,text),
+ public.dabberna_accept_adult_invite(text,text,boolean),
  public.dabberna_revoke_invite(uuid,uuid),
  public.dabberna_revoke_adult(uuid,uuid),
  public.dabberna_leave_household(uuid),
@@ -280,6 +283,8 @@ TO authenticated;
 -- * Inspect pg_proc owner (trusted schema owner only); audit role grants, search paths,
 --   pgcrypto schema access and RPC rate limits.
 -- * Check revocation during parallel requests; ensure no old invite works twice.
--- * Confirm only signed-in adults can accept; teen/child accounts NOT enabled.
+-- * Adult attestation is self-reported, NOT verified age assurance; review laws
+--   and implement appropriate age-gating/verification before production.
+-- * Teen/child accounts remain disabled.
 -- * Never interpret household creation as consent to upload local financial records.
 -- * Do not grant SELECT on invitations, bypass auth.uid(), or use a browser service key.
