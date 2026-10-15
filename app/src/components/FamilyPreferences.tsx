@@ -2,6 +2,7 @@ import { Bell, Compass, CloudSun, ShieldCheck, ShoppingBag } from "lucide-react"
 import { defaultFamilyPreferences, type FamilyPreferences } from "@/lib/familyPreferences";
 import { useLocalState } from "@/lib/storage";
 import { useI18n } from "@/lib/i18n";
+import {FAMILY_SETUP_PREFERENCES_KEY} from "@/lib/familySetup";
 const interests: Array<{key:keyof FamilyPreferences;en:string;ar:string;Icon:typeof Bell}>=[
   {key:"weather",en:"Show weather and clothing guidance",ar:"عرض الطقس واقتراح الملابس",Icon:CloudSun},
   {key:"lifestyle",en:"Suggest family activities",ar:"اقتراح أنشطة عائلية",Icon:Compass},
@@ -13,8 +14,9 @@ export function FamilyPreferences() {
   const {lang}=useI18n();
   const ar=lang==="ar";
   const [preferences,setPreferences,ready]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
-  const set=<K extends keyof FamilyPreferences>(key:K,value:FamilyPreferences[K])=>setPreferences(old=>({...old,[key]:value}));
-  if(!ready)return null;
+  const [confirmed,setConfirmed,confirmedReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
+  const set=<K extends keyof FamilyPreferences>(key:K,value:FamilyPreferences[K])=>{setPreferences(old=>({...old,[key]:value}));setConfirmed(false);};
+  if(!ready||!confirmedReady)return null;
   return <section className="card-soft mt-6 p-4" id="family-preferences">
     <h2 className="text-lg font-semibold">{ar?"تفضيلات العائلة":"Family preferences"}</h2>
     <p className="mt-1 text-sm text-muted-foreground">{ar?"اختاروا النصائح التي تظهر في الصفحة الرئيسية. هذه الإعدادات محفوظة على الجهاز فقط، ولا ترسل إشعارات هاتف حالياً.":"Choose what appears on your home screen. Preferences stay on this device; push notifications are not active."}</p>
@@ -26,6 +28,22 @@ export function FamilyPreferences() {
       </select>
       <span className="mt-1 block text-xs font-normal text-muted-foreground">{ar?"يمكنك تغيير ذلك لاحقاً دون فقدان البيانات.":"You can change this without losing any saved information."}</span>
     </label>
+    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <label className="text-sm font-medium">{ar?"هل الأطفال بيشاركوا عادة بالطلعات؟":"Do children usually join outings?"}
+       <select className="mt-1 w-full rounded-xl border border-border bg-card p-3" value={preferences.typicalChildrenAttendance??"ask"} onChange={e=>set("typicalChildrenAttendance",e.target.value as "ask"|"yes"|"no")}>
+        <option value="ask">{ar?"اسألني بكل طلعة":"Ask me each time"}</option>
+        <option value="yes">{ar?"غالباً معنا أطفال":"Children usually join"}</option>
+        <option value="no">{ar?"غالباً للبالغين فقط":"Usually adults only"}</option>
+       </select>
+      </label>
+      <label className="text-sm font-medium">{ar?"إذا معنا أطفال، لمين الطلعة؟":"When children join, who is the focus?"}
+       <select className="mt-1 w-full rounded-xl border border-border bg-card p-3" value={preferences.typicalOutingFocus??"mixed"} onChange={e=>set("typicalOutingFocus",e.target.value as "children"|"mixed"|"adults")}>
+        <option value="mixed">{ar?"للجميع":"A balance for everyone"}</option>
+        <option value="children">{ar?"الأولوية لمتعة الأطفال":"Children first"}</option>
+        <option value="adults">{ar?"نشاط للكبار والأطفال معنا":"Adult-focused, children welcome"}</option>
+       </select>
+      </label>
+    </div>
     <div className="mt-4 space-y-2">
       {interests.map(({key,en,ar:arabic,Icon})=><label key={key} className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-muted/40 p-3">
         <span className="flex items-center gap-3 text-sm font-medium"><Icon className="size-5 shrink-0 text-brand"/>{ar?arabic:en}</span>
@@ -33,6 +51,9 @@ export function FamilyPreferences() {
       </label>)}
     </div>
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <label className="text-sm font-medium">{ar?"مدينتك (اختياري)":"Your city (optional)"}
+        <input className="mt-1 w-full rounded-xl border border-border bg-card p-3" maxLength={80} placeholder={ar?"مثل عمّان":"e.g. Amman"} value={preferences.city??""} onChange={e=>set("city",e.target.value.slice(0,80))}/>
+      </label>
       <label className="text-sm font-medium">{ar?"المسافة المفضلة للأنشطة":"Preferred outing distance"}
         <select className="mt-1 w-full rounded-xl border border-border bg-card p-3" value={preferences.distanceKm} onChange={e=>set("distanceKm",Number(e.target.value))}>
           {[5,10,15,25,50].map(km=><option key={km} value={km}>{km} km</option>)}
@@ -48,6 +69,12 @@ export function FamilyPreferences() {
           <option value="gentle">{ar?"اقتراحات لطيفة":"Gentle suggestions"}</option>
         </select>
       </label>
+    </div>
+    <div className="mt-4 rounded-xl bg-[#EDF5EA] p-3">
+      <p className="text-xs text-muted-foreground">{ar?"لن نشارك هذه الخيارات مع المطاعم أو المجموعات تلقائياً. ما في تتبع للموقع ولا إشعارات خارج التطبيق.":"These choices are local. They are not automatically shared with merchants or groups, and there is no passive location tracking or push notification."}</p>
+      <button type="button" onClick={()=>setConfirmed(true)} className="mt-3 min-h-11 rounded-full bg-brand px-4 text-sm font-semibold text-white">
+        {confirmed?(ar?"✓ التفضيلات مؤكدة":"✓ Preferences confirmed"):(ar?"أكّد تفضيلاتي":"Confirm my preferences")}
+      </button>
     </div>
   </section>;
 }
