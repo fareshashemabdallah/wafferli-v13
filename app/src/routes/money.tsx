@@ -102,7 +102,13 @@ function MoneyPage() {
         members={members}
         expenses={s.expenses}
         onChange={(expenses) => upd({ expenses })}
-        onConfirmPlanned={(expenseId,amount)=>setS(prev=>({...prev,expenses:prev.expenses.map(e=>e.id===expenseId?{...e,amount,status:"paid" as const,date:today(),plannedAmount:e.plannedAmount??e.amount}:e)}))}
+        cashBalance={s.cashOnHand??null}
+        onConfirmPlanned={(expenseId,amount,mode)=>setS(prev=>{
+          if(mode==="deduct"&&(prev.cashOnHand==null||prev.cashOnHand<amount))return prev;
+          return {...prev,expenses:prev.expenses.map(e=>e.id===expenseId?{...e,amount,status:"paid" as const,
+            date:today(),plannedAmount:e.plannedAmount??e.amount,cashDeducted:mode==="deduct"}:e),
+            ...(mode==="deduct"&&prev.cashOnHand!=null?{cashOnHand:Math.round((prev.cashOnHand-amount)*100)/100,cashUpdatedAt:today()}:{})};
+        })}
         onDelete={(expense)=>setS(previous=>{
           const base=reverseVarianceAllocation(previous,expense.id);
           if(expense.allocation&&base===previous)return previous;
@@ -252,10 +258,11 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
   );
 }
 
-function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanned }: {
+function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanned, cashBalance }: {
   cats: Category[]; members: Member[]; expenses: Expense[];
   onChange: (e: Expense[]) => void; onDelete: (e:Expense)=>void;
-  onConfirmPlanned:(id:string,actual:number)=>void;
+  onConfirmPlanned:(id:string,actual:number,mode:"already"|"deduct"|"untracked")=>void;
+  cashBalance:number|null;
 }) {
   const { tr,lang } = useI18n();
   const ar=lang==="ar";
@@ -339,9 +346,23 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
                   <label className="block text-xs font-semibold">{ar?"كم دفعت فعلياً؟ (د.أ)":"Actual amount paid (JOD)"}
                     <Input className="mt-1 max-w-44" type="number" min={0} max={50000} step=".01" value={actualValue} onChange={ev=>setActualValue(ev.target.value)}/>
                   </label>
-                  <p className="mt-1 text-xs text-muted-foreground">{ar?"المتوقع ":"Expected "}{fmtJOD(e.plannedAmount??e.amount)} · {ar?"لن نغيّر المخصصات دون موافقتك.":"Budget changes need your approval."}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{ar?"المتوقع ":"Expected "}{fmtJOD(e.plannedAmount??e.amount)} · {ar?"اختر إذا كان الرصيد يشمل الدفع أو يحتاج للخصم. تعديل المخصصات يتطلب موافقتك.":"Choose whether cash already reflects this payment. Budget changes need your approval."}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    <Button size="sm" type="button" onClick={()=>{const v=Number(actualValue);if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000)return setQuickError(ar?"أدخل مبلغاً صحيحاً بين 0 و50000.":"Enter a valid actual amount between 0 and 50,000.");onConfirmPlanned(e.id,Math.round(v*100)/100);setConfirming(null);setQuickError("");toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed.");}}>{ar?"تأكيد":"Confirm paid"}</Button>
+                    {cashBalance!==null&&<Button size="sm" type="button" variant="outline" onClick={()=>{ const v=Number(actualValue);
+                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":"Check the actual amount and balance.");
+                      onConfirmPlanned(e.id,Math.round(v*100)/100,"already");
+                      setConfirming(null);setQuickError("");
+                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed."); }}>{ar?"الرصيد يشمل الدفع":"Already in cash balance"}</Button>}
+                    {cashBalance!==null&&<Button size="sm" type="button" onClick={()=>{ const v=Number(actualValue);
+                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000||cashBalance===null||v>cashBalance)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":"Check the actual amount and balance.");
+                      onConfirmPlanned(e.id,Math.round(v*100)/100,"deduct");
+                      setConfirming(null);setQuickError("");
+                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed."); }}>{ar?"اخصمه من الرصيد":"Deduct from cash"}</Button>}
+                    {cashBalance===null&&<Button size="sm" type="button" onClick={()=>{ const v=Number(actualValue);
+                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":"Check the actual amount and balance.");
+                      onConfirmPlanned(e.id,Math.round(v*100)/100,"untracked");
+                      setConfirming(null);setQuickError("");
+                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed."); }}>{ar?"تأكيد (دون رصيد مدخل)":"Confirm (no cash balance)"}</Button>}
                     <Button size="sm" type="button" variant="ghost" onClick={()=>setConfirming(null)}>{ar?"إلغاء":"Cancel"}</Button>
                   </div>
                 </div>}
