@@ -133,6 +133,7 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   createdAt:isoTime,updatedAt:isoTime,targetDate:isoDate.optional(),
   budgetJod:smallMoney.optional(),recipientLabel:z.string().max(60).optional(),
   note:z.string().max(240).optional(),repeatMonths:z.union([z.literal(1),z.literal(3),z.literal(6),z.literal(12)]).optional(),
+  repeatAnchorDate:isoDate.optional(),lastPurchasedOn:isoDate.optional(),
   prices:many(strict({id:z.string().min(1).max(130),amountJod:positiveSmallMoney,
     checkedAt:isoDate,store:z.string().min(2).max(90),sourceUrl:url.optional()}),24)
  }),150),
