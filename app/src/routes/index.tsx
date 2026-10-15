@@ -1,7 +1,7 @@
 import {createFileRoute,Link} from "@tanstack/react-router";
 import {ArrowRight,CalendarHeart,ChevronRight,CloudSun,Compass,Heart,Sparkles,Wallet} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
-import {FamilyFinanceSnapshot} from "@/components/FamilyFinanceSnapshot";
+import {FamilyPriorityCard} from "@/components/FamilyPriorityCard";
 import {HomeJourneyHighlights} from "@/components/HomeJourneyHighlights";
 import {HomePlanHighlight} from "@/components/HomePlanHighlight";
 import {FamilyWeather} from "@/components/FamilyWeather";
@@ -107,6 +107,7 @@ function Index(){
      <Link to="/money" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">{ar?"ابدأ بثلاث أرقام":"Start with three numbers"} <ArrowRight className="size-4 rtl:rotate-180"/></Link>
     </section>}
   {daily&&<>
+   <FamilyPriorityCard/>
    <section className="mt-6" aria-label={ar?"خطوات سريعة":"Everyday choices"}>
     <div className="flex items-baseline justify-between gap-2">
      <h2 className="text-xl font-semibold text-ink">{ar?"شو بتحب تعمل؟":"What feels right today?"}</h2>
@@ -124,7 +125,6 @@ function Index(){
    </section>
    <HomePlanHighlight/>
    <HomeJourneyHighlights/>
-   <FamilyFinanceSnapshot/>
    {prefs.weather&&<details className="group editorial-card mt-4 overflow-hidden">
     <summary className="flex min-h-16 cursor-pointer items-center gap-3 px-4 py-3">
      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF1E8] text-brand"><CloudSun className="size-5"/></span>
