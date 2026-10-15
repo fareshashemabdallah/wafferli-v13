@@ -9,6 +9,7 @@ import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPrefe
 import {FAMILY_SETUP_PREFERENCES_KEY} from "@/lib/familySetup";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {FAMILY_TASKS_KEY,type FamilyTask} from "@/lib/familyTasks";
+import {FAMILY_WISHLIST_KEY,type WishlistItem} from "@/lib/familyWishlist";
 import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
 import type {FamilyMoment} from "@/lib/familyCalendar";
 import {buildFamilyAttention,snoozeAttention,
@@ -27,14 +28,15 @@ export function FamilyAttentionPanel(){
  const [confirmed,,confirmedReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
+ const [wishlist,,wishlistReady]=useLocalState<WishlistItem[]>(FAMILY_WISHLIST_KEY,[]);
  const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [snoozes,setSnoozes,snoozesReady]=useLocalState<AttentionSnoozes>(FAMILY_ATTENTION_SNOOZES_KEY,{});
  const [expanded,setExpanded]=useState(false);
  const [showSnoozed,setShowSnoozed]=useState(false);
- if(!moneyReady||!membersReady||!prefsReady||!confirmedReady||!plansReady||!tasksReady||!momentsReady||!snoozesReady)return null;
+ if(!moneyReady||!membersReady||!prefsReady||!confirmedReady||!plansReady||!tasksReady||!wishlistReady||!momentsReady||!snoozesReady)return null;
  if(prefs.notificationFrequency==="off")return null;
  const now=new Date();
- const allItems=buildFamilyAttention({money,members,preferences:prefs,preferencesConfirmed:confirmed,plans,moments,tasks,snoozes,now,maxItems:20});
+ const allItems=buildFamilyAttention({money,members,preferences:prefs,preferencesConfirmed:confirmed,plans,moments,tasks,wishlist,snoozes,now,maxItems:20});
  const items=expanded?allItems:allItems.slice(0,4);
  const snoozed=Object.entries(snoozes).filter(([key,until])=>key.length<240&&until>dateKey(now)).slice(0,60);
  if(!items.length&&!snoozed.length)return null;
