@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { AppShell, Notice, PilotBadge } from "@/components/AppShell";
 import { FamilyPreferences } from "@/components/FamilyPreferences";
 import {isSampleFamilyMember} from "@/lib/familySetup";
+import {HOUSEHOLD_ACCOUNTS_ENABLED} from "@/lib/householdAccounts";
 import { Field, NativeSelect, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -198,6 +199,15 @@ function Space() {
       </section>
 
       <Link to="/occasions" className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#244D3C]">{ar?"خطّط لهدية أو نشاط بمناسبة عائلية":"Plan a meaningful gift or family activity"} →</Link>
+      {HOUSEHOLD_ACCOUNTS_ENABLED&&<section className="editorial-card mt-5 p-4">
+        <h2 className="font-semibold">{ar?"حسابات الأسرة الموثّقة":"Verified household accounts"}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{ar?
+          "أنشئ عضوية للبالغين بدعوات قابلة للإلغاء. لا تتم مشاركة الميزانية أو بيانات الأطفال مع الأعضاء تلقائياً.":
+          "Invite or revoke adult household members. Finances and children's profiles are not automatically shared or synced."}</p>
+        <Link to="/household" className="mt-3 inline-flex min-h-11 items-center rounded-full bg-brand px-4 text-sm font-semibold text-white">
+          {ar?"إدارة حسابات الأسرة":"Manage household accounts"} →
+        </Link>
+      </section>}
       <details className="group editorial-card mt-6 p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"التفضيلات والخصوصية":"Preferences & privacy"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
       <FamilyPreferences/>
       <section className="card-soft mt-6 p-4 text-sm">
