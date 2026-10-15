@@ -3,13 +3,15 @@ import {Copy,FileText,ShieldCheck} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
-import {useLocalState} from "@/lib/storage";
+import {useLocalState,uid} from "@/lib/storage";
+import {makePrivateQuote,PRIVATE_QUOTES_KEY,type PrivateQuote} from "@/lib/privateQuoteWorkspace";
 import {formatPrivateQuoteBrief,validateQuoteRequest} from "@/lib/merchantQuoteDraft";
 
 /** Draft-only. No merchant discovery, supplier accounts, checkout or sending. */
 export function MerchantQuoteDraft({product,budget}:{product:string;budget:string}){
  const {lang}=useI18n(),ar=lang==="ar";
  const [prefs]=useLocalState("familyPreferences",defaultFamilyPreferences);
+ const [quotes,setQuotes,quotesReady]=useLocalState<PrivateQuote[]>(PRIVATE_QUOTES_KEY,[]);
  const [name,setName]=useState(product);
  const [quantity,setQuantity]=useState("1");
  const [city,setCity]=useState(prefs.city||"Amman");
@@ -26,6 +28,16 @@ export function MerchantQuoteDraft({product,budget}:{product:string;budget:strin
   const v=validateQuoteRequest({product:name,quantity,deliveryCity:city,neededBy,budget:ceiling});
   if(!v.ok||!v.draft){setError(v.error??"Invalid quote request");setBrief("");return;}
   setBrief(formatPrivateQuoteBrief(v.draft,ar?"ar":"en"));
+ };
+ const savePrivateDraft=()=>{
+  setError("");setMessage("");
+  if(!approved||!brief||!quotesReady)return;
+  const checked=validateQuoteRequest({product:name,quantity,deliveryCity:city,neededBy,budget:ceiling});
+  if(!checked.ok||!checked.draft){setError(checked.error??"Invalid request");return;}
+  if(quotes.length>=30){setError("Only 30 local quotation requests are supported");return;}
+  const record=makePrivateQuote(checked.draft,uid());
+  setQuotes(old=>[record,...old]);
+  setMessage(ar?"تم حفظ مسودة خاصة على هذا الجهاز. لم تُرسل إلى أي تاجر.":"Private draft saved on this device. No merchant was contacted.");
  };
  const copy=async()=>{
   if(!approved||!brief)return;
@@ -81,6 +93,7 @@ export function MerchantQuoteDraft({product,budget}:{product:string;budget:strin
      className="mt-0.5 size-4 accent-[#47715A]"/>
     {ar?"راجعت التفاصيل وأوافق على نسخ هذا النص ومشاركته بنفسي فقط.":"I reviewed this draft and agree to copy it. I will decide independently whether to share it."}
    </label>
+   <Button type="button" variant="outline" className="mt-3 me-2" disabled={!approved||!quotesReady||quotes.length>=30} onClick={savePrivateDraft}>{ar?"احفظ مسودة للمتابعة":"Save private draft for tracking"}</Button>
    <Button type="button" className="mt-3" disabled={!approved} onClick={()=>void copy()}>
     <Copy className="size-4"/>{ar?"نسخ طلب العرض":"Copy quotation request"}
    </Button>

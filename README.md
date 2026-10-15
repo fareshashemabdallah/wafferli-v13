@@ -74,6 +74,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Wise Decisions models a proposed purchase **paid today** against the user's verified-for-freshness manual cash input, 30-day recorded due bills and projected low-point, and chosen reserve. A bill or cash risk triggers a **review** outcome; incomplete or stale information triggers **unknown**; a provisional result is never a bank guarantee.
 - Model is read-only and **does not spend, authorize, deduct or send money**. It does not know unrecorded daily costs, true bank balances, unconfirmed provider settlements or delays of expected income. No live bank feed or licensed financial advice.
 
+## Private quotation and offer comparison workspace
+- A parent can save a manually prepared RFQ as an **unsent local draft**, optionally mark that they shared it **themselves outside Dabberna**, and enter prices they independently obtained from suppliers.
+- The workspace compares **item + delivery + tax** in JOD, distinguishes expired quotes, shows whether a chosen budget ceiling is exceeded, and supports local closure and deletion. The app never asserts suppliers are verified, offers are authentic, requests were delivered, or payments happened.
+- Private quote records stay on this device, are included in local JSON export and device-only deletion, and **are not automatically included in the reviewed cloud vault or core backup restore**. Export can be read manually but automatic restoration of this newer section is not yet supported.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
