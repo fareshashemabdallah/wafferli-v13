@@ -5,7 +5,7 @@ import {roundJod} from "./cashflow";
 export type PaidBillCashMode="already"|"deduct"|"untracked";
 export function recordBillPayment(state:MoneyState,billId:string,dueDate:string,paidOn:string,expenseId:string,mode:PaidBillCashMode,actualAmount?:number):MoneyState {
  const bill=(state.commitments??[]).find(b=>b.id===billId);
- if(!bill||bill.paidDates?.includes(dueDate)||dueDate>paidOn||!expenseId.trim())return state;
+ if(!bill||bill.paidDates?.includes(dueDate)||!expenseId.trim())return state;
  const actual=actualAmount??bill.amount;
  if(!Number.isFinite(actual)||actual<0||actual>50000)return state;
  if(mode==="deduct" && (state.cashOnHand==null||!Number.isFinite(state.cashOnHand)||state.cashOnHand<actual))return state;
