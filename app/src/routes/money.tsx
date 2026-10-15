@@ -39,6 +39,7 @@ function MoneyPage() {
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
   const c = useMemo(() => computeMoney(s), [s]);
+  const recurringSavingsGoal=s.savingsTargetAmount??Math.round(c.monthlyIncome*s.savingsPct)/100;
 
   if (!ready)
     return (
@@ -89,7 +90,7 @@ function MoneyPage() {
       {section==="planning"&&<>
       <section className="editorial-card mb-4 p-4 sm:p-5">
         <h2 className="text-lg font-semibold">{ar?"دخل الشهر وهدف الادخار":"Monthly income & savings goal"}</h2>
-        <Settings key={`${c.monthlyIncome}:${c.savingsTarget}`} income={c.monthlyIncome} target={c.savingsTarget} hasSources={s.incomeSources!==undefined}
+        <Settings key={`${c.monthlyIncome}:${recurringSavingsGoal}`} income={c.monthlyIncome} target={recurringSavingsGoal} hasSources={s.incomeSources!==undefined}
          onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
       </section>
       <MoneyGuidance scope="variance" state={s} setState={setS}/>
@@ -152,7 +153,7 @@ function Settings({income,target,hasSources,onSave}:{income:number;target:number
    toast.success(ar?"تم تحديث الدخل وهدف الادخار.":"Income and savings goal updated.");
  };
  return <section className="mt-4">
-  <p className="text-xs text-muted-foreground">{ar?"هدف الادخار مبلغ شهري بالدينار. التعديل ينعكس على مقارنة الميزانية فوراً.":"Set the monthly savings goal in JOD. Your Overview updates immediately."}</p>
+  <p className="text-xs text-muted-foreground">{ar?"حدّد هدف الادخار المعتاد كل شهر بالدينار. إعادة التوزيع لمصروف محدد تؤثر فقط على شهر الدفع.":"Set your regular monthly savings goal in JOD. One-off reallocations affect only their payment month."}</p>
   <form onSubmit={save} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
    <Field label={ar?"الدخل الشهري (د.أ)":"Monthly income (JOD)"}>
     <Input inputMode="decimal" className={inputCls} disabled={hasSources} value={hasSources?String(income):inc} onChange={e=>setInc(e.target.value)}/>
