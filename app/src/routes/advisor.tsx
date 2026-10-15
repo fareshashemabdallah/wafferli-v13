@@ -3,7 +3,7 @@ import { ArrowRight, Calculator, Compass, Receipt, Search, ShoppingBag, Sparkles
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { GuidedFamilyAdvisor } from "@/components/GuidedFamilyAdvisor";
-import { getMoneyOverview } from "@/lib/moneyOverview";
+import {assessImmediateSpending} from "@/lib/spendingScenario";
 import { sampleMoney } from "@/lib/money";
 import { fmtJOD, useLocalState } from "@/lib/storage";
 import { useI18n } from "@/lib/i18n";
@@ -18,13 +18,22 @@ function Advisor(){
   const [money]=useLocalState("money",sampleMoney());
   const [amount,setAmount]=useState("");
   const [purpose,setPurpose]=useState("family outing");
-  const overview=useMemo(()=>getMoneyOverview(money),[money]);
   const numeric=amount.trim()===""?null:Number(amount);
   const valid=numeric!==null&&Number.isFinite(numeric)&&numeric>0&&numeric<=100000;
-  const afterBills=overview.cashAfterBills;
-  const assessed=valid&&!money.demo&&overview.cashSet&&overview.hasBillSchedule&&overview.dateProblems===0&&afterBills!==null;
-  const coversScheduled=assessed && afterBills>=numeric;
-  const moreDetailsNeeded=money.demo||!overview.cashSet||!overview.hasBillSchedule||overview.dateProblems>0;
+  const scenario=useMemo(()=>assessImmediateSpending(money,valid?numeric!:0),[money,numeric,valid]);
+  const reasonAr:Record<string,string>={
+   "Enter a valid one-off amount in JOD (up to 2 decimals).":"أدخل مبلغاً صحيحاً بحد أقصى منزلتين عشريتين.",
+   "Demo finances cannot be used for a real spending decision.":"البيانات التجريبية غير مناسبة لقرار إنفاق فعلي.",
+   "Complete your real monthly income and category budget.":"أكمل الدخل الشهري الحقيقي وميزانية الفئات.",
+   "Enter the actual cash balance held today.":"أدخل الرصيد النقدي الفعلي اليوم.",
+   "Refresh and date-check your actual cash balance.":"راجع رصيدك الفعلي وحدّث تاريخ تسجيله.",
+   "Review unpaid bills with due dates or confirm none this month.":"راجع الفواتير غير المدفوعة ومواعيدها أو أكّد عدم وجودها هذا الشهر.",
+   "Some scheduled income or bills have invalid or missing dates.":"بعض الدخل أو الفواتير تفتقد تواريخ صحيحة.",
+   "Unable to calculate the recorded cash trajectory.":"تعذّر حساب التدفق النقدي المسجّل.",
+   "At least one recorded bill is overdue or not confirmed paid.":"هناك فاتورة مسجّلة متأخرة أو غير مؤكدة السداد.",
+   "The cost exceeds recorded cash after unpaid bills and reserve.":"الكلفة أكبر من الرصيد المسجّل بعد الفواتير والاحتياطي.",
+   "The 30-day forecast's low point falls below your selected cash reserve after this payment.":"أدنى رصيد متوقع خلال ٣٠ يوماً أقل من الاحتياطي بعد هذا المصروف."
+  };
   const shortcuts=[
     {href:"/money",en:"Review family money",ar:"راجع ميزانية العائلة",Icon:Receipt},
     {href:"/explore/together",en:"Plan a family outing",ar:"خطّط لنزهة عائلية",Icon:Compass},
@@ -53,13 +62,28 @@ function Advisor(){
           </select>
         </label>
       </div>
-      {valid && <div role="status" className="mt-4 rounded-2xl bg-mint/70 p-4">
-        <p className="font-semibold">{!assessed?(ar?"نحتاج تفاصيل مالية قبل المقارنة":"More financial information needed"):coversScheduled?(ar?"قد تسمح الأرقام المدخلة بذلك — بعد مراجعة المصاريف اليومية":"Recorded cash may cover it — review everyday expenses too"):(ar?"الشراء قد يتجاوز الرصيد بعد الالتزامات":"May exceed cash after recorded commitments")}</p>
-        <p className="mt-2 text-sm">{moreDetailsNeeded?
-          (ar?"هذه البيانات غير مكتملة أو تجريبية. أدخل الرصيد الفعلي والفواتير المستحقة وتواريخها في المالية.":"These figures are incomplete or demo data. Enter actual cash, unpaid bills and valid due dates in Money.")
-          :(ar?"الرصيد بعد الفواتير المسجلة والاحتياطي: ":"Cash after scheduled bills and reserve: ")+fmtJOD(afterBills??0)+". "+(ar?"هذا ليس مبلغاً آمناً للإنفاق؛ المصاريف غير المجدولة غير محسوبة.":"This is not safe-to-spend money: costs without due dates are excluded.")}</p>
-        <p className="mt-2 text-xs text-muted-foreground">{ar?"النتيجة للمراجعة فقط ولا تضمن القدرة المالية أو تعوض التخطيط." : "This is a planning aid, not a financial guarantee."}</p>
-      </div>}
+      {valid&&<div role="status" className={"mt-4 rounded-2xl border p-4 "+
+       (scenario.outcome==="review"?"border-[#E6D3C5] bg-[#FFF8F1]":"border-[#DCE8D9] bg-[#F4F8F1]")}>
+        <h3 className="font-semibold">{scenario.outcome==="unknown"?
+         (ar?"المعلومات ناقصة لتقييم هذا المصروف":"More real information is required"):
+         scenario.outcome==="review"?
+         (ar?"هذا المصروف قد يضغط على سيولة العائلة":"This spending may put household cash under pressure"):
+         (ar?"تقدير أولي فقط — راجع قبل الالتزام":"A provisional check only — review before committing")}</h3>
+        {scenario.riskReasons.length>0&&<ul className="mt-2 list-disc space-y-1 ps-5 text-sm">
+         {scenario.riskReasons.map(r=><li key={r}>{ar?(reasonAr[r]??r):r}</li>)}
+        </ul>}
+        {scenario.projectedLowJod!==null&&<>
+         <p className="mt-2 text-sm">{ar?"أدنى رصيد متوقع خلال ٣٠ يوماً بعد هذا المصروف: ":"Estimated 30-day low after this payment: "}
+          <strong>{fmtJOD(scenario.projectedLowJod)}</strong></p>
+         <p className="mt-1 text-sm">{ar?"الاحتياطي الذي اخترته: ":"Your chosen reserve: "}
+          {fmtJOD(scenario.reserveJod??0)}</p>
+         <p className="mt-1 text-sm">{ar?"الرصيد النظري بعد الفواتير المسجّلة والاحتياطي وهذا المصروف: ":"Estimated cash after recorded bills, reserve and this purchase: "}
+          {fmtJOD(scenario.billOnlyHeadroomJod??0)}</p>
+        </>}
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{ar?
+         "محاكاة لدفع المبلغ اليوم؛ الرصيد والدخل والفواتير إدخالات يدوية، وليست بيانات بنكية مؤكدة. المصاريف غير المسجّلة وتأخر الدخل غير مضمونين، وقد تتغير النتيجة.":
+         "Assumes payment today. Cash, income and bills are manually entered, not bank-verified. Unrecorded everyday expenses and delayed income may change the result; this is not a spending guarantee."}</p>
+       </div>}
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{ar?"هذه مساعدة حسابية بناءً على بياناتك، وليست ذكاءً اصطناعيًا متصلًا أو نصيحة مالية متخصصة.":"This is an on-device calculation, not a connected AI chatbot or professional financial advice."}</p>
       <Link to="/money" className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand">{ar?"أكمل بيانات الميزانية":"Complete your financial plan"} <ArrowRight className="size-4 rtl:rotate-180"/></Link>
     </div>
