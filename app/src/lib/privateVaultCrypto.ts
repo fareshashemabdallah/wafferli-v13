@@ -93,15 +93,20 @@ export async function decryptPrivateBackup(
  * Contains only sections that the current validated restore can rehydrate.
  */
 export function preparePrivateVaultSnapshot(
- storage:Pick<Storage,"length"|"key"|"getItem">,now=new Date()
+ storage:Pick<Storage,"length"|"key"|"getItem">,
+ selected:readonly RestorableKey[],now=new Date()
 ):{json:string;sections:RestorableKey[]}{
  const full=buildLocalBackup(storage,now);
  const preview=inspectLocalBackup(JSON.stringify(full),storage);
+ const allowed=new Set(preview.sections.map(s=>s.key));
+ const requested=[...new Set(selected)];
+ if(!requested.length||requested.some(key=>!allowed.has(key)))
+  throw new Error("Select existing, validated local sections before upload");
  const entries:Record<string,unknown>={};
  const sections:RestorableKey[]=[];
- for(const item of preview.sections){
-  entries[item.key]=JSON.parse(preview.values[item.key]!) as unknown;
-  sections.push(item.key);
+ for(const key of requested){
+  entries[key]=JSON.parse(preview.values[key]!) as unknown;
+  sections.push(key);
  }
  const json=JSON.stringify({...full,entries,
   warning:"Encrypted personal vault; only reviewed core sections, no cloud household sharing."});
