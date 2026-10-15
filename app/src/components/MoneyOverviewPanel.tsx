@@ -6,6 +6,8 @@ import type {MoneyState} from "@/lib/money";
 import {emptyRealMoney,getMoneyOverview} from "@/lib/moneyOverview";
 import {budgetAlignment} from "@/lib/financeAlignment";
 import {MoneyGuidance} from "@/components/MoneyGuidance";
+import {MoneyReadinessCard} from "@/components/MoneyReadinessCard";
+import {SavingsGoalsPanel} from "@/components/SavingsGoalsPanel";
 import {QuickMoneySetup} from "@/components/QuickMoneySetup";
 import {needsStarterBudget} from "@/lib/starterBudget";
 import {monthCarryover,nextMonthKey} from "@/lib/monthlyCarryover";
@@ -36,6 +38,7 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
    <Link to="/plans" className="inline-flex min-h-11 items-center rounded-full border border-[#D3E0D3] px-4 text-sm font-semibold text-brand">{ar?"ارجع إلى خططنا":"Return to Plans"} →</Link>
   </div>;
  return <div className="space-y-4">
+   {!state.demo&&<MoneyReadinessCard state={state} setState={setState} goTo={goTo}/>}
 
    {state.demo&&!needsStarterBudget(state)&&<section className="rounded-2xl border border-[#EBDCC9] bg-[#FFF6E9] px-4 py-4">
      <p className="text-sm font-semibold text-ink">{ar?"هذه أرقام للتجربة فقط":"You're viewing example finances"}</p>
@@ -84,6 +87,7 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
      </details>}
      <MoneyGuidance scope="alignment" state={state} setState={setState}/>
    </section>
+   {!state.demo&&<SavingsGoalsPanel state={state} setState={setState}/>}
    {plansReady&&plannedItems.length>0&&<section className="editorial-card p-4 sm:p-5" aria-label={ar?"الخطط القادمة":"Upcoming family plans"}>
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div><h2 className="text-base font-semibold">{ar?"خطط عائلية قادمة":"Upcoming family plans"}</h2>
