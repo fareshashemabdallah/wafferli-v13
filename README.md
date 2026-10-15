@@ -26,6 +26,13 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - **Child-aware default outings:** Typical attendance and outing focus prefill the planner, but each outing can change those choices.
 - **Future family accounts:** Access-control policy and proposed server-side RLS schema exist as **design only**. No shared household budgets, cross-device finance sync, parent-to-parent access, or children accounts are live. See [family priorities and outstanding security gates](docs/family-intelligence-priorities.md).
 
+## Authenticated household accounts — staged development
+- Verified Supabase email sign-in, household creation, 72-hour single-use **adult invitation codes**, owner revocation and member exit are implemented in source behind an **OFF-by-default** build flag.
+- Household memberships are not family-and-friends circles; invitations carry no automatic permission to read Money, private expenses, children's profiles or family calendars.
+- Deployable-candidate [household membership SQL](app/supabase/household_accounts_v1.sql) is **not applied automatically**. Parent/adult RLS and invitation controls require real multi-account security verification in staging. The 18+ check is self-attestation, not independent age verification.
+- Public pilot leaves household functionality disabled. Full steps and threat cases: [household accounts rollout](docs/household-accounts-rollout.md).
+- **Still missing:** reviewed backend migration, verified deployment, explicit consent-based private/shared financial sync, account deletion and age-assurance review.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
