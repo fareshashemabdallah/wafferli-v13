@@ -7,12 +7,14 @@ import type {MoneyState} from "./money";
 
 const now=new Date(2026,9,15,12);
 const prefs={...defaultFamilyPreferences};
-const validMoney=():MoneyState=>({...emptyRealMoney(),
-  income:1800,incomeSources:undefined,savingsTargetAmount:200,
-  categories:[{id:"living",name:"Living",planned:1100,type:"fixed"}],
-  cashOnHand:800,cashReserve:100,cashUpdatedAt:"2026-10-15",
-  noBillsConfirmedMonth:"2026-10"
-});
+const validMoney=():MoneyState=>{
+  const base=emptyRealMoney();
+  delete base.incomeSources;
+  return {...base,income:1800,savingsTargetAmount:200,
+    categories:[{id:"living",name:"Living",planned:1100,type:"fixed"}],
+    cashOnHand:800,cashReserve:100,cashUpdatedAt:"2026-10-15",
+    noBillsConfirmedMonth:"2026-10"};
+};
 const goal=(monthly:number,dueDate="2026-11-15")=>createSavingsGoal({
   id:"school",name:"School fund",targetJod:400,savedJod:100,monthlyJod:monthly,dueDate
 },now)!;
@@ -55,7 +57,9 @@ describe("Today family priority",()=>{
  it("points to missing real cash, bills or an old cash update in that order",()=>{
   const s=validMoney();
   expect(selectFamilyPriority({...s,cashOnHand:null},prefs,now)?.id).toBe("cash-missing");
-  expect(selectFamilyPriority({...s,noBillsConfirmedMonth:undefined},prefs,now)?.id).toBe("bills-missing");
+  const withoutBillReview={...s};
+  delete withoutBillReview.noBillsConfirmedMonth;
+  expect(selectFamilyPriority(withoutBillReview,prefs,now)?.id).toBe("bills-missing");
   expect(selectFamilyPriority({...s,cashUpdatedAt:"2026-07-01"},prefs,now)?.id).toBe("cash-stale");
  });
  it("only offers a soft goal suggestion in gentle notification mode",()=>{
