@@ -4,7 +4,7 @@ import {useI18n} from "@/lib/i18n";
 import {useLocalState,uid,fmtJOD} from "@/lib/storage";
 import {dateKey} from "@/lib/familyCalendar";
 import {FAMILY_WISHLIST_KEY,makeWishlistItem,recordWishlistPrice,
- summarizeWishlistPrice,updateWishlistStatus,type WishlistItem,type WishlistKind} from "@/lib/familyWishlist";
+ summarizeWishlistPrice,updateWishlistStatus,confirmRecurringPurchase,type WishlistItem,type WishlistKind} from "@/lib/familyWishlist";
 import {Button} from "@/components/ui/button";
 export function FamilyWishlistPanel({mode}:{mode:"gifts"|"shopping"}){
  const {lang}=useI18n(),ar=lang==="ar";
@@ -20,6 +20,7 @@ export function FamilyWishlistPanel({mode}:{mode:"gifts"|"shopping"}){
  const add=(e:FormEvent)=>{
   e.preventDefault();setError("");
   if(list.length>=150){setError("Maximum 150 saved items");return;}
+  if(repeat&&!date){setError(ar?"حدّد تاريخ أول شراء لتكرار التذكير.":"Choose the first due date for a repeating purchase.");return;}
   const b=budget.trim()?Number(budget):undefined;
   const t=makeWishlistItem({id:uid(),name,kind,...(date?{targetDate:date}:{}),
    ...(b!==undefined?{budgetJod:b}:{}),
@@ -95,6 +96,7 @@ export function FamilyWishlistPanel({mode}:{mode:"gifts"|"shopping"}){
         {item.targetDate??(ar?"بدون موعد":"No date")} {item.budgetJod!==undefined?" · "+fmtJOD(item.budgetJod):""}
         {item.recipientLabel?" · "+item.recipientLabel:""}
         {item.repeatMonths?" · "+(ar?"راجع كل ":"Review every ")+item.repeatMonths+(ar?" شهر":" months"):""}
+        {item.lastPurchasedOn?" · "+(ar?"آخر تأكيد شراء: ":"Last self-confirmed purchase: ")+item.lastPurchasedOn:""}
        </p>
        <p className="mt-1 text-xs text-muted-foreground">
         {summary.latest?(ar?"آخر سعر أدخلته ":"Latest recorded price ")+fmtJOD(summary.latest.amountJod)+" · "+summary.latest.checkedAt:
@@ -104,9 +106,21 @@ export function FamilyWishlistPanel({mode}:{mode:"gifts"|"shopping"}){
       </div>
       <div className="flex items-center gap-1">
        <button type="button" className="min-h-10 rounded-lg bg-[#ECF4EA] px-2 text-xs font-semibold text-brand"
-        onClick={()=>setList(old=>old.map(x=>x.id===item.id?
-         updateWishlistStatus(x,x.status==="purchased"?"considering":"purchased"):x))}>
-        {item.status==="purchased"?(ar?"أعد للقائمة":"Reopen"):(ar?"اشتريتُ بنفسي":"I purchased")}
+        onClick={()=>{
+         setError("");
+         if(item.repeatMonths&&item.status==="considering"){
+          try{
+           const next=confirmRecurringPurchase(item);
+           setList(old=>old.map(x=>x.id===item.id?next:x));
+          }catch(e){setError(e instanceof Error?e.message:String(e));}
+          return;
+         }
+         setList(old=>old.map(x=>x.id===item.id?
+          updateWishlistStatus(x,x.status==="purchased"?"considering":"purchased"):x));
+        }}>
+        {item.repeatMonths&&item.status==="considering"?
+         (ar?"اشتريتُ لهذه الدورة — حدّث الموعد":"Bought this cycle — schedule next"):
+         item.status==="purchased"?(ar?"أعد للقائمة":"Reopen"):(ar?"اشتريتُ بنفسي":"I purchased")}
        </button>
        <button type="button" aria-label={ar?"حذف":"Delete"}
         className="grid min-h-10 min-w-10 place-items-center text-[#985F4B]"
@@ -149,7 +163,7 @@ export function FamilyWishlistPanel({mode}:{mode:"gifts"|"shopping"}){
    })}
   </div>
   <p className="mt-3 text-[11px] text-muted-foreground">{ar?
-   "الفرق بين الأسعار المسجّلة ليس توفيراً مؤكداً. تسجيل الشراء لا يخصم المال ولا ينشئ طلباً لدى التاجر.":
-   "Recorded price changes are not verified savings. Marking an item purchased does not charge, deduct cash or create an order."}</p>
+   "تغيّر الأسعار المسجلة ليس توفيراً مؤكداً. للمشتريات المتكررة، أنت تؤكد كل دورة بنفسك ويُحدّث الموعد التالي فقط؛ لا طلب ولا دفع ولا خصم مالي.":
+   "Recorded price changes are not verified savings. For repeating items, you must confirm each cycle yourself; only the next planning date changes. No purchase, charge or financial deduction is made."}</p>
  </section>;
 }

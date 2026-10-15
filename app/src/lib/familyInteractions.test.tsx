@@ -35,6 +35,29 @@ describe("parent-facing locally stored interactions",()=>{
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
   expect(window.localStorage.getItem("wafferli.v13.privateQuoteRequests")).toBeNull();
  });
+
+ it("moves a monthly household item to its next due date after manual confirmation",async()=>{
+  const anchorDate=new Date();
+  const firstDate=[anchorDate.getFullYear(),String(anchorDate.getMonth()+1).padStart(2,"0"),
+   String(anchorDate.getDate()).padStart(2,"0")].join("-");
+  wrapper(<FamilyWishlistPanel mode="shopping"/>);
+  await screen.findByText("Upcoming family purchase wishlist");
+  fireEvent.change(screen.getByLabelText("What do you need?"),{target:{value:"Laundry detergent"}});
+  fireEvent.change(screen.getByLabelText("Needed by (optional)"),{target:{value:firstDate}});
+  fireEvent.change(screen.getByLabelText("Repeat planning reminder (optional)"),{target:{value:"1"}});
+  fireEvent.click(screen.getByRole("button",{name:"Add to wishlist"}));
+  await screen.findByText("Laundry detergent");
+  fireEvent.click(screen.getByRole("button",{name:"Bought this cycle — schedule next"}));
+  await waitFor(()=>{
+   const rows=JSON.parse(window.localStorage.getItem("wafferli.v13.familyWishlist")??"[]") as WishlistItem[];
+   expect(rows).toHaveLength(1);
+   expect(rows[0]?.id).toBeDefined();
+   expect(rows[0]?.targetDate).not.toBe(firstDate);
+   expect(rows[0]?.status).toBe("considering");
+   expect(rows[0]?.lastPurchasedOn).toBe(firstDate);
+  });
+  expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
+ });
  it("creates and completes a responsibility locally, without sending an assignment",async()=>{
   wrapper(<FamilyTasksPanel/>);
   await screen.findByText("Family responsibilities");
