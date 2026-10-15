@@ -77,8 +77,8 @@ function Services() {
         ? "تفتح هذه الخدمة نتائج بحث طرف ثالث. لا يقوم دبّرنا حالياً بجمع المراجعات أو تحليلها بالذكاء الاصطناعي أو التحقق من تراخيص الأطباء أو المواعيد أو قبول التأمين. راجع المصدر مباشرة وتأكد من المؤهلات والتوافر. المعلومات لا تُعدّ نصيحة طبية."
         : "This pilot opens third-party listings. Dabberna does not yet collect or AI-analyze reviews or verify clinicians' credentials, appointments or insurance acceptance. Check source information and credentials independently. This is not medical advice."}</p>
       <p className="mt-2 text-muted-foreground">{ar
-        ? "تقييمات الزيارات الخاصة بالعائلة ميزة مقترحة للمستقبل، وليست مفعّلة في هذه النسخة."
-        : "Optional post-visit family reviews are a future feature, not enabled in this pilot."}</p>
+        ? "يمكنك حفظ ملاحظاتك الخاصة عن الجهات للمقارنة على جهازك. لا توجد مراجعات أو تقييمات عامة موثّقة."
+        : "You can now save your own private comparison notes on this device; verified public post-visit reviews are not available."}</p>
     </div>
   </AppShell>;
 }
