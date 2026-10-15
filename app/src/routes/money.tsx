@@ -110,16 +110,20 @@ function MoneyPage() {
             date:today(),plannedAmount:e.plannedAmount??e.amount,cashDeducted:mode==="deduct"}:e),
             ...(mode==="deduct"&&prev.cashOnHand!=null?{cashOnHand:Math.round((prev.cashOnHand-amount)*100)/100,cashUpdatedAt:today()}:{})};
         })}
-        onDelete={(expense)=>setS(previous=>{
+        onDelete={(expense)=>{
+          const restoreCash=!!expense.cashDeducted&&s.cashOnHand!==null&&s.cashOnHand!==undefined&&window.confirm(ar?"هل تريد إعادة المبلغ الذي خُصم من الرصيد عند حذف المصروف؟":"Restore the cash deducted for this expense when deleting it?");
+          if(!window.confirm(restoreCash?(ar?"تأكيد حذف المصروف وإعادة الرصيد؟":"Delete expense and restore cash?"):(ar?"حذف المصروف دون تغيير رصيد البنك؟":"Delete this expense without changing entered cash?")))return;
+          setS(previous=>{
           const base=reverseVarianceAllocation(previous,expense.id);
           if(expense.allocation&&base===previous)return previous;
           const expenses=base.expenses.filter(e=>e.id!==expense.id);
-          if(!expense.billId || !expense.dueDate)return {...base,expenses};
+          if(!expense.billId || !expense.dueDate)return {...base,expenses,...(restoreCash&&base.cashOnHand!=null?{cashOnHand:Math.round((base.cashOnHand+expense.amount)*100)/100,cashUpdatedAt:today()}:{})};
           const commitments=(base.commitments??[]).map(b=>b.id===expense.billId?{
             ...b,paidDates:(b.paidDates??[]).filter(d=>d!==expense.dueDate)
           }:b);
           return {...base,expenses,commitments};
-        })}
+        });
+        }}
       />
       <details className="editorial-card mt-4 px-4 py-3">
         <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إدارة فئات المصاريف":"Manage spending categories"} +</summary>
@@ -386,7 +390,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
                  {e.status!=="planned"&&e.plannedAmount!=null&&e.plannedAmount!==e.amount&&<span className="block text-[11px] text-muted-foreground">{ar?"الخطة: ":"Plan: "}{fmtJOD(e.plannedAmount)}</span>}
                </div>
               <Button size="icon" variant="ghost" disabled={!!e.billId||!!e.allocation} aria-label={tr("Edit expense")} onClick={() => setEditing(e)}><Pencil className="size-4" /></Button>
-              <Button size="icon" variant="ghost" disabled={!!e.billId} aria-label={tr("Delete expense")} onClick={() => confirm(e.allocation?(ar?"سيتم حذف المصروف ومحاولة التراجع عن إعادة توزيع الميزانية. المتابعة؟":"Delete this expense and reverse its approved budget reallocation?"):tr("Delete this expense?")) && onDelete(e)}>
+              <Button size="icon" variant="ghost" disabled={!!e.billId} aria-label={tr("Delete expense")} onClick={() => onDelete(e)}>
                 <Trash2 className="size-4" />
               </Button>
             </li>
@@ -410,7 +414,7 @@ function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Ex
         if (amount === null) return setErr(tr("Amount must be a positive number up to 50,000."));
         if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) return setErr(tr("Please pick a valid date."));
         const { amountStr: _a, ...rest } = f;
-        onSave({ ...rest, amount, note: (f.note ?? "").slice(0, 60) });
+        onSave({ ...rest, amount, ...(rest.status==="planned"?{plannedAmount:amount}:{}),note: (f.note ?? "").slice(0, 60) });
       }}
     >
       <Field label={tr("Amount (JOD)")}><Input className={inputCls} inputMode="decimal" autoFocus value={f.amountStr} onChange={(e) => setF({ ...f, amountStr: e.target.value })} /></Field>
