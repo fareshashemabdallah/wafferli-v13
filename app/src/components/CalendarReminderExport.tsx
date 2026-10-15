@@ -2,6 +2,9 @@ import {useMemo,useState} from "react";
 import {CalendarClock,Download} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
+import {useLocalState} from "@/lib/storage";
+import {FAMILY_TASKS_KEY,type FamilyTask} from "@/lib/familyTasks";
+import {FAMILY_WISHLIST_KEY,type WishlistItem} from "@/lib/familyWishlist";
 import {buildReminderCalendar,collectCalendarReminders} from "@/lib/localCalendarReminders";
 import type {MoneyState,Member} from "@/lib/money";
 import type {FamilyMoment} from "@/lib/familyCalendar";
@@ -12,14 +15,18 @@ export function CalendarReminderExport({money,members,moments}:{
  const {lang}=useI18n(),ar=lang==="ar";
  const [bills,setBills]=useState(false);
  const [family,setFamily]=useState(false);
+ const [tasksEnabled,setTasksEnabled]=useState(false);
+ const [shoppingEnabled,setShoppingEnabled]=useState(false);
+ const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
+ const [wishlist,,wishlistReady]=useLocalState<WishlistItem[]>(FAMILY_WISHLIST_KEY,[]);
  const [ack,setAck]=useState(false);
  const [error,setError]=useState("");
  const list=useMemo(()=>collectCalendarReminders({
-  money,members,moments,options:{bills,family}
- }),[money,members,moments,bills,family]);
+  money,members,moments,tasks,wishlist,options:{bills,family,tasks:tasksEnabled,shopping:shoppingEnabled}
+ }),[money,members,moments,tasks,wishlist,bills,family,tasksEnabled,shoppingEnabled]);
  const download=()=>{
   setError("");
-  if(!ack||!list.length)return;
+  if(!ack||!list.length||!tasksReady||!wishlistReady)return;
   try{
    const ics=buildReminderCalendar(list);
    const url=URL.createObjectURL(new Blob([ics],{type:"text/calendar;charset=utf-8"}));
@@ -48,6 +55,16 @@ export function CalendarReminderExport({money,members,moments}:{
      onChange={e=>{setFamily(e.target.checked);setAck(false);}}/>
     {ar?"المناسبات وأعياد الميلاد":"Family dates and birthdays"}
    </label>
+   <label className="inline-flex min-h-10 items-center gap-2">
+    <input type="checkbox" className="size-4 accent-[#47715A]" checked={tasksEnabled}
+     onChange={e=>{setTasksEnabled(e.target.checked);setAck(false);}}/>
+    {ar?"مهام العائلة المفتوحة":"Open household tasks"}
+   </label>
+   <label className="inline-flex min-h-10 items-center gap-2">
+    <input type="checkbox" className="size-4 accent-[#47715A]" checked={shoppingEnabled}
+     onChange={e=>{setShoppingEnabled(e.target.checked);setAck(false);}}/>
+    {ar?"الهدايا والمشتريات المخططة":"Upcoming gifts and purchases"}
+   </label>
   </div>
   <p className="mt-2 text-xs font-semibold">{ar?"موعد جاهز للتصدير: ":"Reminders selected: "}{list.length}</p>
   {list.length>0&&<div className="mt-2 max-h-40 overflow-auto rounded-lg border border-[#E1E9DF] p-2">
@@ -56,13 +73,13 @@ export function CalendarReminderExport({money,members,moments}:{
   </div>}
   <label className="mt-3 flex items-start gap-2 text-xs">
    <input type="checkbox" className="mt-0.5 size-4 accent-[#47715A]" checked={ack}
-    onChange={e=>setAck(e.target.checked)} disabled={!list.length}/>
+    onChange={e=>setAck(e.target.checked)} disabled={!list.length||!tasksReady||!wishlistReady}/>
    {ar?
-    "أفهم أن أسماء المناسبات والفواتير في الملف قد تنتقل لخدمة تقويمي السحابية إذا استوردته، وأنني أنا من يقرر مشاركة الملف.":
-    "I understand importing this file may share bill names or family dates with my calendar provider. I control whether and where to import it."}
+    "أفهم أن أسماء الفواتير والمناسبات والمهام والهدايا والمشتريات في الملف قد تنتقل إلى مزود تقويمي عند استيراده. أنا من أقرر استيراده ومشاركته.":
+    "I understand importing this file may share bill names, family dates, task names, and shopping/gift plans with my calendar provider. I decide whether and where to import it."}
   </label>
   <Button type="button" variant="outline" className="mt-3" onClick={download}
-   disabled={!ack||!list.length}>
+   disabled={!ack||!list.length||!tasksReady||!wishlistReady}>
    <Download className="size-4"/>{ar?"تنزيل تذكيرات التقويم":"Download calendar reminders"}
   </Button>
   {error&&<p role="alert" className="mt-2 text-xs text-destructive">{error}</p>}
