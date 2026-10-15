@@ -65,6 +65,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Reminder files are downloaded in the browser, not sent to Dabberna services. Importing a file into a calendar application **may transfer event names and dates to that provider**; parents must acknowledge this.
 - **No background push/SMS/email is active in Dabberna.** Device/calendar notification delivery depends on the user's calendar app, system permissions, and import behavior. Sample finance and sample-member birthdays are excluded.
 
+## SmartBuy merchant quotation draft and price evidence
+- SmartBuy now allows a **private consumer quotation request draft** with product/service, quantity, delivery city, expected date and optional JOD maximum. Every request is previewed and must be explicitly approved before the customer copies the text.
+- **No merchant receives the draft through Dabberna.** This is not a verified quote marketplace, supplier offer, merchant onboarding, transaction or payment integration. Do not include personal contact details, children's details or full street addresses.
+- A shopper can record a public HTTPS source URL and the date on which they personally checked a price. **Checked** means the user asserts it, not independent price verification. Entries older than seven days are flagged for review and changing a store or total resets manual check status.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
