@@ -2,10 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Cake, CalendarDays, Check, ChevronLeft, ChevronRight, Gift, Heart, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
+import {CalendarReminderExport} from "@/components/CalendarReminderExport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { allFamilyMoments,dateKey,formatMomentDate,isMemberBirthday,kindNames,monthCells,occurrencesForDate,parseCalendarDate,upcomingMoments,type FamilyMoment,type MomentKind } from "@/lib/familyCalendar";
-import { sampleMembers } from "@/lib/money";
+import { sampleMembers,sampleMoney,type MoneyState } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
 import { uid,useLocalState } from "@/lib/storage";
 
@@ -21,6 +22,7 @@ function FamilyCalendarPage(){
  const todayKey=dateKey(today);
  const [events,setEvents,eventsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [members,,membersReady]=useLocalState("members",sampleMembers());
+ const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const ready=eventsReady&&membersReady;
  const combined=useMemo(()=>allFamilyMoments(events,members,ar),[events,members,ar]);
  const [month,setMonth]=useState(()=>new Date(today.getFullYear(),today.getMonth(),1,12));
@@ -138,6 +140,7 @@ function FamilyCalendarPage(){
     <Gift className="size-5 shrink-0 text-brand"/><div className="flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">{formatMomentDate(item.occursOn,ar)} · {kindNames[item.kind][ar?"ar":"en"]}</p></div>
    </div>)}</div>}
   </section>
+  {ready&&moneyReady&&<CalendarReminderExport money={money} members={members} moments={events}/>}
   <div className="mt-5 rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
    {ar?"هذا التقويم خاص بهذا المتصفح فقط ولا تتم مزامنته بين أفراد العائلة بعد. العطل الرسمية لا تُضاف تلقائيًا؛ أضفها يدويًا. لا تُرسل تذكيرات تلقائية أو إشعارات خارج التطبيق. بالنسبة لميلاد 29 فبراير، تظهر الذكرى فقط في السنوات الكبيسة.":"This calendar is private to this browser, not yet shared across family members. Public holidays must be entered manually. There are no background reminders or push notifications. A 29 February birthday appears only in leap years."}
   </div>

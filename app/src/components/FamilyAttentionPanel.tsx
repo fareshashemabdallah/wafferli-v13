@@ -1,4 +1,5 @@
 import {Link} from "@tanstack/react-router";
+import {CalendarReminderExport} from "@/components/CalendarReminderExport";
 import {ArrowRight,Bell,CalendarDays,ShieldAlert,Sparkles,Wallet} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState} from "@/lib/storage";
@@ -77,6 +78,7 @@ export function FamilyAttentionPanel(){
     </article>;
    })}
   </div>
+  <CalendarReminderExport money={money} members={members} moments={moments}/>
   <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{ar?
    "هذه تذكيرات داخل التطبيق فقط؛ لا نرسل إشعارات خلفية أو نؤكد الدفع أو الرصيد البنكي. تأجيل التنبيه لا يغيّر موعد الفاتورة أو أي مبلغ.":
    "In-app guidance only. No background notifications, bank verification or payment status checks. Snoozing changes visibility, never the bill or your balance."}</p>
