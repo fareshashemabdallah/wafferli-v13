@@ -27,30 +27,33 @@ describe("Existing Money flows: alignment & confirmed actuals",()=>{
   expect(varianceOf(paid.expenses[0]!)).toBe(60);
   expect(paid.commitments?.[0]?.amount).toBe(400);
   const approved=applyVarianceAllocation(paid,"e1",{kind:"variable",categoryId:"fun"},"2026-10-15");
-  expect(approved.categories.find(c=>c.id==="rent")?.planned).toBe(460);
-  expect(approved.categories.find(c=>c.id==="fun")?.planned).toBe(140);
+  expect(computeMoney(approved,new Date(2026,9,15)).plannedBy("rent")).toBe(460);
+  expect(approved.categories.find(c=>c.id==="rent")?.planned).toBe(400);
+  expect(computeMoney(approved,new Date(2026,9,15)).plannedBy("fun")).toBe(140);
+  expect(computeMoney(approved,new Date(2026,10,15)).plannedBy("fun")).toBe(200);
   expect(budgetAlignment(approved).status).toBe("balanced");
   expect(applyVarianceAllocation(approved,"e1",{kind:"variable",categoryId:"fun"},"2026-10-15")).toBe(approved);
   const reversed=reverseVarianceAllocation(approved,"e1");
-  expect(reversed.categories.find(c=>c.id==="rent")?.planned).toBe(400);
-  expect(reversed.categories.find(c=>c.id==="fun")?.planned).toBe(200);
+  expect(computeMoney(reversed,new Date(2026,9,15)).plannedBy("rent")).toBe(400);
+  expect(computeMoney(reversed,new Date(2026,9,15)).plannedBy("fun")).toBe(200);
  });
  it("funds overpayment from an explicitly approved savings-target adjustment",()=>{
   const paid=recordBillPayment(fixture(),"bill","2026-10-20","2026-10-15","e2","already",440);
   const approved=applyVarianceAllocation(paid,"e2",{kind:"savings"},"2026-10-15");
-  expect(approved.savingsTargetAmount).toBe(60);
-  expect(approved.categories.find(c=>c.id==="rent")?.planned).toBe(440);
+  expect(computeMoney(approved,new Date(2026,9,15)).savingsTarget).toBe(60);
+  expect(computeMoney(approved,new Date(2026,10,15)).savingsTarget).toBe(100);
+  expect(computeMoney(approved,new Date(2026,9,15)).plannedBy("rent")).toBe(440);
   expect(budgetAlignment(approved).status).toBe("balanced");
-  expect(reverseVarianceAllocation(approved,"e2").savingsTargetAmount).toBe(100);
+  expect(computeMoney(reverseVarianceAllocation(approved,"e2"),new Date(2026,9,15)).savingsTarget).toBe(100);
  });
  it("redirects an underspend to savings or variable categories without editing actual payment",()=>{
   const paid=recordBillPayment(fixture(),"bill","2026-10-20","2026-10-15","e3","already",350);
   const toSavings=applyVarianceAllocation(paid,"e3",{kind:"savings"},"2026-10-15");
-  expect(toSavings.savingsTargetAmount).toBe(150);
-  expect(toSavings.categories.find(c=>c.id==="rent")?.planned).toBe(350);
+  expect(computeMoney(toSavings,new Date(2026,9,15)).savingsTarget).toBe(150);
+  expect(computeMoney(toSavings,new Date(2026,9,15)).plannedBy("rent")).toBe(350);
   expect(toSavings.expenses[0]?.amount).toBe(350);
   const toVariable=applyVarianceAllocation(paid,"e3",{kind:"variable",categoryId:"food"},"2026-10-15");
-  expect(toVariable.categories.find(c=>c.id==="food")?.planned).toBe(350);
+  expect(computeMoney(toVariable,new Date(2026,9,15)).plannedBy("food")).toBe(350);
   expect(budgetAlignment(toVariable).status).toBe("balanced");
  });
  it("plans an expense without counting it as actually spent until payment confirmed",()=>{
