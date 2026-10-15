@@ -8,7 +8,7 @@ export const LOCAL_APP_KEYS=[
  "familyPlans","activeFamilyPlanId","occasionPlans",
  "outings","smartbuy","shopping","activeDecision",
  "familySetupPreferencesConfirmed","familySetupProfileSkipped",
- "familyAttentionSnoozes","privateQuoteRequests","privateServiceShortlist","weatherCity","homeIntroDone","lang"
+ "familyAttentionSnoozes","familyTasks","privateQuoteRequests","privateServiceShortlist","weatherCity","homeIntroDone","lang"
 ] as const;
 const prefix="wafferli.v13.";
 const extras=["dabberna.v13.restaurantSelections","dabberna.geoapify.personalPilotKey"];
