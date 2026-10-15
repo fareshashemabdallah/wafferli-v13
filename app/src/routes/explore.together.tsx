@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createOuting, type SavedOuting } from "@/lib/outings";
 import { useLocalState } from "@/lib/storage";
+import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,setPlanChoice,type FamilyPlan} from "@/lib/familyPlans";
 import { estimateOutingCost, formatJod, optionalJod, parseAttendees, parseJod } from "@/lib/outingCosts";
 
 export const Route = createFileRoute("/explore/together")({
@@ -59,6 +60,9 @@ function TogetherPage() {
   const { tr } = useI18n();
   const navigate = useNavigate();
   const [saved, setSaved] = useLocalState<SavedOuting[]>("outings", []);
+  const [plans,setPlans]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+  const [activePlanId]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
+  const familyPlan=plans.find(p=>p.id===activePlanId&&p.kind==="outing"&&p.status!=="completed");
   const [f, setF] = useState({ title: "Our outing", event_at: "", neighborhood: "Amman", friends: "6", organizer: "", whoPays: "later", activity:"other" as ActivityType });
   const [children, setChildren] = useState<ChildAttendance>("unsure");
   const [childFocus, setChildFocus] = useState<ChildFocus>("mixed");
@@ -145,6 +149,19 @@ function TogetherPage() {
     <AppShell title={tr("Plan Together")}>
       <PlanContextBanner onUseBudget={amount=>updateCost("maximum",String(amount))}/>
       <p className="mb-4 text-sm text-muted-foreground">{tr("Plan a great experience together—balance everyone’s enjoyment, needs and your planned budget.")}</p>
+      {familyPlan&&<div className="mb-4 rounded-2xl border border-[#D9E5D8] bg-[#F4F9F1] p-4">
+       <p className="text-sm font-semibold">{tr("Save an outing estimate to your plan")} · {familyPlan.title}</p>
+       <p className="mt-1 text-xs text-muted-foreground">{tr("Only the outing title and estimate are saved on this device. Creating a public vote remains optional.")}</p>
+       <div className="mt-2 flex flex-wrap items-center gap-2">
+        <Button size="sm" variant="outline" onClick={()=>{
+          const amount=estimate.estimatedTotal??estimate.maximum??undefined;
+          const updated=setPlanChoice(familyPlan,{label:f.title.trim()||familyPlan.title,...(amount!==undefined?{estimatedJod:amount}:{}) ,source:"outing"});
+          setPlans(prev=>prev.map(p=>p.id===familyPlan.id?{...updated,...(f.event_at?{date:f.event_at.slice(0,10)}:{})}:p));
+          toast.success(tr("Outing estimate saved to your plan."));
+        }}>{tr("Save to plan")}</Button>
+        <Link to="/plans" className="text-xs font-semibold text-brand underline">{tr("Open plan")} →</Link>
+       </div>
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <a href={googleActivitiesLink} target="_blank" rel="noopener noreferrer" className="flex min-h-30 flex-col justify-center rounded-2xl border border-border bg-white p-4 transition hover:border-brand/40">
           <span className="text-base font-semibold text-brand">① {tr("Find activity ideas")}</span>
