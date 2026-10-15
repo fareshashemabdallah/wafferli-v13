@@ -6,6 +6,7 @@ import {dateKey} from "@/lib/familyCalendar";
 import {useLocalState,uid} from "@/lib/storage";
 import {SERVICE_SHORTLIST_KEY,makeServiceEntry,assessServiceShortlist,
  type ServiceEntry,type ServiceType} from "@/lib/serviceShortlist";
+import {compareParentSelectedServices} from "@/lib/serviceSideBySide";
 
 export function FamilyServiceShortlist({category}:{category:ServiceType}){
  const {lang}=useI18n(),ar=lang==="ar";
@@ -23,8 +24,11 @@ export function FamilyServiceShortlist({category}:{category:ServiceType}){
  const [note,setNote]=useState("");
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
+ const [compared,setCompared]=useState<string[]>([]);
  if(!ready)return null;
  const visible=assessServiceShortlist(entries.filter(e=>e.category===category));
+ const chosenIds=compared.filter(id=>visible.some(s=>s.entry.id===id));
+ const comparison=chosenIds.length>=2?compareParentSelectedServices(entries,chosenIds):null;
  const add=(e:FormEvent)=>{
   e.preventDefault();setError("");setNotice("");
   if(entries.length>=100){setError("Local comparison is limited to 100 providers");return;}
@@ -115,6 +119,12 @@ export function FamilyServiceShortlist({category}:{category:ServiceType}){
      <article key={entry.id} className="rounded-xl border border-[#E2E9E0] bg-white p-3 text-xs">
       <div className="flex items-start justify-between gap-3">
        <div>
+        <label className="mb-2 flex items-center gap-2 text-[11px] font-semibold text-brand">
+         <input type="checkbox" className="size-4 accent-[#47715A]" checked={chosenIds.includes(entry.id)}
+          disabled={!chosenIds.includes(entry.id)&&chosenIds.length>=3}
+          onChange={e=>setCompared(old=>e.target.checked?[...old,entry.id]:old.filter(id=>id!==entry.id))}/>
+         {ar?"قارن جنباً إلى جنب":"Compare side by side"}
+        </label>
         <p className="font-semibold">{entry.name} · {entry.city}</p>
         <p className="mt-1 text-muted-foreground">{entry.costJod===undefined?(ar?"التكلفة غير معروفة":"Cost unknown"):entry.costJod.toFixed(2)+" JOD"}
          {" · "}{entry.parentFit?entry.parentFit+"/5 "+(ar?"حسب رأيك":"your rating"):(ar?"الملاءمة غير مقيّمة":"Fit unassessed")}</p>
@@ -135,6 +145,34 @@ export function FamilyServiceShortlist({category}:{category:ServiceType}){
       </div>
      </article>)}</div>}
   </div>
+  {comparison&&<div className="mt-4 overflow-x-auto rounded-xl border border-[#DDE7DD] bg-white p-3">
+   <h3 className="text-sm font-semibold">{ar?"مقارنة مباشرة بين خياراتك":"Side-by-side comparison of YOUR saved options"}</h3>
+   <p className="mt-1 text-xs text-muted-foreground">{ar?
+    "ترتيب الأعمدة حسب اختيارك، وليس تصنيف جودة أو كفاءة أو صلاحية طبية. كل البيانات أدخلتها بنفسك.":
+    "Column order follows your selection, not any professional, medical or value-for-money ranking. All values come from your own entries."}</p>
+   <table className="mt-3 w-full min-w-[500px] text-xs">
+    <thead><tr className="border-b">
+     <th className="p-2 text-start">{ar?"معيار":"Criterion"}</th>
+     {comparison.options.map(x=><th key={x.entry.id} className="p-2 text-start">{x.entry.name}</th>)}
+    </tr></thead><tbody>
+     {([
+      {label:ar?"المدينة":"City",value:(x:typeof comparison.options[number])=>x.entry.city},
+      {label:ar?"تكلفة تقريبية":"Entered cost",value:(x:typeof comparison.options[number])=>x.entry.costJod===undefined?"—":x.entry.costJod.toFixed(2)+" JOD"},
+      {label:ar?"تقييمك الشخصي":"Your subjective fit",value:(x:typeof comparison.options[number])=>x.entry.parentFit?x.entry.parentFit+"/5":"—"},
+      {label:ar?"تاريخ المراجعة":"Last checked",value:(x:typeof comparison.options[number])=>x.entry.checkedAt},
+      {label:ar?"قائمة التحقق":"Missing checks",value:(x:typeof comparison.options[number])=>x.missingChecks.join(", ")||"None recorded"},
+      {label:ar?"الأطفال":"Your child-friendly checkbox",value:(x:typeof comparison.options[number])=>x.entry.childFriendly?"✓":"—"},
+      {label:ar?"الوصول":"Your accessibility checkbox",value:(x:typeof comparison.options[number])=>x.entry.stepFreeAccess?"✓":"—"}
+     ]).map(row=><tr key={row.label} className="border-b border-[#EBF0E8]">
+      <th className="p-2 text-start font-medium">{row.label}</th>
+      {comparison.options.map(x=><td key={x.entry.id} className="p-2">{row.value(x)}</td>)}
+     </tr>)}
+    </tbody>
+   </table>
+   <p className="mt-3 text-xs text-muted-foreground">{ar?
+    "للقرارات الصحية تأكد من الترخيص والمؤهلات والتأمين من الجهات الرسمية قبل الحجز.":
+    comparison.warnings.join(" ")}</p>
+  </div>}
   <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{ar?
    "لا تعتمد على هذا الجدول وحده لاختيار طبيب. تأكد من الترخيص والتخصص والتأمين والتوافر مباشرة من مصادر رسمية. لا يتم إرسال ملاحظاتك للخوادم.":
    "Never select a clinician solely from this list. Independently verify licensing, expertise, insurance and availability with authoritative sources. Entries remain local to this browser."}</p>
