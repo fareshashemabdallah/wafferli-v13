@@ -6,6 +6,8 @@ import type {MoneyState} from "@/lib/money";
 import {emptyRealMoney,getMoneyOverview} from "@/lib/moneyOverview";
 import {budgetAlignment} from "@/lib/financeAlignment";
 import {MoneyGuidance} from "@/components/MoneyGuidance";
+import {QuickMoneySetup} from "@/components/QuickMoneySetup";
+import {needsStarterBudget} from "@/lib/starterBudget";
 import {monthCarryover,nextMonthKey} from "@/lib/monthlyCarryover";
 import {useI18n} from "@/lib/i18n";
 
@@ -27,7 +29,9 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
    if(window.confirm(message))setState(()=>emptyRealMoney());
  };
  return <div className="space-y-4">
-   {state.demo&&<section className="rounded-2xl border border-[#EBDCC9] bg-[#FFF6E9] px-4 py-4">
+   {needsStarterBudget(state)&&<QuickMoneySetup money={state} setMoney={setState}/>}
+
+   {state.demo&&!needsStarterBudget(state)&&<section className="rounded-2xl border border-[#EBDCC9] bg-[#FFF6E9] px-4 py-4">
      <p className="text-sm font-semibold text-ink">{ar?"هذه أرقام للتجربة فقط":"You're viewing example finances"}</p>
      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?"المبالغ المعروضة ليست بياناتك. ابدأ بصفحة مالية فارغة وسجّل الأرقام الحقيقية عندما تكون جاهزاً.":"Sample rent, income and expenses are not yours. Start with a blank plan when you're ready to enter real figures."}</p>
      <button type="button" onClick={resetToActual} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
