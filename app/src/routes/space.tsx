@@ -4,6 +4,7 @@ import { Cake, CalendarHeart, Heart, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AppShell, Notice, PilotBadge } from "@/components/AppShell";
 import { FamilyPreferences } from "@/components/FamilyPreferences";
+import {LocalExpensePrivacyReview} from "@/components/LocalExpensePrivacyReview";
 import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {isSampleFamilyMember} from "@/lib/familySetup";
 import {HOUSEHOLD_ACCOUNTS_ENABLED} from "@/lib/householdAccounts";
@@ -212,6 +213,7 @@ function Space() {
       </section>}
       <details className="group editorial-card mt-6 p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"التفضيلات والخصوصية":"Preferences & privacy"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
       <FamilyPreferences/>
+      <LocalExpensePrivacyReview/>
       <section className="card-soft mt-6 p-4 text-sm">
         <h2 className="font-semibold">{tr("Shared vs private expenses")}</h2>
         <p className="mt-1 text-muted-foreground">{tr("In My Money, each expense is marked shared (household) or private. In this pilot everything stays on this one device; multi-user household sharing isn't live yet.")}</p>
