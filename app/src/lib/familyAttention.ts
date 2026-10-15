@@ -5,18 +5,20 @@ import {realFamilyMembers} from "./familySetup";
 import {getMoneyOverview} from "./moneyOverview";
 import type {FamilyPlan} from "./familyPlans";
 import {taskAttention,type FamilyTask} from "./familyTasks";
+import {nextWishlistReminder} from "./wishlistAttention";
+import type {WishlistItem} from "./familyWishlist";
 import type {FamilyPreferences} from "./familyPreferences";
 import type {MoneyState,Member} from "./money";
 
 export type AttentionItem={
  key:string;
- category:"finance"|"bill"|"plan"|"occasion"|"inspiration"|"task";
+ category:"finance"|"bill"|"plan"|"occasion"|"inspiration"|"task"|"shopping";
  severity:"critical"|"important"|"gentle";
  priority:number;
  titleEn:string;titleAr:string;
  detailEn:string;detailAr:string;
  actionEn:string;actionAr:string;
- link:"/money"|"/plans"|"/space"|"/calendar"|"/explore/together";
+ link:"/money"|"/plans"|"/space"|"/calendar"|"/explore/together"|"/explore/smartbuy"|"/occasions";
  /** Critical warnings must remain visible until the underlying data changes. */
  canSnooze:boolean;
 };
@@ -46,6 +48,7 @@ export function buildFamilyAttention(input:{
  plans:readonly FamilyPlan[];
  moments:readonly FamilyMoment[];
  tasks?:readonly FamilyTask[];
+ wishlist?:readonly WishlistItem[];
  snoozes?:AttentionSnoozes;
  now?:Date;
  maxItems?:number;
@@ -108,6 +111,36 @@ export function buildFamilyAttention(input:{
    detailAr:pending.title+" · "+pending.date+" ("+pending.count+" مهام مسجلة قريبة أو متأخرة).",
    actionEn:"Review responsibilities",actionAr:"راجع المهام",link:"/space",canSnooze:!pending.urgent
   });
+ }
+ if(input.preferencesConfirmed&&p.shoppingTips){
+  const wish=nextWishlistReminder(input.wishlist??[],now);
+  if(wish){
+   const when=wish.daysUntil<0?"overdue":wish.daysUntil===0?"today":
+    wish.daysUntil<=7?"within seven days":"within 14 days";
+   const whenAr=wish.daysUntil<0?"تاريخها فات":wish.daysUntil===0?"اليوم":
+    wish.daysUntil<=7?"خلال سبعة أيام":"خلال ١٤ يوماً";
+   const review=wish.priceStatus==="missing"?"No price has been checked yet.":
+    wish.priceStatus==="stale"?"Your last recorded price is more than 14 days old.":
+    "The last price was entered by you; it is not independently verified.";
+   const reviewAr=wish.priceStatus==="missing"?"لا يوجد سعر مسجّل بعد.":
+    wish.priceStatus==="stale"?"آخر سعر مسجّل أقدم من ١٤ يوماً.":
+    "السعر أدخلته بنفسك وليس متحققاً منه بشكل مستقل.";
+   signals.push({
+    key:"shopping:"+wish.item.id+":"+wish.item.targetDate,
+    category:"shopping",priority:wish.daysUntil<=7?19:50,
+    severity:wish.daysUntil<=7?"important":"gentle",canSnooze:true,
+    titleEn:wish.item.kind==="gift"?"Prepare a planned gift":"A planned purchase needs review",
+    titleAr:wish.item.kind==="gift"?"جهّز هدية مخططة":"راجع مشتريات العائلة القادمة",
+    detailEn:wish.item.name+" is needed "+when+". "+review+
+     (wish.overBudget?" Your last entered price exceeds your chosen ceiling.":"")+
+     " No order or payment has been made.",
+    detailAr:wish.item.name+" موعدها "+whenAr+". "+reviewAr+
+     (wish.overBudget?" السعر المدخل أعلى من السقف الذي اخترته.":"")+
+     " لا يوجد طلب أو دفع تلقائي.",
+    actionEn:"Review your wishlist",actionAr:"راجع القائمة",
+    link:wish.link
+   });
+  }
  }
  const advice=selectFamilyLifeAdvice({money,members,preferences:p,
   preferencesConfirmed:input.preferencesConfirmed,plans,moments,now});
