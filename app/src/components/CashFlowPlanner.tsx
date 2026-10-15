@@ -13,6 +13,7 @@ import {
 } from "@/lib/cashflow";
 import { fmtJOD, uid } from "@/lib/storage";
 import {recordBillPayment,reverseBillPayment,type PaidBillCashMode} from "@/lib/billPayment";
+import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 
 type Props = {
   state: MoneyState; members: Member[];
@@ -42,7 +43,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const [billAmount,setBillAmount]=useState("");
   const [receipt,setReceipt]=useState<{sourceId:string;date:string;value:string}|null>(null);
   const [error,setError]=useState("");
-  const [pendingPaid,setPendingPaid]=useState<{bill:Commitment;dueDate:string}|null>(null);
+  const [pendingPaid,setPendingPaid]=useState<{bill:Commitment;dueDate:string;actual:string}|null>(null);
   const [pendingUndo,setPendingUndo]=useState<{billId:string;date:string}|null>(null);
   useEffect(()=>setCash(state.cashOnHand==null?"":String(state.cashOnHand)),[state.cashOnHand]);
   useEffect(()=>setReserve(String(state.cashReserve??0)),[state.cashReserve]);
@@ -99,17 +100,24 @@ export function CashFlowPlanner({state,members,update}:Props) {
     setReceipt(null);setError("");toast.success(tr("Actual receipt recorded. Update your cash balance separately."));
   };
   const markPaid=(bill:Commitment,dueDate:string,cashMode:PaidBillCashMode)=>{
-    if(dueDate>today)return;
-    if(cashMode==="deduct"&&(state.cashOnHand==null||state.cashOnHand<bill.amount)){
+    const value=pendingPaid?.actual??"";
+    const amount=Number(value);
+    if(value.trim()===""||!Number.isFinite(amount)||amount<0||amount>50000){setError(ar?"أدخل مبلغاً فعلياً صحيحاً بين 0 و50000 دينار.":"Enter a valid actual paid amount between 0 and 50,000 JOD.");return;}
+    if(cashMode==="deduct"&&(state.cashOnHand==null||state.cashOnHand<amount)){
       setError(ar?"المبلغ أكبر من الرصيد المدخل. حدّث الرصيد أولاً.":"Payment exceeds entered cash. Refresh your balance first.");return;
     }
     const expenseId=uid();
-    update(current=>recordBillPayment(current,bill.id,dueDate,today,expenseId,cashMode));
+    update(current=>recordBillPayment(current,bill.id,dueDate,today,expenseId,cashMode,Math.round(amount*100)/100));
     setPendingPaid(null);setError("");
     toast.success(ar?"سُجلت الفاتورة المدفوعة مع المصروف.":"Paid bill and expense recorded.");
   };
   const undoPayment=(billId:string,date:string,restoreCash:boolean)=>{
-    update(current=>reverseBillPayment(current,billId,date,restoreCash,today));
+    update(current=>{
+      const linked=current.expenses.find(e=>e.billId===billId&&e.dueDate===date);
+      const base=linked?.allocation?reverseVarianceAllocation(current,linked.id):current;
+      if(linked?.allocation&&base===current)return current;
+      return reverseBillPayment(base,billId,date,restoreCash,today);
+    });
     setPendingUndo(null);setError("");
     toast.success(ar?"تم التراجع عن الفاتورة والمصروف. راجع رصيدك.":"Payment and linked expense undone. Please check your cash balance.");
   };
@@ -201,16 +209,21 @@ export function CashFlowPlanner({state,members,update}:Props) {
                     onClick={()=>{if(confirm(tr("Delete this bill schedule? Already recorded expenses stay in your history.")))update(s=>({...s,commitments:(s.commitments??[]).filter(x=>x.id!==bill.id)}));}}><Trash2 className="size-4"/></Button>
                 </div>
               </div>
-              {next && next.displayDate<=today && <>
+              {next && <>
                 <Button type="button" className="mt-2" size="sm" variant="secondary"
-                  onClick={()=>{setPendingPaid({bill,dueDate:next.displayDate});setError("");}}><Check className="size-3.5"/> {tr("Mark paid & log expense")}</Button>
+                  onClick={()=>{setPendingPaid({bill,dueDate:next.displayDate,actual:String(bill.amount)});setError("");}}><Check className="size-3.5"/> {tr("Mark paid & log expense")}</Button>
                 {pendingPaid?.bill.id===bill.id&&pendingPaid.dueDate===next.displayDate&&
                   <div className="mt-3 rounded-xl border border-[#DAE6D7] bg-[#F5F8F1] p-3">
                     <p className="text-sm font-semibold">{ar?"تأكيد دفع الفاتورة":"Confirm this bill was paid"}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{ar?"سنضيفها للمصاريف. هل رصيدك المُدخل يعكس هذا الدفع؟":"We'll log the expense. Does your entered cash balance already reflect this payment?"}</p>
+                    <label className="mt-3 block text-sm font-semibold">{ar?"المبلغ الذي دفعته فعلياً (د.أ)":"Actual amount paid (JOD)"}
+                      <Input className="mt-1 max-w-44" type="number" min={0} max={50000} step=".01" inputMode="decimal" value={pendingPaid.actual}
+                        onChange={e=>setPendingPaid({...pendingPaid,actual:e.target.value})}/>
+                    </label>
+                    <p className="mt-2 text-xs text-muted-foreground">{ar?"المتوقع: ":"Planned: "}{fmtJOD(bill.amount)}. {ar?"سيسجّل الفرق، وأي تعديل للميزانية يحتاج موافقتك.":"The difference will be recorded. Any budget reallocation needs your approval."}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{ar?"هل رصيدك المدخل يعكس الدفع؟":"Does your entered cash already reflect this payment?"}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {state.cashOnHand!=null&&<Button type="button" size="sm" variant="outline" onClick={()=>markPaid(bill,next.displayDate,"already")}>{ar?"نعم، الرصيد محدّث":"Yes, already reflected"}</Button>}
-                      {state.cashOnHand!=null&&state.cashOnHand>=bill.amount&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"deduct")}>{ar?"لا، اخصمه الآن":"No, deduct it now"}</Button>}
+                      {state.cashOnHand!=null&&state.cashOnHand>=Number(pendingPaid.actual)&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"deduct")}>{ar?"لا، اخصمه الآن":"No, deduct it now"}</Button>}
                       {state.cashOnHand==null&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"untracked")}>{ar?"الرصيد غير مُدخل":"No cash balance entered"}</Button>}
                       <Button type="button" size="sm" variant="ghost" onClick={()=>setPendingPaid(null)}>{ar?"إلغاء":"Cancel"}</Button>
                     </div>
