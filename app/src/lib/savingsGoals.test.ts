@@ -4,7 +4,7 @@ import {getFinancialReadiness} from "./financialReadiness";
 import {emptyRealMoney,getMoneyOverview} from "./moneyOverview";
 import {computeMoney,sampleMoney,type MoneyState} from "./money";
 const now=new Date(2026,9,15,12);
-const base=():MoneyState=>({...emptyRealMoney(),income:1800,savingsTargetAmount:300,categories:[
+const base=():MoneyState=>({...emptyRealMoney(),incomeSources:undefined,income:1800,savingsTargetAmount:300,categories:[
  {id:"housing",name:"Housing",type:"fixed",planned:750},
  {id:"food",name:"Food",type:"variable",planned:450}
 ],cashOnHand:900,cashReserve:150,cashUpdatedAt:"2026-10-14"});
