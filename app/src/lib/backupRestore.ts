@@ -7,7 +7,8 @@ import {LOCAL_APP_KEYS,type LocalBackup} from "./localDataControls";
  * Outing admin/vote tokens and other unreviewed modules are EXCLUDED.
  */
 export const RESTORABLE_KEYS=[
- "money","members","familyCalendar","familyPreferences","familyPlans","shopping"
+ "money","members","familyCalendar","familyPreferences","familyPlans","shopping",
+ "privateQuoteRequests","privateServiceShortlist"
 ] as const;
 export type RestorableKey=typeof RESTORABLE_KEYS[number];
 const PREFIX="wafferli.v13.";
@@ -19,12 +20,23 @@ const id=z.string().min(1).max(180);
 const isoDate=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s=>{
  const parts=s.split("-").map(Number);
  const date=new Date(Date.UTC(parts[0]!,parts[1]!-1,parts[2]!));
- return date.toISOString().slice(0,10)===s;
+ return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===s;
 },"Invalid calendar date");
 const isoTime=z.string().max(50).refine(s=>Number.isFinite(Date.parse(s)),"Invalid timestamp");
 const many=<T extends z.ZodTypeAny>(schema:T,max=3000)=>z.array(schema).max(max);
 const opts=(v:z.ZodRawShape)=>z.object(v).passthrough();
 const numMap=z.record(maxNumber);
+// New decision records are strictly shaped: no hidden tokens or unexpected
+// nested properties may pass into device restoration or the staged vault.
+const strict=(shape:z.ZodRawShape)=>z.object(shape).strict();
+const smallMoney=z.number().finite().min(0).max(100000)
+ .refine(n=>Math.abs(n*100-Math.round(n*100))<=0.00001,"JOD must have two decimal places");
+const positiveSmallMoney=smallMoney.refine(n=>n>0,"Positive amount required");
+const url=z.string().max(700).refine(raw=>{
+ try{const parsed=new URL(raw);return parsed.protocol==="https:"&&!parsed.username&&!parsed.password&&
+  parsed.hostname.includes(".")&&!parsed.hostname.endsWith(".local")&&
+  !/^127\./.test(parsed.hostname);}catch{return false;}
+},"Public HTTPS URL required");
 const expense=opts({
  id, date:isoDate, categoryId:id, amount:maxNumber,
  shared:z.boolean(),status:z.enum(["planned","paid"]).optional(),
@@ -98,7 +110,32 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
  shopping:many(opts({
   id,name:z.string().min(1).max(200),
   qty:z.number().int().min(1).max(10000),price:maxNumber,done:z.boolean()
- }),1500)
+ }),1500),
+ privateQuoteRequests:many(strict({
+  id:z.string().min(1).max(120),createdAt:isoTime,
+  status:z.enum(["draft","shared-by-user","closed"]),
+  request:strict({
+   product:z.string().min(3).max(100),quantity:z.number().int().min(1).max(10000),
+   deliveryCity:z.string().min(2).max(70),neededBy:isoDate,
+   budgetCeilingJod:positiveSmallMoney.optional()
+  }),
+  offers:many(strict({
+   id:z.string().min(1).max(120),merchant:z.string().min(2).max(90),
+   itemCostJod:positiveSmallMoney,deliveryJod:smallMoney,taxesJod:smallMoney,
+   enteredAt:isoTime,expiresOn:isoDate,
+   evidenceUrl:url.optional(),note:z.string().max(250).optional()
+  }),20)
+ }),30),
+ privateServiceShortlist:many(strict({
+  id:z.string().min(1).max(120),category:z.enum(["doctor","school","home","activities","gifts"]),
+  name:z.string().min(2).max(110),city:z.string().min(2).max(75),
+  checkedAt:isoDate,costJod:smallMoney.optional(),sourceUrl:url.optional(),
+  parentFit:z.number().int().min(1).max(5).optional(),
+  childFriendly:z.boolean().optional(),stepFreeAccess:z.boolean().optional(),
+  credentialsConfirmedByParent:z.boolean().optional(),
+  availabilityConfirmedByParent:z.boolean().optional(),
+  note:z.string().max(250).optional()
+ }),100)
 };
 const root=z.object({
  app:z.literal("dabberna"),schemaVersion:z.literal(1),
@@ -144,7 +181,9 @@ const labels:Record<RestorableKey,string>={
  familyCalendar:"Family calendar",
  familyPreferences:"Family preferences",
  familyPlans:"Family plans",
- shopping:"Shopping list"
+ shopping:"Shopping list",
+ privateQuoteRequests:"Private quotation drafts and entered offers",
+ privateServiceShortlist:"Private family-service comparison notes"
 };
 /** Parsing a file never writes to local storage. The original backup export
  * contains more modules than this validator can safely restore; these appear
@@ -178,8 +217,11 @@ export function inspectLocalBackup(
   const result=schemas[typed].safeParse(entries[key]);
   if(!result.success)throw new Error("Backup has invalid "+typed+" data; no changes were made");
   const payload=entries[key];
-  if(["members","familyCalendar","familyPlans","shopping"].includes(typed)&&!uniqueIds(payload))
+  if(["members","familyCalendar","familyPlans","shopping","privateQuoteRequests","privateServiceShortlist"].includes(typed)&&!uniqueIds(payload))
    throw new Error("Duplicate item IDs in "+typed+"; no changes were made");
+  if(typed==="privateQuoteRequests"&&Array.isArray(payload)&&payload.some(q=>
+   record(q)&&!uniqueIds(q["offers"])))
+   throw new Error("Duplicate offer IDs in privateQuoteRequests; no changes were made");
   // Reject archived secrets masquerading as future fields; the app never
   // needs login credentials to reconstruct Money or a family profile.
   const normalized=JSON.stringify(payload);
