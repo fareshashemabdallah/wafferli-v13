@@ -1,5 +1,10 @@
 /* Arabic text for the Dabberna UI. Translate UI copy, never user-entered names or secrets. */
 const labels:Record<string,string> = {
+  "Save an outing estimate to your plan": "احفظ تقدير كلفة الطلعة في خطتك",
+  "Only the outing title and estimate are saved on this device. Creating a public vote remains optional.": "يُحفظ اسم الطلعة وتقدير كلفتها على هذا الجهاز فقط. إنشاء تصويت للمجموعة اختياري.",
+  "Outing estimate saved to your plan.": "تم حفظ تقدير كلفة الطلعة في خطتك.",
+  "Save to plan": "احفظ في الخطة",
+  "Open plan": "افتح الخطة",
   "Find family services": "اكتشف خدمات العائلة",
   "Family Services": "خدمات العائلة",
   "Find doctors, schools, tutors, home services, gifts and activities when you need them.": "ابحث عن أطباء ومدارس ومعلمين وخدمات منزلية وهدايا وأنشطة عند الحاجة.",
