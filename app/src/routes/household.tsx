@@ -260,7 +260,7 @@ function HouseholdAccountsPage(){
        {ar?"مغادرة مساحة الأسرة":"Leave household"}
       </Button>}
      </div>}
-     {HOUSEHOLD_EXPENSE_SHARING_ENABLED&&<HouseholdExpenseSharing key={chosen.household_id+":"+user.id} householdId={chosen.household_id} userId={user.id}/>}
+     {chosen&&HOUSEHOLD_EXPENSE_SHARING_ENABLED&&<HouseholdExpenseSharing key={chosen.household_id+":"+user.id} householdId={chosen.household_id} userId={user.id}/>}
     </section>
    </>
   )}
