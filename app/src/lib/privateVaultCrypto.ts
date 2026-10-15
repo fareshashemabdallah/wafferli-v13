@@ -46,7 +46,7 @@ export function validVaultEnvelope(input:unknown):input is EncryptedVaultEnvelop
 async function derive(passphrase:string,salt:Uint8Array,cryptoProvider:Crypto):Promise<CryptoKey>{
  const material=await cryptoProvider.subtle.importKey("raw",encoder.encode(passphrase),
   "PBKDF2",false,["deriveKey"]);
- return cryptoProvider.subtle.deriveKey({name:"PBKDF2",salt,
+ return cryptoProvider.subtle.deriveKey({name:"PBKDF2",salt:new Uint8Array(salt).buffer,
   iterations:ITERATIONS,hash:"SHA-256"},material,
   {name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
 }
@@ -63,7 +63,7 @@ export async function encryptPrivateBackup(
  const iv=cryptoProvider.getRandomValues(new Uint8Array(12));
  const key=await derive(passphrase,salt,cryptoProvider);
  const encrypted=await cryptoProvider.subtle.encrypt(
-  {name:"AES-GCM",iv},key,encoder.encode(plaintext));
+  {name:"AES-GCM",iv:new Uint8Array(iv).buffer},key,encoder.encode(plaintext));
  return {
   version:1,algorithm:"AES-256-GCM",kdf:"PBKDF2-SHA256",
   iterations:ITERATIONS,salt:b64(salt),iv:b64(iv),
@@ -84,7 +84,7 @@ export async function decryptPrivateBackup(
  const salt=un64(envelope.salt),iv=un64(envelope.iv),bytes=un64(envelope.ciphertext);
  try{
   const key=await derive(passphrase,salt,cryptoProvider);
-  const plain=await cryptoProvider.subtle.decrypt({name:"AES-GCM",iv},key,bytes);
+  const plain=await cryptoProvider.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(iv).buffer},key,new Uint8Array(bytes).buffer);
   if(plain.byteLength>MAX_BACKUP_BYTES)throw new Error("Vault content is too large");
   return decoder.decode(plain);
  }catch{throw new Error("Cannot decrypt vault. Check your passphrase or the file's integrity.");}
