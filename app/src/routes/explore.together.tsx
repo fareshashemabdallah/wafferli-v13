@@ -1,7 +1,7 @@
 import { useI18n } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Plus, Trash2 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createOuting, type SavedOuting } from "@/lib/outings";
 import { useLocalState } from "@/lib/storage";
+import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,setPlanChoice,type FamilyPlan} from "@/lib/familyPlans";
 import { estimateOutingCost, formatJod, optionalJod, parseAttendees, parseJod } from "@/lib/outingCosts";
 
@@ -60,12 +61,21 @@ function TogetherPage() {
   const { tr } = useI18n();
   const navigate = useNavigate();
   const [saved, setSaved] = useLocalState<SavedOuting[]>("outings", []);
+  const [familyPrefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
+  const preferencesApplied=useRef(false);
   const [plans,setPlans]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
   const [activePlanId]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
   const familyPlan=plans.find(p=>p.id===activePlanId&&p.kind==="outing"&&p.status!=="completed");
   const [f, setF] = useState({ title: "Our outing", event_at: "", neighborhood: "Amman", friends: "6", organizer: "", whoPays: "later", activity:"other" as ActivityType });
   const [children, setChildren] = useState<ChildAttendance>("unsure");
   const [childFocus, setChildFocus] = useState<ChildFocus>("mixed");
+  useEffect(()=>{
+   if(!prefsReady||preferencesApplied.current)return;
+   preferencesApplied.current=true;
+   setChildren(familyPrefs.typicalChildrenAttendance==="yes"?"yes":familyPrefs.typicalChildrenAttendance==="no"?"no":"unsure");
+   setChildFocus(familyPrefs.typicalOutingFocus??"mixed");
+   if(familyPrefs.city?.trim())setF(old=>({...old,neighborhood:familyPrefs.city.trim().slice(0,60)}));
+  },[prefsReady,familyPrefs]);
   const [childCount, setChildCount] = useState("1");
   const [cost, setCost] = useState({
     adults: "2", adultRate: "", childRate: "", transport: "", extras: "", maximum: ""

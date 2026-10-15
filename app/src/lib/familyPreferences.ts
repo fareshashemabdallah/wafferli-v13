@@ -6,6 +6,9 @@ export type FamilyPreferences = {
   shoppingTips: boolean;
   notificationFrequency: "off" | "important" | "gentle";
   experienceMode?: "auto" | "individual" | "family";
+  /** Defaults for a new outing form, never overrides that specific outing choice. */
+  typicalChildrenAttendance?: "ask" | "yes" | "no";
+  typicalOutingFocus?: "children" | "mixed" | "adults";
   city: string;
   distanceKm: number;
   outingLimit: number;
@@ -18,6 +21,8 @@ export const defaultFamilyPreferences: FamilyPreferences = {
   shoppingTips: false,
   notificationFrequency: "important",
   experienceMode: "auto",
+  typicalChildrenAttendance: "ask",
+  typicalOutingFocus: "mixed",
   city: "",
   distanceKm: 15,
   outingLimit: 50,

@@ -20,6 +20,12 @@ In GitHub Settings → Pages select **GitHub Actions** as the deployment source.
 ## Merchant payment and commission architecture (future)
 Dabberna will **never custody merchant/customer funds or manually redistribute sales proceeds**. Customer payments must be initiated through merchant/provider-hosted payment flows; where supported, a regulated provider should settle Dabberna's contractual commission natively. Commission agreements can vary by merchant and category. A typed and tested JOD/fils calculation and transaction record model is in `app/src/lib/merchantPaymentPolicy.ts`. The proposed backend event/reconciliation scheme and release gates are documented in [Payment & commission architecture](docs/payment-commission-architecture.md) and [proposed SQL schema](docs/payment-commission-schema.sql). **No live PSP, hosted payment, or settlement integration exists yet.**
 
+## Family Intelligence — latest implemented priorities
+- **Guided family setup:** One progress checklist across actual household profiles, existing monthly Money setup and parent-confirmed preferences. Demo people do not count as real family members; parents can explicitly remove examples or skip adding names.
+- **Connected family recommendations:** One contextual insight linking real upcoming family plans with financial estimates; flags multiple plan costs above the monthly unallocated budget without calling them cash. Gentle outing ideas reflect **actual** family profiles and explicitly chosen child-attendance/focus preferences.
+- **Child-aware default outings:** Typical attendance and outing focus prefill the planner, but each outing can change those choices.
+- **Future family accounts:** Access-control policy and proposed server-side RLS schema exist as **design only**. No shared household budgets, cross-device finance sync, parent-to-parent access, or children accounts are live. See [family priorities and outstanding security gates](docs/family-intelligence-priorities.md).
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
