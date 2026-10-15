@@ -1,4 +1,4 @@
-import {ArrowRight,Check,Lightbulb,ShieldCheck} from "lucide-react";
+import {Check,Lightbulb,ShieldCheck} from "lucide-react";
 import {useState} from "react";
 import {toast} from "sonner";
 import {fmtJOD} from "@/lib/storage";
@@ -16,7 +16,7 @@ export function MoneyGuidance({state,setState,scope}:Props){
  const delta=item?varianceOf(item):0;
  const choices:AllocationChoice[]=scope==="alignment"?(alignment.status==="balanced"||alignment.status==="incomplete"?[]:[
   ...state.categories.filter(c=>c.type==="variable" && (alignment.gap>0||
-   c.planned-alignment.gap>=Math.max(0,state.expenses.filter(e=>e.status!=="planned"&&e.categoryId===c.id&&e.date.slice(0,7)===new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")).reduce((n,e)=>n+e.amount,0)))).map(c=>({kind:"variable" as const,categoryId:c.id})),
+   c.planned+alignment.gap>=Math.max(0,state.expenses.filter(e=>e.status!=="planned"&&e.categoryId===c.id&&e.date.slice(0,7)===new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")).reduce((n,e)=>n+e.amount,0)))).map(c=>({kind:"variable" as const,categoryId:c.id})),
   ...(alignment.gap>0||alignment.savings>=-alignment.gap?[{kind:"savings" as const}]:[])
  ]) : item?allocationOptions(state,delta,item.categoryId):[];
  if(state.demo)return null;
@@ -31,18 +31,15 @@ export function MoneyGuidance({state,setState,scope}:Props){
     (dir<0?(ar?"خفّض مخصص ":"Reduce "):(ar?"زد مخصص ":"Increase "))+category;
   }
   return c.kind==="savings"?(dir>0?(ar?"غطِّ الفرق من هدف الادخار":"Cover difference from savings target"):(ar?"أضف الوفر لهدف الادخار":"Add the saving to savings target")):
-   (dir>0?(ar?"غطِّ الفرق من ":"Cover difference from "):(ar?"حوّل الوفر إلى ")) +category;
+   (dir>0?(ar?"غطِّ الفرق من ":"Cover difference from "):(ar?"حوّل الوفر إلى ":"Move the saving to "))+category;
  };
  const submit=()=>{
   if(!selected)return;
-  let changed=false;
-  setState(old=>{
-   const next=scope==="alignment"?applyAlignmentSuggestion(old,selected):applyVarianceAllocation(old,item!.id,selected,new Date().toISOString());
-   changed=next!==old;return next;
-  });
+  const proposed=scope==="alignment"?applyAlignmentSuggestion(state,selected):applyVarianceAllocation(state,item!.id,selected,new Date().toISOString());
+  if(proposed===state){toast.error(ar?"تعذّر التعديل. راجع المخصصات أولاً.":"Cannot apply that adjustment; review the budgets first.");return;}
+  setState(()=>proposed);
   setProposal(null);
-  // State setters may run asynchronously; avoid premature success claims.
-  toast.message(ar?"تم إرسال تعديل الميزانية للمراجعة على الشاشة.":"Budget update requested. Review the updated totals.");
+  toast.success(ar?"تم تأكيد تعديل الميزانية.":"Budget reallocation confirmed.");
  };
  if(scope==="alignment"&&alignment.status==="balanced")return <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#EDF5EA] p-3 text-sm text-[#3F6B50]"><Check className="size-4"/>{ar?"مخطط المصروف والادخار متوافق مع الدخل الشهري المُدخل.":"Your category budgets and savings goal match entered monthly income."}</div>;
  if(scope==="alignment"&&alignment.status==="incomplete")return <p className="mt-4 text-xs text-muted-foreground">{ar?"أدخل الدخل وهدف الادخار وفئات المصروف لتظهر المقارنة والاقتراحات.":"Enter income, a savings goal and spending-category budgets to see recommendations."}</p>;
