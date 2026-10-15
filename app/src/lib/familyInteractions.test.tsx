@@ -1,4 +1,5 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from "vitest";
+import type {ReactNode} from "react";
 import {render,screen,fireEvent,waitFor,cleanup} from "@testing-library/react";
 import {I18nProvider} from "@/lib/i18n";
 import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
@@ -6,7 +7,7 @@ import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {ChildAwareOutingCompare} from "@/components/ChildAwareOutingCompare";
 import type {WishlistItem} from "@/lib/familyWishlist";
 import type {FamilyTask} from "@/lib/familyTasks";
-const wrapper=(ui:React.ReactNode)=>render(<I18nProvider>{ui}</I18nProvider>);
+const wrapper=(ui:ReactNode)=>render(<I18nProvider>{ui}</I18nProvider>);
 beforeEach(()=>{
  window.localStorage.clear();
  vi.spyOn(window,"confirm").mockReturnValue(true);
