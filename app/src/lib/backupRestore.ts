@@ -8,7 +8,7 @@ import {LOCAL_APP_KEYS,type LocalBackup} from "./localDataControls";
  */
 export const RESTORABLE_KEYS=[
  "money","members","familyCalendar","familyPreferences","familyPlans","shopping",
- "privateQuoteRequests","privateServiceShortlist"
+ "privateQuoteRequests","privateServiceShortlist","familyTasks"
 ] as const;
 export type RestorableKey=typeof RESTORABLE_KEYS[number];
 const PREFIX="wafferli.v13.";
@@ -126,6 +126,13 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
    evidenceUrl:url.optional(),note:z.string().max(250).optional()
   }),20)
  }),30),
+ familyTasks:many(strict({
+  id:z.string().min(1).max(130),title:z.string().min(1).max(140),dueDate:isoDate,
+  priority:z.enum(["high","normal","low"]),status:z.enum(["open","done"]),
+  createdAt:isoTime,updatedAt:isoTime,
+  ownerMemberId:z.string().max(130).optional(),planId:z.string().max(130).optional(),
+  note:z.string().max(300).optional(),completedAt:isoTime.optional()
+ }),250),
  privateServiceShortlist:many(strict({
   id:z.string().min(1).max(120),category:z.enum(["doctor","school","home","activities","gifts"]),
   name:z.string().min(2).max(110),city:z.string().min(2).max(75),
@@ -183,7 +190,8 @@ const labels:Record<RestorableKey,string>={
  familyPlans:"Family plans",
  shopping:"Shopping list",
  privateQuoteRequests:"Private quotation drafts and entered offers",
- privateServiceShortlist:"Private family-service comparison notes"
+ privateServiceShortlist:"Private family-service comparison notes",
+ familyTasks:"Parent-managed family responsibilities"
 };
 /** Parsing a file never writes to local storage. The original backup export
  * contains more modules than this validator can safely restore; these appear
@@ -217,7 +225,7 @@ export function inspectLocalBackup(
   const result=schemas[typed].safeParse(entries[key]);
   if(!result.success)throw new Error("Backup has invalid "+typed+" data; no changes were made");
   const payload=entries[key];
-  if(["members","familyCalendar","familyPlans","shopping","privateQuoteRequests","privateServiceShortlist"].includes(typed)&&!uniqueIds(payload))
+  if(["members","familyCalendar","familyPlans","shopping","privateQuoteRequests","privateServiceShortlist","familyTasks"].includes(typed)&&!uniqueIds(payload))
    throw new Error("Duplicate item IDs in "+typed+"; no changes were made");
   if(typed==="privateQuoteRequests"&&Array.isArray(payload)&&payload.some(q=>
    record(q)&&!uniqueIds(q["offers"])))
