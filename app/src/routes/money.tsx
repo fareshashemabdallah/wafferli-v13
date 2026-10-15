@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CashFlowPlanner } from "@/components/CashFlowPlanner";
+import { MoneyGuidance } from "@/components/MoneyGuidance";
+import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
 import { localToday } from "@/lib/cashflow";
 import { Pencil, Plus, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
@@ -85,26 +87,31 @@ function MoneyPage() {
 
       {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}/>}
       {section==="planning"&&<>
+      <MoneyGuidance scope="variance" state={s} setState={setS}/>
       <CashFlowPlanner state={s} members={members} update={setS} />
       <details className="editorial-card mt-4 px-4 py-3">
         <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إعداد الدخل وأهداف الادخار":"Income & savings settings"} +</summary>
-        <Settings income={c.monthlyIncome} pct={s.savingsPct} hasSources={s.incomeSources!==undefined}
-         onSave={(income,savingsPct)=>upd(s.incomeSources===undefined?{income,savingsPct}:{savingsPct})}/>
+        <Settings key={`${c.monthlyIncome}:${c.savingsTarget}`} income={c.monthlyIncome} target={c.savingsTarget} hasSources={s.incomeSources!==undefined}
+         onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
       </details>
       </>}
       {section==="spending"&&<>
+      <MoneyGuidance scope="variance" state={s} setState={setS}/>
       <Expenses
         cats={s.categories}
         members={members}
         expenses={s.expenses}
         onChange={(expenses) => upd({ expenses })}
+        onConfirmPlanned={(expenseId,amount)=>setS(prev=>({...prev,expenses:prev.expenses.map(e=>e.id===expenseId?{...e,amount,status:"paid" as const,date:today(),plannedAmount:e.plannedAmount??e.amount}:e)}))}
         onDelete={(expense)=>setS(previous=>{
-          const expenses=previous.expenses.filter(e=>e.id!==expense.id);
-          if(!expense.billId || !expense.dueDate)return {...previous,expenses};
-          const commitments=(previous.commitments??[]).map(b=>b.id===expense.billId?{
+          const base=reverseVarianceAllocation(previous,expense.id);
+          if(expense.allocation&&base===previous)return previous;
+          const expenses=base.expenses.filter(e=>e.id!==expense.id);
+          if(!expense.billId || !expense.dueDate)return {...base,expenses};
+          const commitments=(base.commitments??[]).map(b=>b.id===expense.billId?{
             ...b,paidDates:(b.paidDates??[]).filter(d=>d!==expense.dueDate)
           }:b);
-          return {...previous,expenses,commitments};
+          return {...base,expenses,commitments};
         })}
       />
       <details className="editorial-card mt-4 px-4 py-3">
@@ -127,38 +134,31 @@ function Stat({ label, value, sub, warn }: { label: string; value: string; sub: 
   );
 }
 
-function Settings({ income, pct, hasSources, onSave }: { income: number; pct: number; hasSources:boolean; onSave: (i: number, p: number) => void }) {
-  const { tr } = useI18n();
-  const [inc, setInc] = useState(String(income));
-  const [p, setP] = useState(String(pct));
-  const [err, setErr] = useState("");
-  const save = (e: FormEvent) => {
-    e.preventDefault();
-    const i = hasSources ? income : parseAmount(inc, 100000);
-    const pn = Number(p);
-    if (i === null) return setErr(tr("Income must be a positive amount up to 100,000."));
-    if (!Number.isFinite(pn) || pn < 0 || pn > 80) return setErr(tr("Savings must be between 0 and 80%."));
-    setErr("");
-    onSave(i, pn);
-    toast.success(tr("Income & savings updated"));
-  };
-  return (
-    <section className="card-soft mt-6 p-4">
-      <h2 className="text-lg font-semibold">{tr("Income & savings goal")}</h2>
-      <form onSubmit={save} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-        <Field label={hasSources?"Estimated monthly income (JOD)":"Existing monthly household income (JOD)"}
-          hint={hasSources?"Calculated from your income sources below — edit there. One-time and irregular amounts aren't averaged into monthly income.":"Legacy monthly budget estimate. Add dated sources under Income Schedule below."}>
-          <Input className={inputCls} inputMode="decimal" value={hasSources?String(income):inc}
-            disabled={hasSources} onChange={(e) => setInc(e.target.value)} />
-        </Field>
-        <Field label={tr("Savings target (%)")}>
-          <Input className={inputCls} inputMode="numeric" value={p} onChange={(e) => setP(e.target.value)} />
-        </Field>
-        <Button type="submit" className="h-11">{tr("Save")}</Button>
-      </form>
-      {err && <p className="mt-2 text-sm text-destructive" role="alert">{err}</p>}
-    </section>
-  );
+function Settings({income,target,hasSources,onSave}:{income:number;target:number;hasSources:boolean;onSave:(income:number,target:number)=>void}){
+ const {lang}=useI18n(),ar=lang==="ar";
+ const [inc,setInc]=useState(String(income)),[goal,setGoal]=useState(String(target)),[err,setErr]=useState("");
+ const save=(e:FormEvent)=>{
+   e.preventDefault();
+   const i=hasSources?income:Number(inc),amount=Number(goal);
+   if(!Number.isFinite(i)||i<0||i>100000)return setErr(ar?"أدخل دخلاً صحيحاً.":"Enter a valid monthly income.");
+   if(!Number.isFinite(amount)||amount<0||amount>100000)return setErr(ar?"أدخل هدف ادخار صحيحاً.":"Enter a valid savings goal.");
+   setErr("");onSave(i,Math.round(amount*100)/100);
+   toast.success(ar?"تم تحديث الدخل وهدف الادخار.":"Income and savings goal updated.");
+ };
+ return <section className="mt-4">
+  <p className="text-xs text-muted-foreground">{ar?"هدف الادخار مبلغ شهري بالدينار. التعديل ينعكس على مقارنة الميزانية فوراً.":"Set the monthly savings goal in JOD. Your Overview updates immediately."}</p>
+  <form onSubmit={save} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+   <Field label={ar?"الدخل الشهري (د.أ)":"Monthly income (JOD)"}>
+    <Input inputMode="decimal" className={inputCls} disabled={hasSources} value={hasSources?String(income):inc} onChange={e=>setInc(e.target.value)}/>
+   </Field>
+   <Field label={ar?"هدف الادخار شهرياً (د.أ)":"Monthly savings goal (JOD)"}>
+    <Input inputMode="decimal" className={inputCls} value={goal} onChange={e=>setGoal(e.target.value)}/>
+   </Field>
+   <Button type="submit" className="h-11">{ar?"حفظ":"Save"}</Button>
+   {hasSources&&<p className="text-xs text-muted-foreground sm:col-span-3">{ar?"تعديل مصدر الدخل من قائمة الدخل أعلاه.":"Edit monthly income through the Income schedule above."}</p>}
+  </form>
+  {err&&<p className="mt-2 text-sm text-destructive" role="alert">{err}</p>}
+ </section>;
 }
 
 const typeLabel: Record<CatType, string> = { fixed: "Fixed", variable: "Variable", periodic: "Periodic" };
