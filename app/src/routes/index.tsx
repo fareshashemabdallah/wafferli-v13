@@ -4,7 +4,7 @@ import {AppShell} from "@/components/AppShell";
 import {FamilyPriorityCard} from "@/components/FamilyPriorityCard";
 import {FamilySetupCard} from "@/components/FamilySetupCard";
 import {HomeJourneyHighlights} from "@/components/HomeJourneyHighlights";
-import {HomePlanHighlight} from "@/components/HomePlanHighlight";
+import {HomeFamilyAdvice} from "@/components/HomeFamilyAdvice";
 import {FamilyWeather} from "@/components/FamilyWeather";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 import {useLocalState,writeLocal} from "@/lib/storage";
@@ -116,7 +116,7 @@ function Index(){
      })}
     </div>
    </section>
-   <HomePlanHighlight/>
+   <HomeFamilyAdvice/>
    <HomeJourneyHighlights/>
    {prefs.weather&&<details className="group editorial-card mt-4 overflow-hidden">
     <summary className="flex min-h-16 cursor-pointer items-center gap-3 px-4 py-3">
