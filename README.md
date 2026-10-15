@@ -77,12 +77,12 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 ## Private quotation and offer comparison workspace
 - A parent can save a manually prepared RFQ as an **unsent local draft**, optionally mark that they shared it **themselves outside Dabberna**, and enter prices they independently obtained from suppliers.
 - The workspace compares **item + delivery + tax** in JOD, distinguishes expired quotes, shows whether a chosen budget ceiling is exceeded, and supports local closure and deletion. The app never asserts suppliers are verified, offers are authentic, requests were delivered, or payments happened.
-- Private quote records stay on this device, are included in local JSON export and device-only deletion, and **are not automatically included in the reviewed cloud vault or core backup restore**. Export can be read manually but automatic restoration of this newer section is not yet supported.
+- Private quote records stay on this device, are included in local JSON export and device-only deletion, and **can now be selected for validated local restoration or included in the disabled-by-default encrypted personal vault only with explicit opt-in**. There is no automatic cloud upload or synchronization.
 
 ## Family-service comparison and source transparency
 - Parents can create a **private device-only comparison list** of real services they discovered, with a source URL, personally entered approximate cost, date last checked, subjective family-fit score and accessibility/child-friendliness notes.
 - A checklist reminds parents to independently verify availability and, for clinicians, professional credentials. **Checkmarks do not represent Dabberna verification** and the list is alphabetical rather than a fabricated clinical ranking.
-- Saved records are included in explicit JSON export and local-data deletion. They are **not included in automated validated restore or the staged encrypted vault** because those modules support only reviewed core sections; the file itself can still be retained.
+- Saved records are included in explicit JSON export and local-data deletion. They are **now eligible for strictly validated manual restore and optional personal-vault backup when deliberately chosen**; the app does not upload them or verify providers automatically.
 - Do not enter personal medical histories, children’s identifying information or contact credentials in comparison notes.
 
 ## Staging RLS security test harness — not executed yet
