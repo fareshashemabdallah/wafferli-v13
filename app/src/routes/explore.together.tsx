@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
+import {ChildAwareOutingCompare} from "@/components/ChildAwareOutingCompare";
 import { Field, NativeSelect, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -182,6 +183,9 @@ function TogetherPage() {
           <span className="mt-2 block text-sm text-muted-foreground">{showVoteForm?(tr("Close")+" −"):(tr("Create outing vote & get link")+" →")}</span>
         </button>
       </div>
+      <ChildAwareOutingCompare childrenAttendance={children} ages={ageBands}
+       stroller={stroller} quiet={quiet} maximum={cost.maximum} city={f.neighborhood}
+       preferredDistance={familyPrefs.distanceKm}/>
       <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer">{tr("A note on choosing safe, suitable venues")}</summary>
         <p className="mt-2">{tr("Check child admission, age limits, access, venue safety and prices directly with the provider. Google Maps results are third-party information.")}</p>
       </details>
