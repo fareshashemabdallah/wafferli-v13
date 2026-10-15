@@ -121,6 +121,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Parents explicitly enter **dated price checks** and source/store names, can review the earliest-to-latest difference and mark an item as purchased manually. No live feed, verified savings, retailer order, automatic repeat order or Money deduction is implied.
 - Wishlist records are part of explicit local JSON export, strict selective restore and optional off-by-default encrypted personal vault, never household-shared by default.
 
+## Encrypted local backup and restore — no cloud required
+- About → Your Data can now generate a **passphrase-protected JSON backup of validated family sections entirely in the browser**. It uses the existing Web Crypto AES-256-GCM and PBKDF2 key derivation; no plaintext, passphrase, derived key or ciphertext is uploaded.
+- The local Restore panel accepts both traditional unencrypted JSON and a protected envelope. An encrypted file must first be decrypted with its passphrase on the device, then pass all existing schema checks and explicit section-choice/safety-backup confirmation before writing.
+- A lost passphrase cannot be recovered. Unlike the separate staged cloud vault, this offline download needs **no Supabase database, sign-in or environment flag**. Unsupported token-bearing local sections are intentionally omitted; older plain exports are still supported.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.

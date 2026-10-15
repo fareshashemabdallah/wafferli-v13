@@ -4,6 +4,8 @@ import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
 import {buildLocalBackup,eraseLocalAppData} from "@/lib/localDataControls";
 import {LocalBackupRecovery} from "@/components/LocalBackupRecovery";
+import {encryptPrivateBackup,preparePrivateVaultSnapshot} from "@/lib/privateVaultCrypto";
+import {inspectLocalBackup} from "@/lib/backupRestore";
 
 /** Never transmits personal data or touches auth sessions. Only parents who
  * intentionally click download receive an unencrypted local file. */
@@ -12,6 +14,9 @@ export function LocalDataControls(){
  const [confirmation,setConfirmation]=useState("");
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
+ const [securePass,setSecurePass]=useState("");
+ const [secureRepeat,setSecureRepeat]=useState("");
+ const [secureBusy,setSecureBusy]=useState(false);
  const exportData=()=>{
   setError("");setNotice("");
   try{
@@ -31,6 +36,30 @@ export function LocalDataControls(){
    window.setTimeout(()=>URL.revokeObjectURL(url),1000);
    setNotice(ar?"تم إنشاء نسخة قابلة للحفظ على جهازك. احفظها بأمان؛ يمكن استعادة بعض الأقسام فقط بعد فحص الملف وتأكيدك.":"Backup file generated for your device. Keep it secure; validated core sections can be restored separately after explicit review.");
   }catch(e){setError(e instanceof Error?e.message:String(e));}
+ };
+ const exportEncrypted=async()=>{
+  setError("");setNotice("");
+  if(secureBusy)return;
+  if(securePass.length<14||securePass!==secureRepeat){
+   setError(ar?"اكتب كلمة مرور من ١٤ حرفاً على الأقل وأكّدها.":"Enter and repeat a passphrase of at least 14 characters.");return;
+  }
+  setSecureBusy(true);
+  try{
+   const raw=JSON.stringify(buildLocalBackup(window.localStorage));
+   const compatible=inspectLocalBackup(raw,window.localStorage);
+   const snapshot=preparePrivateVaultSnapshot(window.localStorage,compatible.sections.map(s=>s.key));
+   const encrypted=await encryptPrivateBackup(snapshot.json,securePass);
+   const blob=new Blob([JSON.stringify(encrypted)],{type:"application/json;charset=utf-8"});
+   const url=URL.createObjectURL(blob);
+   const link=document.createElement("a");
+   link.href=url;link.download="dabberna-encrypted-backup-"+new Date().toISOString().slice(0,10)+".json";
+   document.body.appendChild(link);link.click();link.remove();
+   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setNotice(ar?
+    "تم إنشاء نسخة مشفّرة محلياً من الأقسام القابلة للاستعادة. احفظ كلمة المرور بأمان ولا تشاركها؛ لا نستطيع استرجاعها.":
+    "Encrypted backup generated locally from validated sections. Keep the passphrase safe; Dabberna cannot recover it.");
+  }catch(e){setError(e instanceof Error?e.message:String(e));}
+  finally{setSecurePass("");setSecureRepeat("");setSecureBusy(false);}
  };
  const clear=()=>{
   setError("");setNotice("");
@@ -59,6 +88,28 @@ export function LocalDataControls(){
     "A plain, unencrypted JSON file of locally saved Money, family profiles, calendar and plans. Login sessions and external API keys are excluded. Validated core sections may be restored after reviewing each replacement. Invitation tokens and unsupported sections are excluded."}</p>
    <Button type="button" variant="outline" className="mt-3" onClick={exportData}>
     <Download className="size-4"/>{ar?"نزّل نسختي":"Download my backup"}
+   </Button>
+  </div>
+  <div className="mt-3 rounded-xl border border-[#DDE7DB] bg-[#F5FAF2] p-3">
+   <h3 className="text-sm font-semibold">{ar?"نسخة مشفّرة بدون سحابة":"Encrypted backup — no cloud required"}</h3>
+   <p className="mt-1 text-xs text-muted-foreground">{ar?
+    "اختر كلمة مرور قوية. سيتم تشفير الأقسام التي اجتازت فحص الاستعادة في متصفحك فقط؛ لن تُرسل الأموال أو ملفات العائلة إلى خادم. احفظ كلمة المرور، لأن فقدانها يعني فقدان القدرة على فك التشفير.":
+    "Protect compatible backup sections with browser-based AES-256-GCM encryption. The passphrase stays here and is never uploaded. You cannot recover a lost passphrase; unsupported/token-bearing sections are excluded."}</p>
+   <div className="mt-3 grid gap-2 sm:grid-cols-2">
+    <label className="text-xs font-semibold">{ar?"كلمة مرور (١٤ حرفاً على الأقل)":"Passphrase (minimum 14 characters)"}
+     <input type="password" minLength={14} maxLength={200} autoComplete="new-password"
+      value={securePass} onChange={e=>setSecurePass(e.target.value)}
+      className="mt-1 min-h-11 w-full rounded-xl border bg-white px-3 text-sm"/>
+    </label>
+    <label className="text-xs font-semibold">{ar?"أعد كلمة المرور":"Repeat passphrase"}
+     <input type="password" minLength={14} maxLength={200} autoComplete="new-password"
+      value={secureRepeat} onChange={e=>setSecureRepeat(e.target.value)}
+      className="mt-1 min-h-11 w-full rounded-xl border bg-white px-3 text-sm"/>
+    </label>
+   </div>
+   <Button type="button" className="mt-3" variant="outline" disabled={secureBusy||securePass.length<14||securePass!==secureRepeat}
+    onClick={()=>void exportEncrypted()}>
+    <Download className="size-4"/>{secureBusy?(ar?"جارٍ تشفير الملف":"Encrypting…"):(ar?"نزّل نسخة مشفّرة":"Download encrypted backup")}
    </Button>
   </div>
   <LocalBackupRecovery/>
