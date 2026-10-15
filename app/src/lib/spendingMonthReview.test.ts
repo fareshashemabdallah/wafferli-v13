@@ -63,9 +63,9 @@ describe("voluntary recorded-spending monthly reviews",()=>{
   restoreLocalSections(dst,preview,["moneyMonthReviews"],true);
   expect(JSON.parse(dst.getItem("wafferli.v13.moneyMonthReviews")!)).toEqual([review]);
   const tampered=JSON.parse(backup) as {entries:Record<string,unknown>};
-  tampered.entries.moneyMonthReviews=[{...review,accessToken:"SECRET"}];
+  tampered.entries["moneyMonthReviews"]=[{...review,accessToken:"SECRET"}];
   expect(()=>inspectLocalBackup(JSON.stringify(tampered),store())).toThrow(/invalid moneyMonthReviews/i);
-  tampered.entries.moneyMonthReviews=[review,review];
+  tampered.entries["moneyMonthReviews"]=[review,review];
   expect(()=>inspectLocalBackup(JSON.stringify(tampered),store())).toThrow(/Duplicate months/);
  });
 });
