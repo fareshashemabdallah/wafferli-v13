@@ -168,6 +168,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - It demonstrates typed status transitions, reviewer-versus-merchant actor distinctions, JOD/fils precision and offer expiry, but actor switching is NOT authentication; business names and offers are not verified, persisted, sent to customers or settled.
 - The live merchant marketplace still requires real company registration/verification, server-side roles, offer moderation, commercial agreements, consumer terms and licensed payment settlement. [Simulator documentation and security gates](docs/merchant-workflow-simulator.md).
 
+## Recurring family purchasing — manual cycle confirmation
+- An optional 1/3/6/12-month cadence now **reschedules the same device-local household/children wishlist item** when a parent explicitly clicks **Bought this cycle — schedule next**. No new duplicate wishlist rows, retailer orders, automatic checkouts, background jobs or budget deductions are created.
+- Repeat items require a first due date. Dates follow the original chosen day (31 January → last day of February → 31 March), with late parent confirmations advancing only to the next future schedule. A second confirmation on the same calendar date is refused.
+- Recurrence anchor and manual last-purchase date are retained through the strictly validated, opt-in local recovery and private encrypted backup flows. These confirmations are self-reported, not independently verified merchant transactions.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
