@@ -1,10 +1,9 @@
 import {createFileRoute,Link} from "@tanstack/react-router";
 import {ArrowRight,CalendarHeart,ChevronRight,CloudSun,Compass,Heart,Sparkles,Wallet} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
-import {FamilyPriorityCard} from "@/components/FamilyPriorityCard";
+import {FamilyAttentionPanel} from "@/components/FamilyAttentionPanel";
 import {FamilySetupCard} from "@/components/FamilySetupCard";
 import {HomeJourneyHighlights} from "@/components/HomeJourneyHighlights";
-import {HomeFamilyAdvice} from "@/components/HomeFamilyAdvice";
 import {FamilyWeather} from "@/components/FamilyWeather";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 import {useLocalState,writeLocal} from "@/lib/storage";
@@ -100,7 +99,7 @@ function Index(){
 
   {daily&&<>
    <FamilySetupCard/>
-   <FamilyPriorityCard/>
+   <FamilyAttentionPanel/>
    <section className="mt-6" aria-label={ar?"خطوات سريعة":"Everyday choices"}>
     <div className="flex items-baseline justify-between gap-2">
      <h2 className="text-xl font-semibold text-ink">{ar?"شو بتحب تعمل؟":"What feels right today?"}</h2>
@@ -116,7 +115,6 @@ function Index(){
      })}
     </div>
    </section>
-   <HomeFamilyAdvice/>
    <HomeJourneyHighlights/>
    {prefs.weather&&<details className="group editorial-card mt-4 overflow-hidden">
     <summary className="flex min-h-16 cursor-pointer items-center gap-3 px-4 py-3">

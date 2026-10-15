@@ -39,6 +39,12 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - [Staged expense-sharing SQL](app/supabase/household_shared_expenses_v1.sql) and [privacy & deployment checks](docs/household-expense-sharing.md) must be security reviewed and tested with separate real accounts. **Neither migration is installed by CI; public GitHub Pages remains disabled for household accounts and expense sharing.**
 - This is not full two-way family-money synchronization or card/merchant payment processing.
 
+## Family Intelligence attention and personal data controls
+- **One prioritized Today attention list** now combines cash risks, upcoming unpaid bill dates, family plans and calendar moments rather than displaying duplicate finance/plan advice cards. It honors parental preferences, supports temporary local snoozing of noncritical items, and never hides critical financial warnings.
+- **Local personal data management** in About: explicit browser-generated JSON export and two-step local data erasure. The export is **unencrypted**; Supabase login sessions and external API keys are excluded. There is no restore/import yet.
+- Signals refresh when Dabberna is opened. **No background push alerts, conversational AI, verified bank data or cloud financial sync have been activated.**
+- Technical scope: [Family attention and data controls](docs/family-attention-and-data-controls.md).
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
