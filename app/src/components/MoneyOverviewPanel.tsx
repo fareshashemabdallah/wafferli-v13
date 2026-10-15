@@ -2,6 +2,8 @@ import {AlertCircle,ArrowRight,CalendarClock,Info,Landmark,Plus,Wallet} from "lu
 import {fmtJOD} from "@/lib/storage";
 import type {MoneyState} from "@/lib/money";
 import {emptyRealMoney,getMoneyOverview} from "@/lib/moneyOverview";
+import {budgetAlignment} from "@/lib/financeAlignment";
+import {MoneyGuidance} from "@/components/MoneyGuidance";
 import {useI18n} from "@/lib/i18n";
 
 type Section="overview"|"spending"|"planning";
@@ -10,6 +12,7 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
  const v=getMoneyOverview(state);
  const f=v.forecast,c=v.month;
+ const alignment=budgetAlignment(state);
  const cash=state.cashOnHand;
  const needReview=f.overdueCount>0||(f.minimumBalance!==null&&f.minimumBalance<0);
  const resetToActual=()=>{
@@ -24,6 +27,24 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
        {ar?"ابدأ بماليتي":"Start with my own finances"} <ArrowRight className="size-4 rtl:rotate-180"/>
      </button>
    </section>}
+   <section className="editorial-card p-5 sm:p-6" aria-label={ar?"توازن ميزانية الشهر":"Monthly budget alignment"}>
+     <div className="flex flex-wrap items-center justify-between gap-2">
+       <div><p className="section-eyebrow">{ar?"التخطيط الشهري":"YOUR MONTHLY PLAN"}</p>
+       <h2 className="mt-1 text-xl font-semibold">{ar?"هل الدخل والمصاريف والادخار متوازنة؟":"Do your income, expenses and savings fit?"}</h2></div>
+       <button type="button" onClick={()=>goTo("planning")} className="text-xs font-semibold text-brand underline underline-offset-2">{ar?"عدّل الدخل والادخار":"Edit income & savings"}</button>
+     </div>
+     <div className="mt-4 grid grid-cols-3 gap-2">
+       <div className="rounded-xl bg-[#EFF5EE] p-3"><p className="text-xs text-muted-foreground">{ar?"دخل الشهر":"Monthly income"}</p><p className="mt-2 text-sm font-semibold tabular-nums sm:text-lg">{fmtJOD(alignment.income)}</p></div>
+       <div className="rounded-xl bg-[#F8F0E7] p-3"><p className="text-xs text-muted-foreground">{ar?"مخصص المصاريف":"Expense budgets"}</p><p className="mt-2 text-sm font-semibold tabular-nums sm:text-lg">{fmtJOD(alignment.categories)}</p></div>
+       <div className="rounded-xl bg-[#EDF1F5] p-3"><p className="text-xs text-muted-foreground">{ar?"هدف الادخار":"Savings goal"}</p><p className="mt-2 text-sm font-semibold tabular-nums sm:text-lg">{fmtJOD(alignment.savings)}</p></div>
+     </div>
+     <p className="mt-3 text-sm font-semibold text-ink">{alignment.status==="incomplete"?
+        (ar?"أكمل البيانات لنقارنها":"Complete your budget to check alignment"):
+        alignment.status==="balanced"?(ar?"الخطة متوازنة":"Your plan is balanced"):
+        (alignment.gap<0?(ar?"عجز في الخطة: ":"Plan exceeds income by "):(ar?"غير موزّع في الخطة: ":"Not yet allocated: "))+fmtJOD(Math.abs(alignment.gap))}</p>
+     <p className="mt-1 text-xs text-muted-foreground">{ar?"هذه مقارنة مخصصات وهدف ادخار، وليست رصيد البنك أو مصروفاً تم دفعه.":"This compares monthly budget envelopes and the savings goal, not actual bank cash or payments made."}</p>
+     <MoneyGuidance scope="alignment" state={state} setState={setState}/>
+   </section>
    <section className="editorial-card overflow-hidden p-5 sm:p-6" aria-label={ar?"السيولة والالتزامات":"Cash and commitments"}>
      <div className="flex items-start gap-3">
        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#E8F1E7] text-brand"><Wallet className="size-6"/></span>
@@ -78,25 +99,16 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
      </button>
    </section>
    <section className="editorial-card p-5 sm:p-6">
-    <div className="flex items-center gap-2"><Landmark className="size-5 text-brand"/><h2 className="text-lg font-semibold">{ar?"خطة مصروف الشهر":"This month's spending plan"}</h2></div>
-    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?"هذه حسابات تخطيط شهرية لا تمثّل رصيد البنك. المتبقي يخصم المصاريف المسجلة وهدف الادخار، وليس الفواتير غير المدفوعة أو المخصصات التي لم تُصرف بعد. الدخل تقديري وليس إيداعاً مؤكداً.":"These are monthly planning figures, not cash on hand or actual bill due dates. This remainder subtracts recorded expenses and the savings goal, not unpaid bills or unspent category allocations. Income is an estimate, not confirmed deposits."}</p>
-    <div className="mt-4 grid grid-cols-2 gap-3">
-     <div className="rounded-xl bg-[#F3F6F1] p-3"><p className="text-xs text-muted-foreground">{ar?"الدخل الشهري المقدّر":"Estimated monthly income"}</p><p className="mt-2 text-lg font-semibold tabular-nums">{fmtJOD(c.monthlyIncome)}</p></div>
-     <div className="rounded-xl bg-[#F8F2EA] p-3"><p className="text-xs text-muted-foreground">{ar?"ميزانيات الفئات":"Category budgets"}</p><p className="mt-2 text-lg font-semibold tabular-nums">{fmtJOD(c.planned)}</p></div>
-     <div className="rounded-xl bg-[#F3F6F1] p-3"><p className="text-xs text-muted-foreground">{ar?"مصاريف مسجلة هذا الشهر":"Recorded expenses this month"}</p><p className="mt-2 text-lg font-semibold tabular-nums">{fmtJOD(c.spent)}</p></div>
-     <div className="rounded-xl bg-[#F8F2EA] p-3"><p className="text-xs text-muted-foreground">{ar?"الدخل بعد الادخار والمصاريف المسجلة (ليس نقداً)":"After savings & recorded expenses (not cash)"}</p><p className="mt-2 text-lg font-semibold tabular-nums">{fmtJOD(c.remaining)}</p></div>
-    </div>
-    <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-     {ar?"عند تأكيد دفع فاتورة داخل التطبيق، تُسجّل كمصروف وتدخل في الإجمالي أعلاه. تحديث رصيد البنك يبقى يدوياً.":"Marking a scheduled bill paid creates a recorded expense, included in the total above. Your actual bank/cash balance still needs manual updating."}
-    </p>
-    <div className="mt-4 flex flex-wrap items-center gap-3">
+    <div className="flex items-center gap-2"><Landmark className="size-5 text-brand"/><h2 className="text-lg font-semibold">{ar?"شو صرفت فعلياً؟":"What have you actually spent?"}</h2></div>
+    <div className="mt-3 flex flex-wrap items-end justify-between gap-3 rounded-2xl bg-[#F1F5EF] p-4">
+      <div><p className="text-xs text-muted-foreground">{ar?"المدفوع والمسجل هذا الشهر":"Confirmed spending this month"}</p>
+        <p className="mt-1 text-2xl font-semibold tabular-nums">{fmtJOD(c.spent)}</p></div>
       <button type="button" onClick={()=>goTo("spending")} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
-       {ar?"سجّل مصروف":"Record spending"} <ArrowRight className="size-4 rtl:rotate-180"/>
-      </button>
-      <button type="button" onClick={()=>goTo("planning")} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand">
-       {ar?"الفواتير":"Bills"} <ArrowRight className="size-4 rtl:rotate-180"/>
+       {ar?"المصاريف":"View expenses"} <ArrowRight className="size-4 rtl:rotate-180"/>
       </button>
     </div>
+    <p className="mt-3 text-xs text-muted-foreground">{ar?"أي مصروف مخطط وغير مؤكّد الدفع لا يدخل ضمن المبلغ الفعلي.":"Planned expenses are excluded until you confirm what was actually paid."}</p>
+    <MoneyGuidance scope="variance" state={state} setState={setState}/>
    </section>
    <details className="editorial-card px-4 py-3">
     <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"تفاصيل إضافية وأرقام متوقعة":"Additional estimates (optional)"} +</summary>

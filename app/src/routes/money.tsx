@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CashFlowPlanner } from "@/components/CashFlowPlanner";
+import { MoneyGuidance } from "@/components/MoneyGuidance";
+import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
 import { localToday } from "@/lib/cashflow";
 import { Pencil, Plus, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
@@ -37,6 +39,7 @@ function MoneyPage() {
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
   const c = useMemo(() => computeMoney(s), [s]);
+  const recurringSavingsGoal=s.savingsTargetAmount??Math.round(c.monthlyIncome*s.savingsPct)/100;
 
   if (!ready)
     return (
@@ -85,31 +88,46 @@ function MoneyPage() {
 
       {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}/>}
       {section==="planning"&&<>
+      <section className="editorial-card mb-4 p-4 sm:p-5">
+        <h2 className="text-lg font-semibold">{ar?"دخل الشهر وهدف الادخار":"Monthly income & savings goal"}</h2>
+        <Settings key={`${c.monthlyIncome}:${recurringSavingsGoal}`} income={c.monthlyIncome} target={recurringSavingsGoal} hasSources={s.incomeSources!==undefined}
+         onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
+      </section>
+      <MoneyGuidance scope="variance" state={s} setState={setS}/>
       <CashFlowPlanner state={s} members={members} update={setS} />
-      <details className="editorial-card mt-4 px-4 py-3">
-        <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إعداد الدخل وأهداف الادخار":"Income & savings settings"} +</summary>
-        <Settings income={c.monthlyIncome} pct={s.savingsPct} hasSources={s.incomeSources!==undefined}
-         onSave={(income,savingsPct)=>upd(s.incomeSources===undefined?{income,savingsPct}:{savingsPct})}/>
-      </details>
       </>}
       {section==="spending"&&<>
+      <MoneyGuidance scope="variance" state={s} setState={setS}/>
       <Expenses
         cats={s.categories}
         members={members}
         expenses={s.expenses}
         onChange={(expenses) => upd({ expenses })}
-        onDelete={(expense)=>setS(previous=>{
-          const expenses=previous.expenses.filter(e=>e.id!==expense.id);
-          if(!expense.billId || !expense.dueDate)return {...previous,expenses};
-          const commitments=(previous.commitments??[]).map(b=>b.id===expense.billId?{
+        cashBalance={s.cashOnHand??null}
+        onConfirmPlanned={(expenseId,amount,mode)=>setS(prev=>{
+          if(mode==="deduct"&&(prev.cashOnHand==null||prev.cashOnHand<amount))return prev;
+          return {...prev,expenses:prev.expenses.map(e=>e.id===expenseId?{...e,amount,status:"paid" as const,
+            date:today(),plannedAmount:e.plannedAmount??e.amount,cashDeducted:mode==="deduct"}:e),
+            ...(mode==="deduct"&&prev.cashOnHand!=null?{cashOnHand:Math.round((prev.cashOnHand-amount)*100)/100,cashUpdatedAt:today()}:{})};
+        })}
+        onDelete={(expense)=>{
+          const restoreCash=!!expense.cashDeducted&&s.cashOnHand!==null&&s.cashOnHand!==undefined&&window.confirm(ar?"هل تريد إعادة المبلغ الذي خُصم من الرصيد عند حذف المصروف؟":"Restore the cash deducted for this expense when deleting it?");
+          if(!window.confirm(restoreCash?(ar?"تأكيد حذف المصروف وإعادة الرصيد؟":"Delete expense and restore cash?"):(ar?"حذف المصروف دون تغيير رصيد البنك؟":"Delete this expense without changing entered cash?")))return;
+          setS(previous=>{
+          const base=reverseVarianceAllocation(previous,expense.id);
+          if(expense.allocation&&base===previous)return previous;
+          const expenses=base.expenses.filter(e=>e.id!==expense.id);
+          if(!expense.billId || !expense.dueDate)return {...base,expenses,...(restoreCash&&base.cashOnHand!=null?{cashOnHand:Math.round((base.cashOnHand+expense.amount)*100)/100,cashUpdatedAt:today()}:{})};
+          const commitments=(base.commitments??[]).map(b=>b.id===expense.billId?{
             ...b,paidDates:(b.paidDates??[]).filter(d=>d!==expense.dueDate)
           }:b);
-          return {...previous,expenses,commitments};
-        })}
+          return {...base,expenses,commitments};
+        });
+        }}
       />
       <details className="editorial-card mt-4 px-4 py-3">
         <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إدارة فئات المصاريف":"Manage spending categories"} +</summary>
-        <Categories cats={s.categories} spentBy={c.spentBy} onChange={(categories) => upd({categories})}/>
+        <Categories cats={s.categories} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={(categories) => upd({categories})}/>
       </details>
       </>}
     </AppShell>
@@ -127,44 +145,37 @@ function Stat({ label, value, sub, warn }: { label: string; value: string; sub: 
   );
 }
 
-function Settings({ income, pct, hasSources, onSave }: { income: number; pct: number; hasSources:boolean; onSave: (i: number, p: number) => void }) {
-  const { tr } = useI18n();
-  const [inc, setInc] = useState(String(income));
-  const [p, setP] = useState(String(pct));
-  const [err, setErr] = useState("");
-  const save = (e: FormEvent) => {
-    e.preventDefault();
-    const i = hasSources ? income : parseAmount(inc, 100000);
-    const pn = Number(p);
-    if (i === null) return setErr(tr("Income must be a positive amount up to 100,000."));
-    if (!Number.isFinite(pn) || pn < 0 || pn > 80) return setErr(tr("Savings must be between 0 and 80%."));
-    setErr("");
-    onSave(i, pn);
-    toast.success(tr("Income & savings updated"));
-  };
-  return (
-    <section className="card-soft mt-6 p-4">
-      <h2 className="text-lg font-semibold">{tr("Income & savings goal")}</h2>
-      <form onSubmit={save} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-        <Field label={hasSources?"Estimated monthly income (JOD)":"Existing monthly household income (JOD)"}
-          hint={hasSources?"Calculated from your income sources below — edit there. One-time and irregular amounts aren't averaged into monthly income.":"Legacy monthly budget estimate. Add dated sources under Income Schedule below."}>
-          <Input className={inputCls} inputMode="decimal" value={hasSources?String(income):inc}
-            disabled={hasSources} onChange={(e) => setInc(e.target.value)} />
-        </Field>
-        <Field label={tr("Savings target (%)")}>
-          <Input className={inputCls} inputMode="numeric" value={p} onChange={(e) => setP(e.target.value)} />
-        </Field>
-        <Button type="submit" className="h-11">{tr("Save")}</Button>
-      </form>
-      {err && <p className="mt-2 text-sm text-destructive" role="alert">{err}</p>}
-    </section>
-  );
+function Settings({income,target,hasSources,onSave}:{income:number;target:number;hasSources:boolean;onSave:(income:number,target:number)=>void}){
+ const {lang}=useI18n(),ar=lang==="ar";
+ const [inc,setInc]=useState(String(income)),[goal,setGoal]=useState(String(target)),[err,setErr]=useState("");
+ const save=(e:FormEvent)=>{
+   e.preventDefault();
+   const i=hasSources?income:Number(inc),amount=Number(goal);
+   if(!Number.isFinite(i)||i<0||i>100000)return setErr(ar?"أدخل دخلاً صحيحاً.":"Enter a valid monthly income.");
+   if(!Number.isFinite(amount)||amount<0||amount>100000)return setErr(ar?"أدخل هدف ادخار صحيحاً.":"Enter a valid savings goal.");
+   setErr("");onSave(i,Math.round(amount*100)/100);
+   toast.success(ar?"تم تحديث الدخل وهدف الادخار.":"Income and savings goal updated.");
+ };
+ return <section className="mt-4">
+  <p className="text-xs text-muted-foreground">{ar?"حدّد هدف الادخار المعتاد كل شهر بالدينار. إعادة التوزيع لمصروف محدد تؤثر فقط على شهر الدفع.":"Set your regular monthly savings goal in JOD. One-off reallocations affect only their payment month."}</p>
+  <form onSubmit={save} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+   <Field label={ar?"الدخل الشهري (د.أ)":"Monthly income (JOD)"}>
+    <Input inputMode="decimal" className={inputCls} disabled={hasSources} value={hasSources?String(income):inc} onChange={e=>setInc(e.target.value)}/>
+   </Field>
+   <Field label={ar?"هدف الادخار شهرياً (د.أ)":"Monthly savings goal (JOD)"}>
+    <Input inputMode="decimal" className={inputCls} value={goal} onChange={e=>setGoal(e.target.value)}/>
+   </Field>
+   <Button type="submit" className="h-11">{ar?"حفظ":"Save"}</Button>
+   {hasSources&&<p className="text-xs text-muted-foreground sm:col-span-3">{ar?"تعديل مصدر الدخل من قائمة الدخل أعلاه.":"Edit monthly income through the Income schedule above."}</p>}
+  </form>
+  {err&&<p className="mt-2 text-sm text-destructive" role="alert">{err}</p>}
+ </section>;
 }
 
 const typeLabel: Record<CatType, string> = { fixed: "Fixed", variable: "Variable", periodic: "Periodic" };
 
-function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (id: string) => number; onChange: (c: Category[]) => void }) {
-  const { tr } = useI18n();
+function Categories({ cats, spentBy, plannedBy, onChange }: { cats: Category[]; spentBy: (id: string) => number; plannedBy:(id:string)=>number; onChange: (c: Category[]) => void }) {
+  const { tr,lang } = useI18n();
   const [editing, setEditing] = useState<Category | null>(null);
   return (
     <section className="card-soft mt-6 p-4">
@@ -187,7 +198,8 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
       <ul className="mt-3 divide-y">
         {cats.map((c) => {
           const a = spentBy(c.id);
-          const pct = c.planned ? Math.min(100, (a / c.planned) * 100) : 0;
+          const effective=plannedBy(c.id);
+          const pct = effective ? Math.min(100, (a / effective) * 100) : 0;
           return (
             <li key={c.id} className="flex items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
@@ -196,9 +208,9 @@ function Categories({ cats, spentBy, onChange }: { cats: Category[]; spentBy: (i
                   <span className="rounded-full bg-mint px-2 text-[11px] text-brand">{tr(typeLabel[c.type])}</span>
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div className={`h-full ${a > c.planned ? "bg-destructive" : "bg-brand-2"}`} style={{ width: `${pct}%` }} />
+                  <div className={`h-full ${a > effective ? "bg-destructive" : "bg-brand-2"}`} style={{ width: `${pct}%` }} />
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{tr("Actual")} {fmtJOD(a)} · {tr("Planned")} {fmtJOD(c.planned)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{tr("Actual")} {fmtJOD(a)} · {tr("Planned")} {fmtJOD(effective)} {effective!==c.planned&&(lang==="ar"?"(معدل لهذا الشهر)":"(adjusted this month)")}</p>
               </div>
               <Button size="icon" variant="ghost" aria-label={`Edit ${c.name}`} onClick={() => setEditing(c)}><Pencil className="size-4" /></Button>
               <Button
@@ -252,37 +264,56 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
   );
 }
 
-function Expenses({ cats, members, expenses, onChange, onDelete }: {
+function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanned, cashBalance }: {
   cats: Category[]; members: Member[]; expenses: Expense[];
   onChange: (e: Expense[]) => void; onDelete: (e:Expense)=>void;
+  onConfirmPlanned:(id:string,actual:number,mode:"already"|"deduct"|"untracked")=>void;
+  cashBalance:number|null;
 }) {
-  const { tr } = useI18n();
+  const { tr,lang } = useI18n();
+  const ar=lang==="ar";
   const blank: Expense = { id: "", date: today(), categoryId: cats[0]?.id ?? "", amount: 0, shared: true };
   const [editing, setEditing] = useState<Expense | null>(null);
   const [quickAmount, setQuickAmount] = useState("");
+  const [quickExpected,setQuickExpected]=useState("");
+  const [quickMode,setQuickMode]=useState<"planned"|"paid">("paid");
+  const [plannedDate,setPlannedDate]=useState(today());
+  const [confirming,setConfirming]=useState<string|null>(null);
+  const [actualValue,setActualValue]=useState("");
   const [quickCategory, setQuickCategory] = useState(cats[0]?.id ?? "");
   const [quickError, setQuickError] = useState("");
   const selectedCategory=cats.some(x=>x.id===quickCategory)?quickCategory:(cats[0]?.id??"");
   const recordQuick=(ev:FormEvent)=>{
     ev.preventDefault();
     const amount=parseAmount(quickAmount,50000);
+    if(quickMode==="planned"&&!/^\d{4}-\d{2}-\d{2}$/.test(plannedDate))return setQuickError(ar?"اختر تاريخاً متوقعاً صحيحاً.":"Choose a valid planned payment date.");
     if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
+    if(quickMode==="paid"&&quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":"Enter a valid expected amount.");
     if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
-    const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:true};
+    const entry:Expense={id:uid(),date:quickMode==="planned"?plannedDate:today(),categoryId:selectedCategory,amount,shared:true,status:quickMode,...(quickMode==="planned"?{plannedAmount:amount}:quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
     onChange([entry,...expenses]);
-    setQuickAmount("");setQuickError("");
-    toast.success(tr("Expense recorded"));
+    setQuickAmount("");setQuickExpected("");setQuickError("");
+    toast.success(quickMode==="planned"?(ar?"تم حفظ المصروف كمخطط، دون احتسابه كمدفوع.":"Expense planned, not counted as paid."):(ar?"تم تسجيل المصروف المدفوع.":"Paid expense recorded."));
   };
   const sorted = [...expenses].sort((a, b) => b.date.localeCompare(a.date));
   const catName = (id: string) => cats.find((c) => c.id === id)?.name ?? "Uncategorized";
   return (
     <section className="card-soft mt-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{tr("Actual expenses")}</h2>
+        <h2 className="text-lg font-semibold">{ar?"المصاريف المخططة والمدفوعة":"Planned & paid expenses"}</h2>
         <Button size="sm" variant="outline" onClick={() => setEditing(blank)} disabled={cats.length === 0}>
           <Plus className="size-4" /> {tr("More details")} </Button>
       </div>
       <form onSubmit={recordQuick} className="mt-3 grid gap-2 rounded-xl bg-muted/40 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <div className="sm:col-span-3 flex flex-wrap gap-2" role="group" aria-label={ar?"حالة المصروف":"Expense status"}>
+          <button type="button" onClick={()=>setQuickMode("paid")} aria-pressed={quickMode==="paid"} className={"min-h-10 rounded-full px-4 text-sm font-semibold "+(quickMode==="paid"?"bg-brand text-white":"border border-border bg-white text-brand")}>{ar?"مدفوع الآن":"Already paid"}</button>
+          <button type="button" onClick={()=>setQuickMode("planned")} aria-pressed={quickMode==="planned"} className={"min-h-10 rounded-full px-4 text-sm font-semibold "+(quickMode==="planned"?"bg-brand text-white":"border border-border bg-white text-brand")}>{ar?"سأدفع لاحقاً":"Plan for later"}</button>
+        </div>
+        {quickMode==="planned"&&<div className="sm:col-span-3">
+          <label className="block text-xs font-semibold">{ar?"تاريخ الدفع المتوقع":"Expected payment date"}
+            <Input type="date" className="mt-1 max-w-52" value={plannedDate} onChange={e=>setPlannedDate(e.target.value)}/>
+          </label>
+        </div>}
         <Field label={tr("Amount (JOD)")}>
           <Input className={inputCls} inputMode="decimal" value={quickAmount}
             placeholder={tr("e.g. 12.50")} onChange={e=>setQuickAmount(e.target.value)} />
@@ -294,8 +325,15 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
           </NativeSelect>
         </Field>
         <Button type="submit" className="h-11" disabled={!selectedCategory}><Plus className="size-4"/> {tr("Save")}</Button>
+        {quickMode==="paid"&&<details className="sm:col-span-3 rounded-xl border border-border bg-white p-3">
+          <summary className="cursor-pointer text-xs font-semibold text-brand">{ar?"هل المبلغ مختلف عن المتوقع؟ (اختياري)":"Compare with an expected amount (optional)"} +</summary>
+          <label className="mt-2 block text-xs font-medium">{ar?"كم كنت تتوقع أن تدفع؟ (د.أ)":"What did you expect to pay? (JOD)"}
+            <Input type="number" step=".01" min={0} max={50000} className="mt-1 max-w-44" value={quickExpected} onChange={e=>setQuickExpected(e.target.value)}/>
+          </label>
+          <p className="mt-2 text-xs text-muted-foreground">{ar?"إذا في فرق، يظهر اقتراح تعديل مخصصاتك بعد التسجيل، وتؤكده أنت.":"If actual differs, you'll be offered a budget adjustment to approve."}</p>
+        </details>}
         {quickError&&<p role="alert" className="text-sm text-destructive sm:col-span-3">{quickError}</p>}
-        <p className="text-xs text-muted-foreground sm:col-span-3"> {tr("Quick entry: today · shared household · your device only. Need a different date, private expense, owner or note? Choose More details.")} </p>
+        <p className="text-xs text-muted-foreground sm:col-span-3"> {quickMode==="planned"?(ar?"المبلغ المتوقع لا يُحتسب كمدفوع حتى تأكيد الدفع الفعلي.":"Estimated amount is not counted as spent until you confirm the actual payment."):(ar?"المبلغ المدفوع سيظهر ضمن مصاريف هذا الشهر.":"Paid amount appears in this month’s actual spending.")} </p>
       </form>
       {editing && (
         <ExpenseForm
@@ -311,20 +349,48 @@ function Expenses({ cats, members, expenses, onChange, onDelete }: {
         />
       )}
       {sorted.length === 0 ? (
-        <p className="mt-4 rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">{tr("No expenses logged yet.")}</p>
+        <p className="mt-4 rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">{ar?"لم تسجّل مصاريف بعد. ابدأ بمصروف مخطط أو مدفوع.":"No expenses yet. Add a planned or paid expense above."}</p>
       ) : (
         <ul className="mt-3 divide-y">
           {sorted.map((e) => (
             <li key={e.id} className="flex items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{e.note || tr(catName(e.categoryId))}</p>
+                {e.status==="planned"&&<button type="button" onClick={()=>{setConfirming(e.id);setActualValue(String(e.amount));}} className="mt-1 min-h-9 rounded-lg bg-[#E8F1E7] px-2.5 text-xs font-semibold text-brand">{ar?"أكد الدفع الفعلي":"Confirm actual payment"}</button>}
+                {confirming===e.id&&e.status==="planned"&&<div className="mt-2 rounded-xl border border-border bg-[#F9FBF6] p-3">
+                  <label className="block text-xs font-semibold">{ar?"كم دفعت فعلياً؟ (د.أ)":"Actual amount paid (JOD)"}
+                    <Input className="mt-1 max-w-44" type="number" min={0} max={50000} step=".01" value={actualValue} onChange={ev=>setActualValue(ev.target.value)}/>
+                  </label>
+                  <p className="mt-1 text-xs text-muted-foreground">{ar?"المتوقع ":"Expected "}{fmtJOD(e.plannedAmount??e.amount)} · {ar?"اختر إذا كان الرصيد يشمل الدفع أو يحتاج للخصم. تعديل المخصصات يتطلب موافقتك.":"Choose whether cash already reflects this payment. Budget changes need your approval."}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {cashBalance!==null&&<Button size="sm" type="button" variant="outline" onClick={()=>{ const v=Number(actualValue);
+                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":"Check the actual amount and balance.");
+                      onConfirmPlanned(e.id,Math.round(v*100)/100,"already");
+                      setConfirming(null);setQuickError("");
+                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed."); }}>{ar?"الرصيد يشمل الدفع":"Already in cash balance"}</Button>}
+                    {cashBalance!==null&&<Button size="sm" type="button" onClick={()=>{ const v=Number(actualValue);
+                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000||cashBalance===null||v>cashBalance)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":"Check the actual amount and balance.");
+                      onConfirmPlanned(e.id,Math.round(v*100)/100,"deduct");
+                      setConfirming(null);setQuickError("");
+                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed."); }}>{ar?"اخصمه من الرصيد":"Deduct from cash"}</Button>}
+                    {cashBalance===null&&<Button size="sm" type="button" onClick={()=>{ const v=Number(actualValue);
+                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":"Check the actual amount and balance.");
+                      onConfirmPlanned(e.id,Math.round(v*100)/100,"untracked");
+                      setConfirming(null);setQuickError("");
+                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed."); }}>{ar?"تأكيد (دون رصيد مدخل)":"Confirm (no cash balance)"}</Button>}
+                    <Button size="sm" type="button" variant="ghost" onClick={()=>setConfirming(null)}>{ar?"إلغاء":"Cancel"}</Button>
+                  </div>
+                </div>}
                 <p className="text-xs text-muted-foreground">
-                  {e.date} · {tr(catName(e.categoryId))} {e.owner ? `· ${e.owner}` : ""} · {tr(e.shared ? "Shared" : "Private")}
+                  {e.status==="planned"?(ar?"بانتظار الدفع · ":"Planned, not paid · "):""}{e.date} · {tr(catName(e.categoryId))} {e.owner ? `· ${e.owner}` : ""} · {tr(e.shared ? "Shared" : "Private")}
                 </p>
               </div>
-              <span className="font-semibold tabular-nums">{fmtJOD(e.amount)}</span>
-              <Button size="icon" variant="ghost" aria-label={tr("Edit expense")} onClick={() => setEditing(e)}><Pencil className="size-4" /></Button>
-              <Button size="icon" variant="ghost" aria-label={tr("Delete expense")} onClick={() => confirm(tr("Delete this expense?")) && onDelete(e)}>
+              <div className="shrink-0 text-end"><span className="block font-semibold tabular-nums">{fmtJOD(e.amount)}</span>
+                 {e.status==="planned"&&<span className="block text-[11px] text-muted-foreground">{ar?"متوقع":"Expected"}</span>}
+                 {e.status!=="planned"&&e.plannedAmount!=null&&e.plannedAmount!==e.amount&&<span className="block text-[11px] text-muted-foreground">{ar?"الخطة: ":"Plan: "}{fmtJOD(e.plannedAmount)}</span>}
+               </div>
+              <Button size="icon" variant="ghost" disabled={!!e.billId||!!e.allocation} aria-label={tr("Edit expense")} onClick={() => setEditing(e)}><Pencil className="size-4" /></Button>
+              <Button size="icon" variant="ghost" disabled={!!e.billId} aria-label={tr("Delete expense")} onClick={() => onDelete(e)}>
                 <Trash2 className="size-4" />
               </Button>
             </li>
@@ -348,7 +414,7 @@ function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Ex
         if (amount === null) return setErr(tr("Amount must be a positive number up to 50,000."));
         if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) return setErr(tr("Please pick a valid date."));
         const { amountStr: _a, ...rest } = f;
-        onSave({ ...rest, amount, note: (f.note ?? "").slice(0, 60) });
+        onSave({ ...rest, amount, ...(rest.status==="planned"?{plannedAmount:amount}:{}),note: (f.note ?? "").slice(0, 60) });
       }}
     >
       <Field label={tr("Amount (JOD)")}><Input className={inputCls} inputMode="decimal" autoFocus value={f.amountStr} onChange={(e) => setF({ ...f, amountStr: e.target.value })} /></Field>

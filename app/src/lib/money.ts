@@ -2,7 +2,8 @@ import type { IncomeSource, Commitment } from "./cashflow";
 import { monthlyTotal } from "./cashflow";
 export type CatType = "fixed" | "variable" | "periodic";
 export type Category = { id: string; name: string; type: CatType; planned: number };
-export type Expense = { id: string; date: string; categoryId: string; amount: number; note?: string; owner?: string; shared: boolean; billId?:string; dueDate?:string; cashDeducted?:boolean };
+export type BudgetAllocation = {kind:"variable"|"savings"; categoryId?:string; delta:number; approvedAt:string};
+export type Expense = { id: string; date: string; categoryId: string; amount: number; note?: string; owner?: string; shared: boolean; billId?:string; dueDate?:string; cashDeducted?:boolean; /** Planned entries do not count as actual spending until confirmed. */ status?:"planned"|"paid"; plannedAmount?:number; allocation?:BudgetAllocation; varianceDismissed?:boolean; };
 export type MoneyState = {
   /** Legacy monthly income: retained to preserve users' existing saved budgets. */
   income:number; savingsPct:number; categories:Category[]; expenses:Expense[]; demo:boolean;
@@ -11,6 +12,10 @@ export type MoneyState = {
   cashOnHand?:number|null; cashReserve?:number;
   /** Date on which the user last refreshed the manually entered cash balance. */
   cashUpdatedAt?:string | undefined;
+  /** Exact monthly JOD savings target overrides the legacy percentage when set. */
+  savingsTargetAmount?:number;
+  /** Approved one-off reallocations affect their payment month, not future months. */
+  monthlyAdjustments?:Record<string,{savingsDelta:number;categoryDeltas:Record<string,number>}>;
 };
 export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string; /** Date of birth, stored on this device only. */ birthday?: string | undefined };
 
@@ -48,12 +53,16 @@ export const sampleMembers = (): Member[] => [
 
 export function computeMoney(s: MoneyState, now = new Date()) {
   const ym = [now.getFullYear(),String(now.getMonth()+1).padStart(2,"0")].join("-");
-  const month = s.expenses.filter((e) => e.date.startsWith(ym));
+  const month = s.expenses.filter((e) => e.date.startsWith(ym) && e.status!=="planned");
   const spentBy = (id: string) => month.filter((e) => e.categoryId === id).reduce((a, e) => a + e.amount, 0);
   const monthlyIncome = s.incomeSources === undefined ? s.income : monthlyTotal(s.incomeSources);
-  const savingsTarget = (monthlyIncome * s.savingsPct) / 100;
+  const baseSavings = typeof s.savingsTargetAmount==="number"&&Number.isFinite(s.savingsTargetAmount)&&s.savingsTargetAmount>=0
+    ? s.savingsTargetAmount : Math.round(monthlyIncome*s.savingsPct)/100;
+  const monthly=s.monthlyAdjustments?.[ym];
+  const savingsTarget=Math.round((baseSavings+(monthly?.savingsDelta??0))*100)/100;
   const spendable = monthlyIncome - savingsTarget;
-  const planned = s.categories.reduce((a, c) => a + c.planned, 0);
+  const plannedBy=(id:string)=>Math.round(((s.categories.find(c=>c.id===id)?.planned??0)+(monthly?.categoryDeltas[id]??0))*100)/100;
+  const planned = Math.round(s.categories.reduce((a, c) => a + plannedBy(c.id), 0)*100)/100;
   const spent = month.reduce((a, e) => a + e.amount, 0);
   const day = now.getDate();
   const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -61,7 +70,7 @@ export function computeMoney(s: MoneyState, now = new Date()) {
   let projected = 0;
   for (const c of s.categories) {
     const a = spentBy(c.id);
-    projected += c.type === "variable" ? Math.max(a, (a / day) * days) : Math.max(a, c.planned);
+    projected += c.type === "variable" ? Math.max(a, (a / day) * days) : Math.max(a, plannedBy(c.id));
   }
   // expenses with unknown categories
   const known = new Set(s.categories.map((c) => c.id));
@@ -77,6 +86,7 @@ export function computeMoney(s: MoneyState, now = new Date()) {
     projectedSavings: monthlyIncome - projected,
     overPlan: planned > spendable,
     spentBy,
+    plannedBy,
     daysLeft: days - day,
   };
 }

@@ -3,15 +3,17 @@ import {roundJod} from "./cashflow";
 
 /** Deterministic, side-effect-free finance operations; never infer a bank balance. */
 export type PaidBillCashMode="already"|"deduct"|"untracked";
-export function recordBillPayment(state:MoneyState,billId:string,dueDate:string,paidOn:string,expenseId:string,mode:PaidBillCashMode):MoneyState {
+export function recordBillPayment(state:MoneyState,billId:string,dueDate:string,paidOn:string,expenseId:string,mode:PaidBillCashMode,actualAmount?:number):MoneyState {
  const bill=(state.commitments??[]).find(b=>b.id===billId);
- if(!bill||bill.paidDates?.includes(dueDate)||dueDate>paidOn||!expenseId.trim())return state;
- if(mode==="deduct" && (state.cashOnHand==null||!Number.isFinite(state.cashOnHand)||state.cashOnHand<bill.amount))return state;
+ if(!bill||bill.paidDates?.includes(dueDate)||!expenseId.trim())return state;
+ const actual=actualAmount??bill.amount;
+ if(!Number.isFinite(actual)||actual<0||actual>50000)return state;
+ if(mode==="deduct" && (state.cashOnHand==null||!Number.isFinite(state.cashOnHand)||state.cashOnHand<actual))return state;
  const category=state.categories.find(c=>c.id===bill.categoryId)?.id??"uncategorized";
  return {...state,
   commitments:(state.commitments??[]).map(b=>b.id===billId?{...b,paidDates:[...(b.paidDates??[]),dueDate]}:b),
-  expenses:[{id:expenseId,date:paidOn,categoryId:category,amount:bill.amount,note:bill.name,shared:true,billId,dueDate,cashDeducted:mode==="deduct"},...state.expenses],
-  ...(mode==="deduct"?{cashOnHand:roundJod(state.cashOnHand!-bill.amount),cashUpdatedAt:paidOn}:{})
+  expenses:[{id:expenseId,date:paidOn,categoryId:category,amount:actual,plannedAmount:bill.amount,status:"paid",note:bill.name,shared:true,billId,dueDate,cashDeducted:mode==="deduct"},...state.expenses],
+  ...(mode==="deduct"?{cashOnHand:roundJod(state.cashOnHand!-actual),cashUpdatedAt:paidOn}:{})
  };
 }
 export function reverseBillPayment(state:MoneyState,billId:string,dueDate:string,restoreDeductedCash:boolean,today:string):MoneyState {
