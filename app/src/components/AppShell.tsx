@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useI18n, type Key } from "@/lib/i18n";
 import { writeLocal } from "@/lib/storage";
 import { Logo } from "./Logo";
+import { ConnectivityNotice } from "./ConnectivityNotice";
 
 const tabs: { to: "/" | "/explore" | "/money" | "/plans" | "/space"; key: Key; icon: typeof Home; exact?: boolean }[] = [
  {to:"/",key:"home",icon:Home,exact:true},
@@ -62,6 +63,7 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
     </div>
    </header>
    <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-32 pt-5 sm:px-6 sm:pt-7 md:px-8 md:pb-12 md:pt-10">
+    <ConnectivityNotice/>
     {title&&<h1 className="mb-5 text-[1.8rem] font-semibold tracking-tight text-ink sm:text-4xl">{title}</h1>}
     {children}
    </main>
