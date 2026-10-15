@@ -49,7 +49,8 @@ describe("Today family priority",()=>{
   const done={...g,savedJod:g.targetJod};
   const s={...validMoney(),savingsGoals:[done]};
   expect(selectFamilyPriority(s,prefs,now)).toBeNull();
-  expect(selectFamilyPriority({...s,savingsGoals:[{...g,dueDate:undefined}]},prefs,now)).toBeNull();
+  const undated=createSavingsGoal({id:"future",name:"New goal",targetJod:400,savedJod:100,monthlyJod:50},now)!;
+  expect(selectFamilyPriority({...s,savingsGoals:[undated]},prefs,now)).toBeNull();
  });
  it("points to missing real cash, bills or an old cash update in that order",()=>{
   const s=validMoney();
