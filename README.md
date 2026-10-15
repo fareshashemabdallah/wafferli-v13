@@ -136,6 +136,12 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - A country registry covers Jordan, Lebanon, UAE and Oman as **future market configuration** with explicit payment, legal and currency readiness gates; financial records remain JOD-only, including when previewing another market. No silent currency conversion.
 - No market launch or merchant commission settlement is enabled. [Future commercial and country rollout requirements](docs/plus-and-markets-gates.md).
 
+## Child-aware outing suitability comparisons
+- Plan Together includes a private list of venues entered by parents with their own checks on children’s admission, age suitability, stroller access, noise, estimated whole-family cost and travel distance.
+- An explainable, **non-verified suitability comparison** highlights contradictions with selected children attendance, accessibility, budget, distance and **parent-selected weather check**. It does not access a live forecast, infer provider suitability or guarantee safety.
+- Outing lists are device-only, available in validated selective manual backup recovery, and never automatically published with outing vote links or uploaded to a merchant.
+- Age bands remain a planning context, not official age-rating data; the parent explicitly records whether each venue accommodates their children.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
