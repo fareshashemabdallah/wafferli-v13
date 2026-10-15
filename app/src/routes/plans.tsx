@@ -66,8 +66,8 @@ function PlansPage(){
  return <AppShell title={ar?"خططنا":"Our Plans"}>
    <section className="page-intro">
      <p className="section-eyebrow">{ar?"خطّة واحدة، خطوات مترابطة":"ONE PLAN · CONNECTED CHOICES"}</p>
-     <h2 className="mt-2 text-xl font-semibold text-ink">{ar?"من الفكرة إلى القرار والنتيجة":"From a good idea to a thoughtful decision"}</h2>
-     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ar?"أضف ما تحتاجه عائلتك، راجع الميزانية، قارِن الخيارات، وسجّل ما حدث فعلياً. كل شيء محفوظ على هذا الجهاز فقط.":"Keep a purchase, outing or occasion in one place. Review your budget, compare options and record what actually happened. Plans stay on this device only."}</p>
+     <h2 className="mt-2 text-xl font-semibold text-ink">{ar?"شو بدنا نعمل، وهل الميزانية بتسمح؟":"What do we want to do—and can our budget support it?"}</h2>
+     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ar?"اختَر خطتك، وشوف شو فيك تعمل بعدها. دبّرنا بيوضّح الخطوة التالية بدل ما يتركك تخمّن.":"Choose a plan. Dabberna will show the next useful step, whether you have entered finances yet or not."}</p>
      <Button className="mt-4 min-h-11" onClick={()=>setNewOpen(v=>!v)}><Plus className="size-4"/>{ar?"خطة جديدة":"New plan"}</Button>
    </section>
    {newOpen&&<form onSubmit={submit} className="editorial-card mt-4 grid gap-3 p-4 sm:grid-cols-2">
@@ -115,7 +115,7 @@ function PlansPage(){
      {currentPlan.budgetJod!==undefined&&<span className="rounded-full bg-[#EDF3EA] px-3 py-2">{ar?"سقف الميزانية: ":"Budget limit: "}{fmtJOD(currentPlan.budgetJod)}</span>}
      {currentPlan.date&&<span className="inline-flex items-center gap-1 rounded-full bg-[#F8F2E9] px-3 py-2"><CalendarDays className="size-3.5"/>{currentPlan.date}</span>}
     </div>
-    {moneyReady&&currentPlan.status!=="completed"&&<PlanDecisionPanel key={currentPlan.id} plan={currentPlan} money={money} plans={plans} onUpdate={update}/>}
+    {moneyReady&&currentPlan.status!=="completed"&&<PlanDecisionPanel key={currentPlan.id} plan={currentPlan} money={money} plans={plans} onUpdate={update} setMoney={setMoney}/>}
     {currentPlan.status!=="completed"&&<>
       <div className="mt-5 rounded-xl bg-[#F4F7F0] p-4">
        <h3 className="font-semibold">{ar?"الخطوة التالية: قارن الخيارات":"Next step: compare suitable options"}</h3>

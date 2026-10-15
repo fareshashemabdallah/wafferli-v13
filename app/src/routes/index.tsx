@@ -8,6 +8,8 @@ import {FamilyWeather} from "@/components/FamilyWeather";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 import {useLocalState,writeLocal} from "@/lib/storage";
 import {useI18n} from "@/lib/i18n";
+import {sampleMoney,type MoneyState} from "@/lib/money";
+import {needsStarterBudget} from "@/lib/starterBudget";
 
 export const Route=createFileRoute("/")({
  head:()=>({meta:[
@@ -20,8 +22,8 @@ export const Route=createFileRoute("/")({
 });
 
 const starts=[
- {to:"/money" as const,Icon:Wallet,en:"Feel confident about money",ar:"راحة بال مع المصروف",
-  enDetail:"Understand spending, bills and what you can comfortably afford.",arDetail:"تابع المصاريف والفواتير واعرف شو بيسمحلك وضعك المالي.",
+ {to:"/money" as const,Icon:Wallet,en:"Start here: Understand your budget",ar:"ابدأ هون: افهم ميزانية عيلتك",
+  enDetail:"Add just three monthly numbers to get meaningful spending advice.",arDetail:"أدخل ٣ أرقام شهرية لحتى تصير نصائح المصروف مفيدة.",
   tone:"sage"},
  {to:"/space" as const,Icon:CalendarHeart,en:"Keep life's moments close",ar:"اهتم بلحظات العائلة",
   enDetail:"Bring birthdays, important dates and family plans together.",arDetail:"رتّب أعياد الميلاد والمناسبات وخطط العائلة بمكان واحد.",
@@ -35,6 +37,7 @@ function Index(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [prefs]=useLocalState("familyPreferences",defaultFamilyPreferences);
  const [introDone,setIntroDone,ready]=useLocalState("homeIntroDone",false);
+ const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const now=new Date();
  const hour=now.getHours();
  const greeting=ar?(hour<12?"صباح الخير":hour<18?"مسا الخير":"ليلة هنية"):(hour<12?"Good morning":hour<18?"Good afternoon":"Good evening");
@@ -97,6 +100,12 @@ function Index(){
    </button>
   </section>}
 
+  {daily&&moneyReady&&needsStarterBudget(money)&&<section className="mt-5 rounded-2xl border border-[#D4E4D5] bg-[#EDF5EB] p-4 sm:p-5">
+     <p className="text-xs font-semibold text-brand">{ar?"أفضل بداية":"YOUR FIRST STEP"}</p>
+     <h2 className="mt-2 text-lg font-semibold">{ar?"خلّينا نفهم مصروف البيت":"Get useful advice in one minute"}</h2>
+     <p className="mt-2 text-sm leading-relaxed text-[#536B5C]">{ar?"أدخل دخل العيلة والمصروف الشهري وهدف الادخار. بعدها دبّرنا بيقدر يقارن خططك بميزانيتك، بدل ما يعرض تنبيهات غامضة.":"Enter monthly income, household spending and your savings goal. Then Dabberna can compare your plans with your budget instead of showing unclear warnings."}</p>
+     <Link to="/money" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">{ar?"ابدأ بثلاث أرقام":"Start with three numbers"} <ArrowRight className="size-4 rtl:rotate-180"/></Link>
+    </section>}
   {daily&&<>
    <section className="mt-6" aria-label={ar?"خطوات سريعة":"Everyday choices"}>
     <div className="flex items-baseline justify-between gap-2">
