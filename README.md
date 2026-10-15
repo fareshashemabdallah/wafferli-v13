@@ -161,6 +161,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Completed tasks and purchased wishlist items are excluded. Only relevant titles and dates enter the file—not family task notes, recipient labels or user-entered price history.
 - Importing into a phone calendar **may transmit titles and dates to the user's calendar provider**; explicit acknowledgement is required. Dabberna itself still has **no background push service** or automatic calendar sync.
 
+## Developer-only merchant workflow simulator
+- A narrowly gated, fictional merchant onboarding and offer-review demonstration now exists as a **Vite DEVELOPMENT-only** view, absent from all production builds. For local testing only, set `VITE_ENABLE_MERCHANT_WORKFLOW_DEMO=true` and open About.
+- It demonstrates typed status transitions, reviewer-versus-merchant actor distinctions, JOD/fils precision and offer expiry, but actor switching is NOT authentication; business names and offers are not verified, persisted, sent to customers or settled.
+- The live merchant marketplace still requires real company registration/verification, server-side roles, offer moderation, commercial agreements, consumer terms and licensed payment settlement. [Simulator documentation and security gates](docs/merchant-workflow-simulator.md).
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.

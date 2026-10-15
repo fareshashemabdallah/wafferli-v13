@@ -4,6 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { LocalDataControls } from "@/components/LocalDataControls";
 import { PrivateVaultPanel } from "@/components/PrivateVaultPanel";
 import {CommercialReadinessPreview} from "@/components/CommercialReadinessPreview";
+import {MerchantWorkflowSandbox} from "@/components/MerchantWorkflowSandbox";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -47,6 +48,7 @@ function About() {
       <LocalDataControls/>
       <PrivateVaultPanel/>
       <CommercialReadinessPreview/>
+      <MerchantWorkflowSandbox/>
       <section className="card-soft mt-4 p-4 text-sm">
         <h2 className="text-lg font-semibold">{tr("How to test")}</h2>
         <ol className="mt-1 list-decimal space-y-1 ps-5"><li>{tr("Discover → Plan Together → create a vote.")}</li><li>{tr("Copy the vote link or send via WhatsApp.")}</li><li>{tr("Open it on another phone, vote, then watch your organizer page update.")}</li></ol>
