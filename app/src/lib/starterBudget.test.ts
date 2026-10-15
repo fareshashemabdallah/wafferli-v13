@@ -35,13 +35,36 @@ describe("guided first-run Money setup for Plans",()=>{
   expect(result.cashOnHand).toBe(850);
   expect(result.cashReserve).toBe(100);
  });
- it("never overwrites existing real expenses, categories, or bills during quick setup",()=>{
+ it("preserves existing real spending categories and saves only missing income",()=>{
   const s:MoneyState={...emptyRealMoney(),categories:[{id:"food",name:"Food",planned:250,type:"variable"}]};
-  expect(needsStarterBudget(s)).toBe(false);
+  expect(needsStarterBudget(s)).toBe(true);
   expect(applyStarterBudget(s,{income:1000,spending:500,savings:100})).toBe(s);
-  const withBills={...emptyRealMoney(),commitments:[{id:"a",name:"Rent",amount:500,frequency:"monthly" as const,dueDate:"2026-10-30"}]};
-  expect(needsStarterBudget(withBills)).toBe(false);
-  expect(applyStarterBudget(withBills,{income:1000,spending:500,savings:100})).toBe(withBills);
+  const result=applyStarterBudget(s,{income:1000,spending:250,savings:100});
+  expect(result.categories).toEqual(s.categories);
+  expect(computeMoney(result,when).monthlyIncome).toBe(1000);
+  expect(computeMoney(result,when).savingsTarget).toBe(100);
+ });
+ it("preserves real dated bills and entered cash while filling missing monthly budgets",()=>{
+  const bill={id:"a",name:"Rent",amount:500,frequency:"monthly" as const,dueDate:"2026-10-30"};
+  const old={...emptyRealMoney(),cashOnHand:800,cashReserve:150,commitments:[bill]};
+  expect(needsStarterBudget(old)).toBe(true);
+  const result=applyStarterBudget(old,{income:1200,spending:750,savings:100});
+  expect(result.commitments).toEqual([bill]);
+  expect(result.cashOnHand).toBe(800);
+  expect(result.cashReserve).toBe(150);
+  expect(computeMoney(result,when).planned).toBe(750);
+  expect(old.categories).toEqual([]);
+ });
+ it("does not overwrite previous real expenses or dated income sources",()=>{
+  const expense={id:"e",date:"2026-10-01",categoryId:"misc",amount:200,shared:true};
+  const old:MoneyState={...emptyRealMoney(),expenses:[expense],incomeSources:[{
+   id:"income",name:"Salary",amount:1400,frequency:"monthly",nextDate:"2026-10-25",shared:true
+  }]};
+  const result=applyStarterBudget(old,{income:1400,spending:900,savings:150});
+  expect(result.incomeSources).toEqual(old.incomeSources);
+  expect(result.expenses).toEqual([expense]);
+  expect(result.categories).toHaveLength(1);
+  expect(result.savingsTargetAmount).toBe(150);
  });
  it("rejects missing or invalid money figures and does not mutate existing state",()=>{
   const blank=emptyRealMoney();
