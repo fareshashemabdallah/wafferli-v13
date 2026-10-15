@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Calculator, Compass, Receipt, Search, ShoppingBag, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { GuidedFamilyAdvisor } from "@/components/GuidedFamilyAdvisor";
 import { getMoneyOverview } from "@/lib/moneyOverview";
 import { sampleMoney } from "@/lib/money";
 import { fmtJOD, useLocalState } from "@/lib/storage";
@@ -36,6 +37,7 @@ function Advisor(){
       <div className="flex items-center gap-2"><Sparkles className="size-6 text-brand"/><h2 className="text-2xl font-semibold">{ar?"أنفق بذكاء، وعِش براحة":"Spend wisely. Live well."}</h2></div>
       <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#536E5D]">{ar?"خلّينا نشوف إذا قرار المصروف مناسب لخطتك، من غير ما تتخلى عن الأشياء الحلوة.":"Feel good about spending on what matters, while keeping the important things covered."}</p>
     </div>
+    <GuidedFamilyAdvisor/>
     <div className="editorial-card mt-5 p-5 sm:p-6">
       <div className="flex items-center gap-2"><Calculator className="size-5 text-brand"/><h2 className="font-semibold">{ar?"هل يناسب هذا المصروف ميزانيتنا؟":"Can we plan this purchase?"}</h2></div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
