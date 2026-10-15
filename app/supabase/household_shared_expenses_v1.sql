@@ -39,10 +39,15 @@ CREATE OR REPLACE FUNCTION public.dabberna_share_one_expense(
  p_amount_fils bigint,p_occurred_on date,p_explicit_consent boolean
 ) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
 AS $$
-DECLARE v_user uuid:=auth.uid();v_id uuid;
+DECLARE v_user uuid:=auth.uid();v_id uuid;v_role text;
 BEGIN
- IF v_user IS NULL OR public.dabberna_active_household_role(p_household_id)
-    NOT IN ('owner','adult')
+ IF v_user IS NULL THEN RAISE EXCEPTION 'Authentication required'; END IF;
+ -- Lock membership so a concurrent revocation waits for this transaction
+ -- to finish; its purge trigger then deletes any just-shared rows.
+ SELECT m.role INTO v_role FROM public.dabberna_household_members m
+ WHERE m.household_id=p_household_id AND m.user_id=v_user
+   AND m.status='active' FOR SHARE;
+ IF v_role IS DISTINCT FROM 'owner' AND v_role IS DISTINCT FROM 'adult'
  THEN RAISE EXCEPTION 'Active adult household membership required'; END IF;
  IF p_explicit_consent IS DISTINCT FROM true
  THEN RAISE EXCEPTION 'Explicit per-expense sharing confirmation required'; END IF;
@@ -70,10 +75,14 @@ $$;
 CREATE OR REPLACE FUNCTION public.dabberna_unshare_one_expense(
  p_household_id uuid,p_expense_id uuid
 ) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
-AS $$
+AS $
+DECLARE v_role text;
 BEGIN
- IF auth.uid() IS NULL OR
-    public.dabberna_active_household_role(p_household_id) NOT IN ('owner','adult')
+ IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Authentication required'; END IF;
+ SELECT m.role INTO v_role FROM public.dabberna_household_members m
+ WHERE m.household_id=p_household_id AND m.user_id=auth.uid()
+   AND m.status='active' FOR SHARE;
+ IF v_role IS DISTINCT FROM 'owner' AND v_role IS DISTINCT FROM 'adult'
  THEN RAISE EXCEPTION 'Active adult household membership required'; END IF;
  DELETE FROM public.dabberna_shared_expenses_v1
  WHERE household_id=p_household_id AND id=p_expense_id AND created_by=auth.uid();
