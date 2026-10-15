@@ -156,6 +156,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Answers are computed from each parent’s existing local records and explain the source, missing facts and next action; unsupported queries still clearly disclose that live, free-form AI is not connected.
 - Clinician information is a **parent-entered checklist, not medical advice, credential verification or a provider ranking**. Venues and prices remain unverified; no private family data is sent to an AI API.
 
+## Opt-in calendar export for household responsibilities and planned purchases
+- Family Calendar and Today now let parents **individually select four reminder sources** for a local .ics download: unpaid recorded bill dates, family events, open household tasks, and upcoming unpurchased gifts/household wishlist entries.
+- Completed tasks and purchased wishlist items are excluded. Only relevant titles and dates enter the file—not family task notes, recipient labels or user-entered price history.
+- Importing into a phone calendar **may transmit titles and dates to the user's calendar provider**; explicit acknowledgement is required. Dabberna itself still has **no background push service** or automatic calendar sync.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
