@@ -1,5 +1,5 @@
 import {createFileRoute,Link} from "@tanstack/react-router";
-import {ArrowRight,CalendarDays,CheckCircle2,Compass,Plus,ShieldCheck,Trash2} from "lucide-react";
+import {CalendarDays,CheckCircle2,Compass,Plus,Trash2} from "lucide-react";
 import {useState,type FormEvent} from "react";
 import {toast} from "sonner";
 import {AppShell} from "@/components/AppShell";
@@ -8,7 +8,8 @@ import {Input} from "@/components/ui/input";
 import {useI18n} from "@/lib/i18n";
 import {uid,fmtJOD,useLocalState} from "@/lib/storage";
 import {sampleMoney,type MoneyState,type Expense} from "@/lib/money";
-import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,makeFamilyPlan,markPlanComplete,moneyAmount,reviewPlanCost,setPlanChoice,upcomingFamilyPlans,type FamilyPlan,type PlanKind} from "@/lib/familyPlans";
+import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,makeFamilyPlan,markPlanComplete,moneyAmount,setPlanChoice,upcomingFamilyPlans,type FamilyPlan,type PlanKind} from "@/lib/familyPlans";
+import {PlanDecisionPanel} from "@/components/PlanDecisionPanel";
 import {localToday} from "@/lib/cashflow";
 export const Route=createFileRoute("/plans")({
  head:()=>({meta:[{title:"My Plans — Dabberna"},{name:"description",content:"Plan meaningful purchases, outings and occasions in one private place."}]}),
@@ -28,7 +29,6 @@ function PlansPage(){
  const [chosen,setChosen]=useState(""),[price,setPrice]=useState(""),[actual,setActual]=useState(""),[category,setCategory]=useState("");
  const selected=plans.find(p=>p.id===active)??null;
  const currentPlan=selected??upcomingFamilyPlans(plans)[0]??plans[0]??null;
- const assess=currentPlan?reviewPlanCost(currentPlan,money):null;
  const update=(next:FamilyPlan)=>setPlans(prev=>prev.map(p=>p.id===next.id?next:p));
  const submit=(e:FormEvent)=>{
   e.preventDefault();const amount=budget.trim()===""?undefined:moneyAmount(budget);
@@ -115,23 +115,11 @@ function PlansPage(){
      {currentPlan.budgetJod!==undefined&&<span className="rounded-full bg-[#EDF3EA] px-3 py-2">{ar?"سقف الميزانية: ":"Budget limit: "}{fmtJOD(currentPlan.budgetJod)}</span>}
      {currentPlan.date&&<span className="inline-flex items-center gap-1 rounded-full bg-[#F8F2E9] px-3 py-2"><CalendarDays className="size-3.5"/>{currentPlan.date}</span>}
     </div>
-    {moneyReady&&assess&&<div className={"mt-4 rounded-xl border p-3 text-sm "+(assess.status==="review"?"border-[#ECC8C9] bg-[#FFF3F2]":"border-[#D8E5D7] bg-[#F3F7F0]")}>
-     <div className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-brand"/>
-      <div><p className="font-semibold">{assess.status==="demo"?(ar?"بيانات تجريبية":"Sample financial data"):
-        assess.status==="unknown"?(ar?"تحتاج معلومات مالية":"Financial details needed"):
-        assess.status==="review"?(ar?"راجع وضعك قبل الالتزام":"Review before committing"):(ar?"تقدير مبدئي":"Provisional financial check")}</p>
-       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{assess.status==="demo"?(ar?"بيانات المالية تجريبية ولا تصلح لتقييم الخطة.":assess.reason):
-        assess.status==="unknown"?(ar?"أدخل الرصيد والفواتير المستحقة والتواريخ وسقف الخطة.":assess.reason):
-        assess.status==="review"?(ar?"قد تتأثر قدرتك على الدفع بالتزامات أو نقص السيولة.":assess.reason):
-        ar?"المبلغ يقع ضمن السيولة المسجلة بعد الفواتير والاحتياطي، لكن قد تنقص مصاريف يومية.":assess.reason}</p>
-       <Link to="/money" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand">{ar?"راجع المالية":"Review Money"} <ArrowRight className="size-3"/></Link>
-      </div>
-     </div>
-    </div>}
+    {moneyReady&&currentPlan.status!=="completed"&&<PlanDecisionPanel key={currentPlan.id} plan={currentPlan} money={money} plans={plans} onUpdate={update}/>}
     {currentPlan.status!=="completed"&&<>
       <div className="mt-5 rounded-xl bg-[#F4F7F0] p-4">
-       <h3 className="font-semibold">{ar?"قارن الخيارات":"Compare your options"}</h3>
-       <p className="mt-1 text-xs text-muted-foreground">{ar?"احتفظ باسم الخطة وسقفها عند الانتقال إلى صفحة المقارنة.":"Keep this plan's name and budget when you explore options."}</p>
+       <h3 className="font-semibold">{ar?"الخطوة التالية: قارن الخيارات":"Next step: compare suitable options"}</h3>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?"بعد مقارنة أرقام الخطة بالميزانية أعلاه، افتح الخيارات المتاحة وقارن كلفتها قبل اتخاذ القرار.":"After checking the figures above, compare real options by cost and suitability before choosing."}</p>
        <div className="mt-3 flex flex-wrap gap-2">
         <Link to={currentPlan.kind==="purchase"?"/explore/smartbuy":currentPlan.kind==="outing"?"/explore/together":currentPlan.kind==="occasion"?"/occasions":"/explore"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
          <Compass className="size-4"/>{ar?"استكشف الخيارات":"Explore options"}
