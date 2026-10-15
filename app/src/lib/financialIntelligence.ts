@@ -21,7 +21,7 @@ export function spendingHistory(money:MoneyState,now=new Date(),months=6):Monthl
  * treating demo figures, missing months, or one occasional expense as a trend.
  * Flags prompt a human review; never assert fraud or excessive spending.
  */
-export function detectSpendingChanges(money:MoneyState,now=new Date()):SpendingFlag[]{
+export function detectSpendingChanges(money:MoneyState,now=new Date(),reviewedBaseline?:ReadonlySet<string>):SpendingFlag[]{
  if(money.demo)return [];
  const current=monthKey(now);
  const months=[1,2,3].map(n=>monthKey(atMonth(now,-n)));
@@ -32,7 +32,7 @@ export function detectSpendingChanges(money:MoneyState,now=new Date()):SpendingF
      e.date.startsWith(month)&&valid(e.amount));
    return {total:round(items.reduce((n,e)=>n+e.amount,0)),count:items.length};
   };
-  const baseline=months.map(categoryTotal).filter(x=>x.count>0);
+  const baseline=months.filter(month=>!reviewedBaseline||reviewedBaseline.has(month)).map(categoryTotal).filter(x=>x.count>0);
   if(baseline.length<2)continue;
   const previous=round(baseline.reduce((n,x)=>n+x.total,0)/baseline.length);
   const recent=categoryTotal(current).total;
