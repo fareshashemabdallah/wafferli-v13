@@ -173,6 +173,12 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Repeat items require a first due date. Dates follow the original chosen day (31 January → last day of February → 31 March), with late parent confirmations advancing only to the next future schedule. A second confirmation on the same calendar date is refused.
 - Recurrence anchor and manual last-purchase date are retained through the strictly validated, opt-in local recovery and private encrypted backup flows. These confirmations are self-reported, not independently verified merchant transactions.
 
+## Spending history reliability and review snapshots
+- Parents may explicitly mark **past months** as having reviewed the paid expense entries they recorded. This is **not** a certification of complete real-world spending or a bank reconciliation; current/future periods and demo finance data cannot be marked reviewed.
+- The app saves a compact local change fingerprint, the recorded paid transaction count, and the planned monthly envelope as viewed **when the parent marked that month reviewed**. Historical budgets are not reconstructed/backdated. If a paid expense changes later, the review is marked stale until reviewed again.
+- The Financial Intelligence comparison chart distinguishes reviewed and unreviewed months. **Unusual-spending prompts now need at least two user-reviewed prior comparison months**, reducing unreliable alerts from missing historical entries. The current month remains an incomplete partial period.
+- These opt-in review records can be selectively exported/restored through strict local backup validation, without exporting credentials or triggering payments or sharing family data.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
