@@ -23,7 +23,8 @@ export function allocationOptions(state:MoneyState,delta:number,expenseCategory?
  const variable=state.categories.filter(c=>c.type==="variable"&&c.id!==expenseCategory&&
    (delta>0?roundJod(actual.plannedBy(c.id)-actual.spentBy(c.id))>=abs:true))
    .map(c=>({kind:"variable" as const,categoryId:c.id}));
- const canSave=delta>0?plannedSavings(state,month)>=abs:true;
+ const savingsAfter=roundJod(plannedSavings(state,month)-delta);
+ const canSave=savingsAfter>=0&&savingsAfter<=actual.monthlyIncome;
  return [...variable,...(canSave?[{kind:"savings" as const}]:[])];
 }
 export function applyVarianceAllocation(state:MoneyState,expenseId:string,choice:AllocationChoice,now:string):MoneyState{
