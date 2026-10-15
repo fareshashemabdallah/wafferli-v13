@@ -66,7 +66,7 @@ describe("wishlists and real user-entered price history",()=>{
  it("rejects repeat frequencies without a date, preserving one-off gifts",()=>{
   expect(makeWishlistItem({id:"refill",name:"Paper towels",kind:"household",
    repeatMonths:1},now)).toBeNull();
-  expect(confirmRecurringPurchase(item(),now)).toThrow(/not an active repeating/i);
+  expect(()=>confirmRecurringPurchase(item(),now)).toThrow(/not an active repeating/i);
  });
  it("safely restores recurring dates but rejects injected extra auth tokens",()=>{
   const original=store(),target=store();
