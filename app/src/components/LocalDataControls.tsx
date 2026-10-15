@@ -3,6 +3,7 @@ import {Download,ShieldCheck,Trash2} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
 import {buildLocalBackup,eraseLocalAppData} from "@/lib/localDataControls";
+import {LocalBackupRecovery} from "@/components/LocalBackupRecovery";
 
 /** Never transmits personal data or touches auth sessions. Only parents who
  * intentionally click download receive an unencrypted local file. */
@@ -28,7 +29,7 @@ export function LocalDataControls(){
    link.click();
    link.remove();
    window.setTimeout(()=>URL.revokeObjectURL(url),1000);
-   setNotice(ar?"تم إنشاء نسخة قابلة للحفظ على جهازك. احفظها بأمان؛ لا يوجد استيراد تلقائي حالياً.":"Backup file generated for your device. Keep it secure; automatic restoration is not yet supported.");
+   setNotice(ar?"تم إنشاء نسخة قابلة للحفظ على جهازك. احفظها بأمان؛ يمكن استعادة بعض الأقسام فقط بعد فحص الملف وتأكيدك.":"Backup file generated for your device. Keep it secure; validated core sections can be restored separately after explicit review.");
   }catch(e){setError(e instanceof Error?e.message:String(e));}
  };
  const clear=()=>{
@@ -54,12 +55,13 @@ export function LocalDataControls(){
   <div className="mt-4 rounded-xl border border-[#E0E8DD] bg-[#F7FAF5] p-3">
    <h3 className="text-sm font-semibold">{ar?"حمّل بياناتك":"Export a personal backup"}</h3>
    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
-    "ملف JSON غير مشفّر يحتوي على مصاريفك وبيانات العائلة والمناسبات والخطط المحفوظة هنا. لا يتضمن كلمات المرور أو جلسات الدخول أو مفاتيح API. لا توجد خاصية استيراد بعد.":
-    "A plain, unencrypted JSON file of locally saved Money, family profiles, calendar and plans. Login sessions and external API keys are excluded. Import/restore is not available yet."}</p>
+    "ملف JSON غير مشفّر يحتوي على مصاريفك وبيانات العائلة والمناسبات والخطط المحفوظة هنا. لا يتضمن كلمات المرور أو جلسات الدخول أو مفاتيح API. يمكن استعادة الأقسام الأساسية التي نتحقق منها، ولا نعيد رموز الدعوات أو ملفات غير مدعومة.":
+    "A plain, unencrypted JSON file of locally saved Money, family profiles, calendar and plans. Login sessions and external API keys are excluded. Validated core sections may be restored after reviewing each replacement. Invitation tokens and unsupported sections are excluded."}</p>
    <Button type="button" variant="outline" className="mt-3" onClick={exportData}>
     <Download className="size-4"/>{ar?"نزّل نسختي":"Download my backup"}
    </Button>
   </div>
+  <LocalBackupRecovery/>
   <div className="mt-3 rounded-xl border border-[#EBDDD5] bg-[#FEFBF7] p-3">
    <h3 className="text-sm font-semibold">{ar?"امسح بيانات هذا المتصفح":"Erase data on this device"}</h3>
    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
@@ -78,7 +80,7 @@ export function LocalDataControls(){
   {error&&<p role="alert" className="mt-3 text-xs text-[#9B4545]">{error}</p>}
   {notice&&<p role="status" className="mt-3 text-xs text-brand">{notice}</p>}
   <p className="mt-3 text-[11px] text-muted-foreground">{ar?
-   "هذه الأدوات لا ترفع بياناتك إلى أي خادم. قبل مسح المتصفح، احتفظ بنسخة خارجية إذا لزم، مع العلم أننا لم نفعّل استعادة النسخ بعد.":
+   "هذه الأدوات لا ترفع بياناتك إلى أي خادم. قبل مسح المتصفح، احتفظ بنسخة خارجية إذا لزم، ويمكنك استعادة الأقسام الأساسية بعد مراجعتها وتأكيدك.":
    "These controls do not upload your data. Keep any export somewhere private. Deleting browser records is irreversible within this pilot."}</p>
  </section>;
 }
