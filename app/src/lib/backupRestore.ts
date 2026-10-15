@@ -20,7 +20,7 @@ const id=z.string().min(1).max(180);
 const isoDate=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s=>{
  const parts=s.split("-").map(Number);
  const date=new Date(Date.UTC(parts[0]!,parts[1]!-1,parts[2]!));
- return date.toISOString().slice(0,10)===s;
+ return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===s;
 },"Invalid calendar date");
 const isoTime=z.string().max(50).refine(s=>Number.isFinite(Date.parse(s)),"Invalid timestamp");
 const many=<T extends z.ZodTypeAny>(schema:T,max=3000)=>z.array(schema).max(max);
