@@ -62,7 +62,7 @@ export function collectCalendarReminders(args:{
    const title=wish.name.trim().slice(0,105);
    if(!title)continue;
    result.push({key:"shopping:"+wish.id+":"+wish.targetDate,date:wish.targetDate,
-    title:(wish.kind==="gift"?"Plan gift: ":"Review purchase: ")+title,kind:"shopping"});
+    title:((wish.kind==="gift"?"Plan gift: ":"Review purchase: ")+title).slice(0,120),kind:"shopping"});
   }
  }
  const seen=new Set<string>();
