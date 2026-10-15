@@ -161,7 +161,7 @@ function TogetherPage() {
         }}>{tr("Save to plan")}</Button>
         <Link to="/plans" className="text-xs font-semibold text-brand underline">{tr("Open plan")} →</Link>
        </div>
-      </div>
+      </div>}
       <div className="grid gap-3 sm:grid-cols-2">
         <a href={googleActivitiesLink} target="_blank" rel="noopener noreferrer" className="flex min-h-30 flex-col justify-center rounded-2xl border border-border bg-white p-4 transition hover:border-brand/40">
           <span className="text-base font-semibold text-brand">① {tr("Find activity ideas")}</span>
