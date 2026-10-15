@@ -5,5 +5,16 @@
   "display": "standalone",
   "background_color": "#f6f8f6",
   "theme_color": "#145b4d",
-  "icons": []
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "description": "Bilingual family budgeting, plans and everyday decisions. Browser-local data pilot.",
+  "scope": "/wafferli-v13/",
+  "lang": "en",
+  "dir": "auto"
 }

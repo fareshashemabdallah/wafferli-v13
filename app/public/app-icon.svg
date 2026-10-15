@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Dabberna">
+ <rect width="192" height="192" rx="49" fill="#145b4d"/>
+ <path d="M57 43v105h34c35 0 54-24 54-52s-19-53-54-53H57Z"
+  fill="none" stroke="#d7e993" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+ <circle cx="145" cy="44" r="10" fill="#d7e993"/>
+</svg>
