@@ -70,6 +70,10 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - **No merchant receives the draft through Dabberna.** This is not a verified quote marketplace, supplier offer, merchant onboarding, transaction or payment integration. Do not include personal contact details, children's details or full street addresses.
 - A shopper can record a public HTTPS source URL and the date on which they personally checked a price. **Checked** means the user asserts it, not independent price verification. Entries older than seven days are flagged for review and changing a store or total resets manual check status.
 
+## Cash-flow what-if spending assessment
+- Wise Decisions models a proposed purchase **paid today** against the user's verified-for-freshness manual cash input, 30-day recorded due bills and projected low-point, and chosen reserve. A bill or cash risk triggers a **review** outcome; incomplete or stale information triggers **unknown**; a provisional result is never a bank guarantee.
+- Model is read-only and **does not spend, authorize, deduct or send money**. It does not know unrecorded daily costs, true bank balances, unconfirmed provider settlements or delays of expected income. No live bank feed or licensed financial advice.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
