@@ -19,6 +19,8 @@
 - Family preferences
 - Family plans and their local decision records
 - Shopping list
+- Private merchant quotation drafts and manually entered offers (strictly validated; no merchant-side authorization)
+- Private family-service comparison notes (strictly validated; no medical credentials or provider ratings verified)
 
 **Not restored:** outing organizer/vote tokens, friend/community/Supabase login state, API keys, calendar-related occasionPlans, SmartBuy comparison drafts, greeting/onboarding settings, local reminders/snoozes, unrecognized future fields at the top level. The file preview lists unsupported sections explicitly rather than silently replacing them. This intentionally avoids restoring token-bearing records with server-side authority and avoids pretending everything can be safely migrated.
 
