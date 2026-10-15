@@ -6,6 +6,7 @@ import {useLocalState} from "@/lib/storage";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {FAMILY_SETUP_PREFERENCES_KEY} from "@/lib/familySetup";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
+import {FAMILY_TASKS_KEY,type FamilyTask} from "@/lib/familyTasks";
 import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
 import type {FamilyMoment} from "@/lib/familyCalendar";
 import {buildFamilyAttention,snoozeAttention,
@@ -23,12 +24,13 @@ export function FamilyAttentionPanel(){
  const [prefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
  const [confirmed,,confirmedReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
  const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [snoozes,setSnoozes,snoozesReady]=useLocalState<AttentionSnoozes>(FAMILY_ATTENTION_SNOOZES_KEY,{});
- if(!moneyReady||!membersReady||!prefsReady||!confirmedReady||!plansReady||!momentsReady||!snoozesReady)return null;
+ if(!moneyReady||!membersReady||!prefsReady||!confirmedReady||!plansReady||!tasksReady||!momentsReady||!snoozesReady)return null;
  if(prefs.notificationFrequency==="off")return null;
  const now=new Date();
- const items=buildFamilyAttention({money,members,preferences:prefs,preferencesConfirmed:confirmed,plans,moments,snoozes,now});
+ const items=buildFamilyAttention({money,members,preferences:prefs,preferencesConfirmed:confirmed,plans,moments,tasks,snoozes,now});
  if(!items.length)return null;
  return <section className="mt-5 rounded-2xl border border-[#DDE6DB] bg-[#F9FBF6] p-4 sm:p-5"
   aria-label={ar?"الأمور التي تستحق انتباهك":"Family attention center"}>

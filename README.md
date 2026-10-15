@@ -106,6 +106,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - Review flags compare categories only when at least two previous months contain recorded entries. They are prompts to double-check timing or missing data, not fraud alerts or verified spending judgments.
 - An explicit, read-only 3/6/12-month what-if tool models changes to monthly income and additional costs, including a one-time event in a selected month. No bank balance, dated bill settlement, financial guarantee or hidden ledger mutation. **Do not enter bills already allocated in regular budget categories again.**
 
+## Parent-managed family responsibilities
+- My Family now includes local, parent-managed tasks with dates, priority, optional adult display labels and optional Plan linkage; parents can mark completed or remove each task.
+- Due and overdue items feed the existing Today attention list when family-life guidance is enabled. This **does not send assignments, notifications or access permissions to anyone**; family member IDs are local labels only.
+- Task records are included in explicit local JSON export, validated selective recovery and the opt-in, off-by-default personal vault. No teen/child login, cloud sync or co-parent task sharing is activated.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
