@@ -1,0 +1,174 @@
+import {createFileRoute,Link} from "@tanstack/react-router";
+import {ArrowRight,CalendarDays,CheckCircle2,Compass,Plus,ShieldCheck,Trash2} from "lucide-react";
+import {useState,type FormEvent} from "react";
+import {toast} from "sonner";
+import {AppShell} from "@/components/AppShell";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {useI18n} from "@/lib/i18n";
+import {uid,fmtJOD,useLocalState} from "@/lib/storage";
+import {sampleMoney,type MoneyState,type Expense} from "@/lib/money";
+import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,makeFamilyPlan,markPlanComplete,moneyAmount,reviewPlanCost,setPlanChoice,upcomingFamilyPlans,type FamilyPlan,type PlanKind} from "@/lib/familyPlans";
+import {localToday} from "@/lib/cashflow";
+export const Route=createFileRoute("/plans")({
+ head:()=>({meta:[{title:"My Plans — Dabberna"},{name:"description",content:"Plan meaningful purchases, outings and occasions in one private place."}]}),
+ component:PlansPage
+});
+const kinds:{id:PlanKind;en:string;ar:string}[]=[
+ {id:"purchase",en:"Purchase",ar:"مشتريات"},{id:"outing",en:"Outing",ar:"طلعة"},{id:"occasion",en:"Occasion",ar:"مناسبة"},{id:"other",en:"Other",ar:"غير ذلك"}
+];
+function PlansPage(){
+ const {lang}=useI18n(),ar=lang==="ar";
+ const [plans,setPlans,ready]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [active,setActive]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
+ const [money,setMoney,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
+ const [newOpen,setNewOpen]=useState(false);
+ const [title,setTitle]=useState(""),[kind,setKind]=useState<PlanKind>("purchase"),[date,setDate]=useState(""),[budget,setBudget]=useState("");
+ const [err,setErr]=useState("");
+ const [chosen,setChosen]=useState(""),[price,setPrice]=useState(""),[actual,setActual]=useState(""),[category,setCategory]=useState("");
+ const selected=plans.find(p=>p.id===active)??null;
+ const currentPlan=selected??upcomingFamilyPlans(plans)[0]??plans[0]??null;
+ const assess=currentPlan?reviewPlanCost(currentPlan,money):null;
+ const update=(next:FamilyPlan)=>setPlans(prev=>prev.map(p=>p.id===next.id?next:p));
+ const submit=(e:FormEvent)=>{
+  e.preventDefault();const amount=budget.trim()===""?undefined:moneyAmount(budget);
+  if(budget.trim()!==""&&amount===null)return setErr(ar?"أدخل ميزانية صحيحة بين صفر و١٠٠٬٠٠٠ دينار.":"Enter a valid budget between 0 and 100,000 JOD.");
+  const plan=makeFamilyPlan({id:uid(),title,kind,...(date?{date}:{}),...(amount!==undefined?{budgetJod:amount!}:{})});
+  if(!plan)return setErr(ar?"أدخل الاسم والتاريخ الصحيح.":"Enter a name and valid date.");
+  setPlans(prev=>[plan,...prev]);setActive(plan.id);setTitle("");setDate("");setBudget("");setNewOpen(false);setErr("");
+  toast.success(ar?"الخطة صارت جاهزة!":"Plan created.");
+ };
+ const decide=()=>{
+  if(!currentPlan||!chosen.trim())return;
+  const n=price.trim()===""?undefined:moneyAmount(price);
+  if(price.trim()!==""&&n===null)return setErr(ar?"أدخل مبلغاً صحيحاً.":"Enter a valid estimated amount.");
+  update(setPlanChoice(currentPlan,{label:chosen,...(n!==undefined?{estimatedJod:n!}:{}),source:"manual"}));
+  setChosen("");setPrice("");setErr("");toast.success(ar?"تم حفظ الاختيار.":"Choice saved to your plan.");
+ };
+ const finish=()=>{
+  if(!currentPlan)return;const n=moneyAmount(actual);
+  if(n===null)return setErr(ar?"أدخل القيمة الفعلية (يمكن أن تكون صفرًا).":"Enter an actual cost (zero is allowed).");
+  update(markPlanComplete(currentPlan,n));setActual("");setErr("");toast.success(ar?"تم حفظ النتيجة الفعلية.":"Actual outcome saved.");
+ };
+ const recordExpense=(plan:FamilyPlan)=>{
+  if(money.demo||!moneyReady)return setErr(ar?"ابدأ ببيانات مالية حقيقية قبل ربط المصروف.":"Switch from demo to your real finances before recording.");
+  if(plan.status!=="completed"||plan.actualJod===undefined)return;
+  if(!category||!money.categories.some(c=>c.id===category))return setErr(ar?"اختَر فئة مصروف أولاً.":"Choose a spending category.");
+  const expenseId="family-plan-"+plan.id;
+  if(money.expenses.some(e=>e.id===expenseId)||plan.expenseId)return setErr(ar?"هذا المصروف مسجّل بالفعل.":"This expense is already recorded.");
+  if(!window.confirm(ar?"سنضيف المبلغ الفعلي كمصروف مدفوع في المالية دون خصمه من رصيد البنك. هل تؤكد؟":"Record this actual amount as a paid expense in Money without changing the manually entered bank balance?"))return;
+  const expense:Expense={id:expenseId,date:localToday(),categoryId:category,amount:plan.actualJod,
+    status:"paid",shared:true,note:plan.title,sourcePlanId:plan.id};
+  setMoney(prev=>prev.expenses.some(e=>e.id===expenseId)?prev:{...prev,expenses:[expense,...prev.expenses]});
+  update({...plan,expenseId,updatedAt:new Date().toISOString()});setErr("");
+  toast.success(ar?"تم الربط بالمالية دون تعديل رصيد البنك.":"Recorded in Money without deducting cash.");
+ };
+ return <AppShell title={ar?"خططنا":"Our Plans"}>
+   <section className="page-intro">
+     <p className="section-eyebrow">{ar?"خطّة واحدة، خطوات مترابطة":"ONE PLAN · CONNECTED CHOICES"}</p>
+     <h2 className="mt-2 text-xl font-semibold text-ink">{ar?"من الفكرة إلى القرار والنتيجة":"From a good idea to a thoughtful decision"}</h2>
+     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ar?"أضف ما تحتاجه عائلتك، راجع الميزانية، قارِن الخيارات، وسجّل ما حدث فعلياً. كل شيء محفوظ على هذا الجهاز فقط.":"Keep a purchase, outing or occasion in one place. Review your budget, compare options and record what actually happened. Plans stay on this device only."}</p>
+     <Button className="mt-4 min-h-11" onClick={()=>setNewOpen(v=>!v)}><Plus className="size-4"/>{ar?"خطة جديدة":"New plan"}</Button>
+   </section>
+   {newOpen&&<form onSubmit={submit} className="editorial-card mt-4 grid gap-3 p-4 sm:grid-cols-2">
+    <label className="text-sm font-medium sm:col-span-2">{ar?"شو ناويين نعمل؟":"What are you planning?"}
+     <Input required maxLength={100} className="mt-1" value={title} onChange={e=>setTitle(e.target.value)} placeholder={ar?"مثلاً: ثلاجة جديدة أو طلعة الجمعة":"e.g. New refrigerator or Friday outing"}/>
+    </label>
+    <label className="text-sm font-medium">{ar?"النوع":"Type"}
+     <select className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3" value={kind} onChange={e=>setKind(e.target.value as PlanKind)}>
+      {kinds.map(k=><option key={k.id} value={k.id}>{ar?k.ar:k.en}</option>)}
+     </select>
+    </label>
+    <label className="text-sm font-medium">{ar?"التاريخ (اختياري)":"When (optional)"}
+     <Input className="mt-1" type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+    </label>
+    <label className="text-sm font-medium sm:col-span-2">{ar?"سقف الميزانية بالدينار (اختياري)":"Comfortable budget ceiling in JOD (optional)"}
+     <Input className="mt-1" type="number" min={0} max={100000} step=".01" inputMode="decimal" value={budget} onChange={e=>setBudget(e.target.value)}/>
+    </label>
+    <div className="sm:col-span-2 flex flex-wrap gap-2">
+     <Button type="submit">{ar?"احفظ الخطة":"Save plan"}</Button>
+     <Button type="button" variant="outline" onClick={()=>{setNewOpen(false);setErr("");}}>{ar?"إلغاء":"Cancel"}</Button>
+    </div>
+   </form>}
+   {!ready||!moneyReady?<p className="mt-4 text-sm text-muted-foreground">{ar?"جارٍ تحميل الخطط…":"Loading your plans…"}</p>:null}
+   {ready&&plans.length===0&&!newOpen&&<div className="editorial-card mt-5 p-5">
+    <h3 className="font-semibold">{ar?"كل رحلة حلوة تبدأ بخطة بسيطة":"Start with one meaningful plan"}</h3>
+    <p className="mt-2 text-sm text-muted-foreground">{ar?"اختَر شراء أو طلعة أو مناسبة، وحدد سقفاً مريحاً إن أحببت.":"Choose a purchase, outing or occasion and add a comfortable limit if you like."}</p>
+   </div>}
+   {ready&&plans.length>0&&<section className="mt-6">
+    <h2 className="text-lg font-semibold">{ar?"خطط العائلة":"Family plans"} <span className="text-sm text-muted-foreground">({plans.length})</span></h2>
+    <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+     {plans.map(p=><button key={p.id} type="button" onClick={()=>{setActive(p.id);setErr("");setChosen("");setActual("");}}
+       className={"min-w-39 max-w-56 shrink-0 rounded-2xl border p-3 text-start "+(currentPlan?.id===p.id?"border-brand bg-[#EAF1E7]":"border-border bg-white")}>
+       <p className="truncate text-sm font-semibold">{p.title}</p>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?kinds.find(k=>k.id===p.kind)?.ar:kinds.find(k=>k.id===p.kind)?.en} · {p.status==="completed"?(ar?"مكتملة":"Completed"):p.status==="decided"?(ar?"تم الاختيار":"Decided"):(ar?"تخطيط":"Planning")}</p>
+       {p.date&&<p className="mt-1 text-xs text-brand">{p.date}</p>}
+      </button>)}
+    </div>
+   </section>}
+   {currentPlan&&<section className="editorial-card mt-4 p-4 sm:p-6" aria-label={ar?"تفاصيل الخطة":"Plan details"}>
+    <div className="flex flex-wrap items-start justify-between gap-2">
+     <div><p className="section-eyebrow">{ar?"خطتك الحالية":"YOUR ACTIVE PLAN"}</p><h2 className="mt-1 text-xl font-semibold">{currentPlan.title}</h2></div>
+     <button type="button" onClick={()=>{if(!window.confirm(ar?"حذف هذه الخطة؟ لن يتم حذف المصاريف المسجلة في المالية.":"Delete this plan? Any expenses already recorded in Money will remain."))return;setPlans(prev=>prev.filter(p=>p.id!==currentPlan.id));setActive(null);}} className="grid size-11 place-items-center rounded-full border border-border text-muted-foreground" aria-label={ar?"حذف الخطة":"Delete plan"}><Trash2 className="size-4"/></button>
+    </div>
+    <div className="mt-3 flex flex-wrap gap-2 text-xs">
+     {currentPlan.budgetJod!==undefined&&<span className="rounded-full bg-[#EDF3EA] px-3 py-2">{ar?"سقف الميزانية: ":"Budget limit: "}{fmtJOD(currentPlan.budgetJod)}</span>}
+     {currentPlan.date&&<span className="inline-flex items-center gap-1 rounded-full bg-[#F8F2E9] px-3 py-2"><CalendarDays className="size-3.5"/>{currentPlan.date}</span>}
+    </div>
+    {moneyReady&&assess&&<div className={"mt-4 rounded-xl border p-3 text-sm "+(assess.status==="review"?"border-[#ECC8C9] bg-[#FFF3F2]":"border-[#D8E5D7] bg-[#F3F7F0]")}>
+     <div className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-brand"/>
+      <div><p className="font-semibold">{assess.status==="demo"?(ar?"بيانات تجريبية":"Sample financial data"):
+        assess.status==="unknown"?(ar?"تحتاج معلومات مالية":"Financial details needed"):
+        assess.status==="review"?(ar?"راجع وضعك قبل الالتزام":"Review before committing"):(ar?"تقدير مبدئي":"Provisional financial check")}</p>
+       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{assess.status==="demo"?(ar?"بيانات المالية تجريبية ولا تصلح لتقييم الخطة.":assess.reason):
+        assess.status==="unknown"?(ar?"أدخل الرصيد والفواتير المستحقة والتواريخ وسقف الخطة.":assess.reason):
+        assess.status==="review"?(ar?"قد تتأثر قدرتك على الدفع بالتزامات أو نقص السيولة.":assess.reason):
+        ar?"المبلغ يقع ضمن السيولة المسجلة بعد الفواتير والاحتياطي، لكن قد تنقص مصاريف يومية.":assess.reason}</p>
+       <Link to="/money" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand">{ar?"راجع المالية":"Review Money"} <ArrowRight className="size-3"/></Link>
+      </div>
+     </div>
+    </div>}
+    {currentPlan.status!=="completed"&&<>
+      <div className="mt-5 rounded-xl bg-[#F4F7F0] p-4">
+       <h3 className="font-semibold">{ar?"قارن الخيارات":"Compare your options"}</h3>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?"احتفظ باسم الخطة وسقفها عند الانتقال إلى صفحة المقارنة.":"Keep this plan's name and budget when you explore options."}</p>
+       <div className="mt-3 flex flex-wrap gap-2">
+        <Link to={currentPlan.kind==="purchase"?"/explore/smartbuy":currentPlan.kind==="outing"?"/explore/together":currentPlan.kind==="occasion"?"/occasions":"/explore"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
+         <Compass className="size-4"/>{ar?"استكشف الخيارات":"Explore options"}
+        </Link>
+       </div>
+      </div>
+      <div className="mt-4">
+       <p className="text-sm font-semibold">{ar?"الاختيار الذي تفضّله":"Your preferred option"}</p>
+       {currentPlan.choice&&<p className="mt-2 rounded-xl bg-[#EAF1E8] p-3 text-sm">{currentPlan.choice.label}{currentPlan.choice.estimatedJod!==undefined&&" · "+fmtJOD(currentPlan.choice.estimatedJod)}</p>}
+       <p className="mt-2 text-xs text-muted-foreground">{ar?"يمكنك حفظ خيار يدوي، أو اختياره من صفحة مقارنة المشتريات.":"Save a choice here, or select an option from Compare & Choose."}</p>
+       <Input maxLength={120} className="mt-2" value={chosen} onChange={e=>setChosen(e.target.value)} placeholder={ar?"اسم الخيار أو المكان":"Option or venue name"}/>
+       <Input className="mt-2 max-w-48" type="number" inputMode="decimal" step=".01" min={0} max={100000} value={price} onChange={e=>setPrice(e.target.value)} placeholder={ar?"سعر تقريبي (اختياري)":"Estimated cost (optional)"}/>
+       <Button variant="outline" className="mt-3" onClick={decide} disabled={!chosen.trim()}>{ar?"احفظ اختياري":"Save my choice"}</Button>
+      </div>
+      <div className="mt-5 border-t border-border pt-4">
+       <h3 className="font-semibold">{ar?"ماذا حدث فعلياً؟":"What actually happened?"}</h3>
+       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?"بعد الشراء أو الطلعة، سجّل التكلفة الحقيقية. لن يتم خصم مبلغ أو إنشاء مصروف إلا بموافقتك.":"After the purchase or outing, record actual cost. No cash or spending entry changes unless you approve."}</p>
+       <Input className="mt-3 max-w-48" type="number" inputMode="decimal" min={0} max={100000} step=".01" value={actual} onChange={e=>setActual(e.target.value)} placeholder={ar?"التكلفة الفعلية بالدينار":"Actual cost (JOD)"}/>
+       <Button className="mt-3" onClick={finish}>{ar?"اكتملت الخطة":"Mark completed"}</Button>
+      </div>
+    </>}
+    {currentPlan.status==="completed"&&<section className="mt-5 rounded-2xl bg-[#EDF6EA] p-4">
+      <p className="flex items-center gap-2 font-semibold"><CheckCircle2 className="size-5 text-brand"/>{ar?"تمّت الخطة":"Plan completed"}</p>
+      <p className="mt-2 text-sm">{ar?"التكلفة الفعلية: ":"Actual cost: "}<strong>{fmtJOD(currentPlan.actualJod??0)}</strong></p>
+      {currentPlan.budgetJod!==undefined&&<p className="mt-1 text-xs text-muted-foreground">{ar?"الفرق عن السقف: ":"Difference from ceiling: "}{fmtJOD((currentPlan.actualJod??0)-currentPlan.budgetJod)}</p>}
+      {currentPlan.expenseId||money.expenses.some(e=>e.sourcePlanId===currentPlan.id)?<p className="mt-3 text-sm font-semibold text-brand">{ar?"هذا المصروف مسجّل في المالية.":"Recorded in Money."}</p>:
+      <div className="mt-3">
+       <p className="text-xs text-muted-foreground">{ar?"تسجيل المصروف خطوة اختيارية؛ رصيد البنك المدخل لا يتغير.":"Optional: record actual expense in Money without changing the manually entered cash balance."}</p>
+       {!money.demo&&money.categories.length>0&&<select className="mt-2 min-h-11 w-full rounded-xl border border-border bg-white px-3 text-sm" value={category} onChange={e=>setCategory(e.target.value)}>
+        <option value="">{ar?"اختر فئة مصروف":"Choose spending category"}</option>{money.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+       </select>}
+       {money.demo?<Link to="/money" className="mt-2 inline-block text-sm font-semibold text-brand underline">{ar?"ابدأ بماليتي الحقيقية":"Start real Money first"}</Link>:
+        <Button variant="outline" className="mt-3" onClick={()=>recordExpense(currentPlan)} disabled={!category||money.categories.length===0}>{ar?"سجّل المصروف في المالية":"Record actual expense in Money"}</Button>}
+      </div>}
+    </section>}
+   </section>}
+   {err&&<p className="mt-3 rounded-xl bg-[#FFF1F1] p-3 text-sm text-[#9B3E47]" role="alert">{err}</p>}
+   <p className="mt-5 text-xs leading-relaxed text-muted-foreground">{ar?"هذه الخطط محفوظة فقط على هذا الجهاز. ليست متزامنة بعد مع حسابات أفراد العائلة.":"Plans remain private to this browser for now. Household cloud sharing and role permissions are not yet connected."}</p>
+  </AppShell>;
+}

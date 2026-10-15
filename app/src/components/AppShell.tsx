@@ -1,14 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Home, Info, Languages, Sparkles, UserRound, Wallet } from "lucide-react";
+import { CalendarCheck2, Compass, Home, Info, Languages, Sparkles, UserRound, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
 import { useI18n, type Key } from "@/lib/i18n";
 import { writeLocal } from "@/lib/storage";
 import { Logo } from "./Logo";
 
-const tabs: { to: "/" | "/explore" | "/money" | "/space"; key: Key; icon: typeof Home; exact?: boolean }[] = [
+const tabs: { to: "/" | "/explore" | "/money" | "/plans" | "/space"; key: Key; icon: typeof Home; exact?: boolean }[] = [
  {to:"/",key:"home",icon:Home,exact:true},
  {to:"/explore",key:"explore",icon:Compass},
  {to:"/money",key:"money",icon:Wallet},
+ {to:"/plans",key:"plans",icon:CalendarCheck2},
  {to:"/space",key:"space",icon:UserRound}
 ];
 
@@ -67,10 +68,10 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
   </div>
 
   <nav aria-label="Main" className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-[#DEE6DD] bg-[#FFFEFC]/95 px-2 pt-2 shadow-[0_-12px_28px_-26px_rgba(42,68,47,.36)] backdrop-blur-xl md:hidden">
-   <div className="mx-auto grid max-w-xl grid-cols-4 gap-1">
+   <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
     {tabs.map(({to,key,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
       onClick={()=>{if(to!=="/")writeLocal("homeIntroDone",true);}}
-      className="group flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[11px] font-medium text-[#708174] transition hover:bg-[#F2F6F0] data-[status=active]:bg-[#ECF4EC] data-[status=active]:font-semibold data-[status=active]:text-brand">
+      className="group flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-0.5 text-[10px] font-medium text-[#708174] transition hover:bg-[#F2F6F0] data-[status=active]:bg-[#ECF4EC] data-[status=active]:font-semibold data-[status=active]:text-brand">
       <Icon className="size-[21px]" aria-hidden="true"/><span>{t(key)}</span>
     </Link>)}
    </div>

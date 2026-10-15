@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/i18n";
-import { createFileRoute } from "@tanstack/react-router";
-import { ImagePlus, Plus, Receipt, Trash2 } from "lucide-react";
+import { createFileRoute,Link } from "@tanstack/react-router";
+import { CheckCircle2, ImagePlus, Plus, Receipt, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
@@ -8,6 +8,8 @@ import { Field, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fmtJOD, uid, useLocalState } from "@/lib/storage";
+import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,setPlanChoice,type FamilyPlan} from "@/lib/familyPlans";
+import {toast} from "sonner";
 
 export const Route = createFileRoute("/explore/smartbuy")({
   head: () => ({
@@ -38,7 +40,11 @@ function Photo({ label, icon: Icon }: { label: string; icon: typeof Receipt }) {
 }
 
 function SmartBuy() {
-  const { tr } = useI18n();
+  const { tr,lang } = useI18n();
+  const ar=lang==="ar";
+  const [plans,setPlans] = useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+  const [activePlan] = useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
+  const selectedPlan=plans.find(p=>p.id===activePlan&&p.kind==="purchase"&&p.status!=="completed");
   const [s, setS] = useLocalState("smartbuy", {
     product: "",
     budget: "",
@@ -78,6 +84,18 @@ function SmartBuy() {
                 <input type="checkbox" checked={a.verified} onChange={(e) => setAlt(a.id, { verified: e.target.checked })} /> {tr(a.verified ? "Price I verified" : "Unverified price")}
               </label>
             </div>
+            {selectedPlan&&Number(a.price)>0&&Number.isFinite(a.total)&&a.total>=0&&a.store.trim()&&<div className="mt-3 rounded-xl border border-[#D7E6DA] bg-[#F2F7F0] p-3">
+              <p className="text-xs font-medium text-muted-foreground">{ar?"اختيار لخطة: ":"Choose for plan: "}{selectedPlan.title}</p>
+              <button type="button" onClick={()=>{
+                 const label=(s.product.trim()?s.product.trim()+" · ":"")+a.store.trim();
+                 const updated=setPlanChoice(selectedPlan,{label,estimatedJod:Math.round(a.total*100)/100,source:"comparison",verified:a.verified});
+                 setPlans(prev=>prev.map(p=>p.id===selectedPlan.id?updated:p));
+                 toast.success(ar?"أضفنا الاختيار للخطة. لم نسجّل أي مصروف.":"Choice saved to Plan. No expense has been recorded.");
+              }} className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
+                <CheckCircle2 className="size-4"/>{ar?"اختَر هذا العرض للخطة":"Choose this for the plan"}
+              </button>
+              {selectedPlan.choice?.estimatedJod===Math.round(a.total*100)/100&&selectedPlan.choice?.label.includes(a.store.trim())&&<Link to="/plans" className="ms-3 text-xs font-semibold text-brand underline">{ar?"راجع الخطة":"Review plan"}</Link>}
+            </div>}
             <details className="group mt-3 rounded-xl bg-muted/40 p-3">
               <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
                 <span>{tr("More than a price: assess this choice")}</span><span className="text-xs group-open:hidden">+</span><span className="hidden text-xs group-open:inline">−</span>

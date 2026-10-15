@@ -8,7 +8,8 @@ import {useI18n} from "@/lib/i18n";
 import {type FamilyMoment,formatMomentDate} from "@/lib/familyCalendar";
 import {sampleMembers,sampleMoney,type Member} from "@/lib/money";
 import {daysUntil,eventBudgetGuidance,ideaCategory,leadAdvice,occasionIdeas,planKey,planningMilestones,upcomingPlanEvents,type OccasionPlan,type OccasionPlans} from "@/lib/occasionAdvisor";
-import {useLocalState,writeLocal} from "@/lib/storage";
+import {useLocalState,writeLocal,uid} from "@/lib/storage";
+import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,makeFamilyPlan,setPlanChoice,type FamilyPlan} from "@/lib/familyPlans";
 import {activeDecisionKey,startDecisionJourney,externalMapLink} from "@/lib/decisionJourney";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 
@@ -47,6 +48,8 @@ function OccasionPlanner(){
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [money]=useLocalState("money",sampleMoney());
  const [plans,setPlans]=useLocalState<OccasionPlans>("occasionPlans",{});
+ const [familyPlans,setFamilyPlans]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [,setActivePlan]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
  const [prefs]=useLocalState("familyPreferences",defaultFamilyPreferences);
  const [chosen,setChosen]=useState("");
  const [feed,setFeed]=useState<TrendFeed|null>(null);
@@ -115,6 +118,23 @@ function OccasionPlanner(){
        onChange={e=>{const v=e.target.value;update({budgetJod:v===""?null:Math.min(100000,Math.max(0,Math.round(Number(v)*100)/100))});}}/>
      </div>
      <p className="mt-2 text-xs text-muted-foreground">{ar?"هذا حد تختاره بنفسك، وليس مبلغًا ننصح بإنفاقه. الخيارات البسيطة قد تكون أفضل.":"You choose the limit. The app will never recommend using every dinar. A modest gesture may mean more."}</p>
+     <div className="mt-3 flex flex-wrap items-center gap-3">
+      {familyPlans.some(p=>p.sourceRef==="occasion:"+key)?
+       <Link to="/plans" className="inline-flex min-h-11 items-center rounded-full bg-[#EAF1E8] px-4 text-sm font-semibold text-brand">{ar?"افتح هذه المناسبة في خططنا":"Open this in Plans"} →</Link>:
+       <button type="button" className="min-h-11 rounded-full border border-[#CADBCC] bg-white px-4 text-sm font-semibold text-brand" onClick={()=>{
+        if(!active)return;
+        const ref="occasion:"+key;
+        const existing=familyPlans.find(p=>p.sourceRef===ref);
+        if(existing){setActivePlan(existing.id);return;}
+        const p=makeFamilyPlan({id:uid(),title:active.title,kind:"occasion",date:active.occursOn,
+         ...(plan.budgetJod!==null?{budgetJod:plan.budgetJod}:{}),sourceRef:ref});
+        if(!p)return;
+        const idea=ideas.find(i=>i.id===plan.chosenIdea);
+        const linked=idea?setPlanChoice(p,{label:ar?idea.ar:idea.en,source:"occasion"}):p;
+        setFamilyPlans(old=>[linked,...old]);setActivePlan(linked.id);
+       }}>{ar?"أضف المناسبة إلى خططنا":"Add occasion to Our Plans"}</button>}
+      <span className="text-xs text-muted-foreground">{ar?"ستبقى خططك على هذا الجهاز":"Your plans stay on this device"}</span>
+     </div>
      {plan.budgetJod!==null&&<div className="mt-3 rounded-xl bg-muted/40 p-3 text-sm">
       <ShieldCheck className="me-2 inline size-4 text-brand"/>
       {financial.status==="demo"?(ar?"بيانات المالية الحالية تجريبية؛ لا يمكن تقييم قدرتك على الدفع منها.":"Your finance figures are demo data, so affordability cannot be assessed.")

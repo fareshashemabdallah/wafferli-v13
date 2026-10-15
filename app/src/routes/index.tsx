@@ -3,6 +3,7 @@ import {ArrowRight,CalendarHeart,ChevronRight,CloudSun,Compass,Heart,Sparkles,Wa
 import {AppShell} from "@/components/AppShell";
 import {FamilyFinanceSnapshot} from "@/components/FamilyFinanceSnapshot";
 import {HomeJourneyHighlights} from "@/components/HomeJourneyHighlights";
+import {HomePlanHighlight} from "@/components/HomePlanHighlight";
 import {FamilyWeather} from "@/components/FamilyWeather";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 import {useLocalState,writeLocal} from "@/lib/storage";
@@ -112,6 +113,7 @@ function Index(){
      })}
     </div>
    </section>
+   <HomePlanHighlight/>
    <HomeJourneyHighlights/>
    <FamilyFinanceSnapshot/>
    {prefs.weather&&<details className="group editorial-card mt-4 overflow-hidden">

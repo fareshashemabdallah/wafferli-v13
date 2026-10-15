@@ -8,6 +8,7 @@ const dict = {
   home: { en: "Today", ar: "اليوم" },
   explore: { en: "Discover", ar: "اكتشف" },
   money: { en: "Money", ar: "المالية" },
+  plans: { en: "Plans", ar: "خططنا" },
   space: { en: "Family", ar: "العائلة" },
   advisor: { en: "Help Me Decide", ar: "ساعدني أختار" },
   circles: { en: "Circles", ar: "مجموعاتي" },
