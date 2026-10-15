@@ -17,6 +17,9 @@ In GitHub Settings → Pages select **GitHub Actions** as the deployment source.
 - **Family profiles and preferences:** parent-controlled visibility of weather and suggestions, preferred outing budget/distance, and in-app guidance frequency.
 - **Bilingual navigation:** Arabic RTL / English LTR.
 
+## Merchant payment and commission architecture (future)
+Dabberna will **never custody merchant/customer funds or manually redistribute sales proceeds**. Customer payments must be initiated through merchant/provider-hosted payment flows; where supported, a regulated provider should settle Dabberna's contractual commission natively. Commission agreements can vary by merchant and category. A typed and tested JOD/fils calculation and transaction record model is in `app/src/lib/merchantPaymentPolicy.ts`. The proposed backend event/reconciliation scheme and release gates are documented in [Payment & commission architecture](docs/payment-commission-architecture.md) and [proposed SQL schema](docs/payment-commission-schema.sql). **No live PSP, hosted payment, or settlement integration exists yet.**
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
