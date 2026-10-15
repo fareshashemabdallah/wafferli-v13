@@ -28,8 +28,14 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
    const message=ar?"هذا سيستبدل بيانات المالية التجريبية أو المسجلة على هذا الجهاز بصفحة مالية فارغة. لن تتغير معلومات العائلة أو التقويم. هل تريد المتابعة؟":"Start your own finances? This will replace the saved Money sample and any financial entries on this device with a blank Money plan. Family profiles and calendar will stay unchanged.";
    if(window.confirm(message))setState(()=>emptyRealMoney());
  };
+ if(needsStarterBudget(state))return <div className="space-y-4">
+   <QuickMoneySetup money={state} setMoney={setState}/>
+   <p className="px-2 text-xs leading-relaxed text-muted-foreground">{ar?
+   "يمكنك العودة إلى خططنا أو اكتشف في أي وقت. لا تحتاج إلى ربط بنكك.":
+   "You can explore Plans and Discover at any time. No bank connection is needed."}</p>
+   <Link to="/plans" className="inline-flex min-h-11 items-center rounded-full border border-[#D3E0D3] px-4 text-sm font-semibold text-brand">{ar?"ارجع إلى خططنا":"Return to Plans"} →</Link>
+  </div>;
  return <div className="space-y-4">
-   {needsStarterBudget(state)&&<QuickMoneySetup money={state} setMoney={setState}/>}
 
    {state.demo&&!needsStarterBudget(state)&&<section className="rounded-2xl border border-[#EBDCC9] bg-[#FFF6E9] px-4 py-4">
      <p className="text-sm font-semibold text-ink">{ar?"هذه أرقام للتجربة فقط":"You're viewing example finances"}</p>
