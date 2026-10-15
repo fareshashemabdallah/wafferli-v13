@@ -14,6 +14,7 @@ import {
 import { fmtJOD, uid } from "@/lib/storage";
 import {recordBillPayment,reverseBillPayment,type PaidBillCashMode} from "@/lib/billPayment";
 import {reverseVarianceAllocation} from "@/lib/financeAlignment";
+import {previousMonthKey} from "@/lib/monthlyCarryover";
 
 type Props = {
   state: MoneyState; members: Member[];
@@ -203,7 +204,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
             const percent=latest&&latest.plannedAmount?roundJod(difference/latest.plannedAmount*100):null;
             const currentMonth=today.slice(0,7),paidMonth=latest?.date.slice(0,7);
             const monthRelation=paidMonth===currentMonth?"next":
-              paidMonth===futureDate(today,-33).slice(0,7)?"current":"other";
+              paidMonth===previousMonthKey(currentMonth)?"current":"other";
             return <div key={bill.id} className={"my-2 rounded-xl border px-3 py-3 text-sm transition-colors "+(difference>0.004?
               "border-[#F0C8CA] bg-[#FFF0F1]":difference<-.004?
               "border-[#D1E5D4] bg-[#EDF7F0]":"border-transparent bg-[#F8FAF6]")}>
