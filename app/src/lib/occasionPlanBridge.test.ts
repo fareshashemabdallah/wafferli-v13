@@ -1,6 +1,6 @@
 import {describe,expect,it} from "vitest";
 import {upsertOccasionFamilyPlan} from "./occasionPlanBridge";
-import {occasionIdeas,planKey,type OccasionPlan} from "./occasionAdvisor";
+import {chooseOccasion,occasionIdeas,planKey,type OccasionPlan} from "./occasionAdvisor";
 import {makeFamilyPlan,markPlanComplete,type FamilyPlan} from "./familyPlans";
 import type {MomentOccurrence} from "./familyCalendar";
 import type {Member} from "./money";
@@ -16,6 +16,14 @@ const run=(plans:readonly FamilyPlan[],oc:OccasionPlan=initial,idea=firstIdea)=>
  upsertOccasionFamilyPlan(plans,event,oc,idea,"new-plan-123",now);
 
 describe("Calendar > Occasion > Our Plans: one connected family decision",()=>{
+ it("opens the exact calendar-selected occasion without repeating title or date",()=>{
+  const other:MomentOccurrence={...event,id:"other",title:"Another date",date:"2026-11-14",occursOn:"2026-11-14"};
+  const list=[other,event];
+  expect(chooseOccasion(list,"",planKey(event))).toBe(event);
+  expect(chooseOccasion(list,planKey(other),planKey(event))).toBe(other);
+  expect(chooseOccasion(list,"","deleted-old-event")).toBe(other);
+  expect(chooseOccasion([],"","")).toBeUndefined();
+ });
  it("creates exactly one plan with reused date, budget, idea and source identity",()=>{
   const a=run([]);
   expect(a.created).toBe(true);
