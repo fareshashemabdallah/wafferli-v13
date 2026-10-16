@@ -12,11 +12,24 @@ export function readLocal<T>(key: string, fallback: T): T {
   }
 }
 
-export function writeLocal<T>(key: string, value: T) {
+export const LOCAL_SAVE_FAILED_EVENT = "dabberna:local-save-failed";
+
+/**
+ * A failed browser storage write must never masquerade as a successful save.
+ * Returns false and emits one app-wide warning without logging any private data.
+ */
+export function writeLocal<T>(key: string, value: T): boolean {
   try {
+    if (typeof window === "undefined") return false;
     window.localStorage.setItem(PREFIX + key, JSON.stringify(value));
+    return true;
   } catch {
-    /* storage full or blocked (private mode) */
+    // React state updaters may run during render; notify after the commit to
+    // avoid updating a separate warning component in another component's render.
+    if (typeof window !== "undefined") queueMicrotask(() => {
+      window.dispatchEvent(new Event(LOCAL_SAVE_FAILED_EVENT));
+    });
+    return false;
   }
 }
 
@@ -33,8 +46,7 @@ export function useLocalState<T>(key: string, initial: T) {
     (next: T | ((prev: T) => T)) => {
       setValue((prev) => {
         const v = typeof next === "function" ? (next as (p: T) => T)(prev) : next;
-        writeLocal(key, v);
-        return v;
+        return writeLocal(key, v) ? v : prev;
       });
     },
     [key],

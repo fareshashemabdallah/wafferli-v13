@@ -44,7 +44,7 @@ export function FamilySetupCard(){
     <h3 className="text-sm font-semibold">{ar?current.ar:current.en}</h3>
     <p className="mt-1 text-xs text-muted-foreground">{ar?current.detailAr:current.detailEn}</p>
    </div>
-   <Link to={current.link} className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-brand px-3 text-xs font-semibold text-white">
+   <Link to={current.link} hash={setup.next==="preferences"?"family-preferences":setup.next==="family"?"household-members":""} className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-brand px-3 text-xs font-semibold text-white">
     {ar?"تابع":"Continue"} <ArrowRight className="size-3.5 rtl:rotate-180"/>
    </Link>
   </div>
