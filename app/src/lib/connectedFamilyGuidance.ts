@@ -17,7 +17,7 @@ export type ConnectedContext={
 export type ConnectedAdvice={
  titleEn:string;titleAr:string;detailEn:string;detailAr:string;
  sourceEn:string;sourceAr:string;
- route:"/plans"|"/occasions"|"/explore/together"|"/explore/smartbuy"|"/space";
+ route:"/plans"|"/occasions"|"/explore/together"|"/explore/market"|"/explore/smartbuy"|"/space";
  actionEn:string;actionAr:string
 };
 const d=(now:Date)=>dateKey(now);
@@ -112,7 +112,7 @@ export function nextConnectedFamilyAction(ctx:ConnectedContext):ConnectedAdvice{
      (typeof item.budgetJod==="number"?" · السقف اللي حددته: "+item.budgetJod.toFixed(2)+" د.أ.":".")+
      " تأكد من السعر والتوصيل مع البائع؛ لم يُنشأ طلب أو دفع.",
     sourceEn:"Private family wishlist",sourceAr:"قائمة مشتريات العائلة الخاصة",
-    route:item.kind==="gift"?"/occasions":"/explore/smartbuy",
+    route:item.kind==="gift"?"/occasions":"/explore/market",
     actionEn:item.kind==="gift"?"Review gifts":"Compare options",
     actionAr:item.kind==="gift"?"راجع الهدايا":"قارن الخيارات"
    };
@@ -123,7 +123,7 @@ export function nextConnectedFamilyAction(ctx:ConnectedContext):ConnectedAdvice{
   detailEn:"No dated purchases need attention from your opted-in list this month. You can compare an item when you're ready; family-life suggestions remain turned off.",
   detailAr:"لا توجد مشتريات مؤرخة قريبة بقائمتك المفعّلة. فيك تقارن منتجاً لما تحتاجه؛ اقتراحات الحياة العائلية تظل معطّلة.",
   sourceEn:"Your shopping preferences and device-only wishlist",sourceAr:"تفضيلات التسوق والقائمة على جهازك",
-  route:"/explore/smartbuy",actionEn:"Compare a purchase",actionAr:"قارن منتجاً"
+  route:"/explore/market",actionEn:"Find seller prices",actionAr:"ابحث عن أسعار المتاجر"
  };
  return {
   titleEn:"Plan something simple together",titleAr:"خطّطوا لوقت حلو مع بعض",
