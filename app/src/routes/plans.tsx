@@ -10,6 +10,7 @@ import {uid,fmtJOD,useLocalState} from "@/lib/storage";
 import {sampleMoney,type MoneyState,type Expense} from "@/lib/money";
 import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,makeFamilyPlan,markPlanComplete,moneyAmount,setPlanChoice,upcomingFamilyPlans,type FamilyPlan,type PlanKind} from "@/lib/familyPlans";
 import {PlanDecisionPanel} from "@/components/PlanDecisionPanel";
+import {checkFamilyPlan,postponeFlexiblePlan,markPlanDoneWithoutCost,addPlanActualCost} from "@/lib/familyPlanCheckIn";
 import {FamilyNextActions} from "@/components/FamilyNextActions";
 import {localToday} from "@/lib/cashflow";
 export const Route=createFileRoute("/plans")({
@@ -31,6 +32,35 @@ function PlansPage(){
  const selected=plans.find(p=>p.id===active)??null;
  const currentPlan=selected??upcomingFamilyPlans(plans)[0]??plans[0]??null;
  const update=(next:FamilyPlan)=>setPlans(prev=>prev.map(p=>p.id===next.id?next:p));
+ const completeSimply=()=>{
+  if(!currentPlan||currentPlan.status==="completed")return;
+  if(!window.confirm(ar?"هل اكتملت الخطة فعلاً؟ لن نسجّل مبلغاً أو دفعة، ويمكن إضافة التكلفة لاحقاً.":
+   "Did the plan actually happen? This marks it done without recording a cost or payment."))return;
+  update(markPlanDoneWithoutCost(currentPlan));setErr("");
+  toast.success(ar?"تمّ! بلا مصروف مسجّل.":"Plan completed; no expense was recorded.");
+ };
+ const moveWeek=()=>{
+  if(!currentPlan)return;
+  const next=postponeFlexiblePlan(currentPlan);
+  if(!next)return setErr(ar?"هذا الموعد مربوط بمناسبة ثابتة ولا يمكن تأجيله تلقائياً.":
+   "This date belongs to a fixed or linked event and cannot be moved here.");
+  if(!window.confirm(ar?
+   "غيّر تاريخ الخطة المسجّل لأسبوع لاحق؟ هذا لا يغيّر أي حجز أو موعد مؤكد عند مزوّد الخدمة.":
+   "Move this saved plan one week? It does NOT reschedule any real booking, order or provider appointment."))return;
+  update(next);setErr("");
+  toast.success(ar?"تم تحديث موعد الخطة فقط.":"Saved plan date updated only.");
+ };
+ const addActualLater=()=>{
+  if(!currentPlan||currentPlan.status!=="completed")return;
+  const n=moneyAmount(actual);
+  if(n===null)return setErr(ar?"أدخل تكلفة فعلية صحيحة أو اتركها فارغة.":
+   "Enter a valid actual amount or leave it unrecorded.");
+  const updated=addPlanActualCost(currentPlan,n);
+  if(!updated)return setErr(ar?"لا يمكن تغيير تكلفة مرتبطة بمصروف مسجل مسبقاً.":
+   "Cannot change a cost already linked to a recorded expense.");
+  update(updated);setActual("");setErr("");
+  toast.success(ar?"تم تحديث تكلفة الخطة فقط، دون تسجيل مصروف.":"Plan cost saved, without recording an expense.");
+ };
  const submit=(e:FormEvent)=>{
   e.preventDefault();const amount=budget.trim()===""?undefined:moneyAmount(budget);
   if(budget.trim()!==""&&amount===null)return setErr(ar?"أدخل ميزانية صحيحة بين صفر و١٠٠٬٠٠٠ دينار.":"Enter a valid budget between 0 and 100,000 JOD.");
@@ -117,7 +147,29 @@ function PlansPage(){
      {currentPlan.budgetJod!==undefined&&<span className="rounded-full bg-[#EDF3EA] px-3 py-2">{ar?"سقف الميزانية: ":"Budget limit: "}{fmtJOD(currentPlan.budgetJod)}</span>}
      {currentPlan.date&&<span className="inline-flex items-center gap-1 rounded-full bg-[#F8F2E9] px-3 py-2"><CalendarDays className="size-3.5"/>{currentPlan.date}</span>}
     </div>
-    {moneyReady&&currentPlan.status!=="completed"&&<PlanDecisionPanel key={currentPlan.id} plan={currentPlan} money={money} plans={plans} onUpdate={update} setMoney={setMoney}/>}
+    {(()=>{
+     const pulse=checkFamilyPlan(currentPlan);
+     return <div className="mt-4 rounded-xl border border-[#D5E5D3] bg-[#F2F8EF] p-4"
+       aria-label={ar?"مراجعة تقدم الخطة":"Your plan check-in"}>
+       <p className="text-xs font-semibold text-brand">{ar?"شو لازم نعمل هلأ؟":"YOUR NEXT ACTION"}</p>
+       <h3 className="mt-1 text-base font-semibold">{ar?pulse.headingAr:pulse.headingEn}</h3>
+       <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{ar?pulse.detailAr:pulse.detailEn}</p>
+       {currentPlan.status!=="completed"&&<div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" onClick={completeSimply}
+         className="inline-flex min-h-11 items-center rounded-full bg-brand px-4 text-sm font-semibold text-white">
+         {ar?"تمّت الخطة بالفعل":"This plan is done"}
+        </button>
+        {pulse.canMove&&<button type="button" onClick={moveWeek}
+         className="inline-flex min-h-11 items-center rounded-full border border-[#CDDFCD] bg-white px-4 text-sm font-semibold text-brand">
+         {ar?"أجّل خطتي أسبوعاً":"Move my plan one week"}
+        </button>}
+       </div>}
+       <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{ar?
+        "هذه مراجعة على معلومات هذا الجهاز فقط. لا حجز أو دفع أو متابعة تلقائية عند مزوّد الخدمة.":
+        "This is a check-in on your saved plan only. No booking, payment or provider monitoring is assumed."}</p>
+      </div>;
+    })()}
+        {moneyReady&&currentPlan.status!=="completed"&&<PlanDecisionPanel key={currentPlan.id} plan={currentPlan} money={money} plans={plans} onUpdate={update} setMoney={setMoney}/>}
     {!money.demo&&(money.savingsGoals??[]).length>0&&currentPlan.status!=="completed"&&<div className="mt-3 rounded-2xl border border-[#D8E5D8] bg-[#F7FAF5] p-4">
       <label className="block text-sm font-semibold">{ar?"هل تدّخر لهذا الهدف؟":"Saving up for this plan?"}
        <select className="mt-2 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm" value={currentPlan.savingsGoalId??""}
@@ -141,12 +193,16 @@ function PlansPage(){
        <h3 className="font-semibold">{ar?"الخطوة التالية: قارن الخيارات":"Next step: compare suitable options"}</h3>
        <p className="mt-1 text-xs text-muted-foreground">{ar?"بعد مقارنة أرقام الخطة بالميزانية أعلاه، افتح الخيارات المتاحة وقارن كلفتها قبل اتخاذ القرار.":"After checking the figures above, compare real options by cost and suitability before choosing."}</p>
        <div className="mt-3 flex flex-wrap gap-2">
-        <Link to={currentPlan.kind==="purchase"?"/explore/smartbuy":currentPlan.kind==="outing"?"/explore/together":currentPlan.kind==="occasion"?"/occasions":"/explore"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
+        <Link to={currentPlan.kind==="purchase"?"/explore/market":currentPlan.kind==="outing"?"/explore/weekend":currentPlan.kind==="occasion"?"/occasions":"/advisor"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
          <Compass className="size-4"/>{ar?"استكشف الخيارات":"Explore options"}
         </Link>
        </div>
       </div>
-      <div className="mt-4">
+      <details className="mt-4 rounded-xl border border-[#E0E8DD] bg-white p-3">
+       <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
+        {ar?"حفظ خيار يدوي وتكلفته (اختياري)":"Save a specific choice and cost (optional)"}
+       </summary>
+       <div className="mt-4">
        <p className="text-sm font-semibold">{ar?"الاختيار الذي تفضّله":"Your preferred option"}</p>
        {currentPlan.choice&&<p className="mt-2 rounded-xl bg-[#EAF1E8] p-3 text-sm">{currentPlan.choice.label}{currentPlan.choice.estimatedJod!==undefined&&" · "+fmtJOD(currentPlan.choice.estimatedJod)}</p>}
        <p className="mt-2 text-xs text-muted-foreground">{ar?"يمكنك حفظ خيار يدوي، أو اختياره من صفحة مقارنة المشتريات.":"Save a choice here, or select an option from Compare & Choose."}</p>
@@ -154,17 +210,36 @@ function PlansPage(){
        <Input className="mt-2 max-w-48" type="number" inputMode="decimal" step=".01" min={0} max={100000} value={price} onChange={e=>setPrice(e.target.value)} placeholder={ar?"سعر تقريبي (اختياري)":"Estimated cost (optional)"}/>
        <Button variant="outline" className="mt-3" onClick={decide} disabled={!chosen.trim()}>{ar?"احفظ اختياري":"Save my choice"}</Button>
       </div>
-      <div className="mt-5 border-t border-border pt-4">
+      </details>
+      <details className="mt-4 rounded-xl border border-[#E0E8DD] bg-white p-3">
+       <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
+        {ar?"سجّل تكلفة فعلية مع إكمال الخطة (اختياري)":"Finish and record actual cost (optional)"}
+       </summary>
+       <div className="mt-5 border-t border-border pt-4">
        <h3 className="font-semibold">{ar?"ماذا حدث فعلياً؟":"What actually happened?"}</h3>
        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?"بعد الشراء أو الطلعة، سجّل التكلفة الحقيقية. لن يتم خصم مبلغ أو إنشاء مصروف إلا بموافقتك.":"After the purchase or outing, record actual cost. No cash or spending entry changes unless you approve."}</p>
        <Input className="mt-3 max-w-48" type="number" inputMode="decimal" min={0} max={100000} step=".01" value={actual} onChange={e=>setActual(e.target.value)} placeholder={ar?"التكلفة الفعلية بالدينار":"Actual cost (JOD)"}/>
        <Button className="mt-3" onClick={finish}>{ar?"اكتملت الخطة":"Mark completed"}</Button>
       </div>
+      </details>
     </>}
     {currentPlan.status==="completed"&&<section className="mt-5 rounded-2xl bg-[#EDF6EA] p-4">
       <p className="flex items-center gap-2 font-semibold"><CheckCircle2 className="size-5 text-brand"/>{ar?"تمّت الخطة":"Plan completed"}</p>
-      <p className="mt-2 text-sm">{ar?"التكلفة الفعلية: ":"Actual cost: "}<strong>{fmtJOD(currentPlan.actualJod??0)}</strong></p>
-      {currentPlan.budgetJod!==undefined&&<p className="mt-1 text-xs text-muted-foreground">{ar?"الفرق عن السقف: ":"Difference from ceiling: "}{fmtJOD((currentPlan.actualJod??0)-currentPlan.budgetJod)}</p>}
+      <p className="mt-2 text-sm">{ar?"التكلفة الفعلية: ":"Actual cost: "}
+       <strong>{currentPlan.actualJod===undefined?(ar?"لم تسجّل بعد":"Not recorded"):fmtJOD(currentPlan.actualJod)}</strong></p>
+      {currentPlan.actualJod===undefined&&<details className="mt-3 rounded-xl border border-[#DDE8DB] bg-white p-3">
+       <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">
+        {ar?"أضف التكلفة الفعلية لاحقاً (اختياري)":"Add actual cost later (optional)"}
+       </summary>
+       <label className="mt-3 block text-xs font-semibold">{ar?"التكلفة الحقيقية بالدينار":"Actual cost (JOD)"}
+        <Input className="mt-1 max-w-48" type="number" min={0} max={100000} step=".01"
+         value={actual} onChange={e=>setActual(e.target.value)}/>
+       </label>
+       <Button className="mt-3" onClick={addActualLater} disabled={!actual.trim()}>
+        {ar?"احفظ التكلفة فقط":"Save cost only"}
+       </Button>
+      </details>}
+      {currentPlan.budgetJod!==undefined&&currentPlan.actualJod!==undefined&&<p className="mt-1 text-xs text-muted-foreground">{ar?"الفرق عن السقف: ":"Difference from ceiling: "}{fmtJOD(currentPlan.actualJod-currentPlan.budgetJod)}</p>}
       {currentPlan.expenseId||money.expenses.some(e=>e.sourcePlanId===currentPlan.id)?<p className="mt-3 text-sm font-semibold text-brand">{ar?"هذا المصروف مسجّل في المالية.":"Recorded in Money."}</p>:
       <div className="mt-3">
        <p className="text-xs text-muted-foreground">{ar?"تسجيل المصروف خطوة اختيارية؛ رصيد البنك المدخل لا يتغير.":"Optional: record actual expense in Money without changing the manually entered cash balance."}</p>
