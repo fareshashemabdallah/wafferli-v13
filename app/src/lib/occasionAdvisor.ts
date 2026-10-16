@@ -7,6 +7,10 @@ export type OccasionPlan={budgetJod:number|null;chosenIdea?:string;done?:string[
 export type OccasionPlans=Record<string,OccasionPlan>;
 export type OccasionIdea={id:string;en:string;ar:string;whyEn:string;whyAr:string;focus:"gift"|"experience"|"together";share:number};
 export const planKey=(item:MomentOccurrence)=>item.id+"@"+item.occursOn.slice(0,4);
+/** Reuse the exact date selected in Calendar, then fall back safely if it passed. */
+export function chooseOccasion(upcoming:readonly MomentOccurrence[],chosen:string,focused:string):MomentOccurrence|undefined{
+ return upcoming.find(event=>planKey(event)===(chosen||focused))??upcoming[0];
+}
 export const daysUntil=(date:string,now:Date)=>{
  const d=parseCalendarDate(date);
  if(!d)return Number.POSITIVE_INFINITY;
