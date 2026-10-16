@@ -25,9 +25,10 @@ describe("explicit amount financial question",()=>{
  });
  it("never interprets age, date, a second price or another currency as a JOD spend",()=>{
   expect(explicitJodAmount("Can we take 3 children aged 5 and 7?")).toBeNull();
-  expect(explicitJodAmount("Can we afford 20 or 40 JOD?")).toBe(40); // Only the explicitly labeled amount is understood
+  expect(explicitJodAmount("Can we afford 20 or 40 JOD?")).toBeNull();
   expect(explicitJodAmount("50 JOD or 70 JOD")).toBeNull();
   expect(explicitJodAmount("Can we afford 60 USD?")).toBeNull();
+  expect(explicitJodAmount("50 JOD or 60 USD")).toBeNull();
   expect(explicitJodAmount("Can we afford 0 JOD?")).toBeNull();
   expect(explicitJodAmount("Can we afford 200000 JOD?")).toBeNull();
   expect(explicitJodAmount("Can we afford 22.456 JOD?")).toBeNull();
