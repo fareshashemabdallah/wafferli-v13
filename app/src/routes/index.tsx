@@ -1,9 +1,10 @@
 import {createFileRoute,Link} from "@tanstack/react-router";
-import {ArrowRight,CalendarHeart,ChevronRight,CloudSun,Compass,Heart,Receipt,Sparkles,Wallet} from "lucide-react";
+import {ArrowRight,CloudSun,Heart,Receipt,Sparkles} from "lucide-react";
 import {useState} from "react";
 import {AppShell} from "@/components/AppShell";
 import {TodayFamilyBrief} from "@/components/TodayFamilyBrief";
 import {QuickExpenseCard} from "@/components/QuickExpenseCard";
+import {FamilyChoiceHome} from "@/components/FamilyChoiceHome";
 import {FamilySetupCard} from "@/components/FamilySetupCard";
 import {FamilyWeather} from "@/components/FamilyWeather";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
@@ -20,18 +21,6 @@ export const Route=createFileRoute("/")({
  component:Index
 });
 
-const starts=[
- {to:"/money" as const,Icon:Wallet,en:"Start here: Understand your budget",ar:"ابدأ هون: افهم ميزانية عيلتك",
-  enDetail:"Add just three monthly numbers to get meaningful spending advice.",arDetail:"أدخل ٣ أرقام شهرية لحتى تصير نصائح المصروف مفيدة.",
-  tone:"sage"},
- {to:"/space" as const,Icon:CalendarHeart,en:"Keep life's moments close",ar:"اهتم بلحظات العائلة",
-  enDetail:"Bring birthdays, important dates and family plans together.",arDetail:"رتّب أعياد الميلاد والمناسبات وخطط العائلة بمكان واحد.",
-  tone:"peach"},
- {to:"/explore" as const,Icon:Compass,en:"Choose experiences worth having",ar:"اختَر تجارب بتستاهل",
-  enDetail:"Discover outings, gifts and services that fit your life and budget.",arDetail:"اكتشف طلعات وهدايا وخدمات تناسب حياتك وميزانيتك.",
-  tone:"blue"}
-] as const;
-
 function Index(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [prefs]=useLocalState("familyPreferences",defaultFamilyPreferences);
@@ -43,8 +32,6 @@ function Index(){
  const date=new Intl.DateTimeFormat(ar?"ar-JO":"en-US",{weekday:"long",month:"long",day:"numeric"}).format(now);
  const intro=ready&&!introDone;
  const daily=ready&&introDone;
- const tileBg=(tone:string)=>tone==="sage"?"bg-[#EAF0E7]":tone==="peach"?"bg-[#FCF0E6]":"bg-[#E8EEF0]";
- const tileIcon=(tone:string)=>tone==="sage"?"text-[#315E4B]":tone==="peach"?"text-[#B17A5F]":"text-[#537780]";
  return <AppShell>
   {!ready?<div className="hero-surface h-48 animate-pulse rounded-[2rem]" aria-label={ar?"جارٍ تجهيز الصفحة":"Loading your day"}/>:
   intro?<section className="relative isolate overflow-hidden rounded-[2rem] border border-[#DCE5D9] bg-gradient-to-br from-[#E8F0E7] via-[#F7F4EB] to-[#F3E4D7] px-5 pb-6 pt-7 sm:px-8 sm:pb-8 sm:pt-9">
@@ -73,58 +60,34 @@ function Index(){
     </div>
    </section>}
 
-  {ready&&intro&&<section className="mt-7" aria-label={ar?"كيف يساعدك دبّرنا":"Explore Dabberna"}>
-   <div className="flex items-baseline justify-between gap-3">
-     <div>
-       <p className="section-eyebrow">{ar?"على راحتك":"YOUR LIFE, YOUR WAY"}</p>
-       <h2 className="mt-1 text-[1.6rem] font-semibold text-ink">{ar?"شو بتحب تبلّش؟":"Start with what matters"}</h2>
-     </div>
-   </div>
-   <div className="mt-4 grid gap-3">
-    {starts.map(({to,Icon,en,ar:arabic,enDetail,arDetail,tone})=><Link key={to} to={to} onClick={()=>{writeLocal("homeIntroDone",true);setIntroDone(true);}}
-     className="soft-action group flex min-h-25 items-center gap-4 p-4 sm:p-5">
-     <span className={"grid size-14 shrink-0 place-items-center rounded-[1.05rem] "+tileBg(tone)+" "+tileIcon(tone)}>
-      <Icon className="size-7" strokeWidth={1.65}/>
-     </span>
-     <span className="min-w-0 flex-1">
-      <span className="block text-base font-semibold text-ink sm:text-lg">{ar?arabic:en}</span>
-      <span className="mt-1 block text-xs leading-relaxed text-muted-foreground sm:text-sm">{ar?arDetail:enDetail}</span>
-     </span>
-     <ChevronRight className="size-5 shrink-0 text-brand/60 rtl:rotate-180" aria-hidden="true"/>
-    </Link>)}
-   </div>
+  {ready&&intro&&<>
+   <FamilyChoiceHome onNavigate={()=>{writeLocal("homeIntroDone",true);setIntroDone(true);}}/>
    <button type="button" onClick={()=>setIntroDone(true)}
-    className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#254B3C]">
-    {ar?"خلّيني شوف يومي":"Take me to my day"} <ArrowRight className="size-4 rtl:rotate-180"/>
+    className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full border border-[#DAE4D8] bg-white px-5 text-sm font-semibold text-brand">
+    {ar?"اعرض ملخص يومي":"Show my family today"} <ArrowRight className="size-4 rtl:rotate-180"/>
    </button>
-  </section>}
+  </>}
 
   {daily&&<>
-   <FamilySetupCard/>
+   <FamilyChoiceHome/>
    <TodayFamilyBrief/>
-   <section className="mt-6" aria-label={ar?"خطوات سريعة":"Everyday choices"}>
-    <div className="flex items-baseline justify-between gap-2">
-     <h2 className="text-xl font-semibold text-ink">{ar?"شو بتحب تعمل اليوم؟":"Make one thing easier"}</h2>
-     <Link to="/explore" className="text-xs font-semibold text-brand">{ar?"المزيد":"Explore"} <ArrowRight className="inline size-3.5 rtl:rotate-180"/></Link>
-    </div>
-    <div className="mt-3 grid grid-cols-3 gap-2.5">
-     <button type="button" aria-expanded={quickExpenseOpen} aria-controls="quick-expense"
-      onClick={()=>setQuickExpenseOpen(v=>!v)}
-      className={"soft-action flex min-h-29 flex-col items-start justify-between gap-4 bg-[#EAF0E7] px-3.5 py-4 text-start sm:min-h-32 sm:px-5"}>
-      <Receipt className="size-6 text-[#315E4B]" strokeWidth={1.65}/>
-      <span className="text-[13px] font-semibold leading-tight text-ink sm:text-base">{ar?"سجّل مصروف":"Add expense"}</span>
-     </button>
-     <Link to="/advisor" className="soft-action flex min-h-29 flex-col justify-between gap-4 bg-[#FCF0E6] px-3.5 py-4 sm:min-h-32 sm:px-5">
-      <Sparkles className="size-6 text-[#B17A5F]" strokeWidth={1.65}/>
-      <span className="text-[13px] font-semibold leading-tight text-ink sm:text-base">{ar?"اسأل دبّرنا":"Ask Dabberna"}</span>
-     </Link>
-     <Link to="/explore/together" className="soft-action flex min-h-29 flex-col justify-between gap-4 bg-[#E8EEF0] px-3.5 py-4 sm:min-h-32 sm:px-5">
-      <Compass className="size-6 text-[#537780]" strokeWidth={1.65}/>
-      <span className="text-[13px] font-semibold leading-tight text-ink sm:text-base">{ar?"خطّط لطلعة":"Plan outing"}</span>
-     </Link>
-    </div>
-    {quickExpenseOpen&&<QuickExpenseCard onClose={()=>setQuickExpenseOpen(false)}/>}
-   </section>
+   <div className="mt-5 flex flex-wrap items-center gap-3">
+    <button type="button" aria-expanded={quickExpenseOpen} aria-controls="quick-expense"
+     onClick={()=>setQuickExpenseOpen(v=>!v)}
+     className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#D7E5D5] bg-white px-4 text-sm font-semibold text-brand">
+     <Receipt className="size-4"/>{ar?"سجّل مصروف اليوم":"Record today's expense"}
+    </button>
+    <Link to="/advisor" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand underline">
+     <Sparkles className="size-4"/>{ar?"اسأل دبّرنا":"Ask Dabberna"} →
+    </Link>
+   </div>
+   {quickExpenseOpen&&<QuickExpenseCard onClose={()=>setQuickExpenseOpen(false)}/>}
+   <details className="mt-4 rounded-xl border border-[#E2E9DF] bg-white px-4 py-3">
+    <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
+     {ar?"خصّص نصائح دبّرنا (اختياري)":"Personalize your family advice (optional)"}
+    </summary>
+    <FamilySetupCard/>
+   </details>
    {prefs.weather&&<details className="group editorial-card mt-4 overflow-hidden">
     <summary className="flex min-h-16 cursor-pointer items-center gap-3 px-4 py-3">
      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF1E8] text-brand"><CloudSun className="size-5"/></span>
