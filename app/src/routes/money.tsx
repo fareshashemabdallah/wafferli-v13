@@ -404,7 +404,8 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
 }
 
 function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Expense; cats: Category[]; members: Member[]; onSave: (e: Expense) => void; onCancel: () => void }) {
-  const { tr } = useI18n();
+  const { tr,lang } = useI18n();
+  const ar=lang==="ar";
   const [f, setF] = useState({ ...initial, amountStr: initial.amount ? String(initial.amount) : "" });
   const [err, setErr] = useState("");
   return (
