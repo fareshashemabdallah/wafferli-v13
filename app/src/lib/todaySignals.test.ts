@@ -29,7 +29,7 @@ describe("one family briefing",()=>{
   expect(buildTodaySignals([],items.map((link,i)=>decision("i"+i,link)),4)).toHaveLength(4);
  });
  it("keeps original attention item references for snoozing, never changes source arrays",()=>{
-  const a=[makeAttention("shopping","/explore/smartbuy","gentle","price")];
+  const a=[makeAttention("shopping","/explore/market","gentle","price")];
   const b=[decision("out","/explore/together")];
   const before=JSON.stringify([a,b]);
   const items=buildTodaySignals(a,b);
