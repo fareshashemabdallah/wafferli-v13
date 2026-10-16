@@ -1,4 +1,5 @@
 import {getMoneyOverview} from "./moneyOverview";
+import {nextConnectedFamilyAction,personalOutingAdvice} from "./connectedFamilyGuidance";
 import {explicitJodAmount,explainSpecificSpending} from "./specificSpendingAdvice";
 import {realFamilyMembers} from "./familySetup";
 import {allFamilyMoments,upcomingMoments} from "./familyCalendar";
@@ -13,7 +14,7 @@ import {summarizeWishlistPrice,type WishlistItem} from "./familyWishlist";
 import type {ServiceEntry} from "./serviceShortlist";
 import type {OutingOption} from "./childAwareOutingCompare";
 
-export type AdvisorIntent="safety"|"bills"|"savings"|"family"|"shopping"|"plans"|"tasks"|"gifts"|"outings"|"services"|"unsupported";
+export type AdvisorIntent="priorities"|"safety"|"bills"|"savings"|"family"|"shopping"|"plans"|"tasks"|"gifts"|"outings"|"services"|"unsupported";
 export type GuidedAnswer={
  intent:AdvisorIntent;
  titleEn:string;titleAr:string;
@@ -33,7 +34,7 @@ export const guidedPrompts=[
  {id:"bills" as const,en:"What bills need attention?",ar:"شو الفواتير اللي لازم ننتبه إلها؟"},
  {id:"savings" as const,en:"How are our savings goals?",ar:"كيف ماشيين بأهداف الادخار؟"},
  {id:"family" as const,en:"What's coming up for the children?",ar:"شو في مناسبات للأطفال قريباً؟"},
- {id:"plans" as const,en:"What should we plan next?",ar:"شو لازم نخطّط له؟"},
+ {id:"priorities" as const,en:"What matters most for our family this week?",ar:"شو أهم خطوة للعيلة هالأسبوع؟"},
  {id:"shopping" as const,en:"How can we buy more wisely?",ar:"كيف نشتري بذكاء؟"},
  {id:"tasks" as const,en:"What family tasks are due?",ar:"شو مهام العائلة المستحقة؟"},
  {id:"gifts" as const,en:"Are any gifts coming up?",ar:"عنا هدايا لازم نجهزها؟"},
@@ -48,6 +49,7 @@ export function detectAdvisorIntent(question:string):AdvisorIntent{
  // Treat explicit affordability as a Money question, not a location or
  // occasion suggestion; no bank-verified verdict is ever produced.
  if(hit(q,/afford|can we pay|can i pay|within (our |my )?budget|fit (our |my )?budget|budget for|نقدر ندفع|فينا ندفع|بنقدر ندفع|بتسمح الميزانية|مناسب للميزانية|ميزانية.*(طلعة|هدية|نزهة)|can we spend/i))return "safety";
+ if(hit(q,/priority|priorities|what matters|most important|what should we do next|focus on this week|next best action|شو أهم|شو الأهم|أولوية|اولويه|أولويات|اولويات/i))return "priorities";
  if(hit(q,/task|chore|responsibilit|to.?do|مهمات|مهام|مهمة|واجبات|مسؤوليات/i))return "tasks";
  if(hit(q,/bill|due|overdue|invoice|payment date|فواتير|فاتورة|مستحق|دفعات|دفع/i))return "bills";
  if(hit(q,/sav(?:e|ed|ing|ings)|goal|هدف|ادخار|توفير|نوفر/i))return "savings";
@@ -71,6 +73,11 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
  const now=ctx.now??new Date(),day=dateKey(now);
  const m=ctx.money;
  const overview=getMoneyOverview(m,now);
+ if(intent==="priorities"){
+  const next=nextConnectedFamilyAction(ctx);
+  return answer(intent,next.titleEn,next.titleAr,next.detailEn,next.detailAr,
+   next.sourceEn,next.sourceAr,next.route,next.actionEn,next.actionAr);
+ }
  if(intent==="safety"){
   const jod=explicitJodAmount(question);
   if(jod!==null){
@@ -204,16 +211,10 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
    "Gifts: private wishlist and user-checked prices","الهدايا: قائمة خاصة وأسعار أدخلتها","/occasions","Review gift ideas","راجع أفكار الهدايا");
  }
  if(intent==="outings"){
-  const count=(ctx.outings??[]).length;
-  const children=ctx.preferences.typicalChildrenAttendance==="yes";
-  return answer(intent,"Choose an outing around the family's needs","اختر طلعة تناسب احتياجات العائلة",
-   (count?count+" venues saved in your private comparison. ":"No venue is saved for comparison yet. ")+
-   (children?"Your preferences indicate children usually join. ":"Confirm whether children are attending. ")+
-   "Set a whole-family budget and distance limit, check age rules, access and real weather. Venues are not verified or booked.",
-   (count?count+" أماكن محفوظة للمقارنة الخاصة. ":"ما في أماكن محفوظة بعد. ")+
-   (children?"تفضيلاتك تشير أن الأطفال عادةً يشاركون. ":"حدد إذا كان الأطفال سيشاركون. ")+
-   "حدد الميزانية والمسافة، وتأكد من ملاءمة الأعمار والطقس الحقيقي. لا يوجد تحقق أو حجز.",
-   "Plan Together: parent choices and personal venue notes","خططنا سوا: تفضيلاتك وملاحظاتك","/explore/together","Compare outings","قارن الطلعات");
+  const guidance=personalOutingAdvice(ctx);
+  return answer(intent,guidance.titleEn,guidance.titleAr,guidance.detailEn,
+   guidance.detailAr,guidance.sourceEn,guidance.sourceAr,guidance.route,
+   guidance.actionEn,guidance.actionAr);
  }
  if(intent==="services"){
   const saved=ctx.services??[];
