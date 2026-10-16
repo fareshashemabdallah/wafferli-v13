@@ -179,6 +179,12 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - The Financial Intelligence comparison chart distinguishes reviewed and unreviewed months. **Unusual-spending prompts now need at least two user-reviewed prior comparison months**, reducing unreliable alerts from missing historical entries. The current month remains an incomplete partial period.
 - These opt-in review records can be selectively exported/restored through strict local backup validation, without exporting credentials or triggering payments or sharing family data.
 
+## Financial privacy defaults and exact local sharing preview
+- **New expenses now start with a Private (device) label**, including quick Money entries, expense editor, paid bills, completed family Plans and recorded shopping baskets. New manual income sources also default to Private. **Existing saved data is not relabeled or migrated.**
+- Parents can explicitly change labels in My Family > local expense privacy review. Selecting a Household label does NOT send the item to another account, grant access or constitute cloud consent. The editor and expense list now say **Household label (device only)** instead of implying shared access.
+- For locally Household-labeled entries, the parent may expand a **hypothetical per-item preview** showing only the category, JOD amount and date that a separately consented shared copy could contain. Names, notes, linked family Plans and balances are excluded. No network request is made by this preview.
+- Real cross-device sharing remains feature-gated off and requires a separate explicit per-item consent step, deployed and independently tested RLS, authenticated adults and security approval.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
