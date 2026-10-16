@@ -39,7 +39,7 @@ function Explore(){
     <Sun className="mt-4 size-9 text-[#A9825A]" strokeWidth={1.4} aria-hidden="true"/>
     <h2 className="mt-2 max-w-xs text-[1.8rem] font-semibold leading-tight text-ink sm:text-4xl">{ar?"خلّي الطلعة ذكرى حلوة":"Make the next outing memorable"}</h2>
     <p className="mt-3 max-w-sm text-sm leading-6 text-[#52695D]">{ar?"اختار وقت حلو مع العائلة أو الأصدقاء، وفق اهتماماتكم وميزانيتكم.":"Find something to enjoy together, based on your needs and comfortable budget."}</p>
-    <Link to="/explore/together" className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#254C3D]">
+    <Link to="/explore/weekend" className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#254C3D]">
      {ar?"خطّط لطلعة":"Plan an outing"} <ArrowRight className="size-4 rtl:rotate-180"/>
     </Link>
    </div>
