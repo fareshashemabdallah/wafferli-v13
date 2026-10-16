@@ -59,7 +59,8 @@ const focusNames: Record<ChildFocus,string> = {
 };
 
 function TogetherPage() {
-  const { tr } = useI18n();
+  const { tr,lang } = useI18n();
+  const ar=lang==="ar";
   const navigate = useNavigate();
   const [saved, setSaved] = useLocalState<SavedOuting[]>("outings", []);
   const [familyPrefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
@@ -174,9 +175,10 @@ function TogetherPage() {
        </div>
       </div>}
       <div className="mt-4 rounded-2xl border border-[#D7E5D3] bg-[#F2F8EE] p-4">
-        <h2 className="text-lg font-semibold">{tr("Start with ideas, not a long form")}</h2>
+        <h2 className="text-lg font-semibold">{ar?"بلّش بالأفكار، مش باستمارة طويلة":"Start with ideas, not a long form"}</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-         {tr("We'll search current external activity listings using your chosen area and attendance settings. Dabberna does not verify venue safety, pricing, admission or availability.")}
+         {ar?"سنفتح قوائم أنشطة خارجية حسب المنطقة ومشاركة الأطفال اللي اخترتها. دبّرنا لا يؤكد سلامة المكان أو السعر أو دخول الأطفال أو التوفر.":
+"We'll search current external activity listings using your chosen area and attendance settings. Dabberna does not verify venue safety, pricing, admission or availability."}
         </p>
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -191,9 +193,10 @@ function TogetherPage() {
       </div>
       <details className="mt-4 rounded-2xl border border-[#DFE7DC] bg-white p-4">
        <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
-        {tr("Optional: compare places against your children's needs and your budget")} +
+        {ar?"اختياري: قارن الأماكن حسب أعمار الأطفال والميزانية":"Optional: compare places against your children's needs and your budget"} +
        </summary>
-       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{tr("Use this after you have shortlisted places. Child admission, ages, prices and availability must be confirmed with providers.")}</p>
+       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?"استخدمها بعد ما تختار أماكن ممكنة. تأكد من دخول الأطفال والأعمار والأسعار والتوفر مع المكان.":
+"Use this after you have shortlisted places. Child admission, ages, prices and availability must be confirmed with providers."}</p>
        <ChildAwareOutingCompare childrenAttendance={children} ages={ageBands}
         stroller={stroller} quiet={quiet} maximum={cost.maximum} city={f.neighborhood}
         preferredDistance={familyPrefs.distanceKm}/>
