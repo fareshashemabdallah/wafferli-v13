@@ -17,7 +17,7 @@ export type ConnectedContext={
 export type ConnectedAdvice={
  titleEn:string;titleAr:string;detailEn:string;detailAr:string;
  sourceEn:string;sourceAr:string;
- route:"/plans"|"/occasions"|"/explore/together"|"/space";
+ route:"/plans"|"/occasions"|"/explore/together"|"/explore/smartbuy"|"/space";
  actionEn:string;actionAr:string
 };
 const d=(now:Date)=>dateKey(now);
@@ -31,7 +31,7 @@ const inNext=(date:string,now:Date,days:number)=>{
  * This is private, deterministic guidance—not a model call, price or booking.
  */
 export function nextConnectedFamilyAction(ctx:ConnectedContext):ConnectedAdvice{
- const now=ctx.now??new Date(),prefs=ctx.preferences,day=d(now);
+ const now=ctx.now??new Date(),prefs=ctx.preferences;
  if(!prefs.lifestyle&&!prefs.shoppingTips)
   return {
    titleEn:"Choose what you'd like help with",titleAr:"حدّد كيف بتحب نساعد عيلتك",
@@ -46,7 +46,7 @@ export function nextConnectedFamilyAction(ctx:ConnectedContext):ConnectedAdvice{
   [...ctx.moments],realFamilyMembers(ctx.members)),now,31):[];
  const earliestPlan=plans[0],earliestEvent=soonEvents[0];
  // Avoid presenting the event and its linked Plan as different household jobs.
- const eventHasPlan=earliestEvent&&plans.some(p=>p.sourceRef==="occasion:"+planKey(earliestEvent));
+ const eventHasPlan=earliestEvent&&earliestPlan?.sourceRef==="occasion:"+planKey(earliestEvent);
  const usePlan=!!earliestPlan&&(
   !earliestEvent||earliestPlan.date!<=earliestEvent.occursOn||!!eventHasPlan
  );
@@ -112,10 +112,19 @@ export function nextConnectedFamilyAction(ctx:ConnectedContext):ConnectedAdvice{
      (typeof item.budgetJod==="number"?" · السقف اللي حددته: "+item.budgetJod.toFixed(2)+" د.أ.":".")+
      " تأكد من السعر والتوصيل مع البائع؛ لم يُنشأ طلب أو دفع.",
     sourceEn:"Private family wishlist",sourceAr:"قائمة مشتريات العائلة الخاصة",
-    route:"/plans",actionEn:"Review family plans",actionAr:"راجع خطط العائلة"
+    route:item.kind==="gift"?"/occasions":"/explore/smartbuy",
+    actionEn:item.kind==="gift"?"Review gifts":"Compare options",
+    actionAr:item.kind==="gift"?"راجع الهدايا":"قارن الخيارات"
    };
   }
  }
+ if(!prefs.lifestyle)return {
+  titleEn:"Your next shopping step",titleAr:"خطوتك القادمة للتسوق",
+  detailEn:"No dated purchases need attention from your opted-in list this month. You can compare an item when you're ready; family-life suggestions remain turned off.",
+  detailAr:"لا توجد مشتريات مؤرخة قريبة بقائمتك المفعّلة. فيك تقارن منتجاً لما تحتاجه؛ اقتراحات الحياة العائلية تظل معطّلة.",
+  sourceEn:"Your shopping preferences and device-only wishlist",sourceAr:"تفضيلات التسوق والقائمة على جهازك",
+  route:"/explore/smartbuy",actionEn:"Compare a purchase",actionAr:"قارن منتجاً"
+ };
  return {
   titleEn:"Plan something simple together",titleAr:"خطّطوا لوقت حلو مع بعض",
   detailEn:"Nothing due soon appears in the family dates and plans you chose to record. Start with a comfortable limit and confirm whether children will join. No venue or cost is assumed.",
@@ -167,7 +176,7 @@ export function personalOutingAdvice(ctx:ConnectedContext):ConnectedAdvice{
   " تحقق من ملاءمة الأعمار والطقس وتوفر المكان. ";
  if(!comparisons.length)return {
   titleEn:"Let's choose an outing with your preferences",titleAr:"خلّينا نختار طلعة تناسب العيلة",
-  detailEn:baseEn+"There are no saved places to compare yet. Check a few real options yourself; no venues, prices or travel times are invented.",
+  detailEn:baseEn+"No venue is saved for comparison yet. Check a few real options yourself; no venues, prices or travel times are invented.",
   detailAr:baseAr+"ما عندك أماكن محفوظة للمقارنة بعد. قارن خيارات فعلية بنفسك؛ ما عم نفترض أماكن أو أسعار أو أوقات وصول.",
   sourceEn:"Your family preferences and saved outing plans",sourceAr:"تفضيلات العائلة والخطط المحفوظة",
   route:"/explore/together",actionEn:"Compare outings",actionAr:"قارن الطلعات"
