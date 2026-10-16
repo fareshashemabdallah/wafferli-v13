@@ -37,6 +37,7 @@ function MoneyPage() {
   const { lang } = useI18n();
   const ar=lang==="ar";
   const [section,setSection]=useState<"overview"|"spending"|"planning">("overview");
+  const [categoryEditorOpen,setCategoryEditorOpen]=useState(false);
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
   const c = useMemo(() => computeMoney(s), [s]);
@@ -87,7 +88,7 @@ function MoneyPage() {
         </div></details>
       </div>
 
-      {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}/>}
+      {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection} onManageCategories={()=>{setCategoryEditorOpen(true);setSection("spending");}}/>}
       {section==="overview"&&<details className="editorial-card mb-4 px-4 py-3">
        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
         {ar?"أدوات إضافية: تاريخ المصاريف وتجربة خطط مستقبلية":"Optional: spending history and future budget experiments"} +
@@ -135,7 +136,7 @@ function MoneyPage() {
         });
         }}
       />
-      <details className="editorial-card mt-4 px-4 py-3">
+      <details open={categoryEditorOpen} onToggle={event=>setCategoryEditorOpen(event.currentTarget.open)} className="editorial-card mt-4 px-4 py-3">
         <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إدارة فئات المصاريف":"Manage spending categories"} +</summary>
         <Categories cats={s.categories} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={(categories) => upd({categories})}/>
       </details>
