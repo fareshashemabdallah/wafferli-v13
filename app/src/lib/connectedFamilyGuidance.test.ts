@@ -81,8 +81,10 @@ describe("connected, device-only family priorities",()=>{
   expect(on.detailEn.toLowerCase()).toContain("no order or payment");
  });
  it("keeps unscheduled or past plans out of proactive due-date guidance",()=>{
+  const withoutDate=plan();
+  delete withoutDate.date;
   const result=nextConnectedFamilyAction(input({plans:[
-   plan({date:"2026-10-15"}),plan({date:undefined}),plan({date:"2026-12-21"})
+   plan({date:"2026-10-15"}),withoutDate,plan({date:"2026-12-21"})
   ],moments:[event]}));
   expect(result.titleEn).toContain("occasion");
   expect(result.route).toBe("/occasions");
