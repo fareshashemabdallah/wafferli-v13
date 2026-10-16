@@ -185,6 +185,11 @@ Dabberna will **never custody merchant/customer funds or manually redistribute s
 - For locally Household-labeled entries, the parent may expand a **hypothetical per-item preview** showing only the category, JOD amount and date that a separately consented shared copy could contain. Names, notes, linked family Plans and balances are excluded. No network request is made by this preview.
 - Real cross-device sharing remains feature-gated off and requires a separate explicit per-item consent step, deployed and independently tested RLS, authenticated adults and security approval.
 
+## Keyboard navigation accessibility
+- Every page now includes an **English/Arabic Skip to main content** link as the first keyboard stop, targeting a unique focusable main region across desktop and mobile layouts.
+- Primary desktop/mobile navigation and language controls have visible keyboard focus rings. Localized automated component tests verify the skip target, two navigation surfaces and Arabic right-to-left switching.
+- This is an accessibility improvement and test baseline, **not** a full screen-reader, WCAG or real-device audit.
+
 ## What isn't live yet
 - Bank connections, verified shared family finances across parents' devices, credit cards and payments.
 - Generative AI, automated independent review aggregation, live product price feeds and healthcare provider verification.
