@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { allFamilyMoments,dateKey,formatMomentDate,isMemberBirthday,kindNames,monthCells,occurrencesForDate,parseCalendarDate,upcomingMoments,type FamilyMoment,type MomentKind } from "@/lib/familyCalendar";
 import { sampleMembers,sampleMoney,type MoneyState } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
-import { uid,useLocalState } from "@/lib/storage";
+import { uid,useLocalState,writeLocal } from "@/lib/storage";
+import {planKey} from "@/lib/occasionAdvisor";
+import {realFamilyMembers} from "@/lib/familySetup";
 
 export const Route=createFileRoute("/calendar")({
  head:()=>({meta:[{title:"Family Calendar — Dabberna"},{name:"description",content:"A private family calendar for birthdays, holidays and meaningful occasions. Saved on this device."}]}),
@@ -24,7 +26,7 @@ function FamilyCalendarPage(){
  const [members,,membersReady]=useLocalState("members",sampleMembers());
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const ready=eventsReady&&membersReady;
- const combined=useMemo(()=>allFamilyMoments(events,members,ar),[events,members,ar]);
+ const combined=useMemo(()=>allFamilyMoments(events,realFamilyMembers(members),ar),[events,members,ar]);
  const [month,setMonth]=useState(()=>new Date(today.getFullYear(),today.getMonth(),1,12));
  const [selected,setSelected]=useState(todayKey);
  const [editing,setEditing]=useState(false);
@@ -104,6 +106,13 @@ function FamilyCalendarPage(){
      <button type="button" onClick={()=>remove(item)} aria-label={ar?"حذف":"Delete"} className="rounded-lg p-2 text-destructive hover:bg-muted"><Trash2 className="size-4"/></button>
     </>}
    </div>)}</div>
+   {chosen.length>0&&<div className="mt-4 flex flex-wrap gap-2">
+     {chosen.map(item=><Link key={item.id+item.occursOn} to="/occasions"
+      onClick={()=>writeLocal("focusedOccasionKey",planKey(item))}
+      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#EAF2E7] px-4 text-xs font-semibold text-brand">
+      <Gift className="size-4"/>{ar?"حضّر لهذه المناسبة: ":"Plan: "}{item.title} →
+     </Link>)}
+   </div>}
   </section>
   {editing&&<form onSubmit={save} className="card-soft mt-4 space-y-3 p-4 sm:p-5">
    <h2 className="text-lg font-semibold">{form.id?(ar?"تعديل المناسبة":"Edit occasion"):(ar?"مناسبة جديدة":"New occasion")}</h2>
@@ -138,6 +147,10 @@ function FamilyCalendarPage(){
    {!ready?<p className="mt-2 text-sm text-muted-foreground">{ar?"جارٍ تحميل المناسبات...":"Loading saved occasions…"}</p>:upcoming.length===0?<p className="mt-2 rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{ar?"عندما تضيف مناسبات، ستظهر هنا وعلى الصفحة الرئيسية.":"When you add birthdays in My Family or occasions here, they will appear on My Day."}</p>
    :<div className="mt-3 space-y-2">{upcoming.map(item=><div key={item.id+item.occursOn} className="card-soft flex items-center gap-3 p-3">
     <Gift className="size-5 shrink-0 text-brand"/><div className="flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">{formatMomentDate(item.occursOn,ar)} · {kindNames[item.kind][ar?"ar":"en"]}</p></div>
+    <Link to="/occasions" onClick={()=>writeLocal("focusedOccasionKey",planKey(item))}
+     className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-[#D7E6DA] px-3 text-xs font-semibold text-brand">
+     {ar?"خطّط":"Plan"} →
+    </Link>
    </div>)}</div>}
   </section>
   {ready&&moneyReady&&<CalendarReminderExport money={money} members={members} moments={events}/>}
