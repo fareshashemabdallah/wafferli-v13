@@ -1,7 +1,7 @@
 import { useI18n } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Cake, CalendarHeart, Heart, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { AppShell, Notice, PilotBadge } from "@/components/AppShell";
 import { FamilyPreferences } from "@/components/FamilyPreferences";
 import {LocalExpensePrivacyReview} from "@/components/LocalExpensePrivacyReview";
@@ -36,6 +36,15 @@ const newOccasion=():OccasionDraft=>({id:"",title:"",date:dateKey(new Date()),ki
 function Space() {
   const { tr,lang } = useI18n();
   const ar=lang==="ar";
+  useEffect(()=>{
+    // Hash-router deep link from Today's setup checklist to the exact editor.
+    const target=window.location.hash.split("#").pop();
+    if(target!=="family-preferences"&&target!=="household-members")return;
+    const el=document.getElementById(target);
+    if(!el)return;
+    if(target==="family-preferences"&&el instanceof HTMLDetailsElement)el.open=true;
+    el.scrollIntoView?.({block:"start"});
+  },[]);
   const [members,setMembers] = useLocalState<Member[]>("members",sampleMembers());
   const samples=members.filter(isSampleFamilyMember);
   const [events,setEvents,eventsReady] = useLocalState<FamilyMoment[]>("familyCalendar",[]);
@@ -84,7 +93,7 @@ function Space() {
         <p className="relative mt-2 max-w-lg text-sm leading-relaxed text-[#4E6B5A]">{ar?"تفاصيل العائلة وأيامها المهمة، محفوظة بمكان واحد.":"Your people, birthdays and meaningful dates, thoughtfully kept together."}</p>
       </section>
 
-      <section className="mt-7" id="household-members">
+      <section className="mt-7 scroll-mt-24" id="household-members">
         {samples.length>0&&<div className="mb-4 rounded-2xl border border-[#E6D7C5] bg-[#FFF8F0] p-4">
           <p className="text-sm font-semibold">{ar?"أسماء تجريبية، ليست عيلتك":"Example profiles, not your family"}</p>
           <p className="mt-1 text-xs text-muted-foreground">{ar?"هؤلاء أشخاص للتجربة فقط. فيك تشيلهم وتضيف أفراد عيلتك، من دون تغيير المصاريف أو المناسبات المسجلة.":"These are demonstration people. Remove them before personalizing family advice. This won\u0027t alter your existing money or family occasions."}</p>
@@ -211,7 +220,7 @@ function Space() {
           {ar?"إدارة حسابات الأسرة":"Manage household accounts"} →
         </Link>
       </section>}
-      <details className="group editorial-card mt-6 p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"التفضيلات والخصوصية":"Preferences & privacy"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
+      <details id="family-preferences" className="group editorial-card mt-6 scroll-mt-24 p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"التفضيلات والخصوصية":"Preferences & privacy"} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
       <FamilyPreferences/>
       <LocalExpensePrivacyReview/>
       <section className="card-soft mt-6 p-4 text-sm">
