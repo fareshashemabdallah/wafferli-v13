@@ -12,7 +12,7 @@ export type WeekendOutingDecision={
  weekendFrom:string; weekendTo:string;
  suggestedJod:number|null;
  recordedMarginJod:number|null; monthlyRoomJod:number|null;
- unpaidBillsJod:number|null; emergencyReserveJod:number|null;
+ unpaidBillsJod:number|null; essentialBudgetJod:number|null; emergencyReserveJod:number|null;
  cashJod:number|null;
  headlineEn:string;headlineAr:string;explanationEn:string;explanationAr:string;
  nextEn:string;nextAr:string;
@@ -36,9 +36,13 @@ export function decideWeekendOuting(
 ):WeekendOutingDecision{
  const weekend=nextJordanWeekend(now),readiness=getFinancialReadiness(money,now);
  const base={weekendFrom:weekend.from,weekendTo:weekend.to};
+ const updated=money.cashUpdatedAt&&/^\\d{4}-\\d{2}-\\d{2}$/.test(money.cashUpdatedAt)?
+  new Date(money.cashUpdatedAt+"T12:00:00"):null;
+ const freshWeekend=readiness.cashFresh&&!!updated&&
+  now.getTime()-updated.getTime()>=-86400000&&now.getTime()-updated.getTime()<=3*86400000;
  const missing:WeekendMissing=money.demo||!readiness.budgetReady?"real-budget":
   !readiness.cashKnown?"cash":
-  !readiness.cashFresh?"cash-date":
+  !freshWeekend?"cash-date":
   !readiness.billsReviewed?"bills":null;
  const oneMissing:Record<Exclude<WeekendMissing,null>,[string,string,string,string]>={
   "real-budget":[
@@ -65,7 +69,7 @@ export function decideWeekendOuting(
  if(missing){
   const [headlineEn,headlineAr,explanationEn,explanationAr]=oneMissing[missing];
   return {...base,status:"needs-details",missing,suggestedJod:null,recordedMarginJod:null,
-   monthlyRoomJod:null,unpaidBillsJod:null,emergencyReserveJod:null,cashJod:null,
+   monthlyRoomJod:null,unpaidBillsJod:null,essentialBudgetJod:null,emergencyReserveJod:null,cashJod:null,
    headlineEn,headlineAr,explanationEn,explanationAr,
    nextEn:missing==="cash"||missing==="cash-date"?"Enter or confirm one cash balance":"Review the missing money detail",
    nextAr:missing==="cash"||missing==="cash-date"?"أدخل أو أكّد الرصيد":"راجع المعلومة الناقصة"};
@@ -74,8 +78,14 @@ export function decideWeekendOuting(
  const reserve=Number.isFinite(money.cashReserve)&&money.cashReserve!>=0?money.cashReserve!:0;
  const cash=money.cashOnHand!;
  const upcoming=overview.forecast.upcomingBills;
- const recordedMargin=roundJod(cash-upcoming-reserve);
  const categories=money.categories.filter(x=>leisure.test(x.name));
+ // Do not double-count a category whose scheduled bill is already deducted.
+ // Remaining *non-bill* category envelopes are estimates of essentials yet
+ // to be paid; treating them as spending capacity would be misleading.
+ const billLinked=new Set((money.commitments??[]).map(x=>x.categoryId).filter(Boolean));
+ const essentials=roundJod(money.categories.filter(x=>!leisure.test(x.name)&&!billLinked.has(x.id))
+  .reduce((sum,x)=>sum+Math.max(0,month.plannedBy(x.id)-month.spentBy(x.id)),0));
+ const recordedMargin=roundJod(cash-upcoming-essentials-reserve);
  const leisureLeft=roundJod(categories.reduce((sum,x)=>
   sum+Math.max(0,month.plannedBy(x.id)-month.spentBy(x.id)),0));
  // A leisure envelope already exists? Don't additionally count unallocated
@@ -83,7 +93,7 @@ export function decideWeekendOuting(
  const monthlyRoom=categories.length?leisureLeft:Math.max(0,budget.gap);
  const reserveLow=overview.forecast.minimumBalance;
  const cautious=overview.dateProblems>0||overview.forecast.overdueCount>0||
-  budget.status==="deficit"||recordedMargin<=0||
+  budget.status==="deficit"||recordedMargin<=0||reserve<=0||
   reserveLow===null||reserveLow<reserve||monthlyRoom<=0;
  const preferred=Number.isFinite(prefs.outingLimit)&&prefs.outingLimit>0?
   prefs.outingLimit:Infinity;
@@ -91,35 +101,39 @@ export function decideWeekendOuting(
  // recorded JOD. This is not a guarantee: everyday costs may be unrecorded.
  const possible=Math.min(preferred,recordedMargin,monthlyRoom,
   reserveLow===null?0:reserveLow-reserve);
- const suggested=cautious?null:roundDown5(Math.max(0,possible)*0.8);
+ // Hold back at least 30% of the smallest recorded margin, even after
+ // deducting remaining essential categories, before suggesting a test budget.
+ const suggested=cautious?null:roundDown5(Math.max(0,possible)*0.7);
  const good=suggested!==null&&suggested>=5;
  const noReserve=reserve===0;
  const detailsEn="Entered cash "+roundJod(cash).toFixed(2)+
   " JOD − unpaid dated bills "+roundJod(upcoming).toFixed(2)+
+  " JOD − remaining non-bill planned costs "+essentials.toFixed(2)+
   " JOD − chosen cushion "+roundJod(reserve).toFixed(2)+
-  " JOD = "+recordedMargin.toFixed(2)+" JOD before other everyday spending. "+
+  " JOD = "+recordedMargin.toFixed(2)+" JOD recorded margin. "+
   (categories.length?"Unspent recorded leisure envelope: ":"Unassigned monthly plan: ")+
   monthlyRoom.toFixed(2)+" JOD. "+
   (noReserve?"No emergency cushion was set. ":"")+
   "Cash, payments, current prices and unrecorded expenses have not been verified.";
  const detailsAr="الرصيد المسجّل "+roundJod(cash).toFixed(2)+
   " د.أ − الفواتير المؤرخة غير المدفوعة "+roundJod(upcoming).toFixed(2)+
+  " د.أ − باقي المصاريف المخططة غير المدرجة كفواتير "+essentials.toFixed(2)+
   " د.أ − الاحتياطي المختار "+roundJod(reserve).toFixed(2)+
-  " د.أ = "+recordedMargin.toFixed(2)+" د.أ قبل مصاريف الحياة الأخرى. "+
+  " د.أ = "+recordedMargin.toFixed(2)+" د.أ هامشاً حسب البيانات المسجلة. "+
   (categories.length?"المتبقي المخطط للترفيه: ":"غير المخصّص بميزانية الشهر: ")+
   monthlyRoom.toFixed(2)+" د.أ. "+
   (noReserve?"ما تم تحديد احتياطي للطوارئ. ":"")+
   "الرصيد والدفع والأسعار والمصاريف غير المسجلة غير مؤكدة.";
  if(!good)return {...base,status:"review",missing:null,suggestedJod:null,
   recordedMarginJod:recordedMargin,monthlyRoomJod:monthlyRoom,unpaidBillsJod:upcoming,
-  emergencyReserveJod:reserve,cashJod:cash,
+  essentialBudgetJod:essentials,emergencyReserveJod:reserve,cashJod:cash,
   headlineEn:"I'd keep this outing low-cost for now",headlineAr:"الأفضل تخلي الطلعة قليلة الكلفة حالياً",
   explanationEn:detailsEn,explanationAr:detailsAr,
   nextEn:"Look for free or low-cost activities; review any overdue bills or budget pressure first.",
   nextAr:"دور على نشاطات مجانية أو قليلة الكلفة وراجع أي فواتير متأخرة أو ضغط على الميزانية أولاً."};
  return {...base,status:"possible",missing:null,suggestedJod:suggested,
   recordedMarginJod:recordedMargin,monthlyRoomJod:monthlyRoom,unpaidBillsJod:upcoming,
-  emergencyReserveJod:reserve,cashJod:cash,
+  essentialBudgetJod:essentials,emergencyReserveJod:reserve,cashJod:cash,
   headlineEn:"A modest outing may fit your recorded plan",headlineAr:"طلعة بسيطة ممكن تناسب الخطة المسجّلة",
   explanationEn:detailsEn,explanationAr:detailsAr,
   nextEn:"Try a total-family planning ceiling of "+suggested.toFixed(0)+
