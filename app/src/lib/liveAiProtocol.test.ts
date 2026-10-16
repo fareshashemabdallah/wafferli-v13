@@ -22,12 +22,12 @@ describe("Dabberna live AI network boundary",()=>{
  });
  it("checks numeric summary bounds, field allowlist and monetary precision",()=>{
   const context={monthlyIncomeJod:2300,plannedExpensesJod:1400,recordedSpentJod:800,
-   savingsTargetJod:250,upcomingBillCount:4};
+   savingsTargetJod:250,recordedBillScheduleCount:4};
   expect(parseLiveAiRequest({...good(),context}).context).toEqual(context);
   expect(()=>parseLiveAiRequest({...good(),context:{...context,accountNumber:"123"}})).toThrow();
   expect(()=>parseLiveAiRequest({...good(),context:{...context,monthlyIncomeJod:Infinity}})).toThrow();
   expect(()=>parseLiveAiRequest({...good(),context:{...context,recordedSpentJod:1.234}})).toThrow();
-  expect(()=>parseLiveAiRequest({...good(),context:{...context,upcomingBillCount:999}})).toThrow();
+  expect(()=>parseLiveAiRequest({...good(),context:{...context,recordedBillScheduleCount:999}})).toThrow();
  });
  it("never sends sample finance or raw expense member names when consented",()=>{
   expect(optionalLiveAiFinancialSummary(sampleMoney())).toBeNull();
