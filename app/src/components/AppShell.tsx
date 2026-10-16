@@ -17,7 +17,7 @@ const tabs: { to: "/" | "/explore" | "/money" | "/plans" | "/space"; key: Key; i
 function LangToggle(){
  const {lang,setLang}=useI18n();
  return <button type="button" onClick={()=>setLang(lang==="en"?"ar":"en")}
-  className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#DDE5DB] bg-white/80 px-3 text-xs font-semibold text-brand shadow-sm transition hover:bg-white"
+  className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#DDE5DB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 bg-white/80 px-3 text-xs font-semibold text-brand shadow-sm transition hover:bg-white"
   aria-label={lang==="en"?"Switch to Arabic":"Switch to English"}>
   <Languages className="size-4" aria-hidden="true"/>{lang==="en"?"العربية":"English"}
  </button>;
@@ -26,6 +26,7 @@ function LangToggle(){
 export function AppShell({children,title}:{children:ReactNode;title?:string}){
  const {t,lang}=useI18n();
  return <div className="min-h-dvh md:flex">
+  <a href="#dabberna-main-content" className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-[100] focus:rounded-xl focus:bg-brand focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-white focus:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#B9D8BB]">{lang==="ar"?"انتقل إلى المحتوى الرئيسي":"Skip to main content"}</a>
   <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-e border-[#E4E9E0] bg-[#FFFEFA]/95 px-5 pb-6 pt-8 md:flex">
    <Link to="/" aria-label="Dabberna home" className="inline-flex"><Logo className="scale-105 origin-left"/></Link>
    <p className="mt-3 max-w-44 text-xs leading-relaxed text-muted-foreground">{lang==="ar"?"أنفق بذكاء، وعِش براحة.":"Spend wisely. Live well."}</p>
@@ -33,7 +34,7 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
    <nav className="mt-5 flex flex-col gap-1.5" aria-label="Main">
     {tabs.map(({to,key,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
       onClick={()=>{if(to!=="/")writeLocal("homeIntroDone",true);}}
-      className="flex min-h-12 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-muted-foreground transition hover:bg-[#F1F5EF] data-[status=active]:bg-[#E6F0E7] data-[status=active]:text-brand">
+      className="flex min-h-12 items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 px-3 text-sm font-semibold text-muted-foreground transition hover:bg-[#F1F5EF] data-[status=active]:bg-[#E6F0E7] data-[status=active]:text-brand">
       <Icon className="size-5" aria-hidden="true"/>{t(key)}
     </Link>)}
    </nav>
@@ -62,7 +63,7 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
      </div>
     </div>
    </header>
-   <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-32 pt-5 sm:px-6 sm:pt-7 md:px-8 md:pb-12 md:pt-10">
+   <main id="dabberna-main-content" tabIndex={-1} className="mx-auto w-full max-w-4xl flex-1 px-4 pb-32 pt-5 sm:px-6 sm:pt-7 md:px-8 md:pb-12 md:pt-10">
     <ConnectivityNotice/>
     {title&&<h1 className="mb-5 text-[1.8rem] font-semibold tracking-tight text-ink sm:text-4xl">{title}</h1>}
     {children}
@@ -73,7 +74,7 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
    <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
     {tabs.map(({to,key,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
       onClick={()=>{if(to!=="/")writeLocal("homeIntroDone",true);}}
-      className="group flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-0.5 text-[10px] font-medium text-[#708174] transition hover:bg-[#F2F6F0] data-[status=active]:bg-[#ECF4EC] data-[status=active]:font-semibold data-[status=active]:text-brand">
+      className="group flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 px-0.5 text-[10px] font-medium text-[#708174] transition hover:bg-[#F2F6F0] data-[status=active]:bg-[#ECF4EC] data-[status=active]:font-semibold data-[status=active]:text-brand">
       <Icon className="size-[21px]" aria-hidden="true"/><span>{t(key)}</span>
     </Link>)}
    </div>
