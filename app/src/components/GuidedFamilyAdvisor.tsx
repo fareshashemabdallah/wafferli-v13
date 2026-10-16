@@ -68,7 +68,7 @@ export function GuidedFamilyAdvisor(){
    </div>
   </div>
   <div className="mt-4 grid gap-2 sm:grid-cols-2">
-   {guidedPrompts.filter(p=>["safety","bills","family","outings"].includes(p.id)).map(p=><button type="button" key={p.id} disabled={!ready}
+   {guidedPrompts.filter(p=>["safety","bills","priorities","outings"].includes(p.id)).map(p=><button type="button" key={p.id} disabled={!ready}
     onClick={()=>ask(ar?p.ar:p.en)}
     className="min-h-11 rounded-xl border border-[#DDE8D9] bg-[#F6FAF4] px-3 py-2 text-start text-xs font-semibold text-brand transition hover:bg-[#ECF3E9] disabled:opacity-50">
     {ar?p.ar:p.en}
@@ -79,7 +79,7 @@ export function GuidedFamilyAdvisor(){
     {ar?"أسئلة إضافية عن الادخار والمشتريات والمهام":"More questions about savings, shopping & tasks"}
    </summary>
    <div className="mt-2 grid gap-2 sm:grid-cols-2">
-    {guidedPrompts.filter(p=>!["safety","bills","family","outings"].includes(p.id)).map(p=><button type="button" key={p.id} disabled={!ready}
+    {guidedPrompts.filter(p=>!["safety","bills","priorities","outings"].includes(p.id)).map(p=><button type="button" key={p.id} disabled={!ready}
      onClick={()=>ask(ar?p.ar:p.en)}
      className="min-h-11 rounded-xl border border-[#DDE8D9] bg-[#F6FAF4] px-3 py-2 text-start text-xs font-semibold text-brand hover:bg-[#ECF3E9] disabled:opacity-50">
      {ar?p.ar:p.en}
