@@ -39,6 +39,10 @@ describe("live AI deployment security invariants",()=>{
   expect(quota).toContain("old.used<20");
   expect(quota).toContain("old.used<4");
   expect(quota).toContain("AI_RATE_LIMIT");
+  expect(quota).toContain("dabberna_ai_global_usage_v1");
+  expect(quota).toContain("global_bucket.used<200");
+  expect(quota).toContain("revoke all on public.dabberna_ai_global_usage_v1 from public, anon, authenticated");
+  expect(quota).toContain("enable row level security");
   expect(quota).not.toContain("prompt text");
  });
 
