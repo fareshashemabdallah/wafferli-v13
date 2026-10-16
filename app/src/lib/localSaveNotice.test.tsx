@@ -1,5 +1,5 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from "vitest";
-import {cleanup,fireEvent,render,screen} from "@testing-library/react";
+import {cleanup,fireEvent,render,screen,waitFor} from "@testing-library/react";
 import type {ReactNode,AnchorHTMLAttributes} from "react";
 import {I18nProvider} from "./i18n";
 import {writeLocal,useLocalState} from "./storage";
@@ -19,12 +19,12 @@ beforeEach(()=>window.localStorage.clear());
 afterEach(()=>{cleanup();vi.restoreAllMocks();window.localStorage.clear();});
 
 describe("browser storage failure UX",()=>{
- it("warns when storage is full and preserves previous displayed value",()=>{
+ it("warns when storage is full and preserves previous displayed value",async()=>{
   render(<I18nProvider><AppShell><Counter/></AppShell></I18nProvider>);
   const stub=vi.spyOn(Storage.prototype,"setItem").mockImplementation(()=>{throw Error("quota exceeded");});
   fireEvent.click(screen.getByRole("button",{name:"Save change"}));
   expect(screen.getByText("Count: 0")).toBeInTheDocument();
-  expect(screen.getByRole("alert")).toHaveTextContent("Your changes could not be saved");
+  expect(await screen.findByRole("alert")).toHaveTextContent("Your changes could not be saved");
   expect(window.localStorage.getItem("wafferli.v13.test-amount")).toBeNull();
   stub.mockRestore();
   fireEvent.click(screen.getByRole("button",{name:"Dismiss save warning"}));
