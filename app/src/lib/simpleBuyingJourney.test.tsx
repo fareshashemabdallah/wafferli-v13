@@ -22,6 +22,24 @@ afterEach(()=>{cleanup();vi.restoreAllMocks();window.localStorage.clear();});
 const draw=()=>render(<I18nProvider><SmartBuy/></I18nProvider>);
 
 describe("simple buying journey",()=>{
+ it("answers which entered store costs less, without making purchases",async()=>{
+  draw();
+  const stores=screen.getAllByRole("textbox",{name:"Store"});
+  const prices=screen.getAllByRole("textbox",{name:"Price"});
+  const delivery=screen.getAllByRole("textbox",{name:"Delivery or travel"});
+  expect(screen.getByText("Enter prices from two different stores to get an answer")).toBeInTheDocument();
+  fireEvent.change(stores[0]!,{target:{value:"Family Store"}});
+  fireEvent.change(prices[0]!,{target:{value:"21"}});
+  fireEvent.change(delivery[0]!,{target:{value:"3"}});
+  fireEvent.change(stores[1]!,{target:{value:"Local Shop"}});
+  fireEvent.change(prices[1]!,{target:{value:"18"}});
+  fireEvent.change(delivery[1]!,{target:{value:"1"}});
+  await screen.findByText("Lower entered total: Local Shop");
+  expect(screen.getByText(/Lower than Family Store by/)).toHaveTextContent("5 JOD");
+  expect(screen.getByText(/not verified retailer offers or guaranteed savings/)).toBeInTheDocument();
+  expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
+ });
+
  it("offers an everyday basket link and keeps advanced tools initially folded",()=>{
   draw();
   expect(screen.getByRole("link",{name:/Open My Basket/})).toHaveAttribute("href","/explore/shopping");
