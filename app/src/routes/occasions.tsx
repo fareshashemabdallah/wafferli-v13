@@ -10,7 +10,8 @@ import {type FamilyMoment,formatMomentDate} from "@/lib/familyCalendar";
 import {sampleMembers,sampleMoney,type Member} from "@/lib/money";
 import {daysUntil,eventBudgetGuidance,ideaCategory,leadAdvice,occasionIdeas,planKey,planningMilestones,upcomingPlanEvents,type OccasionPlan,type OccasionPlans} from "@/lib/occasionAdvisor";
 import {useLocalState,writeLocal,uid} from "@/lib/storage";
-import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,makeFamilyPlan,setPlanChoice,type FamilyPlan} from "@/lib/familyPlans";
+import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan} from "@/lib/familyPlans";
+import {upsertOccasionFamilyPlan} from "@/lib/occasionPlanBridge";
 import {activeDecisionKey,startDecisionJourney,externalMapLink} from "@/lib/decisionJourney";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 
@@ -53,13 +54,16 @@ function OccasionPlanner(){
  const [,setActivePlan]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
  const [prefs]=useLocalState("familyPreferences",defaultFamilyPreferences);
  const [chosen,setChosen]=useState("");
+ const [focused,setFocused]=useLocalState<string>("focusedOccasionKey","");
+ const [syncMessage,setSyncMessage]=useState("");
  const [feed,setFeed]=useState<TrendFeed|null>(null);
  const [feedState,setFeedState]=useState<"loading"|"loaded"|"unavailable">("loading");
  const now=useMemo(()=>new Date(),[]);
  const upcoming=useMemo(()=>upcomingPlanEvents(events,members,now,180,ar).slice(0,24),[events,members,now,ar]);
- const active=upcoming.find(o=>planKey(o)===chosen)??upcoming[0];
+ const active=upcoming.find(o=>planKey(o)===(chosen||focused))??upcoming[0];
  const key=active?planKey(active):"";
  const plan:OccasionPlan=plans[key]??{budgetJod:null};
+ const existingPlan=familyPlans.find(p=>p.sourceRef==="occasion:"+key);
  const days=active?daysUntil(active.occursOn,now):null;
  const ideas=active?occasionIdeas(active,members):[];
  const financial=eventBudgetGuidance(plan,money,now);
@@ -100,7 +104,7 @@ function OccasionPlanner(){
    <section className="mt-5">
     <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-semibold">{ar?"اختر المناسبة":"Choose an occasion"}</h2><Link to="/calendar" className="text-xs font-semibold text-brand">{ar?"إدارة التقويم":"Manage calendar"} →</Link></div>
     <div className="flex gap-2 overflow-x-auto pb-2">
-     {upcoming.map(e=><button type="button" key={planKey(e)} onClick={()=>setChosen(planKey(e))}
+     {upcoming.map(e=><button type="button" key={planKey(e)} onClick={()=>{setChosen(planKey(e));setFocused(planKey(e));setSyncMessage("");}}
        className={"min-w-[9.75rem] shrink-0 rounded-2xl border p-3 text-start transition "+(planKey(e)===key?"border-brand bg-mint":"border-border bg-card")}>
        <p className="truncate text-sm font-semibold">{e.title}</p>
        <p className="mt-1 text-xs text-muted-foreground">{formatMomentDate(e.occursOn,ar)}</p>
@@ -120,21 +124,32 @@ function OccasionPlanner(){
      </div>
      <p className="mt-2 text-xs text-muted-foreground">{ar?"هذا حد تختاره بنفسك، وليس مبلغًا ننصح بإنفاقه. الخيارات البسيطة قد تكون أفضل.":"You choose the limit. The app will never recommend using every dinar. A modest gesture may mean more."}</p>
      <div className="mt-3 flex flex-wrap items-center gap-3">
-      {familyPlans.some(p=>p.sourceRef==="occasion:"+key)?
-       <Link to="/plans" className="inline-flex min-h-11 items-center rounded-full bg-[#EAF1E8] px-4 text-sm font-semibold text-brand">{ar?"افتح هذه المناسبة في خططنا":"Open this in Plans"} →</Link>:
-       <button type="button" className="min-h-11 rounded-full border border-[#CADBCC] bg-white px-4 text-sm font-semibold text-brand" onClick={()=>{
+      {existingPlan?.status!=="completed"&&<button type="button"
+       className="min-h-11 rounded-full border border-[#CADBCC] bg-white px-4 text-sm font-semibold text-brand"
+       onClick={()=>{
         if(!active)return;
-        const ref="occasion:"+key;
-        const existing=familyPlans.find(p=>p.sourceRef===ref);
-        if(existing){setActivePlan(existing.id);return;}
-        const p=makeFamilyPlan({id:uid(),title:active.title,kind:"occasion",date:active.occursOn,
-         ...(plan.budgetJod!==null?{budgetJod:plan.budgetJod}:{}),sourceRef:ref});
-        if(!p)return;
-        const idea=ideas.find(i=>i.id===plan.chosenIdea);
-        const linked=idea?setPlanChoice(p,{label:ar?idea.ar:idea.en,source:"occasion"}):p;
-        setFamilyPlans(old=>[linked,...old]);setActivePlan(linked.id);
-       }}>{ar?"أضف المناسبة إلى خططنا":"Add occasion to Our Plans"}</button>}
-      <span className="text-xs text-muted-foreground">{ar?"ستبقى خططك على هذا الجهاز":"Your plans stay on this device"}</span>
+        const candidate=upsertOccasionFamilyPlan(familyPlans,active,plan,
+         ideas.find(i=>i.id===plan.chosenIdea),uid(),new Date(),lang);
+        if(!candidate.activeId)return;
+        setFamilyPlans(old=>upsertOccasionFamilyPlan(old,active,plan,
+         ideas.find(i=>i.id===plan.chosenIdea),candidate.activeId!,new Date(),lang).plans);
+        setActivePlan(candidate.activeId);
+        setSyncMessage(candidate.changed?(ar?"تم حفظ تفاصيل المناسبة في خططنا.":"Occasion details saved to Our Plans."):
+         (ar?"خطتك محفوظة بالفعل.":"Your plan is already up to date."));
+       }}>
+       {existingPlan?(ar?"حدّث الخطة باختياراتك":"Update existing plan with my choices"):
+        (ar?"احفظ المناسبة في خططنا":"Save this occasion to Our Plans")}
+      </button>}
+      {existingPlan&&<Link to="/plans" onClick={()=>setActivePlan(existingPlan.id)}
+       className="inline-flex min-h-11 items-center rounded-full bg-[#EAF1E8] px-4 text-sm font-semibold text-brand">
+       {existingPlan.status==="completed"?(ar?"راجع الخطة المكتملة":"View completed plan"):
+        (ar?"افتح الخطة":"Open saved plan")} →
+      </Link>}
+      <span className="text-xs text-muted-foreground">
+       {ar?"يُحفظ موعد المناسبة وفكرتها وسقفها باختيارك فقط. لا يتم الدفع أو تسجيل أي مصروف.":
+        "The date, chosen idea and ceiling transfer only when you save. No payment or expense is recorded."}
+      </span>
+      {syncMessage&&<p role="status" className="w-full text-xs font-semibold text-brand">{syncMessage}</p>}
      </div>
      {plan.budgetJod!==null&&<div className="mt-3 rounded-xl bg-muted/40 p-3 text-sm">
       <ShieldCheck className="me-2 inline size-4 text-brand"/>
