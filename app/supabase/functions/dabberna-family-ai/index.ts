@@ -1,7 +1,7 @@
 // Supabase Edge Function. Deploy separately from static GitHub Pages.
 // OpenAI API key must live ONLY in Edge Function secrets.
 import {createClient} from "npm:@supabase/supabase-js@2";
-import {parseLiveAiRequest} from "../../../src/lib/liveAiProtocol.ts";
+import {parseLiveAiRequest} from "../_shared/liveAiProtocol.ts";
 
 type Json=Record<string,unknown>;
 const reply=(body:Json,status:number,headers:Record<string,string>)=>new Response(JSON.stringify(body),{
