@@ -247,7 +247,7 @@ function PlansPage(){
         <option value="">{ar?"اختر فئة مصروف":"Choose spending category"}</option>{money.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
        </select>}
        {money.demo?<Link to="/money" className="mt-2 inline-block text-sm font-semibold text-brand underline">{ar?"ابدأ بماليتي الحقيقية":"Start real Money first"}</Link>:
-        <Button variant="outline" className="mt-3" onClick={()=>recordExpense(currentPlan)} disabled={!category||money.categories.length===0}>{ar?"سجّل المصروف في المالية":"Record actual expense in Money"}</Button>}
+        <Button variant="outline" className="mt-3" onClick={()=>recordExpense(currentPlan)} disabled={!category||money.categories.length===0||currentPlan.actualJod===undefined}>{ar?"سجّل المصروف في المالية":"Record actual expense in Money"}</Button>}
       </div>}
     </section>}
    </section>}
