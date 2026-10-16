@@ -32,7 +32,8 @@ describe("new financial records are private by default",()=>{
   expect(source("routes/money.tsx")).toContain('amount: 0, shared: false');
   expect(source("routes/money.tsx")).toContain('amount,shared:false,status:quickMode');
   expect(source("routes/plans.tsx")).toContain('status:"paid",shared:false,note:plan.title');
-  expect(source("routes/explore.shopping.tsx")).toContain('note: "Shopping basket", shared: false');
+  expect(source("routes/explore.shopping.tsx")).toContain('recordBasketExpense(');
+  expect(source("lib/basketRecording.ts")).toContain('note:"Shopping basket",shared:false,status:"paid"');
   expect(source("components/CashFlowPlanner.tsx")).toContain('frequency:"monthly",nextDate:"",shared:false');
   expect(source("lib/billPayment.ts")).toContain('note:bill.name,shared:false,billId');
  });
