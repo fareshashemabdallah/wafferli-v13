@@ -146,7 +146,7 @@ export function SpendingBreakdownCard({
       {(limited?group.lines.slice(0,2):group.lines).map(line=>
        <div key={line.id} className="flex items-start justify-between gap-3 py-2 text-sm">
         <div className="min-w-0 flex-1">
-         <p className="font-medium">{knownNames[line.id]?(ar?knownNames[line.id].ar:knownNames[line.id].en):tr(line.name)}</p>
+         <p className="font-medium">{knownNames[line.id]?(ar?knownNames[line.id]!.ar:knownNames[line.id]!.en):tr(line.name)}</p>
          <p className="mt-0.5 text-xs text-muted-foreground">{ar?"مصروف مسجّل: ":"Recorded: "}{fmtJOD(line.recordedJod)}</p>
         </div>
         <div className="shrink-0 text-end"><p className="font-semibold tabular-nums">{fmtJOD(line.plannedJod)}</p>
