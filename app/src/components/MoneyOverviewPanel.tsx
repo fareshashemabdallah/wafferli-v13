@@ -5,6 +5,7 @@ import {FAMILY_PLANS_KEY,upcomingFamilyPlans,type FamilyPlan} from "@/lib/family
 import type {MoneyState} from "@/lib/money";
 import {emptyRealMoney,getMoneyOverview} from "@/lib/moneyOverview";
 import {budgetAlignment} from "@/lib/financeAlignment";
+import {budgetPlainResult} from "@/lib/budgetPlainResult";
 import {MoneyGuidance} from "@/components/MoneyGuidance";
 import {MoneyReadinessCard} from "@/components/MoneyReadinessCard";
 import {SavingsGoalsPanel} from "@/components/SavingsGoalsPanel";
@@ -22,6 +23,7 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
  const v=getMoneyOverview(state);
  const f=v.forecast,c=v.month;
  const alignment=budgetAlignment(state);
+ const plain=budgetPlainResult(alignment);
  const today=new Date(),ym=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0");
  const upcomingCarryover=monthCarryover(state,nextMonthKey(ym));
  const cash=state.cashOnHand;
@@ -50,10 +52,23 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
    <section className="editorial-card p-5 sm:p-6" aria-label={ar?"توازن ميزانية الشهر":"Monthly budget alignment"}>
      <div className="flex flex-wrap items-center justify-between gap-2">
        <div><p className="section-eyebrow">{ar?"التخطيط الشهري":"YOUR MONTHLY PLAN"}</p>
-       <h2 className="mt-1 text-xl font-semibold">{ar?"هل الدخل والمصاريف والادخار متوازنة؟":"Do your income, expenses and savings fit?"}</h2></div>
+       <h2 className="mt-1 text-xl font-semibold">{ar?"شو بتعني الأرقام اللي دخلتها؟":"What do your numbers tell you?"}</h2></div>
        <button type="button" onClick={()=>goTo("planning")} className="text-xs font-semibold text-brand underline underline-offset-2">{ar?"عدّل الدخل والادخار":"Edit income & savings"}</button>
      </div>
-     <div className="mt-4 grid grid-cols-3 gap-2">
+     <div role="status" className={"mt-4 rounded-xl border p-4 "+(plain.state==="deficit"?
+      "border-[#E8D0C4] bg-[#FFF8F1]":"border-[#D9E5D8] bg-[#F4F9F1]")}>
+       <h3 className="text-base font-semibold">{ar?plain.titleAr:plain.titleEn}</h3>
+       <p className="mt-2 text-sm leading-relaxed">{ar?plain.messageAr:plain.messageEn}</p>
+       {plain.state==="deficit"&&<button type="button" onClick={()=>goTo("planning")}
+        className="mt-3 min-h-11 text-sm font-semibold text-brand underline">
+        {ar?"عدّل الخطة":"Adjust your plan"} →
+       </button>}
+     </div>
+     <details className="mt-3 rounded-xl border border-[#DFE8DE] bg-white px-3 py-2">
+      <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
+       {ar?"كيف وصلنا لهالنتيجة؟":"See the numbers behind this answer"} +
+      </summary>
+      <div className="mt-3 grid grid-cols-3 gap-2">
        <div className="rounded-xl bg-[#EFF5EE] p-3"><p className="text-xs text-muted-foreground">{ar?"دخل الشهر":"Monthly income"}</p><p className="mt-2 text-sm font-semibold tabular-nums sm:text-lg">{fmtJOD(alignment.income)}</p></div>
        <div className="rounded-xl bg-[#F8F0E7] p-3"><p className="text-xs text-muted-foreground">{ar?"مخصص المصاريف":"Expense budgets"}</p><p className="mt-2 text-sm font-semibold tabular-nums sm:text-lg">{fmtJOD(alignment.categories)}</p></div>
        <div className="rounded-xl bg-[#EDF1F5] p-3"><p className="text-xs text-muted-foreground">{ar?"هدف الادخار":"Savings goal"}</p><p className="mt-2 text-sm font-semibold tabular-nums sm:text-lg">{fmtJOD(alignment.savings)}</p></div>
@@ -63,6 +78,7 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
         alignment.status==="balanced"?(ar?"الخطة متوازنة":"Your plan is balanced"):
         (alignment.gap<0?(ar?"عجز في الخطة: ":"Plan exceeds income by "):(ar?"غير موزّع في الخطة: ":"Not yet allocated: "))+fmtJOD(Math.abs(alignment.gap))}</p>
      <p className="mt-1 text-xs text-muted-foreground">{ar?"هذه مقارنة مخصصات وهدف ادخار، وليست رصيد البنك أو مصروفاً تم دفعه.":"This compares monthly budget envelopes and the savings goal, not actual bank cash or payments made."}</p>
+     </details>
      {Math.abs(c.carryover.net)>=.005&&<div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D9E5D8] bg-[#F2F7EE] px-3 py-3 text-sm">
        <div><p className="font-semibold">{ar?"رصيد التخطيط المرحّل من الشهر الماضي":"Budget carryover from last month"}</p>
        <p className="mt-1 text-xs text-muted-foreground">{ar?"يتضمنه حساب التوازن أعلاه، وليس إضافة لرصيد البنك.":"Included in the alignment math above—not added to your bank balance."}</p></div>
@@ -107,19 +123,39 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#E8F1E7] text-brand"><Wallet className="size-6"/></span>
        <div className="min-w-0 flex-1">
         <p className="section-eyebrow">{ar?"الصورة المالية الآن":"YOUR CASH & COMMITMENTS"}</p>
-        <h2 className="mt-1 text-xl font-semibold">{v.cashSet?(v.cashAfterBills!==null&&v.cashAfterBills<0?(ar?"عجز بعد الفواتير والاحتياطي":"Shortfall after bills & reserve"):(ar?"بعد الفواتير والاحتياطي":"After scheduled bills & reserve")):(ar?"ابدأ برصيدك الحالي":"Let's begin with your current balance")}</h2>
+        <h2 className="mt-1 text-xl font-semibold">{ar?"هل غطّينا الفواتير القريبة؟":"What about your upcoming bills?"}</h2>
        </div>
      </div>
-     {v.cashSet?<>
-       <p className="mt-5 text-3xl font-semibold tabular-nums text-ink sm:text-4xl">{fmtJOD(v.cashAfterBills??0)}</p>
-       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?"هذا رصيدك المدخل ناقص الفواتير غير المدفوعة المسجلة خلال ٣٠ يوماً والاحتياطي. ليس مبلغاً آمناً للإنفاق: لا يشمل المصاريف اليومية التي لم تُجدول.":"Your manually entered cash minus recorded unpaid bills over the next 30 days and your reserve. Not a safe-to-spend amount: everyday costs without due dates are excluded."}</p>
+     {v.cashSet&&!state.demo&&v.hasBillSchedule&&v.dateProblems===0?<>
+       <h3 className="mt-4 text-sm font-semibold">{ar?"المتبقي حسابياً بعد الفواتير المسجلة والاحتياطي":"Cash minus recorded bills and emergency cushion"}</h3>
+       <p className="mt-2 text-3xl font-semibold tabular-nums text-ink sm:text-4xl">{fmtJOD(v.cashAfterBills??0)}</p>
+       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ar?
+        "هذا ليس مبلغاً تستطيع صرفه بأمان؛ لم نحسم منه كل مصاريف الحياة اليومية وقد تكون بعض الفواتير ناقصة. ما رح نسمّيه مالاً متاحاً.":
+        "This is NOT your safe spending limit. Everyday spending and any unlisted bills are missing, so don't treat this number as money you can freely spend."}</p>
+       <details className="mt-3 rounded-xl border border-[#DFE8DE] bg-white p-3">
+        <summary className="min-h-10 cursor-pointer text-xs font-semibold text-brand">
+         {ar?"كيف حسبنا هالرقم؟":"How was this amount calculated?"}
+        </summary>
+        <p className="mt-2 text-sm tabular-nums">
+         {fmtJOD(cash??0)} − {fmtJOD(f.upcomingBills)} − {fmtJOD(state.cashReserve??0)} = {fmtJOD(v.cashAfterBills??0)}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">{ar?
+         "رصيد أدخلته − فواتير غير مدفوعة خلال ٣٠ يوماً − احتياطي اخترته. الدخل المستقبلي غير محسوب.":
+         "Your entered cash − unpaid bills due within 30 days − the emergency buffer you chose. Expected future income is excluded."}</p>
+       </details>
      </>:<div className="mt-4">
-        <p className="text-sm leading-relaxed text-muted-foreground">{ar?"حتى تكون الحسابات واضحة، أدخل الرصيد الحقيقي المتاح في البنك والنقد، ثم جدول الفواتير المستحقة.":"Enter the actual cash and bank balance you have today, then add due dates for your bills. Monthly budget estimates are not bank balances."}</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{ar?
+         "ما فينا نحسب الباقي لأن الرصيد أو الفواتير أو تواريخها ناقصة، أو لأنك تشوف بيانات تجريبية. راجع رصيد اليوم والفواتير الحقيقية أولاً.":
+         "There isn't enough real information yet. Enter today's cash, review upcoming unpaid bills and check their dates. Sample figures are not your money."}</p>
         <button type="button" onClick={()=>goTo("planning")} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white">
-         <Plus className="size-4"/>{ar?"أدخل الرصيد والفواتير":"Set cash & bills"}
+         <Plus className="size-4"/>{ar?"راجع رصيدك وفواتيرك":"Check cash & bills"}
         </button>
        </div>}
-     <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+     <details className="mt-4 rounded-xl border border-[#DFE8DE] bg-white px-3 py-2">
+      <summary className="min-h-11 cursor-pointer text-xs font-semibold text-brand">
+       {ar?"تفاصيل الفواتير والرصيد (اختياري)":"More cash and bill details (optional)"}
+      </summary>
+     <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
        <div className="rounded-2xl bg-[#F1F5EF] p-3">
         <p className="text-xs text-muted-foreground">{ar?"رصيد اليوم":"Cash entered today"}</p>
         <p className="mt-1 text-sm font-semibold tabular-nums">{v.cashSet?fmtJOD(cash!):(ar?"لم يُدخل":"Not set")}</p>
@@ -137,6 +173,7 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
         <p className="mt-1 text-sm font-semibold tabular-nums">{v.hasIncomeSchedule?fmtJOD(f.expectedIncome):(ar?"لم يُجدول":"Not scheduled")}</p>
        </div>
      </div>
+     </details>
      {state.cashUpdatedAt&&<p className="mt-3 text-xs font-medium text-brand">{ar?"آخر تحديث للرصيد: ":"Balance last updated: "}{state.cashUpdatedAt}</p>}
      <p className="mt-3 text-xs text-muted-foreground">{ar?"الدخل المتوقع يظهر للمعلومية فقط؛ لا يُضاف إلى رصيد اليوم حتى تستلمه وتحدّث الرصيد يدوياً.":"Expected income is informational only; it isn't included in today's cash. Update cash yourself when it arrives."}</p>
      {!v.hasBillSchedule&&<div className="mt-4 flex items-start gap-2 rounded-xl bg-[#FFF3E5] p-3 text-sm text-[#835C39]">
