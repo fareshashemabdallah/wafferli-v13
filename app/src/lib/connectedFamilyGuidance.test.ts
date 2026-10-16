@@ -37,7 +37,7 @@ describe("connected, device-only family priorities",()=>{
   expect(r.detailEn).toContain("Friday family outing");
   expect(r.detailEn).toContain("2026-10-18");
   expect(r.detailEn).toContain("45.00 JOD");
-  expect(r.detailEn).toContain("not money already spent");
+  expect(r.detailEn).toContain("A safe cost assessment needs completed");
   expect(r.route).toBe("/plans");
   expect(JSON.stringify(original)).toBe(frozen);
  });
