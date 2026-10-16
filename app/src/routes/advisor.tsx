@@ -47,10 +47,17 @@ function Advisor(){
       <div className="flex items-center gap-2"><Sparkles className="size-6 text-brand"/><h2 className="text-2xl font-semibold">{ar?"أنفق بذكاء، وعِش براحة":"Spend wisely. Live well."}</h2></div>
       <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#536E5D]">{ar?"خلّينا نشوف إذا قرار المصروف مناسب لخطتك، من غير ما تتخلى عن الأشياء الحلوة.":"Feel good about spending on what matters, while keeping the important things covered."}</p>
     </div>
-    <LiveFamilyAdvisor/>
     <GuidedFamilyAdvisor/>
-    <div className="editorial-card mt-5 p-5 sm:p-6">
-      <div className="flex items-center gap-2"><Calculator className="size-5 text-brand"/><h2 className="font-semibold">{ar?"هل يناسب هذا المصروف ميزانيتنا؟":"Can we plan this purchase?"}</h2></div>
+    <LiveFamilyAdvisor/>
+    <details className="group editorial-card mt-5 p-5 sm:p-6">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold text-brand">
+       <Calculator className="size-5" aria-hidden="true"/>
+       {ar?"احسب تأثير مصروف محدد (اختياري)":"Check a specific purchase amount (optional)"} +
+      </summary>
+      <p className="mt-2 text-xs text-muted-foreground">
+       {ar?"جرّب تأثير مبلغ قبل الدفع. الحساب يعتمد على الأرقام المدخلة فقط، ولا يغيّر أي مصروف.":
+        "Try a one-off amount before paying. This uses your entered records only and changes no expense or bank balance."}
+      </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium">{ar?"المبلغ (دينار)":"Amount (JOD)"}
           <input type="number" min="0" max="100000" step=".01" value={amount} onChange={e=>setAmount(e.target.value)} className="mt-1 w-full rounded-xl border border-border bg-background p-3" placeholder="35"/>
@@ -88,7 +95,7 @@ function Advisor(){
        </div>}
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{ar?"هذه مساعدة حسابية بناءً على بياناتك، وليست ذكاءً اصطناعيًا متصلًا أو نصيحة مالية متخصصة.":"This is an on-device calculation, not a connected AI chatbot or professional financial advice."}</p>
       <Link to="/money" className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand">{ar?"أكمل بيانات الميزانية":"Complete your financial plan"} <ArrowRight className="size-4 rtl:rotate-180"/></Link>
-    </div>
+    </details>
     <div className="editorial-card mt-5 p-4"><h2 className="font-semibold">{ar?"اسأل من تثق بهم":"Ask people you trust"}</h2><p className="mt-1 text-sm text-muted-foreground">{ar?"اسأل مجموعتك عن طبيب أو منتج أو نشاط جرّبوه بالفعل.":"Ask your circle if someone has personally tried a doctor, product or activity."}</p><Link to="/community" className="mt-2 inline-block font-semibold text-brand">{ar?"فتح دردشة المجموعة":"Open group discussion"} →</Link></div>
     <details className="group editorial-card mt-5 p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"استكشف خيارات أخرى":"More ways to plan"} +</summary>
     <div className="mt-3 grid gap-2 sm:grid-cols-2">

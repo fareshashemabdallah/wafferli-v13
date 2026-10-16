@@ -1,18 +1,23 @@
 import {allFamilyMoments,dateKey,parseCalendarDate,upcomingMoments,type FamilyMoment,type MomentOccurrence} from "./familyCalendar";
 import type {Member,MoneyState} from "./money";
+import {realFamilyMembers} from "./familySetup";
 import {buildForecast,legacyIncome} from "./cashflow";
 
 export type OccasionPlan={budgetJod:number|null;chosenIdea?:string;done?:string[];updatedAt?:string};
 export type OccasionPlans=Record<string,OccasionPlan>;
 export type OccasionIdea={id:string;en:string;ar:string;whyEn:string;whyAr:string;focus:"gift"|"experience"|"together";share:number};
 export const planKey=(item:MomentOccurrence)=>item.id+"@"+item.occursOn.slice(0,4);
+/** Reuse the exact date selected in Calendar, then fall back safely if it passed. */
+export function chooseOccasion(upcoming:readonly MomentOccurrence[],chosen:string,focused:string):MomentOccurrence|undefined{
+ return upcoming.find(event=>planKey(event)===(chosen||focused))??upcoming[0];
+}
 export const daysUntil=(date:string,now:Date)=>{
  const d=parseCalendarDate(date);
  if(!d)return Number.POSITIVE_INFINITY;
  return Math.round((d.getTime()-new Date(now.getFullYear(),now.getMonth(),now.getDate(),12).getTime())/86400000);
 };
 export function upcomingPlanEvents(events:FamilyMoment[],members:Member[],now:Date,days=100,arabic=false){
- return upcomingMoments(allFamilyMoments(events,members,arabic),now,days+1);
+ return upcomingMoments(allFamilyMoments(events,realFamilyMembers(members),arabic),now,days+1);
 }
 export function leadAdvice(days:number,ar:boolean):string{
  if(days>45)return ar?"وقت مناسب لابتكار فكرة والتعرّف على خيارات جديدة.":"You have time to explore ideas, not rush into buying.";

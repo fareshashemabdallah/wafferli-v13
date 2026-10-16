@@ -38,15 +38,16 @@ export function LiveFamilyAdvisor(){
   });
   return ()=>{live=false;requestGeneration.current++;data.subscription.unsubscribe();};
  },[]);
- if(!LIVE_AI_UI_ENABLED)return <section className="editorial-card mt-5 p-4 sm:p-5" aria-label={ar?"حالة الذكاء الاصطناعي":"Live AI status"}>
-  <div className="flex items-start gap-3"><Bot className="size-6 shrink-0 text-brand"/>
-   <div><h2 className="font-semibold">{ar?"المساعد المباشر غير مفعّل بعد":"Live AI requires backend activation"}</h2>
-    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
-     "المحادثة المباشرة تحتاج خادماً مؤمناً ومفتاح خدمة خاصاً وضبط حدود الاستخدام. الإرشادات المحلية أدناه تعمل الآن من دون إرسال بياناتك.":
-     "Live conversation requires a secured server deployment, provider credentials and request limits. The local guided advisor below works without uploading family details."}</p>
-   </div>
-  </div>
- </section>;
+ if(!LIVE_AI_UI_ENABLED)return <details className="editorial-card mt-4 p-4 sm:p-5"
+  aria-label={ar?"حالة المحادثة المباشرة":"Live AI status"}>
+  <summary className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-semibold text-brand">
+   <Bot className="size-5 shrink-0" aria-hidden="true"/>
+   {ar?"عن المحادثة الذكية المباشرة (غير مفعّلة بعد)":"About live AI (not activated yet)"} +
+  </summary>
+  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?
+   "المحادثة المباشرة تحتاج خادماً مؤمناً ومفتاح خدمة خاصاً وضبط حدود الاستخدام. الإرشادات المحلية أعلاه تعمل الآن من دون إرسال بياناتك.":
+   "Live conversation requires a secured server deployment, provider credentials and request limits. The guided advice above works now without uploading your family's data."}</p>
+ </details>;
  const signin=(e:FormEvent)=>{
   e.preventDefault();if(busy)return;
   setBusy(true);setError("");setMessage("");

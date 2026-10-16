@@ -43,6 +43,10 @@ const hit=(q:string,words:RegExp)=>words.test(q);
 export function detectAdvisorIntent(question:string):AdvisorIntent{
  const q=question.toLocaleLowerCase().trim().slice(0,400);
  if(!q)return "unsupported";
+ // Parents often describe a real-life event AND ask whether its cost is safe.
+ // Treat explicit affordability as a Money question, not a location or
+ // occasion suggestion; no bank-verified verdict is ever produced.
+ if(hit(q,/afford|can we pay|can i pay|within (our |my )?budget|fit (our |my )?budget|budget for|نقدر ندفع|فينا ندفع|بنقدر ندفع|بتسمح الميزانية|مناسب للميزانية|ميزانية.*(طلعة|هدية|نزهة)|can we spend/i))return "safety";
  if(hit(q,/task|chore|responsibilit|to.?do|مهمات|مهام|مهمة|واجبات|مسؤوليات/i))return "tasks";
  if(hit(q,/bill|due|overdue|invoice|payment date|فواتير|فاتورة|مستحق|دفعات|دفع/i))return "bills";
  if(hit(q,/sav(?:e|ed|ing|ings)|goal|هدف|ادخار|توفير|نوفر/i))return "savings";

@@ -54,12 +54,24 @@ export function GuidedFamilyAdvisor(){
    </div>
   </div>
   <div className="mt-4 grid gap-2 sm:grid-cols-2">
-   {guidedPrompts.map(p=><button type="button" key={p.id} disabled={!ready}
+   {guidedPrompts.filter(p=>["safety","bills","family","outings"].includes(p.id)).map(p=><button type="button" key={p.id} disabled={!ready}
     onClick={()=>ask(ar?p.ar:p.en)}
     className="min-h-11 rounded-xl border border-[#DDE8D9] bg-[#F6FAF4] px-3 py-2 text-start text-xs font-semibold text-brand transition hover:bg-[#ECF3E9] disabled:opacity-50">
     {ar?p.ar:p.en}
    </button>)}
   </div>
+  <details className="mt-3 rounded-xl border border-[#E1E8DF] bg-white px-3 py-2">
+   <summary className="flex min-h-10 cursor-pointer items-center text-xs font-semibold text-brand">
+    {ar?"أسئلة إضافية عن الادخار والمشتريات والمهام":"More questions about savings, shopping & tasks"}
+   </summary>
+   <div className="mt-2 grid gap-2 sm:grid-cols-2">
+    {guidedPrompts.filter(p=>!["safety","bills","family","outings"].includes(p.id)).map(p=><button type="button" key={p.id} disabled={!ready}
+     onClick={()=>ask(ar?p.ar:p.en)}
+     className="min-h-11 rounded-xl border border-[#DDE8D9] bg-[#F6FAF4] px-3 py-2 text-start text-xs font-semibold text-brand hover:bg-[#ECF3E9] disabled:opacity-50">
+     {ar?p.ar:p.en}
+    </button>)}
+   </div>
+  </details>
   <form onSubmit={submit} className="mt-4 flex flex-wrap gap-2">
    <label className="min-w-[175px] flex-1 text-xs font-semibold">
     {ar?"أو اكتب سؤالك":"Or type your question"}
