@@ -27,7 +27,7 @@ describe("keyboard navigation and bilingual accessibility",()=>{
   const nav=screen.getAllByRole("navigation",{name:"Main"});
   expect(nav).toHaveLength(2);
   const links=nav.flatMap(n=>Array.from(n.querySelectorAll("a")));
-  expect(links).toHaveLength(10);
+  expect(links).toHaveLength(6); // Three user outcomes on desktop and mobile, each keyboard reachable.
   for(const link of links)expect(link.className).toContain("focus-visible:ring-2");
  });
  it("updates the skip wording for Arabic without changing saved finances",()=>{
