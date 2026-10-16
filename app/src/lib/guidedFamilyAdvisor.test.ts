@@ -27,6 +27,12 @@ describe("family question advisor",()=>{
   expect(detectAdvisorIntent("Tasks due tomorrow")).toBe("tasks");
   expect(detectAdvisorIntent("هدايا العيلة")).toBe("gifts");
   expect(detectAdvisorIntent("best pediatrician")).toBe("services");
+  // When outings or gifts are mentioned alongside affordability, the parent
+  // wants a financial safety assessment, not only a list of places.
+  expect(detectAdvisorIntent("Can we afford an outing with our children this weekend?")).toBe("safety");
+  expect(detectAdvisorIntent("Can we afford a birthday gift?")).toBe("safety");
+  expect(detectAdvisorIntent("هل ميزانية العيلة بتسمح بطلعة للأطفال؟")).toBe("safety");
+  expect(detectAdvisorIntent("What outings suit our family?")).toBe("outings");
   expect(guidedPrompts).toHaveLength(10);
  });
  it("never passes demo figures as real household safety data",()=>{
