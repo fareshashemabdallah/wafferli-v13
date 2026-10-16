@@ -1,6 +1,6 @@
 # Dabberna feature implementation register
 
-_Last engineering review: 16 October 2026. Source: `main` after PR #64._
+_Historical engineering review: 16 October 2026. Source: `main` after PR #64. This is a snapshot, not the current release register. For **all 80 PRs, subsequent PRs #65–#80, removed-feature recovery paths, and current-versus-archived distinctions**, read [DABBERNA_DEVELOPMENT_ARCHIVE.md](DABBERNA_DEVELOPMENT_ARCHIVE.md)._
 
 This register distinguishes **implemented code**, **actually enabled in the public browser pilot**, and **production readiness**. A green TypeScript/test/build workflow validates code quality only; it is **not** evidence that a sensitive database was deployed, that a provider is verified, or that a payment was completed.
 
