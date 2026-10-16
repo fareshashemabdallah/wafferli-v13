@@ -12,7 +12,7 @@ export const Route=createFileRoute("/advisor")({
   {name:"description",content:"Ask about your family's money, outings and shopping. Get a grounded next step from your saved context."}
  ]}),component:Advisor
 });
-function Advisor(){
+export function Advisor(){
  const {lang}=useI18n(),ar=lang==="ar";
  return <AppShell title={ar?"اسأل دبّرنا":"Ask Dabberna"}>
   <div className="page-intro overflow-hidden p-5 sm:p-7">
