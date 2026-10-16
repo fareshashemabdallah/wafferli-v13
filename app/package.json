@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "security:staging": "node scripts/verify-staging-security.mjs",
+    "security:ai-staging": "node scripts/verify-live-ai-staging.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
