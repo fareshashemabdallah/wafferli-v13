@@ -27,6 +27,7 @@ import { Route as ExploreShoppingRouteImport } from './routes/explore.shopping'
 import { Route as ExploreSmartbuyRouteImport } from './routes/explore.smartbuy'
 import { Route as ExploreMarketRouteImport } from './routes/explore.market'
 import { Route as ExploreTogetherRouteImport } from './routes/explore.together'
+import { Route as ExploreWeekendRouteImport } from './routes/explore.weekend'
 import { Route as TogetherAdminTokenRouteImport } from './routes/together.$adminToken'
 import { Route as VoteTokenRouteImport } from './routes/vote.$token'
 
@@ -115,6 +116,11 @@ const ExploreSmartbuyRoute = ExploreSmartbuyRouteImport.update({
   path: '/explore/smartbuy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExploreWeekendRoute = ExploreWeekendRouteImport.update({
+  id: '/explore/weekend',
+  path: '/explore/weekend',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExploreTogetherRoute = ExploreTogetherRouteImport.update({
   id: '/explore/together',
   path: '/explore/together',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/explore/shopping': typeof ExploreShoppingRoute
   '/explore/market': typeof ExploreMarketRoute
   '/explore/smartbuy': typeof ExploreSmartbuyRoute
+  '/explore/weekend': typeof ExploreWeekendRoute
   '/explore/together': typeof ExploreTogetherRoute
   '/together/$adminToken': typeof TogetherAdminTokenRoute
   '/vote/$token': typeof VoteTokenRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/explore/shopping': typeof ExploreShoppingRoute
   '/explore/market': typeof ExploreMarketRoute
   '/explore/smartbuy': typeof ExploreSmartbuyRoute
+  '/explore/weekend': typeof ExploreWeekendRoute
   '/explore/together': typeof ExploreTogetherRoute
   '/together/$adminToken': typeof TogetherAdminTokenRoute
   '/vote/$token': typeof VoteTokenRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/explore/shopping': typeof ExploreShoppingRoute
   '/explore/market': typeof ExploreMarketRoute
   '/explore/smartbuy': typeof ExploreSmartbuyRoute
+  '/explore/weekend': typeof ExploreWeekendRoute
   '/explore/together': typeof ExploreTogetherRoute
   '/together/$adminToken': typeof TogetherAdminTokenRoute
   '/vote/$token': typeof VoteTokenRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/explore/shopping'
     | '/explore/market'
     | '/explore/smartbuy'
+    | '/explore/weekend'
     | '/explore/together'
     | '/together/$adminToken'
     | '/vote/$token'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/explore/shopping'
     | '/explore/market'
     | '/explore/smartbuy'
+    | '/explore/weekend'
     | '/explore/together'
     | '/together/$adminToken'
     | '/vote/$token'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/explore/shopping'
     | '/explore/market'
     | '/explore/smartbuy'
+    | '/explore/weekend'
     | '/explore/together'
     | '/together/$adminToken'
     | '/vote/$token'
@@ -284,6 +296,7 @@ export interface RootRouteChildren {
   ExploreShoppingRoute: typeof ExploreShoppingRoute
   ExploreMarketRoute: typeof ExploreMarketRoute
   ExploreSmartbuyRoute: typeof ExploreSmartbuyRoute
+  ExploreWeekendRoute: typeof ExploreWeekendRoute
   ExploreTogetherRoute: typeof ExploreTogetherRoute
   TogetherAdminTokenRoute: typeof TogetherAdminTokenRoute
   VoteTokenRoute: typeof VoteTokenRoute
@@ -411,6 +424,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreSmartbuyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/explore/weekend': {
+      id: '/explore/weekend'
+      path: '/explore/weekend'
+      fullPath: '/explore/weekend'
+      preLoaderRoute: typeof ExploreWeekendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/explore/together': {
       id: '/explore/together'
       path: '/explore/together'
@@ -452,6 +472,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreShoppingRoute: ExploreShoppingRoute,
   ExploreMarketRoute: ExploreMarketRoute,
   ExploreSmartbuyRoute: ExploreSmartbuyRoute,
+  ExploreWeekendRoute: ExploreWeekendRoute,
   ExploreTogetherRoute: ExploreTogetherRoute,
   TogetherAdminTokenRoute: TogetherAdminTokenRoute,
   VoteTokenRoute: VoteTokenRoute,
