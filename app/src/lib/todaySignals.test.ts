@@ -3,7 +3,7 @@ import {buildTodaySignals} from "./todaySignals";
 import type {AttentionItem} from "./familyAttention";
 import type {DecisionStep} from "./familyDecisionBrief";
 const makeAttention=(category:AttentionItem["category"],link:AttentionItem["link"],
- severity:AttentionItem["severity"],key=category):AttentionItem=>({
+ severity:AttentionItem["severity"],key:string=category):AttentionItem=>({
  key,category,severity,priority:category==="finance"?0:20,
  titleEn:key,titleAr:key,detailEn:"Explain a real next action",detailAr:"شرح",
  actionEn:"Review",actionAr:"راجع",link,canSnooze:severity!=="critical"
