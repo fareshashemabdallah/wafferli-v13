@@ -1,4 +1,5 @@
 import {getMoneyOverview} from "./moneyOverview";
+import {explicitJodAmount,explainSpecificSpending} from "./specificSpendingAdvice";
 import {realFamilyMembers} from "./familySetup";
 import {allFamilyMoments,upcomingMoments} from "./familyCalendar";
 import {dateKey} from "./familyCalendar";
@@ -71,6 +72,13 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
  const m=ctx.money;
  const overview=getMoneyOverview(m,now);
  if(intent==="safety"){
+  const jod=explicitJodAmount(question);
+  if(jod!==null){
+   const assessment=explainSpecificSpending(m,jod,now);
+   return answer(intent,assessment.titleEn,assessment.titleAr,
+    assessment.detailEn,assessment.detailAr,assessment.sourceEn,assessment.sourceAr,
+    "/money","Review Money assumptions","راجع أرقام المالية");
+  }
   if(m.demo||!overview.cashSet||!overview.hasBillSchedule||overview.dateProblems>0){
    return answer(intent,"We need real figures first","لازم نكمل المعلومات الفعلية",
     "The pilot cannot assess household spending safety without a current cash balance, a reviewed schedule of unpaid bills and valid dates. Sample numbers are not your bank balance.",
