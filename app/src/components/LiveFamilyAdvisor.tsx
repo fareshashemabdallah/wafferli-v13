@@ -71,7 +71,7 @@ export function LiveFamilyAdvisor(){
   ]);
   const generation=++requestGeneration.current;
   setBusy(true);setError("");setMessage("");
-  void askLiveFamilyAi({question:currentQuestion,language:lang,history:relevant,
+  void askLiveFamilyAi({question:currentQuestion,language:lang,history:relevant,parentConsent:true,
    ...(shareNumbers&&summary?{context:summary}:{})})
    .then(answer=>{
     if(generation!==requestGeneration.current)return;
@@ -103,10 +103,10 @@ export function LiveFamilyAdvisor(){
     <Button type="submit" disabled={busy}>{ar?"أرسل رابط الدخول":"Send sign-in link"}</Button>
    </form>:<>
     <p className="mt-3 text-xs text-muted-foreground">{ar?"تم تسجيل الدخول":"Signed in"} · {user.email}</p>
-    {history.length>0&&<div className="mt-4 space-y-3" aria-live="polite">
+    {history.length>0&&<div className="mt-4 space-y-3" role="log" aria-label={ar?"سجل المحادثة":"Conversation history"} aria-live="polite" aria-relevant="additions">
      {history.map((turn,i)=><article key={i} className="rounded-xl border border-[#DCE8DB] bg-[#F9FCF7] p-3">
-      <p className="text-xs font-semibold text-brand">{turn.question}</p>
-      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{turn.answer}</p>
+      <p className="break-words text-xs font-semibold text-brand">{turn.question}</p>
+      <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed">{turn.answer}</p>
      </article>)}
      <button type="button" className="inline-flex min-h-10 items-center gap-2 text-xs font-semibold text-brand underline"
       onClick={()=>setHistory([])}><Trash2 className="size-3.5"/>
@@ -167,7 +167,7 @@ export function LiveFamilyAdvisor(){
        "أوافق لهذا الطلب على إرسال سؤالي كما في المعاينة، ومعه الرسائل السابقة وملخص الأرقام فقط إذا اخترتهما بنفسي. أفهم أن إجابة الذكاء الاصطناعي قد تخطئ.":
        "For this request I agree to send the previewed question, plus my separately selected conversation history and numeric summary if enabled, to an AI provider through Dabberna. I understand the model can make mistakes."}</span>
      </label>
-     <Button type="submit" disabled={!consent||busy||question.trim().length<2}>
+     <Button type="submit" disabled={!consent||busy||!user||question.trim().length<2} aria-busy={busy}>
       <Send className="size-4"/>{busy?(ar?"جارٍ البحث عن جواب...":"Getting an answer..."):(ar?"اسأل الذكاء الاصطناعي":"Ask live AI")}
      </Button>
     </form>
