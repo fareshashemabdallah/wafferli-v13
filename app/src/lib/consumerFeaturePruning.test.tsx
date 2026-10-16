@@ -2,9 +2,9 @@ import {afterEach,beforeEach,describe,expect,it,vi} from "vitest";
 import {cleanup,render,screen} from "@testing-library/react";
 import type {ReactNode,AnchorHTMLAttributes} from "react";
 import {I18nProvider} from "@/lib/i18n";
-import {Route as AboutRoute} from "@/routes/about";
-import {Route as ExploreRoute} from "@/routes/explore.index";
-import {Route as AdvisorRoute} from "@/routes/advisor";
+import {About} from "@/routes/about";
+import {Explore} from "@/routes/explore.index";
+import {Advisor} from "@/routes/advisor";
 
 vi.mock("@tanstack/react-router",()=>({
  createFileRoute:()=> (options:unknown)=>options,
@@ -31,7 +31,7 @@ afterEach(()=>{cleanup();vi.restoreAllMocks();window.localStorage.clear()});
 const draw=(component:ReactNode)=>render(<I18nProvider>{component}</I18nProvider>);
 describe("remove distractions, not parent decision support",()=>{
  it("About shows real consumer capabilities and backup instead of commercial or merchant mockups",()=>{
-  draw(AboutRoute.options.component());
+  draw(<About/>);
   expect(screen.getByText("Family support, not more forms")).toBeInTheDocument();
   expect(screen.getByText("Private data backup and restore")).toBeInTheDocument();
   expect(screen.getByText("Private vault control")).toBeInTheDocument();
@@ -40,7 +40,7 @@ describe("remove distractions, not parent decision support",()=>{
   expect(screen.getByRole("link",{name:/Ask Dabberna/})).toHaveAttribute("href","/advisor");
  });
  it("Discover helps pick practical family outcomes but doesn't promote social networks",()=>{
-  draw(ExploreRoute.options.component());
+  draw(<Explore/>);
   expect(screen.getByRole("link",{name:/A family outing/})).toHaveAttribute("href","/explore/weekend");
   expect(screen.getByRole("link",{name:/Find a product/})).toHaveAttribute("href","/explore/market");
   expect(screen.getByRole("link",{name:/My shopping list/})).toHaveAttribute("href","/explore/shopping");
@@ -48,7 +48,7 @@ describe("remove distractions, not parent decision support",()=>{
   expect(screen.queryByRole("link",{name:/Community experiences/})).not.toBeInTheDocument();
  });
  it("Advisor has just one amount checker in the guided experience, not a second full form",()=>{
-  draw(AdvisorRoute.options.component());
+  draw(<Advisor/>);
   expect(screen.getByText("Ask one family question")).toBeInTheDocument();
   expect(screen.queryByText("Check a specific purchase amount (optional)")).not.toBeInTheDocument();
   expect(screen.queryByText("Ask people you trust (optional)")).not.toBeInTheDocument();
