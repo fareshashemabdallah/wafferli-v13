@@ -46,7 +46,7 @@ export function normalizeWeekendPlaces(raw:unknown):WeekendPlace[]{
    !Number.isFinite(lat)||!Number.isFinite(lon)||lat<-90||lat>90||
    lon<-180||lon>180||seen.has(id))return [];
   seen.add(id);
-  return [{id,name,category,lat,lon,osmUrl:"https://www.openstreetmap.org/"+id}];
+  return [{id,name,category:category as WeekendPlace["category"],lat,lon,osmUrl:"https://www.openstreetmap.org/"+id}];
  }).slice(0,20);
 }
 export function weekendPlaceSearchUrl(place:WeekendPlace,city:WeekendCity):string{
@@ -57,10 +57,11 @@ export async function findWeekendPlaces(city:WeekendCity):Promise<{
  places:WeekendPlace[];checkedAt:number;stale:boolean
 }>{
  const key=prefix+city,now=Date.now();
- const cached=(()=>{
+ const cached:{places:WeekendPlace[];checkedAt:number}|null=(()=>{
   try{
    const data=JSON.parse(localStorage.getItem(key)||"null") as {places?:WeekendPlace[];checkedAt?:number}|null;
-   return data&&Array.isArray(data.places)&&typeof data.checkedAt==="number"?data:null;
+   return data&&Array.isArray(data.places)&&typeof data.checkedAt==="number"?
+    {places:data.places,checkedAt:data.checkedAt}:null;
   }catch{return null}
  })();
  if(cached&&now-cached.checkedAt<MAX_CACHE_MS)
