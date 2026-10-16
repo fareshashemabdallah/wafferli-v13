@@ -10,6 +10,10 @@ export function explicitJodAmount(question:string):number|null {
  const western=question.replace(/[٠-٩]/g,d=>String(d.charCodeAt(0)-0x0660))
   .replace(/[۰-۹]/g,d=>String(d.charCodeAt(0)-0x06f0))
   .replace(/٫/g,".").replace(/٬/g,",");
+ // Mixed currencies need an explicit conversion decision; never silently convert.
+ if(/(?:usd|eur|gbp|دولار|يورو|\$|€|£)/iu.test(western))return null;
+ // A choice between two costs is not a single proposed purchase.
+ if(/\d[\d.,]*\s*(?:or|أو|او)\s*\d[\d.,]*\s*(?:jod|jd|دينار|دنانير|د\.?\s?أ)/iu.test(western))return null;
  const currency=String.raw`(?:jod|j\.?d\.?|jordanian\s+dinars?|dinars?|دنانير|دينار(?:اً)?|د\.?\s?أ\.?)`;
  const digits=String.raw`(?:\d[\d,.]*\d|\d)`;
  const regex=new RegExp(String.raw`(?:${currency}\s*(${digits})|(${digits})\s*${currency})`,"giu");
