@@ -8,6 +8,15 @@ create table if not exists public.dabberna_ai_usage_v1 (
  used int not null default 0 check (used between 0 and 20),
  primary key(user_id,bucket_type,bucket_start)
 );
+-- Additional total-provider safety cap across every account: 200 turns per UTC day.
+-- This is a request ceiling, not a guaranteed monetary ceiling; provider account
+-- spending limits and alerting must ALSO be configured before launch.
+create table if not exists public.dabberna_ai_global_usage_v1 (
+ bucket_start date primary key,
+ used int not null default 0 check (used between 0 and 200)
+);
+alter table public.dabberna_ai_global_usage_v1 enable row level security;
+revoke all on public.dabberna_ai_global_usage_v1 from public, anon, authenticated;
 alter table public.dabberna_ai_usage_v1 enable row level security;
 revoke all on public.dabberna_ai_usage_v1 from public, anon, authenticated;
 -- The consumer must not be able to read or mutate quota rows, even own rows.
@@ -52,9 +61,21 @@ begin
   -- Raising an exception rolls back BOTH counters in this transaction.
   raise exception 'AI_RATE_LIMIT' using errcode='P0001';
  end if;
+ -- Atomic shared daily counter prevents new accounts from bypassing a total cap.
+ -- A failure aborts this transaction and rolls back both per-user claims.
+ v_used := null;
+ insert into public.dabberna_ai_global_usage_v1 as global_bucket
+  (bucket_start,used)
+  values ((v_now at time zone 'UTC')::date,1)
+  on conflict(bucket_start)
+  do update set used=global_bucket.used+1 where global_bucket.used<200
+  returning used into v_used;
+ if v_used is null then
+  raise exception 'AI_RATE_LIMIT' using errcode='P0001';
+ end if;
  return true;
 end;
-$$;
+$;
 revoke all on function public.dabberna_ai_claim_turn() from public, anon;
 grant execute on function public.dabberna_ai_claim_turn() to authenticated;
 
@@ -64,3 +85,7 @@ grant execute on function public.dabberna_ai_claim_turn() to authenticated;
 -- 3. fifth request in 10 minutes -> AI_RATE_LIMIT; daily 21st -> denied.
 -- 4. concurrent requests cannot exceed one atomic quota window.
 -- 5. row remains linked to auth.users so account deletion cascades.
+-- 6. 201st total call across all users in a UTC day -> AI_RATE_LIMIT.
+-- 7. table SELECT/UPDATE is denied to authenticated users for global counter.
+-- 8. Set an independent provider-account spend limit; requests are not currency.
+
