@@ -74,7 +74,7 @@ export async function findWeekendPlaces(city:WeekendCity):Promise<{
  try{localStorage.setItem(attemptsKey,String(now));}catch{}
  const area=CITY[city],dy=2.5/111.32,dx=2.5/(111.32*Math.cos(area.lat*Math.PI/180));
  const bbox=[area.lat-dy,area.lon-dx,area.lat+dy,area.lon+dx].map(x=>x.toFixed(5)).join(",");
- const query='[out:json][timeout:12];nwr["leisure"~"^(park|playground)$"]('+bbox+');nwr["tourism"~"^(museum|attraction)$"]('+bbox+');nwr["amenity"="arts_centre"]('+bbox+');out center 60;';
+ const query='[out:json][timeout:12];(nwr["leisure"~"^(park|playground)$"]('+bbox+');nwr["tourism"~"^(museum|attraction)$"]('+bbox+');nwr["amenity"="arts_centre"]('+bbox+'););out center 60;';
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
  try{
   const result=await fetch("https://overpass-api.de/api/interpreter?data="+encodeURIComponent(query),{
