@@ -1,6 +1,6 @@
 # Dabberna feature implementation register
 
-_Last engineering review: 15 October 2026. Source: `main` after PR #53._
+_Last engineering review: 15 October 2026. Source: `main` after PR #57._
 
 This register distinguishes **implemented code**, **actually enabled in the public browser pilot**, and **production readiness**. A green TypeScript/test/build workflow validates code quality only; it is **not** evidence that a sensitive database was deployed, that a provider is verified, or that a payment was completed.
 
@@ -18,11 +18,12 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 | Family onboarding | Actual-vs-demo profiles, parent-confirmed preferences and priority setup | Local pilot | Real household identity / cross-device profiles depend on staged RLS |
 | Family Intelligence Engine | Local next-step prioritization connects finance, real family dates, plans and tasks (#23, #43) | Local pilot | Personalizable multi-step AI concierge and source-grounded live recommendations not connected |
 | Financial budget and cash flow | Categories, manual income/bills, expenses, savings targets, 30-day projection | Local pilot | No bank-feed verification, accounting audit or server-sync correctness |
-| Spending analytics | Six-month entered-paid spending, cautious unusual-pattern prompts (#41) | Local pilot | Historical budgets are not snapshotted at each period; don't claim perfect retrospective actuals |
+| Local finance privacy defaults | New expenses/private income start device-private, local labels explicitly separate from cloud consent, a hypothetical minimal-fields sharing preview exists (#57) | Local pilot | Existing records unchanged; authenticated per-item sharing remains disabled pending deployed RLS and independent security review |
+| Spending analytics | Six-month entered-paid spending, parent-reviewed past months, change detection and conservative alerts (#41, #56) | Local pilot | Budgets are captured only when manually reviewed, not reconstructed as original historic values; records are not bank-verified |
 | Longer scenarios | Read-only 3-, 6- and 12-month budget envelopes plus immediate spend stress (#34, #41) | Local pilot | No income-arrival certainty, unrecorded-cost completeness or financial guarantees |
-| Family responsibilities | Parent-managed dated tasks, status, local adult display labels, optional plan linkage (#42) | Local pilot | No authenticated multi-parent assignment or push delivery |
+| Family responsibilities | Parent-managed dated tasks, status, local adult display labels and optional plan linkage (#42) | Local pilot | No authenticated multi-parent assignment or push delivery |
 | Gifts and occasions | Calendar, annual dates, occasion planning, gift wishlist and manually recorded prices (#44) | Local pilot | No verified retailers, actual stock, checkout or automatic gifting |
-| Household shopping | Basket, manual comparisons, shopping wishlists, cost and price history (#33, #44) | Local pilot | No trustworthy live store feeds or stock/availability |
+| Household shopping | Basket, manual comparisons, price history and parent-confirmed recurring 1/3/6/12-month shopping (#33, #44, #55) | Local pilot | No trustworthy live retailer feeds, stock, automatic ordering or checkout |
 | Private merchant quote decisions | Parent-created RFQ drafts, self-entered offers, total cost and expiry, quote-to-Plan (#35, #38) | Local pilot | No real quotation dispatch, verified bidders or binding transaction |
 | Family outings | Child attendance/focus, costs, group voting, explicit parent-checked venue suitability (#48) | Local pilot with third-party voting service | No guaranteed accessibility, venue safety, live availability or forecast-linked age rules |
 | Provider and doctor comparisons | Private service checklist and source URLs, parent observations (#36) | Local pilot | No verified practitioner licensing, independent reviews or medical recommendations |
@@ -58,8 +59,8 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 
 ## Remaining work that can still advance without external credentials
 
-- Expand parent analytics with **historic plan snapshots** and explicit completeness indicators for backfilled months.
-- User-configurable **repeat purchase planning** (not automatic orders or charges); safeguard against duplicate recurring records.
+- Improve past-budget provenance beyond snapshots taken at parent review; historical completeness cannot be proven from manual entries.
+- Improve recurring-shopping reminders and skipped-cycle visibility; automatic orders or charges remain unavailable.
 - Broader UI/browser-path automated tests including payment-blocked paths, all AR/EN form validation and older Safari.
 - A more explicit data and privacy settings journey for shared-vs-private fields (local previews only until server enforcement).
 - UX refinements after real parent usability tests: accessibility, navigation complexity, plain-language advice and notification fatigue.
@@ -80,5 +81,8 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 - #51 — grounded ten-topic guided family questions.
 - #52 — four-category opt-in calendar reminder export.
 - #53 — developer-only fictional merchant/reviewer workflow.
+- #55 — anchored repeat-purchase planning with explicit parent confirmations.
+- #56 — past-month review snapshots with stale-entry detection.
+- #57 — private-by-default new financial records and hypothetical sharing preview.
 
 **Deployment truth:** source merged into GitHub `main` does not prove the GitHub Pages host has already deployed the newest commit. The public UI must be independently checked after deployment.
