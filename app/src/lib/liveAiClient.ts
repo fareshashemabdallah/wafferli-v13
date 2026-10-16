@@ -17,7 +17,7 @@ export function optionalLiveAiFinancialSummary(money:MoneyState):LiveAiFinancial
  const rawCash=money.cashOnHand;
  return {monthlyIncomeJod:round(income),plannedExpensesJod:round(costs),
   recordedSpentJod:round(spent),savingsTargetJod:round(target),
-  upcomingBillCount:Math.min(500,(money.commitments??[]).length),
+  recordedBillScheduleCount:Math.min(500,(money.commitments??[]).length),
   ...(typeof rawCash==="number"&&valid(rawCash)?{cashOnHandJod:round(rawCash)}:{})};
 }
 export async function askLiveFamilyAi(input:LiveAiRequest):Promise<string>{
