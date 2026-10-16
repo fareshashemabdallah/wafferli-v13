@@ -76,7 +76,7 @@ export async function searchConfiguredMarketFeed(query:string,endpoint:string|un
   target.searchParams.set("market","JO");
   const response=await fetch(target.href,{
    method:"GET",headers:{Accept:"application/json"},
-   credentials:"omit",cache:"no-store",signal
+   credentials:"omit",cache:"no-store",...(signal?{signal}:{})
   });
   if(!response.ok)return {status:"unavailable",offers:[],message:"The live price source is temporarily unavailable."};
   const data=await response.json() as unknown;
