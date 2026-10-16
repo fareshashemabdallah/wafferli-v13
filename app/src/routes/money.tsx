@@ -274,7 +274,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
 }) {
   const { tr,lang } = useI18n();
   const ar=lang==="ar";
-  const blank: Expense = { id: "", date: today(), categoryId: cats[0]?.id ?? "", amount: 0, shared: true };
+  const blank: Expense = { id: "", date: today(), categoryId: cats[0]?.id ?? "", amount: 0, shared: false };
   const [editing, setEditing] = useState<Expense | null>(null);
   const [quickAmount, setQuickAmount] = useState("");
   const [quickExpected,setQuickExpected]=useState("");
@@ -292,7 +292,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
     if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
     if(quickMode==="paid"&&quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":"Enter a valid expected amount.");
     if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
-    const entry:Expense={id:uid(),date:quickMode==="planned"?plannedDate:today(),categoryId:selectedCategory,amount,shared:true,status:quickMode,...(quickMode==="planned"?{plannedAmount:amount}:quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
+    const entry:Expense={id:uid(),date:quickMode==="planned"?plannedDate:today(),categoryId:selectedCategory,amount,shared:false,status:quickMode,...(quickMode==="planned"?{plannedAmount:amount}:quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
     onChange([entry,...expenses]);
     setQuickAmount("");setQuickExpected("");setQuickError("");
     toast.success(quickMode==="planned"?(ar?"تم حفظ المصروف كمخطط، دون احتسابه كمدفوع.":"Expense planned, not counted as paid."):(ar?"تم تسجيل المصروف المدفوع.":"Paid expense recorded."));
@@ -384,7 +384,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
                   </div>
                 </div>}
                 <p className="text-xs text-muted-foreground">
-                  {e.status==="planned"?(ar?"بانتظار الدفع · ":"Planned, not paid · "):""}{e.date} · {tr(catName(e.categoryId))} {e.owner ? `· ${e.owner}` : ""} · {tr(e.shared ? "Shared" : "Private")}
+                  {e.status==="planned"?(ar?"بانتظار الدفع · ":"Planned, not paid · "):""}{e.date} · {tr(catName(e.categoryId))} {e.owner ? `· ${e.owner}` : ""} · {e.shared?(ar?"عائلي محلي":"Household label"):(ar?"خاص على الجهاز":"Private on device")}
                 </p>
               </div>
               <div className="shrink-0 text-end"><span className="block font-semibold tabular-nums">{fmtJOD(e.amount)}</span>
@@ -435,7 +435,7 @@ function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Ex
       </Field>
       <Field label={tr("Note (optional)")}><Input className={inputCls} maxLength={60} value={f.note ?? ""} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
       <label className="flex items-center justify-between gap-3 rounded-md border bg-card px-3 text-sm font-medium">
-        {f.shared ? "Shared household expense" : "Private (only you)"}
+        {f.shared ? (ar?"علامة عائلية محلية — لا مشاركة تلقائية":"Household label only — no automatic sharing") : (ar?"خاص على هذا الجهاز":"Private on this device")}
         <Switch checked={f.shared} onCheckedChange={(v) => setF({ ...f, shared: v })} />
       </label>
       {err && <p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
