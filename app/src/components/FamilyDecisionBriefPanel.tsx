@@ -9,6 +9,7 @@ import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPrefe
 import {FAMILY_SETUP_PREFERENCES_KEY} from "@/lib/familySetup";
 import type {FamilyMoment} from "@/lib/familyCalendar";
 import {buildFamilyDecisionBrief} from "@/lib/familyDecisionBrief";
+import {FAMILY_WISHLIST_KEY,type WishlistItem} from "@/lib/familyWishlist";
 
 /** No external data or hidden LLM calls. Parents control all inputs; this
  * view does not change any financial, calendar or plan records. */
@@ -19,11 +20,12 @@ export function FamilyDecisionBriefPanel(){
  const [plans,,plReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [moments,,moReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [tasks,,tReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
+ const [wishlist,,wReady]=useLocalState<WishlistItem[]>(FAMILY_WISHLIST_KEY,[]);
  const [prefs,,fReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
  const [confirmed,,cReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
- if(!mReady||!pReady||!plReady||!moReady||!tReady||!fReady||!cReady)return null;
- if(!confirmed||prefs.notificationFrequency==="off"||(!prefs.lifestyle&&!prefs.financeTips))return null;
- const brief=buildFamilyDecisionBrief({money,members,plans,moments,tasks,preferences:prefs});
+ if(!mReady||!pReady||!plReady||!moReady||!tReady||!wReady||!fReady||!cReady)return null;
+ if(!confirmed||prefs.notificationFrequency==="off"||(!prefs.lifestyle&&!prefs.financeTips&&!prefs.shoppingTips))return null;
+ const brief=buildFamilyDecisionBrief({money,members,plans,moments,tasks,wishlist,preferences:prefs});
  return <section className="mt-5 rounded-2xl border border-[#DDE9D8] bg-[#F5F9F1] p-4 sm:p-5"
   aria-label={ar?"خطة أولويات الأسرة":"Connected family decisions"}>
   <div className="flex items-start gap-3">
