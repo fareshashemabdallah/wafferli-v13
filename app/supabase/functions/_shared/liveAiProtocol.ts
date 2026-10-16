@@ -6,7 +6,7 @@ export type LiveAiLanguage="en"|"ar";
 export type LiveAiTurn={role:"user"|"assistant";content:string};
 export type LiveAiFinancialSummary={
  monthlyIncomeJod:number;plannedExpensesJod:number;recordedSpentJod:number;
- savingsTargetJod:number;upcomingBillCount:number;
+ savingsTargetJod:number;recordedBillScheduleCount:number;
  cashOnHandJod?:number;
 };
 export type LiveAiRequest={
@@ -39,11 +39,11 @@ export function parseLiveAiRequest(input:unknown):LiveAiRequest {
  if(input["context"]!==undefined){
   const c=input["context"];
   if(!record(c)||!exact(c,["monthlyIncomeJod","plannedExpensesJod",
-   "recordedSpentJod","savingsTargetJod","upcomingBillCount","cashOnHandJod"])||
+   "recordedSpentJod","savingsTargetJod","recordedBillScheduleCount","cashOnHandJod"])||
    !money(c["monthlyIncomeJod"])||!money(c["plannedExpensesJod"])||
    !money(c["recordedSpentJod"])||!money(c["savingsTargetJod"])||
-   !Number.isInteger(c["upcomingBillCount"])||
-   (c["upcomingBillCount"] as number)<0||(c["upcomingBillCount"] as number)>500||
+   !Number.isInteger(c["recordedBillScheduleCount"])||
+   (c["recordedBillScheduleCount"] as number)<0||(c["recordedBillScheduleCount"] as number)>500||
    (c["cashOnHandJod"]!==undefined&&!money(c["cashOnHandJod"])))
    throw new Error("Invalid or excessive financial summary");
   context={
@@ -51,7 +51,7 @@ export function parseLiveAiRequest(input:unknown):LiveAiRequest {
    plannedExpensesJod:c["plannedExpensesJod"],
    recordedSpentJod:c["recordedSpentJod"],
    savingsTargetJod:c["savingsTargetJod"],
-   upcomingBillCount:c["upcomingBillCount"] as number,
+   recordedBillScheduleCount:c["recordedBillScheduleCount"] as number,
    ...(c["cashOnHandJod"]!==undefined?{cashOnHandJod:c["cashOnHandJod"] as number}:{})
   };
  }
