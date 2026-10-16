@@ -76,7 +76,7 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
  const overview=getMoneyOverview(m,now);
  // A weekend affordability question deserves the same source-grounded
  // question-to-answer-to-places journey as the dedicated experience.
- if(intent==="safety"&&/outing|weekend|picnic|نزهة|طلعة|مشوار|ويكند|عائلية.*طلعة/i.test(question)){
+ if(intent==="safety"&&explicitJodAmount(question)===null&&/outing|weekend|picnic|نزهة|طلعة|مشوار|ويكند|عائلية.*طلعة/i.test(question)){
   const outing=decideWeekendOuting(m,ctx.preferences,now);
   return answer(intent,outing.headlineEn,outing.headlineAr,
    outing.nextEn+" "+outing.explanationEn,
