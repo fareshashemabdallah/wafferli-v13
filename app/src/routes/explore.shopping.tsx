@@ -83,8 +83,8 @@ function Shopping() {
       <p className="mb-3 flex items-center gap-2 text-sm text-muted-foreground"><PilotBadge>{tr("Device only")}</PilotBadge> {tr("Prices are what you enter — no live store prices.")}</p>
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-[#DCE7DA] bg-[#F5F9F3] p-3 text-sm">
         <span>{ar?"عم تشتري منتج كبير أو بدك تقارن سعرين؟":"Buying one larger item or comparing store prices?"}</span>
-        <Link to="/explore/smartbuy" className="inline-flex min-h-11 items-center font-semibold text-brand underline">
-          {ar?"قارن الخيارات":"Compare options"} →
+        <Link to="/explore/market" className="inline-flex min-h-11 items-center font-semibold text-brand underline">
+          {ar?"ابحث عن أسعار المتاجر":"Find seller prices"} →
         </Link>
       </div>
       {sampleRows.length>0&&<div className="mb-3 rounded-xl border border-[#E8D3BB] bg-[#FFF8ED] p-3 text-sm">
