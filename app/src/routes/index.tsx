@@ -1,10 +1,10 @@
 import {createFileRoute,Link} from "@tanstack/react-router";
-import {ArrowRight,CalendarHeart,ChevronRight,CloudSun,Compass,Heart,Sparkles,Wallet} from "lucide-react";
+import {ArrowRight,CalendarHeart,ChevronRight,CloudSun,Compass,Heart,Receipt,Sparkles,Wallet} from "lucide-react";
+import {useState} from "react";
 import {AppShell} from "@/components/AppShell";
-import {FamilyAttentionPanel} from "@/components/FamilyAttentionPanel";
-import {FamilyDecisionBriefPanel} from "@/components/FamilyDecisionBriefPanel";
+import {TodayFamilyBrief} from "@/components/TodayFamilyBrief";
+import {QuickExpenseCard} from "@/components/QuickExpenseCard";
 import {FamilySetupCard} from "@/components/FamilySetupCard";
-import {HomeJourneyHighlights} from "@/components/HomeJourneyHighlights";
 import {FamilyWeather} from "@/components/FamilyWeather";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 import {useLocalState,writeLocal} from "@/lib/storage";
@@ -35,6 +35,7 @@ const starts=[
 function Index(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [prefs]=useLocalState("familyPreferences",defaultFamilyPreferences);
+ const [quickExpenseOpen,setQuickExpenseOpen]=useState(false);
  const [introDone,setIntroDone,ready]=useLocalState("homeIntroDone",false);
  const now=new Date();
  const hour=now.getHours();
@@ -100,24 +101,30 @@ function Index(){
 
   {daily&&<>
    <FamilySetupCard/>
-   <FamilyAttentionPanel/>
-   <FamilyDecisionBriefPanel/>
+   <TodayFamilyBrief/>
    <section className="mt-6" aria-label={ar?"خطوات سريعة":"Everyday choices"}>
     <div className="flex items-baseline justify-between gap-2">
-     <h2 className="text-xl font-semibold text-ink">{ar?"شو بتحب تعمل؟":"What feels right today?"}</h2>
+     <h2 className="text-xl font-semibold text-ink">{ar?"شو بتحب تعمل اليوم؟":"Make one thing easier"}</h2>
      <Link to="/explore" className="text-xs font-semibold text-brand">{ar?"المزيد":"Explore"} <ArrowRight className="inline size-3.5 rtl:rotate-180"/></Link>
     </div>
     <div className="mt-3 grid grid-cols-3 gap-2.5">
-     {starts.map(({to,Icon,tone},idx)=>{
-      const label=idx===0?(ar?"مصروفي":"My money"):idx===1?(ar?"عائلتي":"My family"):(ar?"أفكار جديدة":"Explore");
-      return <Link key={to} to={to} className={"soft-action flex min-h-29 flex-col justify-between gap-4 px-3.5 py-4 sm:min-h-32 sm:px-5 "+tileBg(tone)}>
-       <Icon className={"size-6 "+tileIcon(tone)} strokeWidth={1.65}/>
-       <span className="text-[13px] font-semibold leading-tight text-ink sm:text-base">{label}</span>
-      </Link>;
-     })}
+     <button type="button" aria-expanded={quickExpenseOpen} aria-controls="quick-expense"
+      onClick={()=>setQuickExpenseOpen(v=>!v)}
+      className={"soft-action flex min-h-29 flex-col items-start justify-between gap-4 bg-[#EAF0E7] px-3.5 py-4 text-start sm:min-h-32 sm:px-5"}>
+      <Receipt className="size-6 text-[#315E4B]" strokeWidth={1.65}/>
+      <span className="text-[13px] font-semibold leading-tight text-ink sm:text-base">{ar?"سجّل مصروف":"Add expense"}</span>
+     </button>
+     <Link to="/advisor" className="soft-action flex min-h-29 flex-col justify-between gap-4 bg-[#FCF0E6] px-3.5 py-4 sm:min-h-32 sm:px-5">
+      <Sparkles className="size-6 text-[#B17A5F]" strokeWidth={1.65}/>
+      <span className="text-[13px] font-semibold leading-tight text-ink sm:text-base">{ar?"اسأل دبّرنا":"Ask Dabberna"}</span>
+     </Link>
+     <Link to="/explore/together" className="soft-action flex min-h-29 flex-col justify-between gap-4 bg-[#E8EEF0] px-3.5 py-4 sm:min-h-32 sm:px-5">
+      <Compass className="size-6 text-[#537780]" strokeWidth={1.65}/>
+      <span className="text-[13px] font-semibold leading-tight text-ink sm:text-base">{ar?"خطّط لطلعة":"Plan outing"}</span>
+     </Link>
     </div>
+    {quickExpenseOpen&&<QuickExpenseCard onClose={()=>setQuickExpenseOpen(false)}/>}
    </section>
-   <HomeJourneyHighlights/>
    {prefs.weather&&<details className="group editorial-card mt-4 overflow-hidden">
     <summary className="flex min-h-16 cursor-pointer items-center gap-3 px-4 py-3">
      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF1E8] text-brand"><CloudSun className="size-5"/></span>
