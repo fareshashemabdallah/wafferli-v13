@@ -14,8 +14,6 @@ vi.mock("@/components/AppShell",()=>({
  Notice:()=>null
 }));
 vi.mock("@/components/PlanContextBanner",()=>({PlanContextBanner:()=>null}));
-vi.mock("@/components/MerchantQuoteDraft",()=>({MerchantQuoteDraft:()=> <p>Merchant quote tools</p>}));
-vi.mock("@/components/PrivateOfferWorkspace",()=>({PrivateOfferWorkspace:()=> <p>Private offer tools</p>}));
 vi.mock("@/components/FamilyWishlistPanel",()=>({FamilyWishlistPanel:()=> <p>Wishlist tools</p>}));
 beforeEach(()=>{window.localStorage.clear();vi.spyOn(window,"confirm").mockReturnValue(true);});
 afterEach(()=>{cleanup();vi.restoreAllMocks();window.localStorage.clear();});
@@ -40,13 +38,14 @@ describe("simple buying journey",()=>{
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
  });
 
- it("offers an everyday basket link and keeps advanced tools initially folded",()=>{
+ it("keeps only useful basket and wishlist fallbacks, without merchant simulators or preview-only photo inputs",()=>{
   draw();
   expect(screen.getByRole("link",{name:/Open My Basket/})).toHaveAttribute("href","/explore/shopping");
-  const advanced=screen.getByText("Advanced: quote drafts, offers & photos (optional)").closest("details");
+  expect(screen.getByRole("link",{name:/First, find real seller listings/})).toHaveAttribute("href","/explore/market");
   const wish=screen.getByText("Plan future purchases & wishlist (optional)").closest("details");
-  expect(advanced).toHaveProperty("open",false);
   expect(wish).toHaveProperty("open",false);
+  expect(screen.queryByText("Advanced: quote drafts, offers & photos (optional)")).not.toBeInTheDocument();
+  expect(screen.queryByText("Preview only · AI extraction not connected")).not.toBeInTheDocument();
   expect(screen.getByText(/Prices are entered by you/)).toBeInTheDocument();
  });
  it("reuses only the parent's basket product name, never the entered price",async()=>{
