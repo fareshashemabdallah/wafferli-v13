@@ -10,7 +10,7 @@ export type PlanCheckIn={
 /** A saved plan is a reminder and intention, never an external booking or bill. */
 export function checkFamilyPlan(plan:FamilyPlan,now=new Date()):PlanCheckIn{
  const canMove=plan.status!=="completed"&&!!plan.date&&
-  (plan.kind==="outing"||plan.kind==="purchase"||plan.kind==="other")&&!plan.sourceRef;
+  (plan.kind==="outing"||plan.kind==="purchase"||plan.kind==="other")&&!plan.sourceRef&&!plan.expenseId;
  const fixed={canMove};
  if(plan.status==="completed")
   return {...fixed,state:"completed",
