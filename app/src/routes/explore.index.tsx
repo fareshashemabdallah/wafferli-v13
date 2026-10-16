@@ -10,7 +10,7 @@ export const Route=createFileRoute("/explore/")({
  ]}),
  component:Explore
 });
-function Explore(){
+export function Explore(){
  const {lang}=useI18n(),ar=lang==="ar";
  return <AppShell title={ar?"خلّينا نلاقي الخيار المناسب":"Find what's right for your family"}>
   <section className="rounded-2xl border border-[#DFE8DB] bg-[#F1F7ED] p-5">
