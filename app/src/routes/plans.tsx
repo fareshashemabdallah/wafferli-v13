@@ -58,7 +58,7 @@ function PlansPage(){
   if(money.expenses.some(e=>e.id===expenseId)||plan.expenseId)return setErr(ar?"هذا المصروف مسجّل بالفعل.":"This expense is already recorded.");
   if(!window.confirm(ar?"سنضيف المبلغ الفعلي كمصروف مدفوع في المالية دون خصمه من رصيد البنك. هل تؤكد؟":"Record this actual amount as a paid expense in Money without changing the manually entered bank balance?"))return;
   const expense:Expense={id:expenseId,date:localToday(),categoryId:category,amount:plan.actualJod,
-    status:"paid",shared:true,note:plan.title,sourcePlanId:plan.id};
+    status:"paid",shared:false,note:plan.title,sourcePlanId:plan.id};
   setMoney(prev=>prev.expenses.some(e=>e.id===expenseId)?prev:{...prev,expenses:[expense,...prev.expenses]});
   update({...plan,expenseId,updatedAt:new Date().toISOString()});setErr("");
   toast.success(ar?"تم الربط بالمالية دون تعديل رصيد البنك.":"Recorded in Money without deducting cash.");
