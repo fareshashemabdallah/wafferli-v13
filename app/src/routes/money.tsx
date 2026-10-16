@@ -88,7 +88,15 @@ function MoneyPage() {
       </div>
 
       {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}/>}
-      {section==="overview"&&<FinancialIntelligencePanel state={s}/> }
+      {section==="overview"&&<details className="editorial-card mb-4 px-4 py-3">
+       <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
+        {ar?"أدوات إضافية: تاريخ المصاريف وتجربة خطط مستقبلية":"Optional: spending history and future budget experiments"} +
+       </summary>
+       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?
+        "هذه أدوات لمن يحب التفاصيل. ما تحتاجها لتفهم ميزانية بيتك اليوم.":
+        "These deeper tools are for parents who want more analysis. You don't need them to understand today's household budget."}</p>
+       <div className="mt-3"><FinancialIntelligencePanel state={s}/></div>
+      </details>}
       {section==="planning"&&<>
       <section className="editorial-card mb-4 p-4 sm:p-5">
         <h2 className="text-lg font-semibold">{ar?"دخل الشهر وهدف الادخار":"Monthly income & savings goal"}</h2>
