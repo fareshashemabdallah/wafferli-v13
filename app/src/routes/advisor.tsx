@@ -42,17 +42,18 @@ function Advisor(){
     {href:"/explore/services",en:"Find a family service",ar:"ابحث عن خدمة للعائلة",Icon:Search},
     {href:"/occasions",en:"Plan an upcoming occasion",ar:"خطّط لمناسبة قادمة",Icon:Sparkles}
   ];
-  return <AppShell title={ar?"قرارات ذكية":"Wise Decisions"}>
+  return <AppShell title={ar?"اسأل دبّرنا":"Ask Dabberna"}>
     <div className="page-intro relative overflow-hidden p-5 sm:p-7">
-      <div className="flex items-center gap-2"><Sparkles className="size-6 text-brand"/><h2 className="text-2xl font-semibold">{ar?"أنفق بذكاء، وعِش براحة":"Spend wisely. Live well."}</h2></div>
-      <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#536E5D]">{ar?"خلّينا نشوف إذا قرار المصروف مناسب لخطتك، من غير ما تتخلى عن الأشياء الحلوة.":"Feel good about spending on what matters, while keeping the important things covered."}</p>
+      <div className="flex items-center gap-2"><Sparkles className="size-6 text-brand"/><h2 className="text-2xl font-semibold">{ar?"اسأل سؤالاً، وخد خطوة واضحة":"One question. One useful next step."}</h2></div>
+      <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#536E5D]">{ar?"دبّرنا بيربط معلومات العيلة اللي حفظتها ليقترح خطوة مناسبة. إذا معلومة ناقصة، منسألك عنها بدل ما نفترض جواب.":
+"Ask about a family decision. Dabberna reuses your saved context and explains what's missing rather than making up an answer."}</p>
     </div>
+    <GuidedFamilyAdvisor/>
     <Link to="/explore/weekend" className="mt-5 flex min-h-20 items-center justify-between gap-3 rounded-2xl border border-[#D8E8D7] bg-[#EFF7EC] p-4 text-start">
      <span><span className="block text-base font-semibold text-ink">{ar?"فينا نطلع مع العيلة هالويكند؟":"Can we afford a family outing this weekend?"}</span>
      <span className="mt-1 block text-xs text-muted-foreground">{ar?"نتيجة من أرقامك وخيارات طلعات حقيقية":"A cautious answer from your figures, followed by actual mapped places"}</span></span>
      <ArrowRight className="size-5 shrink-0 text-brand rtl:rotate-180"/>
     </Link>
-    <GuidedFamilyAdvisor/>
     <LiveFamilyAdvisor/>
     <details className="group editorial-card mt-5 p-5 sm:p-6">
       <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold text-brand">
@@ -101,7 +102,13 @@ function Advisor(){
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{ar?"هذه مساعدة حسابية بناءً على بياناتك، وليست ذكاءً اصطناعيًا متصلًا أو نصيحة مالية متخصصة.":"This is an on-device calculation, not a connected AI chatbot or professional financial advice."}</p>
       <Link to="/money" className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand">{ar?"أكمل بيانات الميزانية":"Complete your financial plan"} <ArrowRight className="size-4 rtl:rotate-180"/></Link>
     </details>
-    <div className="editorial-card mt-5 p-4"><h2 className="font-semibold">{ar?"اسأل من تثق بهم":"Ask people you trust"}</h2><p className="mt-1 text-sm text-muted-foreground">{ar?"اسأل مجموعتك عن طبيب أو منتج أو نشاط جرّبوه بالفعل.":"Ask your circle if someone has personally tried a doctor, product or activity."}</p><Link to="/community" className="mt-2 inline-block font-semibold text-brand">{ar?"فتح دردشة المجموعة":"Open group discussion"} →</Link></div>
+    <details className="mt-5 rounded-xl border border-[#E1E8DD] bg-white p-4">
+     <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">
+      {ar?"مشاركة القرار مع أشخاص تثق فيهم (اختياري)":"Ask people you trust (optional)"}
+     </summary>
+     <div className="editorial-card mt-5 p-4"><h2 className="font-semibold">{ar?"اسأل من تثق بهم":"Ask people you trust"}</h2><p className="mt-1 text-sm text-muted-foreground">{ar?"اسأل مجموعتك عن طبيب أو منتج أو نشاط جرّبوه بالفعل.":"Ask your circle if someone has personally tried a doctor, product or activity."}</p><Link to="/community" className="mt-2 inline-block font-semibold text-brand">{ar?"فتح دردشة المجموعة":"Open group discussion"} →</Link></div>
+    
+    </details>
     <details className="group editorial-card mt-5 p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"استكشف خيارات أخرى":"More ways to plan"} +</summary>
     <div className="mt-3 grid gap-2 sm:grid-cols-2">
       {shortcuts.map(({href,en,ar:arabic,Icon})=><Link key={href} to={href} className="flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-medium text-brand hover:bg-mint/60"><Icon className="size-5"/>{ar?arabic:en}<ArrowRight className="ms-auto size-4 rtl:rotate-180"/></Link>)}
