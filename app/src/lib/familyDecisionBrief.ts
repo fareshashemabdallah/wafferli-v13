@@ -5,9 +5,11 @@ import {taskSummary,type FamilyTask} from "./familyTasks";
 import type {MoneyState,Member} from "./money";
 import type {FamilyPreferences} from "./familyPreferences";
 import type {FamilyPlan} from "./familyPlans";
+import {nextWishlistReminder} from "./wishlistAttention";
+import type {WishlistItem} from "./familyWishlist";
 export type DecisionStep={
  id:string;titleEn:string;titleAr:string;detailEn:string;detailAr:string;
- link:"/money"|"/plans"|"/calendar"|"/space"|"/explore/together"|"/explore/smartbuy";
+ link:"/money"|"/plans"|"/calendar"|"/space"|"/explore/together"|"/explore/smartbuy"|"/occasions";
  urgency:"important"|"normal";
 };
 export type FamilyDecisionBrief={
@@ -18,7 +20,7 @@ export type FamilyDecisionBrief={
 };
 export function buildFamilyDecisionBrief(input:{
  money:MoneyState;members:readonly Member[];moments:readonly FamilyMoment[];
- plans:readonly FamilyPlan[];tasks:readonly FamilyTask[];preferences:FamilyPreferences;
+ plans:readonly FamilyPlan[];tasks:readonly FamilyTask[];wishlist?:readonly WishlistItem[];preferences:FamilyPreferences;
  now?:Date
 }):FamilyDecisionBrief {
  const now=input.now??new Date(),today=dateKey(now),end=dateKey(shiftDays(now,14));
@@ -31,6 +33,8 @@ export function buildFamilyDecisionBrief(input:{
  const upcoming=lifeAllowed?upcomingMoments(allFamilyMoments([...input.moments],
   realFamilyMembers(input.members)),now,15):[];
  const tasks=lifeAllowed?taskSummary(input.tasks,now):null;
+ // Shopping is separately opt-in, even when family-life suggestions are enabled.
+ const wishlist=p.shoppingTips?nextWishlistReminder(input.wishlist??[],now):null;
  const steps:DecisionStep[]=[];
  const add=(step:DecisionStep)=>{if(!steps.some(x=>x.id===step.id))steps.push(step);};
  let hasCashRisk=false;
@@ -65,6 +69,37 @@ export function buildFamilyDecisionBrief(input:{
     tasks.dueSoon+" task(s) are due within seven days.",
    detailAr:tasks.overdue>0?tasks.overdue+" مهام محلية متأخرة تحتاج للمراجعة.":
     tasks.dueSoon+" مهام خلال سبعة أيام.",link:"/space"});
+ }
+ if(wishlist){
+  const {item,daysUntil,priceStatus,overBudget}=wishlist;
+  // This is an entered intention, not a bill, merchant offer or recorded expense.
+  const amount=item.budgetJod;
+  const cashCheck=moneyAllowed&&typeof amount==="number"&&amount>0?
+   assessImmediateSpending(input.money,amount,now).outcome:null;
+  const caution=cashCheck==="review"||cashCheck==="unknown";
+  const gift=item.kind==="gift";
+  const priceNote=overBudget?
+   "The last manually recorded price exceeds your chosen ceiling.":
+   priceStatus==="missing"?"You have not recorded a price yet.":
+   priceStatus==="stale"?"Your last manually checked price may be outdated.":
+   "Recheck the recorded price with the seller.";
+  const priceNoteAr=overBudget?
+   "آخر سعر أدخلته يتجاوز السقف الذي حددته.":
+   priceStatus==="missing"?"لم تسجّل سعراً بعد.":
+   priceStatus==="stale"?"السعر الذي سجلته قديم ويحتاج مراجعة.":
+   "تأكد من السعر المسجّل مع المتجر.";
+  add({id:"shopping",urgency:overBudget||caution||daysUntil<=3?"important":"normal",
+   titleEn:gift?"Prepare an upcoming gift thoughtfully":"Review an upcoming family purchase",
+   titleAr:gift?"حضّر هدية قريبة بميزانية واضحة":"راجع مشتريات العائلة القادمة",
+   detailEn:item.name+" — "+(daysUntil<0?"the planned date has passed":daysUntil===0?
+    "planned for today":"planned in "+daysUntil+" day(s)")+". "+priceNote+
+    (caution?" Check entered cash and bills before committing; this is not a verified affordability decision.":"")+
+    (gift&&upcoming.length?" Check whether this gift relates to your upcoming family date.":""),
+   detailAr:item.name+" — "+(daysUntil<0?"تجاوز الموعد المخطط":daysUntil===0?
+    "الموعد اليوم":"بعد "+daysUntil+" يوم")+". "+priceNoteAr+
+    (caution?" راجع الرصيد والفواتير قبل أي التزام؛ ليس هذا تأكيداً للقدرة المالية.":"")+
+    (gift&&upcoming.length?" تأكد إن كانت الهدية مرتبطة بمناسبتك القريبة.":""),
+   link:wishlist.link});
  }
  if(lifeAllowed&&upcoming.length){
   const event=upcoming[0]!;
