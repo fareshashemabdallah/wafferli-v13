@@ -209,9 +209,8 @@ function OccasionPlanner(){
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {[
           {to:"/explore/together" as const,goal:"outing" as const,en:"Plan an outing",ar:"خطّط لنزهة"},
-          {to:"/explore/smartbuy" as const,goal:"gift" as const,en:"Compare gifts & prices",ar:"قارن الهدايا والأسعار"},
+          {to:"/explore/market" as const,goal:"gift" as const,en:"Find gift products at stores",ar:"ابحث عن هدايا في المتاجر"},
           {to:"/explore/restaurants" as const,goal:"places" as const,en:"Explore restaurants",ar:"اكتشف المطاعم"},
-          {to:"/community" as const,goal:"advice" as const,en:"Ask trusted friends",ar:"اسأل من تثق بهم"},
         ].map(a=><Link key={a.goal} to={a.to}
            onClick={()=>writeLocal(activeDecisionKey,startDecisionJourney(active,plan,a.goal))}
            className="inline-flex items-center justify-between rounded-xl border border-border bg-[#F9FBF7] px-3 py-3 text-sm font-semibold text-brand transition hover:bg-mint">
