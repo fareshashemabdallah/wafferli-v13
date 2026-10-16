@@ -61,13 +61,29 @@ export function GuidedFamilyAdvisor(){
    </span>
    <div>
     <p className="section-eyebrow">{ar?"إرشادات العائلة":"FAMILY DECISIONS"}</p>
-    <h2 className="mt-1 text-lg font-semibold">{ar?"شو بدك تراجع اليوم؟":"What would you like to review?"}</h2>
+    <h2 className="mt-1 text-lg font-semibold">{ar?"شو بتحب دبّرنا يساعدك فيه؟":"What can I help your family decide?"}</h2>
     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
      "اسأل عن مصروف البيت أو الفواتير أو الادخار أو الأطفال أو الخطط. الإجابات مبنية فقط على البيانات اللي أدخلتها في هذا المتصفح—وليست محادثة AI متصلة.":
-     "Ask about money, family tasks, gifts, outings, services or shopping. Answers use only your records on this device—guided logic, not a connected AI chatbot."}</p>
+     "Ask one question. I will use what you already saved and tell you what I can and cannot confirm. This guided advisor works on your device; connected generative AI is not active."}</p>
    </div>
   </div>
-  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+  <form onSubmit={submit} className="mt-4 flex flex-wrap gap-2 rounded-xl bg-[#EFF6ED] p-3">
+   <label className="min-w-[175px] flex-1 text-xs font-semibold">
+    {ar?"أو اكتب سؤالك":"Or type your question"}
+    <input maxLength={400} value={question} onChange={e=>setQuestion(e.target.value)}
+     className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
+     placeholder={ar?"كيف الميزانية هالشهر؟":"What do our bills look like?"}/>
+   </label>
+   <Button type="submit" className="self-end" disabled={!ready||!question.trim()}>
+    <Send className="size-4"/>{ar?"اسأل":"Ask"}
+   </Button>
+  </form>
+
+  <details className="mt-4 rounded-xl border border-[#DCE7DC] bg-white p-3">
+   <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
+    {ar?"أسئلة جاهزة وحساب مبلغ محدد (اختياري)":"Suggested questions & amount check (optional)"}
+   </summary>
+   <div className="mt-4 grid gap-2 sm:grid-cols-2">
    {guidedPrompts.filter(p=>["safety","bills","priorities","outings"].includes(p.id)).map(p=><button type="button" key={p.id} disabled={!ready}
     onClick={()=>ask(ar?p.ar:p.en)}
     className="min-h-11 rounded-xl border border-[#DDE8D9] bg-[#F6FAF4] px-3 py-2 text-start text-xs font-semibold text-brand transition hover:bg-[#ECF3E9] disabled:opacity-50">
@@ -107,17 +123,8 @@ export function GuidedFamilyAdvisor(){
    </div>
    {quickError&&<p role="alert" className="mt-2 text-xs text-destructive">{quickError}</p>}
   </form>
-  <form onSubmit={submit} className="mt-4 flex flex-wrap gap-2">
-   <label className="min-w-[175px] flex-1 text-xs font-semibold">
-    {ar?"أو اكتب سؤالك":"Or type your question"}
-    <input maxLength={400} value={question} onChange={e=>setQuestion(e.target.value)}
-     className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
-     placeholder={ar?"كيف الميزانية هالشهر؟":"What do our bills look like?"}/>
-   </label>
-   <Button type="submit" className="self-end" disabled={!ready||!question.trim()}>
-    <Send className="size-4"/>{ar?"اسأل":"Ask"}
-   </Button>
-  </form>
+
+  </details>
   {history.length>0&&<div className="mt-4 space-y-3" aria-live="polite">
    {history.map((exchange,i)=><div key={i} className="rounded-xl border border-[#E1E7DB] bg-[#FAFCF8] p-3">
     <p className="text-xs font-semibold text-[#567462]">{exchange.question}</p>
