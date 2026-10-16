@@ -12,7 +12,7 @@ export function recordBillPayment(state:MoneyState,billId:string,dueDate:string,
  const category=state.categories.find(c=>c.id===bill.categoryId)?.id??"uncategorized";
  return {...state,
   commitments:(state.commitments??[]).map(b=>b.id===billId?{...b,paidDates:[...(b.paidDates??[]),dueDate]}:b),
-  expenses:[{id:expenseId,date:paidOn,categoryId:category,amount:actual,plannedAmount:bill.amount,status:"paid",note:bill.name,shared:true,billId,dueDate,cashDeducted:mode==="deduct"},...state.expenses],
+  expenses:[{id:expenseId,date:paidOn,categoryId:category,amount:actual,plannedAmount:bill.amount,status:"paid",note:bill.name,shared:false,billId,dueDate,cashDeducted:mode==="deduct"},...state.expenses],
   ...(mode==="deduct"?{cashOnHand:roundJod(state.cashOnHand!-actual),cashUpdatedAt:paidOn}:{})
  };
 }

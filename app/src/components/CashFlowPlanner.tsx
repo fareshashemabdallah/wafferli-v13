@@ -21,7 +21,7 @@ type Props = {
   update: (fn: (current:MoneyState)=>MoneyState) => void;
 };
 const keys=Object.keys(frequencyNames) as Frequency[];
-const blankIncome=():IncomeSource=>({id:"",name:"",amount:0,frequency:"monthly",nextDate:"",shared:true});
+const blankIncome=():IncomeSource=>({id:"",name:"",amount:0,frequency:"monthly",nextDate:"",shared:false});
 const blankBill=():Commitment=>({id:"",name:"",amount:0,frequency:"monthly",dueDate:""});
 const fmt=(d:string)=>d || "Date needed";
 const positive=(str:string)=>/^(?:\d{1,6})(?:\.\d{1,2})?$/.test(str.trim()) && Number(str)>0 && Number(str)<=100000;
@@ -319,7 +319,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
               </NativeSelect></Field>
               <Field label={tr("Privacy label")}><NativeSelect value={editIncome.shared?"shared":"private"}
                 onChange={e=>setEditIncome({...editIncome,shared:e.target.value==="shared"})}>
-                <option value="shared">{tr("Shared household")}</option><option value="private">{tr("Private")}</option>
+                <option value="shared">{ar?"علامة عائلية محلية":"Household label (device only)"}</option><option value="private">{ar?"خاص على الجهاز":"Private on device"}</option>
               </NativeSelect></Field>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">{tr("Privacy labels are organizational in this device-only pilot; real multi-user access control is not yet implemented.")}</p>
