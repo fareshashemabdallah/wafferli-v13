@@ -28,7 +28,7 @@ const working = [
   "Plan Together — share outing votes and organize child-aware experiences",
 ];
 const notLive = [
-  "AI assistant / AI receipt or product photo extraction",
+  "Live AI requires separately activated secure Supabase endpoint, consent and model provider; photo/receipt AI extraction is not connected",
   "Live online prices or real savings figures",
   "Automated provider reviews, verified prices or bookings (third-party directory links are available)",
   "Shared family financial accounts and cross-device sync (group accounts are separate)",

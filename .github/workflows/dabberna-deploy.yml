@@ -40,6 +40,8 @@ jobs:
         run: python3 app/scripts/occasion_trends.py
       - name: Build static React app
         working-directory: app
+        env:
+          VITE_ENABLE_LIVE_AI: ${{ vars.DABBERNA_ENABLE_LIVE_AI || 'false' }}
         run: bun run build
       - name: Verify compiled Dabberna entry page
         run: |
