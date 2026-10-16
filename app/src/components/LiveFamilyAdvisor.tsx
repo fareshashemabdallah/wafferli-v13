@@ -117,7 +117,7 @@ export function LiveFamilyAdvisor(){
        <dt>{ar?"المصاريف المخططة":"Expense plan"}</dt><dd>{summary.plannedExpensesJod} JOD</dd>
        <dt>{ar?"المصروف المسجل":"Recorded spending"}</dt><dd>{summary.recordedSpentJod} JOD</dd>
        <dt>{ar?"هدف الادخار":"Savings target"}</dt><dd>{summary.savingsTargetJod} JOD</dd>
-       <dt>{ar?"عدد مواعيد الفواتير المسجلة":"Recorded bill schedules"}</dt><dd>{summary.upcomingBillCount}</dd>
+       <dt>{ar?"عدد مواعيد الفواتير المسجلة":"Recorded bill schedules"}</dt><dd>{summary.recordedBillScheduleCount}</dd>
        {summary.cashOnHandJod!==undefined&&<><dt>{ar?"الرصيد الذي أدخلته":"Entered cash balance"}</dt><dd>{summary.cashOnHandJod} JOD</dd></>}
       </dl>}
      </div>}
