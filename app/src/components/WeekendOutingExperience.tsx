@@ -116,8 +116,9 @@ export function WeekendOutingExperience(){
      <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
       <p>{ar?"الرصيد المسجّل":"Entered cash"}: <strong>{fmtJOD(decision.cashJod??0)}</strong></p>
       <p>{ar?"فواتير غير مدفوعة":"Unpaid dated bills"}: <strong>{fmtJOD(decision.unpaidBillsJod??0)}</strong></p>
+      <p>{ar?"مصاريف أساسية متبقية":"Remaining planned essentials"}: <strong>{fmtJOD(decision.essentialBudgetJod??0)}</strong></p>
       <p>{ar?"احتياطي حددته":"Chosen reserve"}: <strong>{fmtJOD(decision.emergencyReserveJod??0)}</strong></p>
-      <p>{ar?"المتبقي قبل المصاريف الأخرى":"Before other costs"}: <strong>{fmtJOD(decision.recordedMarginJod??0)}</strong></p>
+      <p>{ar?"الهامش حسب المعلومات المسجلة":"Recorded planning margin"}: <strong>{fmtJOD(decision.recordedMarginJod??0)}</strong></p>
      </div>
      <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{ar?decision.explanationAr:decision.explanationEn}</p>
     </details>}
