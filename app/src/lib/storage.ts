@@ -24,7 +24,11 @@ export function writeLocal<T>(key: string, value: T): boolean {
     window.localStorage.setItem(PREFIX + key, JSON.stringify(value));
     return true;
   } catch {
-    if (typeof window !== "undefined") window.dispatchEvent(new Event(LOCAL_SAVE_FAILED_EVENT));
+    // React state updaters may run during render; notify after the commit to
+    // avoid updating a separate warning component in another component's render.
+    if (typeof window !== "undefined") queueMicrotask(() => {
+      window.dispatchEvent(new Event(LOCAL_SAVE_FAILED_EVENT));
+    });
     return false;
   }
 }
