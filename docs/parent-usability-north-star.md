@@ -6,8 +6,8 @@
 
 | Metric | Acceptance target | How to verify |
 | --- | --- | --- |
-| Perceived everyday usefulness | >=9.0/10 mean, with >=80% of trial parents scoring >=9 | End-of-session question: "How useful would this be in managing your family life?" |
-| Ease of use | >=9.0/10 mean, with >=80% scoring >=9 | End-of-session question: "How easy was it to achieve what you needed?" |
+| Perceived everyday usefulness | >=9.5/10 mean target (9.0/10 minimum gate), with >=80% of trial parents scoring >=9 | End-of-session question: "How useful would this be in managing your family life?" |
+| Ease of use | >=9.5/10 mean target (9.0/10 minimum gate), with >=80% scoring >=9 | End-of-session question: "How easy was it to achieve what you needed?" |
 | First useful result | <=2 minutes for >=80% of first-time parents | Start from clean device; obtain meaningful budget or family/date overview with no real personal data needed |
 | Independent core-journey completion | >=95% across the five task journeys | Observe completion unassisted; distinguish task failure from unavailable external backend |
 | Critical reliability incidents | ZERO duplicate expense records, silent failures or accidental demo-to-real transfers | Automated tests plus manual double-tap, reload, full-storage and recovery cases |
@@ -47,4 +47,4 @@
 
 ## Release gate
 
-No declaration of "very high usefulness and ease" until both >=9.0/10 targets are measured with real parents, all P0 reliability failures are resolved, and the relevant live feature gates are independently checked. A merged GitHub PR is code shipped, not market validation.
+No declaration of "very high usefulness and ease" until both >=9.0/10 minimum gates are measured with real parents; continue iterating toward the 9.5/10 targets, all P0 reliability failures are resolved, and the relevant live feature gates are independently checked. A merged GitHub PR is code shipped, not market validation.
