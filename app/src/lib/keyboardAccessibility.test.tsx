@@ -35,6 +35,21 @@ describe("keyboard navigation and bilingual accessibility",()=>{
   fireEvent.click(screen.getAllByRole("button",{name:"Switch to Arabic"})[0]!);
   expect(screen.getByRole("link",{name:"انتقل إلى المحتوى الرئيسي"})).toHaveAttribute("href","#dabberna-main-content");
   expect(document.documentElement.dir).toBe("rtl");
+  expect(screen.getAllByRole("navigation",{name:"التنقل الرئيسي"})).toHaveLength(2);
+  expect(screen.getAllByRole("link",{name:"الصفحة الرئيسية لدبّرنا"})).toHaveLength(2);
+  expect(screen.getAllByRole("navigation",{name:"Main"})).toHaveLength(0);
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
  });
+ it("gives both brand links visible focus and legible mobile navigation labels",()=>{
+  render(<I18nProvider><AppShell title="Family">Content</AppShell></I18nProvider>);
+  for(const link of screen.getAllByRole("link",{name:"Dabberna home"})){
+   expect(link.className).toContain("focus-visible:ring-2");
+  }
+  const nav=screen.getAllByRole("navigation",{name:"Main"})[1]!;
+  for(const link of nav.querySelectorAll("a")){
+   expect(link.className).toContain("text-xs");
+   expect(link.className).toContain("min-h-14");
+  }
+ });
+
 });
