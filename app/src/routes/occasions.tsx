@@ -8,7 +8,7 @@ import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
 import {type FamilyMoment,formatMomentDate} from "@/lib/familyCalendar";
 import {sampleMembers,sampleMoney,type Member} from "@/lib/money";
-import {daysUntil,eventBudgetGuidance,ideaCategory,leadAdvice,occasionIdeas,planKey,planningMilestones,upcomingPlanEvents,type OccasionPlan,type OccasionPlans} from "@/lib/occasionAdvisor";
+import {chooseOccasion,daysUntil,eventBudgetGuidance,ideaCategory,leadAdvice,occasionIdeas,planKey,planningMilestones,upcomingPlanEvents,type OccasionPlan,type OccasionPlans} from "@/lib/occasionAdvisor";
 import {useLocalState,writeLocal,uid} from "@/lib/storage";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {upsertOccasionFamilyPlan} from "@/lib/occasionPlanBridge";
@@ -60,7 +60,7 @@ function OccasionPlanner(){
  const [feedState,setFeedState]=useState<"loading"|"loaded"|"unavailable">("loading");
  const now=useMemo(()=>new Date(),[]);
  const upcoming=useMemo(()=>upcomingPlanEvents(events,members,now,180,ar).slice(0,24),[events,members,now,ar]);
- const active=upcoming.find(o=>planKey(o)===(chosen||focused))??upcoming[0];
+ const active=chooseOccasion(upcoming,chosen,focused);
  const key=active?planKey(active):"";
  const plan:OccasionPlan=plans[key]??{budgetJod:null};
  const existingPlan=familyPlans.find(p=>p.sourceRef==="occasion:"+key);
