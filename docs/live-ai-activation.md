@@ -20,6 +20,22 @@
 6. Only when the server is operational and independently security-tested, set the GitHub Actions repository variable **DABBERNA_ENABLE_LIVE_AI=true** and redeploy the static Pages app. The deploy workflow maps this PUBLIC boolean to **VITE_ENABLE_LIVE_AI**. False/unset leaves the live AI UI disabled and shows the offline advisor.
 7. Re-test a real signed-in family member on the deployed app, including the optional numeric-summary consent boundary. A green GitHub CI run is not proof that Supabase code or SQL has been deployed.
 
+## Automated staging smoke test (manual, opt-in)
+A separate operator-only script is available at `app/scripts/verify-live-ai-staging.mjs`; from `app/`, run `npm run security:ai-staging` **only against a disposable staging Supabase project**. The script rejects the current public project, requires an explicit confirmation, and never prints credentials, prompts or model responses.
+
+Required environment variables (set privately in a local terminal, not GitHub source):
+- `DABBERNA_CONFIRM_STAGING=DISPOSABLE_PROJECT_ONLY`
+- `DABBERNA_STAGING_PROJECT_REF=<disposable_ref>`
+- `DABBERNA_STAGING_URL=https://<disposable_ref>.supabase.co`
+- `DABBERNA_STAGING_ANON_KEY=<staging publishable or anon key>`
+- `DABBERNA_AI_TEST_ORIGIN=https://fareshashemabdallah.github.io` (optional, must match Edge allowed origin)
+
+The default checks cover allowed-origin CORS preflight, rejection of an unauthorized origin, non-JSON requests, and anonymous access. The staging Edge Function must already have its server-side enabled flag, quota SQL and secrets; otherwise the test **fails** with an explanation instead of silently passing.
+
+Optionally, provide `DABBERNA_AI_TEST_EMAIL` and `DABBERNA_AI_TEST_PASSWORD` for a disposable test account to verify authenticated rejection of malformed JSON, unexpected child-data fields, synthetic email addresses, and mock payment-card details. These negative cases do not intentionally consume AI credits. To also perform **one paid provider request**, explicitly set `DABBERNA_RUN_PAID_AI_TEST=I_ACCEPT_PROVIDER_COST` for that invocation. The script neither prints the answer nor tests multiple paid requests by default.
+
+Passing the smoke test is only an early gate: continue with independent multi-user auth/quotas/security, data retention review, parent usability tests, provider billing caps and production rollout controls. **This test has not been run on a real staging project.**
+
 ## Fail-closed design
 
 - Never fall back to open public/unlimited AI calls when quota SQL fails or secrets are missing.
