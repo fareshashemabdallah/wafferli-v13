@@ -10,6 +10,7 @@ import {uid,fmtJOD,useLocalState} from "@/lib/storage";
 import {sampleMoney,type MoneyState,type Expense} from "@/lib/money";
 import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,makeFamilyPlan,markPlanComplete,moneyAmount,setPlanChoice,upcomingFamilyPlans,type FamilyPlan,type PlanKind} from "@/lib/familyPlans";
 import {PlanDecisionPanel} from "@/components/PlanDecisionPanel";
+import {FamilyNextActions} from "@/components/FamilyNextActions";
 import {localToday} from "@/lib/cashflow";
 export const Route=createFileRoute("/plans")({
  head:()=>({meta:[{title:"My Plans — Dabberna"},{name:"description",content:"Plan meaningful purchases, outings and occasions in one private place."}]}),
@@ -64,11 +65,12 @@ function PlansPage(){
   toast.success(ar?"تم الربط بالمالية دون تعديل رصيد البنك.":"Recorded in Money without deducting cash.");
  };
  return <AppShell title={ar?"خططنا":"Our Plans"}>
+   <div className="mb-5"><FamilyNextActions/></div>
    <section className="page-intro">
      <p className="section-eyebrow">{ar?"خطّة واحدة، خطوات مترابطة":"ONE PLAN · CONNECTED CHOICES"}</p>
-     <h2 className="mt-2 text-xl font-semibold text-ink">{ar?"شو بدنا نعمل، وهل الميزانية بتسمح؟":"What do we want to do—and can our budget support it?"}</h2>
-     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ar?"اختَر خطتك، وشوف شو فيك تعمل بعدها. دبّرنا بيوضّح الخطوة التالية بدل ما يتركك تخمّن.":"Choose a plan. Dabberna will show the next useful step, whether you have entered finances yet or not."}</p>
-     <Button className="mt-4 min-h-11" onClick={()=>setNewOpen(v=>!v)}><Plus className="size-4"/>{ar?"خطة جديدة":"New plan"}</Button>
+     <h2 className="mt-2 text-xl font-semibold text-ink">{ar?"قرارات عيلتنا وخططنا القادمة":"Decisions we made, and what comes next"}</h2>
+     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ar?"التواريخ اللي حفظتها بتصير خطط جاهزة للمراجعة بموافقتك. أنشئ خطة يدوياً فقط إذا بتحب.":"Upcoming dates can become ready-to-review plans with one approval. You only need to create one manually if you want."}</p>
+     <Button className="mt-4 min-h-11" onClick={()=>setNewOpen(v=>!v)}><Plus className="size-4"/>{ar?"أنشئ خطة بنفسي (اختياري)":"Create a plan myself (optional)"}</Button>
    </section>
    {newOpen&&<form onSubmit={submit} className="editorial-card mt-4 grid gap-3 p-4 sm:grid-cols-2">
     <label className="text-sm font-medium sm:col-span-2">{ar?"شو ناويين نعمل؟":"What are you planning?"}
