@@ -28,10 +28,10 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
  return <div className="min-h-dvh md:flex">
   <a href="#dabberna-main-content" className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-[100] focus:rounded-xl focus:bg-brand focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-white focus:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#B9D8BB]">{lang==="ar"?"انتقل إلى المحتوى الرئيسي":"Skip to main content"}</a>
   <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-e border-[#E4E9E0] bg-[#FFFEFA]/95 px-5 pb-6 pt-8 md:flex">
-   <Link to="/" aria-label="Dabberna home" className="inline-flex"><Logo className="scale-105 origin-left"/></Link>
+   <Link to="/" aria-label={lang==="ar"?"الصفحة الرئيسية لدبّرنا":"Dabberna home"} className="inline-flex rounded-lg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"><Logo className="scale-105 origin-left"/></Link>
    <p className="mt-3 max-w-44 text-xs leading-relaxed text-muted-foreground">{lang==="ar"?"أنفق بذكاء، وعِش براحة.":"Spend wisely. Live well."}</p>
    <div className="mt-8 premium-divider"/>
-   <nav className="mt-5 flex flex-col gap-1.5" aria-label="Main">
+   <nav className="mt-5 flex flex-col gap-1.5" aria-label={lang==="ar"?"التنقل الرئيسي":"Main"}>
     {tabs.map(({to,key,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
       onClick={()=>{if(to!=="/")writeLocal("homeIntroDone",true);}}
       className="flex min-h-12 items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 px-3 text-sm font-semibold text-muted-foreground transition hover:bg-[#F1F5EF] data-[status=active]:bg-[#E6F0E7] data-[status=active]:text-brand">
@@ -42,10 +42,10 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
     <Sparkles className="size-5 text-brand" aria-hidden="true"/>
     <p className="mt-2 text-sm font-semibold">{lang==="ar"?"ساعدني أختار":"Help me decide"}</p>
     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{lang==="ar"?"تحقق من قرار إنفاق قبل الالتزام به.":"Check a spending decision before you commit."}</p>
-    <Link to="/advisor" className="mt-3 inline-flex min-h-10 items-center rounded-full bg-brand px-4 text-xs font-semibold text-white">{lang==="ar"?"ابدأ":"Get started"} →</Link>
+    <Link to="/advisor" className="mt-3 inline-flex min-h-11 items-center rounded-full bg-brand px-4 text-xs font-semibold text-white focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2">{lang==="ar"?"ابدأ":"Get started"} →</Link>
    </div>
    <div className="mt-auto flex items-center justify-between gap-2">
-    <Link to="/about" className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-brand"><Info className="size-4"/>{t("about")}</Link>
+    <Link to="/about" className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-brand focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"><Info className="size-4"/>{t("about")}</Link>
     <LangToggle/>
    </div>
   </aside>
@@ -53,10 +53,10 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
   <div className="flex min-w-0 flex-1 flex-col">
    <header className="pt-safe sticky top-0 z-30 border-b border-[#E4E8DD]/80 bg-[#F9F8F4]/95 backdrop-blur-xl md:hidden">
     <div className="mx-auto flex h-[66px] max-w-4xl items-center justify-between gap-2 px-4">
-     <Link to="/" aria-label="Dabberna home" className="inline-flex min-w-0"><Logo/></Link>
+     <Link to="/" aria-label={lang==="ar"?"الصفحة الرئيسية لدبّرنا":"Dabberna home"} className="inline-flex min-w-0 rounded-lg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"><Logo/></Link>
      <div className="flex shrink-0 items-center gap-2">
       <Link to="/advisor" aria-label={t("advisor")} title={t("advisor")}
-       className="grid size-11 place-items-center rounded-full border border-[#DDE5DB] bg-[#EAF1E8] text-brand transition hover:bg-white">
+       className="grid size-11 place-items-center rounded-full border border-[#DDE5DB] bg-[#EAF1E8] text-brand transition hover:bg-white focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2">
        <Sparkles className="size-5" aria-hidden="true"/>
       </Link>
       <LangToggle/>
@@ -70,11 +70,11 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
    </main>
   </div>
 
-  <nav aria-label="Main" className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-[#DEE6DD] bg-[#FFFEFC]/95 px-2 pt-2 shadow-[0_-12px_28px_-26px_rgba(42,68,47,.36)] backdrop-blur-xl md:hidden">
+  <nav aria-label={lang==="ar"?"التنقل الرئيسي":"Main"} className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-[#DEE6DD] bg-[#FFFEFC]/95 px-2 pt-2 shadow-[0_-12px_28px_-26px_rgba(42,68,47,.36)] backdrop-blur-xl md:hidden">
    <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
     {tabs.map(({to,key,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
       onClick={()=>{if(to!=="/")writeLocal("homeIntroDone",true);}}
-      className="group flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 px-0.5 text-[10px] font-medium text-[#708174] transition hover:bg-[#F2F6F0] data-[status=active]:bg-[#ECF4EC] data-[status=active]:font-semibold data-[status=active]:text-brand">
+      className="group flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 px-0.5 text-xs font-medium text-[#708174] transition hover:bg-[#F2F6F0] data-[status=active]:bg-[#ECF4EC] data-[status=active]:font-semibold data-[status=active]:text-brand">
       <Icon className="size-[21px]" aria-hidden="true"/><span>{t(key)}</span>
     </Link>)}
    </div>

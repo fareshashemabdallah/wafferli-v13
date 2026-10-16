@@ -3,7 +3,7 @@ import {detectSensitiveAiText,containsSensitiveAiContent} from "./liveAiPrivacy"
 import {parseLiveAiRequest} from "./liveAiProtocol";
 
 const req=(question:string,history:unknown[]=[])=>
- ({question,language:"en",history});
+ ({question,language:"en",history,parentConsent:true});
 describe("live family AI sensitive data guards",()=>{
  it("rejects contact details, known national phone forms, secrets and banking references",()=>{
   const inputs=[

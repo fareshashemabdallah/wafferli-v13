@@ -9,6 +9,7 @@ describe("live AI deployment security invariants",()=>{
  it("never exposes OpenAI credentials from browser or sends unconsented local context",()=>{
   expect(ui).not.toContain("OPENAI_API_KEY");
   expect(ui).toContain("checked={consent}");
+  expect(ui).toContain("parentConsent:true");
   expect(ui).toContain("checked={shareNumbers}");
   expect(ui).toContain("shareNumbers&&summary");
   expect(ui).not.toContain("JSON.stringify(money)");
@@ -26,6 +27,8 @@ describe("live AI deployment security invariants",()=>{
   expect(edge).toContain('DABBERNA_AI_SERVER_ENABLED');
   expect(edge).toContain('AI_ALLOWED_ORIGINS');
   expect(edge).toContain('parseLiveAiRequest(JSON.parse(content))');
+  const protocol=root("../../supabase/functions/_shared/liveAiProtocol.ts");
+  expect(protocol).toContain('input["parentConsent"]!==true');
   expect(edge).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
  });
  it("stores only request counters and denies table access to anonymous and authenticated callers",()=>{
@@ -36,6 +39,10 @@ describe("live AI deployment security invariants",()=>{
   expect(quota).toContain("old.used<20");
   expect(quota).toContain("old.used<4");
   expect(quota).toContain("AI_RATE_LIMIT");
+  expect(quota).toContain("dabberna_ai_global_usage_v1");
+  expect(quota).toContain("global_bucket.used<200");
+  expect(quota).toContain("revoke all on public.dabberna_ai_global_usage_v1 from public, anon, authenticated");
+  expect(quota).toContain("enable row level security");
   expect(quota).not.toContain("prompt text");
  });
 

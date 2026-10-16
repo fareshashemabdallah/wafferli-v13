@@ -36,7 +36,7 @@ const allowed=new URL(origin);
 if(allowed.origin!==origin||allowed.protocol!=="https:"||allowed.username||allowed.password)
  throw Error("An exact HTTPS staging-allowed origin is required");
 const headers={apikey:anon,Origin:origin,"Content-Type":"application/json"};
-const question={question:"How should we plan a family activity with 30 JOD?",language:"en",history:[]};
+const question={question:"How should we plan a family activity with 30 JOD?",language:"en",history:[],parentConsent:true};
 
 async function request(method,body,{token,requestOrigin=origin,contentType="application/json"}={}){
  const response=await fetch(functionUrl,{
@@ -90,6 +90,7 @@ async function main(){
  try{
   // All these must be rejected BEFORE the AI quota is claimed or a provider is queried.
   for(const body of [
+   {...question,parentConsent:false},
    {...question,children:[{name:"FAKE_CHILD"}]},
    {...question,question:"Email synthetic@example.com with the answer"},
    {...question,history:[{role:"assistant",content:"Card 4111 1111 1111 1111"}]},

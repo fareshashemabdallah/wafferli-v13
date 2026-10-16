@@ -13,6 +13,8 @@ export type LiveAiFinancialSummary={
 };
 export type LiveAiRequest={
  question:string;language:LiveAiLanguage;history:LiveAiTurn[];
+ /** True only after a parent explicitly agrees to this individual request. */
+ parentConsent:true;
  context?:LiveAiFinancialSummary;
 };
 const money=(x:unknown):x is number=>typeof x==="number"&&
@@ -22,7 +24,8 @@ const exact=(value:Record<string,unknown>,keys:readonly string[])=>
  Object.keys(value).every(key=>keys.includes(key));
 const maxBytes=6_000;
 export function parseLiveAiRequest(input:unknown):LiveAiRequest {
- if(!record(input)||!exact(input,["question","language","history","context"])||
+ if(!record(input)||!exact(input,["question","language","history","context","parentConsent"])||
+  input["parentConsent"]!==true||
   typeof input["question"]!=="string"||input["question"].trim().length<2||
   input["question"].length>600||
   (input["language"]!=="ar"&&input["language"]!=="en")||
@@ -61,7 +64,7 @@ export function parseLiveAiRequest(input:unknown):LiveAiRequest {
  if(detectSensitiveAiText(input["question"]))
   throw new Error("Remove sensitive details from the AI question before sending");
  const result:LiveAiRequest={question:input["question"].trim(),
-  language:input["language"],history,...(context?{context}:{})};
+  language:input["language"],history,parentConsent:true,...(context?{context}:{})};
  if(new TextEncoder().encode(JSON.stringify(result)).byteLength>maxBytes)
   throw new Error("The AI question is too long");
  return result;
