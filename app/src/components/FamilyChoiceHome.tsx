@@ -1,7 +1,7 @@
 import {Link} from "@tanstack/react-router";
 import {ArrowRight,HeartPulse,ShoppingBag,Sun} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
-import {useLocalState} from "@/lib/storage";
+import {fmtJOD,useLocalState} from "@/lib/storage";
 import {sampleMoney,type MoneyState} from "@/lib/money";
 import {budgetAlignment} from "@/lib/financeAlignment";
 import {budgetPlainResult} from "@/lib/budgetPlainResult";
@@ -15,7 +15,14 @@ export function FamilyChoiceHome({onNavigate}:{onNavigate?:()=>void}){
  const [prefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
  const [confirmed,,confirmedReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
  const financialReady=moneyReady&&!needsStarterBudget(money);
- const financialResult=financialReady?budgetPlainResult(budgetAlignment(money)):null;
+ const financialSummary=financialReady?budgetAlignment(money):null;
+ const financialResult=financialSummary?budgetPlainResult(financialSummary):null;
+ const financialHeadline=financialSummary?.status==="surplus"?
+  (ar?"غير مخصّص هالشهر: ":"Unallocated this month: ")+fmtJOD(financialSummary.gap):
+  financialSummary?.status==="deficit"?
+  (ar?"ميزانيتك ناقصها: ":"Your monthly plan is short by ")+fmtJOD(-financialSummary.gap):
+  financialResult?(ar?financialResult.titleAr:financialResult.titleEn):
+  (ar?"٣ أرقام بسيطة تعطينا الصورة، بدون ربط بنك.":"Start with three numbers; no bank connection needed.");
  const outingDetail=prefsReady&&confirmedReady&&confirmed&&prefs.lifestyle?
   (prefs.city.trim()?prefs.city.trim().slice(0,60)+" · ":"")+
    (prefs.outingLimit>0?prefs.outingLimit.toFixed(0)+" JOD "+(ar?"ميزانية طلعتك المخططة":"planned outing ceiling"):
@@ -37,8 +44,7 @@ export function FamilyChoiceHome({onNavigate}:{onNavigate?:()=>void}){
     <span className="min-w-0 flex-1">
      <span className="block text-lg font-semibold text-ink">{ar?"كيف وضع ميزانية عيلتي؟":"How is my family doing financially?"}</span>
      <span className="mt-1.5 block text-sm leading-relaxed text-muted-foreground">
-      {financialResult?(ar?financialResult.titleAr:financialResult.titleEn):
-       (ar?"٣ أرقام بسيطة تعطينا الصورة، بدون ربط بنك.":"Start with three numbers; no bank connection needed.")}
+      {financialHeadline}
      </span>
      {financialResult&&<span className="mt-1 block text-xs text-muted-foreground">{ar?
       "هذه نتيجة تخطيط وليست رصيد بنك مؤكّداً.":"A planning result, not confirmed spendable bank cash."}</span>}
