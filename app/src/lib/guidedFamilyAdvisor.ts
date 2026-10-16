@@ -1,4 +1,5 @@
 import {getMoneyOverview} from "./moneyOverview";
+import {decideWeekendOuting} from "./weekendOutingDecision";
 import {nextConnectedFamilyAction,personalOutingAdvice} from "./connectedFamilyGuidance";
 import {explicitJodAmount,explainSpecificSpending} from "./specificSpendingAdvice";
 import {realFamilyMembers} from "./familySetup";
@@ -20,7 +21,7 @@ export type GuidedAnswer={
  titleEn:string;titleAr:string;
  textEn:string;textAr:string;
  sourceEn:string;sourceAr:string;
- route:"/money"|"/calendar"|"/plans"|"/explore/market"|"/explore/smartbuy"|"/explore/together"|"/space"|"/occasions"|"/explore/services";
+ route:"/money"|"/calendar"|"/plans"|"/explore/weekend"|"/explore/market"|"/explore/smartbuy"|"/explore/together"|"/space"|"/occasions"|"/explore/services";
  actionEn:string;actionAr:string;
 };
 export type AdvisorContext={
@@ -73,6 +74,17 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
  const now=ctx.now??new Date(),day=dateKey(now);
  const m=ctx.money;
  const overview=getMoneyOverview(m,now);
+ // A weekend affordability question deserves the same source-grounded
+ // question-to-answer-to-places journey as the dedicated experience.
+ if(intent==="safety"&&explicitJodAmount(question)===null&&/outing|weekend|picnic|نزهة|طلعة|مشوار|ويكند|عائلية.*طلعة/i.test(question)){
+  const outing=decideWeekendOuting(m,ctx.preferences,now);
+  return answer(intent,outing.headlineEn,outing.headlineAr,
+   outing.nextEn+" "+outing.explanationEn,
+   outing.nextAr+" "+outing.explanationAr,
+   "Saved monthly plan, cash, dated bills and chosen cushion (device only)",
+   "خطة الشهر والرصيد والفواتير المؤرخة والاحتياطي المسجل على الجهاز",
+   "/explore/weekend","See an outing plan and real places","شوف خطة طلعة وأماكن حقيقية");
+ }
  if(intent==="priorities"){
   const next=nextConnectedFamilyAction(ctx);
   return answer(intent,next.titleEn,next.titleAr,next.detailEn,next.detailAr,

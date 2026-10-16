@@ -10,7 +10,8 @@ import { Field, NativeSelect, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createOuting, type SavedOuting } from "@/lib/outings";
-import { useLocalState } from "@/lib/storage";
+import { readLocal,useLocalState } from "@/lib/storage";
+import {WEEKEND_HANDOFF_KEY,usableWeekendDraft} from "@/lib/weekendOutingHandoff";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,setPlanChoice,type FamilyPlan} from "@/lib/familyPlans";
 import { estimateOutingCost, formatJod, optionalJod, parseAttendees, parseJod } from "@/lib/outingCosts";
@@ -79,8 +80,9 @@ function TogetherPage() {
    if(familyPrefs.city?.trim())setF(old=>({...old,neighborhood:familyPrefs.city.trim().slice(0,60)}));
   },[prefsReady,familyPrefs]);
   const [childCount, setChildCount] = useState("1");
+  const [weekendDraft]=useState(()=>usableWeekendDraft(readLocal(WEEKEND_HANDOFF_KEY,null)));
   const [cost, setCost] = useState({
-    adults: "2", adultRate: "", childRate: "", transport: "", extras: "", maximum: ""
+    adults: "2", adultRate: "", childRate: "", transport: "", extras: "", maximum: weekendDraft?String(weekendDraft.budgetJod):""
   });
   const [ageBands, setAgeBands] = useState<string[]>([]);
   const [stroller, setStroller] = useState(false);
@@ -160,6 +162,12 @@ function TogetherPage() {
   return (
     <AppShell title={tr("Plan Together")}>
       <PlanContextBanner onUseBudget={amount=>updateCost("maximum",String(amount))}/>
+      {weekendDraft&&<div className="mb-4 rounded-xl border border-[#D8E6D5] bg-[#F2F8EE] p-3 text-sm">
+       <p className="font-semibold">{ar?"نقلت سقف التخطيط من تقييم الويكند":"Planning ceiling carried from your weekend check"} · {weekendDraft.budgetJod} JOD</p>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?
+        "هذا السقف تقديري، مش مبلغ مضمون للإنفاق. تم نقله باختيارك ولم يتغير رصيدك.":
+        "This is an estimated planning ceiling—not confirmed money to spend. You chose to carry it here; no cash record changed."}</p>
+      </div>}
       <p className="mb-4 text-sm text-muted-foreground">{tr("Plan a great experience together—balance everyone’s enjoyment, needs and your planned budget.")}</p>
       {familyPlan&&<div className="mb-4 rounded-2xl border border-[#D9E5D8] bg-[#F4F9F1] p-4">
        <p className="text-sm font-semibold">{tr("Save an outing estimate to your plan")} · {familyPlan.title}</p>

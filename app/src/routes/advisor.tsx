@@ -47,6 +47,11 @@ function Advisor(){
       <div className="flex items-center gap-2"><Sparkles className="size-6 text-brand"/><h2 className="text-2xl font-semibold">{ar?"أنفق بذكاء، وعِش براحة":"Spend wisely. Live well."}</h2></div>
       <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#536E5D]">{ar?"خلّينا نشوف إذا قرار المصروف مناسب لخطتك، من غير ما تتخلى عن الأشياء الحلوة.":"Feel good about spending on what matters, while keeping the important things covered."}</p>
     </div>
+    <Link to="/explore/weekend" className="mt-5 flex min-h-20 items-center justify-between gap-3 rounded-2xl border border-[#D8E8D7] bg-[#EFF7EC] p-4 text-start">
+     <span><span className="block text-base font-semibold text-ink">{ar?"فينا نطلع مع العيلة هالويكند؟":"Can we afford a family outing this weekend?"}</span>
+     <span className="mt-1 block text-xs text-muted-foreground">{ar?"نتيجة من أرقامك وخيارات طلعات حقيقية":"A cautious answer from your figures, followed by actual mapped places"}</span></span>
+     <ArrowRight className="size-5 shrink-0 text-brand rtl:rotate-180"/>
+    </Link>
     <GuidedFamilyAdvisor/>
     <LiveFamilyAdvisor/>
     <details className="group editorial-card mt-5 p-5 sm:p-6">

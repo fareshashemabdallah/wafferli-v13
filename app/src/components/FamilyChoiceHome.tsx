@@ -54,7 +54,7 @@ export function FamilyChoiceHome({onNavigate}:{onNavigate?:()=>void}){
      </span>
     </span>
    </Link>
-   <Link to="/explore/together" onClick={onNavigate}
+   <Link to="/explore/weekend" onClick={onNavigate}
     className="soft-action flex min-h-32 items-center gap-4 rounded-2xl bg-[#FFF2E8] p-4 sm:p-5">
     <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white text-[#B17A5F]">
      <Sun className="size-7" strokeWidth={1.6} aria-hidden="true"/>
@@ -63,7 +63,7 @@ export function FamilyChoiceHome({onNavigate}:{onNavigate?:()=>void}){
      <span className="block text-lg font-semibold text-ink">{ar?"شو ممكن نعمل سوا هالأسبوع؟":"What can we enjoy together?"}</span>
      <span className="mt-1.5 block text-sm leading-relaxed text-muted-foreground">{outingDetail}</span>
      <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand">
-      {ar?"اكتشف أفكاراً":"Explore ideas"}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden="true"/>
+      {ar?"شوف شو بيناسب ميزانيتنا":"See what we could plan"}<ArrowRight className="size-4 rtl:rotate-180" aria-hidden="true"/>
      </span>
     </span>
    </Link>
