@@ -1,4 +1,4 @@
-import {useEffect,useState,type FormEvent} from "react";
+import {useEffect,useRef,useState,type FormEvent} from "react";
 import {Bot,LockKeyhole,Send,ShieldAlert,Trash2} from "lucide-react";
 import type {User} from "@supabase/supabase-js";
 import {Button} from "@/components/ui/button";
@@ -8,6 +8,7 @@ import {sampleMoney,type MoneyState} from "@/lib/money";
 import {supabase} from "@/integrations/supabase/client";
 import {askLiveFamilyAi,LIVE_AI_UI_ENABLED,optionalLiveAiFinancialSummary} from "@/lib/liveAiClient";
 import type {LiveAiTurn} from "@/lib/liveAiProtocol";
+import {detectSensitiveAiText} from "@/lib/liveAiPrivacy";
 
 type Conversation={question:string;answer:string};
 /** No automatic model call: parents opt in for EACH turn and optionally choose
@@ -18,7 +19,8 @@ export function LiveFamilyAdvisor(){
  const [user,setUser]=useState<User|null>(null),[authReady,setAuthReady]=useState(false);
  const [email,setEmail]=useState(""),[message,setMessage]=useState("");
  const [question,setQuestion]=useState(""),[consent,setConsent]=useState(false);
- const [shareNumbers,setShareNumbers]=useState(false),[busy,setBusy]=useState(false);
+ const [shareNumbers,setShareNumbers]=useState(false),[includeHistory,setIncludeHistory]=useState(false),[busy,setBusy]=useState(false);
+ const requestGeneration=useRef(0);
  const [error,setError]=useState(""),[history,setHistory]=useState<Conversation[]>([]);
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const summary=moneyReady?optionalLiveAiFinancialSummary(money):null;
@@ -29,9 +31,12 @@ export function LiveFamilyAdvisor(){
    if(live){setUser(error?null:data.user);setAuthReady(true);}
   }).catch(()=>{if(live)setAuthReady(true);});
   const {data}=supabase.auth.onAuthStateChange((_event,session)=>{
-   if(live){setUser(session?.user??null);setHistory([]);setConsent(false);setShareNumbers(false);}
+   if(live){requestGeneration.current++;
+    setUser(session?.user??null);setHistory([]);setQuestion("");
+    setConsent(false);setShareNumbers(false);setIncludeHistory(false);setBusy(false);
+   }
   });
-  return ()=>{live=false;data.subscription.unsubscribe();};
+  return ()=>{live=false;requestGeneration.current++;data.subscription.unsubscribe();};
  },[]);
  if(!LIVE_AI_UI_ENABLED)return <section className="editorial-card mt-5 p-4 sm:p-5" aria-label={ar?"حالة الذكاء الاصطناعي":"Live AI status"}>
   <div className="flex items-start gap-3"><Bot className="size-6 shrink-0 text-brand"/>
@@ -57,17 +62,25 @@ export function LiveFamilyAdvisor(){
   e.preventDefault();
   if(busy||!user||!consent||question.trim().length<2)return;
   const currentQuestion=question.trim();
-  const relevant=history.slice(-2).flatMap(({question:q,answer}):LiveAiTurn[]=>[
+  const sensitive=detectSensitiveAiText(currentQuestion);
+  if(sensitive){setError(ar?
+   "قد يحتوي السؤال على بريد أو رقم هاتف أو معلومات بنكية أو بيانات تسجيل دخول. احذف المعلومات الحساسة وحاول مجدداً.":
+   "Your question may contain an email address, phone, bank/card number or credential. Remove sensitive details and try again.");return;}
+  const relevant=(!includeHistory?[]:history.slice(-2)).flatMap(({question:q,answer}):LiveAiTurn[]=>[
    {role:"user",content:q},{role:"assistant",content:answer.slice(0,800)}
   ]);
+  const generation=++requestGeneration.current;
   setBusy(true);setError("");setMessage("");
   void askLiveFamilyAi({question:currentQuestion,language:lang,history:relevant,
    ...(shareNumbers&&summary?{context:summary}:{})})
    .then(answer=>{
+    if(generation!==requestGeneration.current)return;
     setHistory(old=>[...old.slice(-3),{question:currentQuestion,answer}]);
-    setQuestion("");setConsent(false);setShareNumbers(false);
-   }).catch(err=>setError(err instanceof Error?err.message:String(err)))
-   .finally(()=>setBusy(false));
+    setQuestion("");setConsent(false);setShareNumbers(false);setIncludeHistory(false);
+   }).catch(err=>{
+    if(generation===requestGeneration.current)
+     setError(err instanceof Error?err.message:String(err));
+   }).finally(()=>{if(generation===requestGeneration.current)setBusy(false);});
  };
  return <section className="editorial-card mt-5 p-4 sm:p-5" aria-label={ar?"المساعد الذكي المباشر":"Live family AI"}>
   <div className="flex items-start gap-3">
@@ -121,12 +134,38 @@ export function LiveFamilyAdvisor(){
        {summary.cashOnHandJod!==undefined&&<><dt>{ar?"الرصيد الذي أدخلته":"Entered cash balance"}</dt><dd>{summary.cashOnHandJod} JOD</dd></>}
       </dl>}
      </div>}
+     {history.length>0&&<label className="flex items-start gap-2 rounded-xl border border-[#DDE8DC] bg-[#F6FAF5] p-3 text-xs leading-relaxed">
+      <input type="checkbox" checked={includeHistory} onChange={e=>setIncludeHistory(e.target.checked)}
+       className="mt-0.5 size-4 shrink-0"/>
+      <span>{ar?
+       "أرسل آخر محادثتين (السؤال والرد) لإعطاء سياق لهذا الطلب فقط. هذا الخيار مغلق افتراضياً.":
+       "Include the last two question-and-answer turns as context for this request only (optional; OFF by default)."}</span>
+     </label>}
+     <details className="rounded-xl border border-[#DDE8DC] bg-white p-3 text-xs">
+      <summary className="min-h-9 cursor-pointer font-semibold text-brand">{ar?"راجع بالضبط ما سيُرسل قبل الموافقة":"Preview exactly what will be sent before consenting"}</summary>
+      <div className="mt-2 space-y-2">
+       <p className="font-semibold">{ar?"سؤالك":"Question"}</p>
+       <p className="whitespace-pre-wrap break-words">{question.trim()|| (ar?"لم تكتب سؤالاً بعد.":"No question entered yet.")}</p>
+       <p className="font-semibold">{ar?"الرسائل السابقة":"Previous conversation"}</p>
+       <p>{includeHistory&&history.length>0?(ar?"آخر محادثتين أدناه":"Last two exchanges below"):(ar?"لن تُرسل":"Not included")}</p>
+       {includeHistory&&history.slice(-2).map((turn,i)=><div key={i} className="rounded-lg bg-[#F6FAF5] p-2">
+        <p className="whitespace-pre-wrap break-words">{turn.question}</p>
+        <p className="mt-1 whitespace-pre-wrap break-words">{turn.answer.slice(0,800)}</p>
+       </div>)}
+       <p className="font-semibold">{ar?"ملخص ميزانيتك":"Budget summary"}</p>
+       <p>{shareNumbers&&summary?(ar?"الأرقام الظاهرة في الجدول أعلاه فقط":"Only the numeric figures shown above"):
+        (ar?"لن تُرسل أرقام الميزانية":"Not included")}</p>
+       <p className="text-muted-foreground">{ar?
+        "المعاينة لا تعني إرسالاً. يلزم اختيار الموافقة والضغط على إرسال. لا تُدرج أسماء أفراد العائلة أو تفاصيل السجلات المحلية آلياً.":
+        "Opening this preview does not send anything. You must separately consent and click Send. No local family names or detailed records are added automatically."}</p>
+      </div>
+     </details>
      <label className="flex items-start gap-2 rounded-xl bg-[#F8F4EC] p-3 text-xs leading-relaxed">
       <input type="checkbox" className="mt-0.5 size-4 shrink-0" checked={consent}
        onChange={e=>setConsent(e.target.checked)}/>
       <span>{ar?
-       "أوافق على إرسال سؤالي ورسائلي القريبة إلى مزود AI عبر خادم دبّرنا لهذا الطلب. لا أرسل معلومات أطفال حساسة أو بيانات صحية أو مصرفية. أفهم أن إجابة الذكاء الاصطناعي قد تخطئ.":
-       "For this request, I agree to send my question and limited recent messages to an AI provider through Dabberna. I will not include sensitive child, medical or bank information, and understand AI answers may be wrong."}</span>
+       "أوافق لهذا الطلب على إرسال سؤالي كما في المعاينة، ومعه الرسائل السابقة وملخص الأرقام فقط إذا اخترتهما بنفسي. أفهم أن إجابة الذكاء الاصطناعي قد تخطئ.":
+       "For this request I agree to send the previewed question, plus my separately selected conversation history and numeric summary if enabled, to an AI provider through Dabberna. I understand the model can make mistakes."}</span>
      </label>
      <Button type="submit" disabled={!consent||busy||question.trim().length<2}>
       <Send className="size-4"/>{busy?(ar?"جارٍ البحث عن جواب...":"Getting an answer..."):(ar?"اسأل الذكاء الاصطناعي":"Ask live AI")}
