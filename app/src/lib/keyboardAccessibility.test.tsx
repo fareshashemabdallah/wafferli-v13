@@ -37,7 +37,7 @@ describe("keyboard navigation and bilingual accessibility",()=>{
   expect(document.documentElement.dir).toBe("rtl");
   expect(screen.getAllByRole("navigation",{name:"التنقل الرئيسي"})).toHaveLength(2);
   expect(screen.getAllByRole("link",{name:"الصفحة الرئيسية لدبّرنا"})).toHaveLength(2);
-  expect(screen.getAllByRole("navigation",{name:"Main"})).toHaveLength(0);
+  expect(screen.queryAllByRole("navigation",{name:"Main"})).toHaveLength(0);
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
  });
  it("gives both brand links visible focus and legible mobile navigation labels",()=>{
