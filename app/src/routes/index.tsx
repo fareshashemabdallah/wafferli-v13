@@ -5,6 +5,8 @@ import {AppShell} from "@/components/AppShell";
 import {TodayFamilyBrief} from "@/components/TodayFamilyBrief";
 import {QuickExpenseCard} from "@/components/QuickExpenseCard";
 import {FamilyStarterCard} from "@/components/FamilyStarterCard";
+import {SpendingBreakdownCard} from "@/components/SpendingBreakdownCard";
+import {sampleMoney,type MoneyState} from "@/lib/money";
 import {FamilyNextActions} from "@/components/FamilyNextActions";
 import {FamilySetupCard} from "@/components/FamilySetupCard";
 import {FamilyWeather} from "@/components/FamilyWeather";
@@ -23,6 +25,7 @@ export const Route=createFileRoute("/")({
 function Index(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [prefs]=useLocalState("familyPreferences",defaultFamilyPreferences);
+ const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [quickExpenseOpen,setQuickExpenseOpen]=useState(false);
  const now=new Date(),hour=now.getHours();
  const greeting=ar?(hour<12?"صباح الخير":hour<18?"مسا الخير":"ليلة هنية"):
@@ -42,6 +45,7 @@ function Index(){
   </header>
   <div className="mt-5 space-y-4">
    <FamilyStarterCard/>
+   {moneyReady&&!money.demo&&<SpendingBreakdownCard state={money} compact/>}
    <TodayFamilyBrief/>
    <FamilyNextActions/>
   </div>
