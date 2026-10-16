@@ -68,4 +68,3 @@ export function parseLiveAiAnswer(raw:unknown):string {
  return raw["answer"].trim();
 }
 export const LIVE_AI_FUNCTION="dabberna-family-ai";
-export const LIVE_AI_ENABLED=import.meta.env["VITE_ENABLE_LIVE_AI"]==="true";
