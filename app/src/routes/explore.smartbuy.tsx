@@ -45,7 +45,7 @@ function Photo({ label, icon: Icon }: { label: string; icon: typeof Receipt }) {
   );
 }
 
-function SmartBuy() {
+export function SmartBuy() {
   const { tr,lang } = useI18n();
   const ar=lang==="ar";
   const [plans,setPlans] = useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
