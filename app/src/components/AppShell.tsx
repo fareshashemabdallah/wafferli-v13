@@ -1,18 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { CalendarCheck2, Compass, Home, Info, Languages, Sparkles, UserRound, Wallet } from "lucide-react";
+import { CalendarCheck2, Home, Info, Languages, Sparkles, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
-import { useI18n, type Key } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { writeLocal } from "@/lib/storage";
 import { Logo } from "./Logo";
 import { ConnectivityNotice } from "./ConnectivityNotice";
 import { LocalSaveNotice } from "./LocalSaveNotice";
 
-const tabs: { to: "/" | "/explore" | "/money" | "/plans" | "/space"; key: Key; icon: typeof Home; exact?: boolean }[] = [
- {to:"/",key:"home",icon:Home,exact:true},
- {to:"/explore",key:"explore",icon:Compass},
- {to:"/money",key:"money",icon:Wallet},
- {to:"/plans",key:"plans",icon:CalendarCheck2},
- {to:"/space",key:"space",icon:UserRound}
+// Parent navigation is organized by outcomes, not by separate data-entry tools.
+// Money, Family, Calendar, Discover and specialist tools stay available from
+// contextual actions and Family settings, without changing their stored data.
+const tabs: {to:"/"|"/advisor"|"/plans";en:string;ar:string;icon:typeof Home;exact?:boolean}[]=[
+ {to:"/",en:"Today",ar:"اليوم",icon:Home,exact:true},
+ {to:"/advisor",en:"Ask Dabberna",ar:"اسأل دبّرنا",icon:Sparkles},
+ {to:"/plans",en:"Our Plans",ar:"خططنا",icon:CalendarCheck2}
 ];
 
 function LangToggle(){
@@ -33,10 +34,10 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
    <p className="mt-3 max-w-44 text-xs leading-relaxed text-muted-foreground">{lang==="ar"?"أنفق بذكاء، وعِش براحة.":"Spend wisely. Live well."}</p>
    <div className="mt-8 premium-divider"/>
    <nav className="mt-5 flex flex-col gap-1.5" aria-label={lang==="ar"?"التنقل الرئيسي":"Main"}>
-    {tabs.map(({to,key,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
+    {tabs.map(({to,en,ar,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
       onClick={()=>{if(to!=="/")writeLocal("homeIntroDone",true);}}
       className="flex min-h-12 items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 px-3 text-sm font-semibold text-muted-foreground transition hover:bg-[#F1F5EF] data-[status=active]:bg-[#E6F0E7] data-[status=active]:text-brand">
-      <Icon className="size-5" aria-hidden="true"/>{t(key)}
+      <Icon className="size-5" aria-hidden="true"/>{lang==="ar"?ar:en}
     </Link>)}
    </nav>
    <div className="mt-6 rounded-[1.4rem] bg-[#EDF3EA] p-4">
@@ -46,6 +47,7 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
     <Link to="/advisor" className="mt-3 inline-flex min-h-11 items-center rounded-full bg-brand px-4 text-xs font-semibold text-white focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2">{lang==="ar"?"ابدأ":"Get started"} →</Link>
    </div>
    <div className="mt-auto flex items-center justify-between gap-2">
+    <Link to="/space" className="flex min-h-11 items-center gap-1.5 rounded-lg text-xs font-medium text-brand"><UserRound className="size-4"/>{lang==="ar"?"العائلة والإعدادات":"Family & settings"}</Link>
     <Link to="/about" className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-brand focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"><Info className="size-4"/>{t("about")}</Link>
     <LangToggle/>
    </div>
@@ -60,6 +62,7 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
        className="grid size-11 place-items-center rounded-full border border-[#DDE5DB] bg-[#EAF1E8] text-brand transition hover:bg-white focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2">
        <Sparkles className="size-5" aria-hidden="true"/>
       </Link>
+      <Link to="/space" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#DDE5DB] bg-white/80 px-3 text-xs font-semibold text-brand" aria-label={lang==="ar"?"العائلة والإعدادات":"Family & settings"}><UserRound className="size-4"/><span className="hidden sm:inline">{lang==="ar"?"العائلة":"Family"}</span></Link>
       <LangToggle/>
      </div>
     </div>
@@ -73,11 +76,11 @@ export function AppShell({children,title}:{children:ReactNode;title?:string}){
   </div>
 
   <nav aria-label={lang==="ar"?"التنقل الرئيسي":"Main"} className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-[#DEE6DD] bg-[#FFFEFC]/95 px-2 pt-2 shadow-[0_-12px_28px_-26px_rgba(42,68,47,.36)] backdrop-blur-xl md:hidden">
-   <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
-    {tabs.map(({to,key,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
+   <div className="mx-auto grid max-w-xl grid-cols-3 gap-2">
+    {tabs.map(({to,en,ar,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
       onClick={()=>{if(to!=="/")writeLocal("homeIntroDone",true);}}
       className="group flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 px-0.5 text-xs font-medium text-[#708174] transition hover:bg-[#F2F6F0] data-[status=active]:bg-[#ECF4EC] data-[status=active]:font-semibold data-[status=active]:text-brand">
-      <Icon className="size-[21px]" aria-hidden="true"/><span>{t(key)}</span>
+      <Icon className="size-[21px]" aria-hidden="true"/><span>{lang==="ar"?ar:en}</span>
     </Link>)}
    </div>
   </nav>
