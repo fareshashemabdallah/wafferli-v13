@@ -1,0 +1,32 @@
+name: Validate Dabberna live AI Edge Function
+on:
+  pull_request:
+    paths:
+      - 'app/supabase/functions/**'
+      - 'app/supabase/ai_quota_v1.sql'
+      - '.github/workflows/dabberna-ai-edge.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/supabase/functions/**'
+      - 'app/supabase/ai_quota_v1.sql'
+      - '.github/workflows/dabberna-ai-edge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check-edge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check Supabase Edge Function without live secrets
+        run: deno check app/supabase/functions/dabberna-family-ai/index.ts
+      - name: Confirm deployment remains an explicit action
+        run: |
+          test -s app/supabase/ai_quota_v1.sql
+          grep -q 'DABBERNA_AI_SERVER_ENABLED' app/supabase/functions/dabberna-family-ai/index.ts
+          grep -q 'store:false' app/supabase/functions/dabberna-family-ai/index.ts
