@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/i18n";
 import { createFileRoute,Link } from "@tanstack/react-router";
-import { CheckCircle2, ImagePlus, Plus, Receipt, Trash2 } from "lucide-react";
+import { CheckCircle2, ImagePlus, Plus, Receipt, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
@@ -9,6 +9,7 @@ import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
 import {PrivateOfferWorkspace} from "@/components/PrivateOfferWorkspace";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import {dateKey} from "@/lib/familyCalendar";
+import {isSampleBasketEntry,type BasketEntry} from "@/lib/basketRecording";
 import { Field, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +59,10 @@ function SmartBuy() {
       { id: "a2", store: "", price: "", extra: "", verified: false },
     ] as Alt[],
   });
+  const [basket] = useLocalState<BasketEntry[]>("shopping",[]);
+  // Reuse names the parent already entered; never pretend a manual basket
+  // price is a verified seller quote or import it as an offer.
+  const availableBasketItems=basket.filter(item=>!isSampleBasketEntry(item)&&item.name.trim()).slice(0,30);
   const budget = Number(s.budget) || 0;
   const rows = s.alts.map((a) => ({ ...a, total: (Number(a.price) || 0) + (Number(a.extra) || 0) }));
   const valid = rows.filter((r) => Number(r.price) > 0);
@@ -67,10 +72,46 @@ function SmartBuy() {
   return (
     <AppShell title={tr("Compare & Choose")}>
       <PlanContextBanner onUseBudget={amount=>setS(old=>({...old,budget:String(amount)}))}/>
-      <p className="mb-3 text-sm text-muted-foreground">{tr("Compare price, quality and convenience before choosing.")}</p>
+      <p className="mb-3 text-sm text-muted-foreground">
+        {ar?"قارن خيارين بسهولة، مع التوصيل أو المواصلات. الأسعار من إدخالك أنت وليست عروضاً مباشرة من المتاجر.":
+        "Compare two options including delivery or travel. Prices are entered by you, not fetched or verified retailer offers."}
+      </p>
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-[#DCE7D9] bg-[#F4F8F1] p-3 text-sm">
+        <span>{ar?"عندك قائمة مشتريات يومية؟":"Making an everyday shopping list?"}</span>
+        <Link to="/explore/shopping" className="inline-flex min-h-11 items-center font-semibold text-brand underline">
+          {ar?"افتح سلّتي":"Open My Basket"} →
+        </Link>
+      </div>
       <div className="card-soft mt-4 grid gap-3 p-4 sm:grid-cols-2">
         <Field label={tr("What are you buying?")}><Input className={inputCls} maxLength={60} value={s.product} onChange={(e) => setS({ ...s, product: e.target.value })} /></Field>
         <Field label={tr("Your budget (JOD)")}><Input className={inputCls} inputMode="decimal" value={s.budget} onChange={(e) => setS({ ...s, budget: e.target.value })} /></Field>
+        {availableBasketItems.length>0&&<label className="text-xs font-semibold sm:col-span-2">
+          {ar?"أو استخدم منتجاً من سلّتك المحفوظة":"Or reuse an item from My Basket"}
+          <select className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
+            aria-label={ar?"منتج من سلّتي":"Item from My Basket"}
+            value={availableBasketItems.some(item=>item.name===s.product)?s.product:""}
+            onChange={e=>{if(e.target.value)setS(old=>({...old,product:e.target.value}));}}>
+            <option value="">{ar?"اختر إذا بتحب":"Select an item (optional)"}</option>
+            {availableBasketItems.map(item=><option key={item.id} value={item.name}>{item.name}</option>)}
+          </select>
+          <span className="mt-1 block text-[11px] font-normal text-muted-foreground">
+            {ar?"ننقل اسم المنتج فقط. السعر بحاجة لتتحقق منه بنفسك.":
+             "Only the name is reused. Check actual store prices yourself."}
+          </span>
+        </label>}
+        <div className="sm:col-span-2">
+          <button type="button" className="inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-brand underline"
+           onClick={()=>{
+             if(!window.confirm(ar?"ابدأ مقارنة جديدة؟ سيُستبدل جدول المقارنة المحفوظ فقط، ولن تُحذف السلّة أو الخطط.":
+              "Start a new comparison? This replaces only your saved comparison; your basket and family plans remain unchanged."))return;
+             setS({product:"",budget:"",alts:[
+              {id:uid(),store:"",price:"",extra:"",verified:false},
+              {id:uid(),store:"",price:"",extra:"",verified:false}
+             ]});
+           }}><RotateCcw className="size-4"/>
+           {ar?"ابدأ مقارنة جديدة":"Start another comparison"}
+          </button>
+        </div>
       </div>
       <div className="mt-4 space-y-3">
         {rows.map((a) => (
@@ -141,14 +182,33 @@ function SmartBuy() {
         ))}
         <Button variant="secondary" disabled={s.alts.length >= 8} onClick={() => setS({ ...s, alts: [...s.alts, { id: uid(), store: "", price: "", extra: "", verified: false }] })}><Plus className="size-4" /> {tr("Add alternative")}</Button>
       </div>
-      <MerchantQuoteDraft product={s.product} budget={s.budget}/>
-      <PrivateOfferWorkspace/>
-      <FamilyWishlistPanel mode="shopping"/>
-      <details className="mt-5 rounded-2xl border border-border bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{tr("Add photos (optional)")}</summary>
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <Photo label={tr("Product photo")} icon={ImagePlus} />
-        <Photo label={tr("Receipt photo")} icon={Receipt} />
-      </div>
+      <details className="group mt-5 rounded-2xl border border-[#DDE9DB] bg-[#FAFCF8] p-4">
+        <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
+          {ar?"مشتريات مستقبلية وقائمة الرغبات (اختياري)":"Plan future purchases & wishlist (optional)"}
+        </summary>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {ar?"احفظ الاحتياجات القادمة والأسعار التي تحققت منها. لا توجد إعادة طلب تلقائية أو مقارنة مباشرة.":
+           "Save future needs and prices you personally checked. No automatic orders or live price feeds."}
+        </p>
+        <FamilyWishlistPanel mode="shopping"/>
+      </details>
+      <details className="group mt-4 rounded-2xl border border-[#DDE9DB] bg-white p-4">
+        <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
+          {ar?"خيارات متقدمة: عروض ومرفقات (اختياري)":"Advanced: quote drafts, offers & photos (optional)"}
+        </summary>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {ar?"هذه أدوات لتنظيم الأسعار والطلبات التي تتحقق منها أنت. لا يرسل دبّرنا طلباً لتاجر ولا يدير مدفوعات.":
+           "Organize your own comparisons and quotes. Dabberna does not send merchant requests or handle payments."}
+        </p>
+        <MerchantQuoteDraft product={s.product} budget={s.budget}/>
+        <PrivateOfferWorkspace/>
+        <details className="mt-5 rounded-2xl border border-border bg-white p-4">
+          <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{tr("Add photos (optional)")}</summary>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <Photo label={tr("Product photo")} icon={ImagePlus} />
+            <Photo label={tr("Receipt photo")} icon={Receipt} />
+          </div>
+        </details>
       </details>
     </AppShell>
   );
