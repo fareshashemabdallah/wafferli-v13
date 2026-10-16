@@ -29,6 +29,8 @@ export function GuidedFamilyAdvisor(){
  const [outings,,outingsReady]=useLocalState<OutingOption[]>(OUTING_SHORTLIST_KEY,[]);
  const [prefs,,prefsReady]=useLocalState("familyPreferences",defaultFamilyPreferences);
  const [question,setQuestion]=useState("");
+ const [quickAmount,setQuickAmount]=useState("");
+ const [quickError,setQuickError]=useState("");
  const [history,setHistory]=useState<Exchange[]>([]);
  const ready=moneyReady&&membersReady&&calendarReady&&plansReady&&tasksReady&&wishlistReady&&servicesReady&&outingsReady&&prefsReady;
  const ask=(value:string)=>{
@@ -39,6 +41,18 @@ export function GuidedFamilyAdvisor(){
   setQuestion("");
  };
  const submit=(e:FormEvent)=>{e.preventDefault();ask(question);};
+ const checkCost=(e:FormEvent)=>{
+  e.preventDefault();
+  const n=Number(quickAmount);
+  if(!/^\\d{1,6}(?:\\.\\d{1,2})?$/.test(quickAmount)||!Number.isFinite(n)||n<=0||n>100000){
+   setQuickError(ar?"أدخل مبلغاً بالدينار (منزلتان عشريتان كحد أقصى).":
+    "Enter a JOD amount with up to two decimal places.");
+   return;
+  }
+  setQuickError("");
+  ask(ar?"فينا ندفع "+quickAmount+" دينار لطلعة عائلية؟":
+   "Can we afford "+quickAmount+" JOD for a family outing?");
+ };
  return <section className="editorial-card mt-5 p-4 sm:p-5"
   aria-label={ar?"مساعد العائلة المحلي":"Guided family advisor"}>
   <div className="flex items-start gap-3">
@@ -72,6 +86,27 @@ export function GuidedFamilyAdvisor(){
     </button>)}
    </div>
   </details>
+  <form onSubmit={checkCost} className="mt-4 rounded-xl border border-[#DDE8D9] bg-[#F6FAF4] p-3"
+   aria-label={ar?"تقييم مصروف محدد":"Check a specific family cost"}>
+   <p className="text-sm font-semibold">{ar?"كم ممكن نخصص لطلعة العائلة؟":"Thinking about a family outing cost?"}</p>
+   <p className="mt-1 text-xs text-muted-foreground">{ar?
+    "أدخل المبلغ فقط؛ دبّرنا يراجعه مقابل رصيدك وفواتيرك المسجّلة، من دون تسجيل مصروف.":
+    "Enter one amount. Dabberna checks it against your entered cash and upcoming bills—without recording a payment."}</p>
+   <div className="mt-3 flex flex-wrap items-end gap-2">
+    <label className="min-w-32 flex-1 text-xs font-semibold">
+     {ar?"المبلغ بالدينار":"Amount in JOD"}
+     <input type="number" min="0.01" max="100000" step="0.01" inputMode="decimal" required
+      aria-label={ar?"مبلغ المصروف بالدينار":"Proposed spending amount JOD"}
+      value={quickAmount} onChange={e=>{setQuickAmount(e.target.value);setQuickError("");}}
+      className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
+      placeholder="40"/>
+    </label>
+    <Button type="submit" className="min-h-11" disabled={!ready||!quickAmount}>
+     {ar?"افحص المبلغ":"Check amount"} <ArrowRight className="size-4 rtl:rotate-180"/>
+    </Button>
+   </div>
+   {quickError&&<p role="alert" className="mt-2 text-xs text-destructive">{quickError}</p>}
+  </form>
   <form onSubmit={submit} className="mt-4 flex flex-wrap gap-2">
    <label className="min-w-[175px] flex-1 text-xs font-semibold">
     {ar?"أو اكتب سؤالك":"Or type your question"}
