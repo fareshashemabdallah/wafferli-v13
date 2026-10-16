@@ -27,6 +27,10 @@ jobs:
       - name: TypeScript check
         working-directory: app
         run: bun run typecheck
+      - name: Validate manual staging script syntax without secrets
+        run: |
+          node --check app/scripts/verify-live-ai-staging.mjs
+          node --check app/scripts/verify-staging-security.mjs
       - name: Unit tests
         working-directory: app
         run: bun run test
