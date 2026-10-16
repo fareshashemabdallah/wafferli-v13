@@ -73,6 +73,9 @@ export function SmartBuy() {
 
   return (
     <AppShell title={ar?"قارن أسعار متجرين":"Which store costs less?"}>
+      <Link to="/explore/market" className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#EAF3E8] px-4 text-sm font-semibold text-brand">
+        {ar?"أولاً، ابحث عن سعر المنتج عند متاجر حقيقية":"First, find real seller listings"} →
+       </Link>
       <PlanContextBanner onUseBudget={amount=>setS(old=>({...old,budget:String(amount)}))}/>
       <p className="mb-3 text-sm text-muted-foreground">
         {ar?"إذا عرفت سعر منتج في متجرين، أدخلهما وسنوضح لك الأرخص بعد التوصيل أو المواصلات. دبّرنا لا يجلب الأسعار مباشرة.":

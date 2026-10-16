@@ -68,7 +68,7 @@ describe("connected, device-only family priorities",()=>{
   const q=nextConnectedFamilyAction(input({preferences:{...prefs,shoppingTips:true},wishlist:[gift]}));
   expect(q.detailEn).toContain("Birthday story");
   expect(q.route).toBe("/occasions");
-  expect(nextConnectedFamilyAction(input({preferences:{...prefs,shoppingTips:true}})).route).toBe("/explore/smartbuy");
+  expect(nextConnectedFamilyAction(input({preferences:{...prefs,shoppingTips:true}})).route).toBe("/explore/market");
  });
  it("only uses family wishlist in cross-module advice when shopping tips are opted in",()=>{
   expect(nextConnectedFamilyAction(input({wishlist:[gift],preferences:{

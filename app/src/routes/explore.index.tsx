@@ -45,9 +45,9 @@ function Explore(){
    </div>
   </section>
   <div className="mt-3 grid grid-cols-2 gap-3">
-   <Link to="/explore/smartbuy" className="soft-action flex min-h-43 flex-col justify-between bg-[#FCF1E9] p-4 sm:min-h-48 sm:p-5">
+   <Link to="/explore/market" className="soft-action flex min-h-43 flex-col justify-between bg-[#FCF1E9] p-4 sm:min-h-48 sm:p-5">
     <span className="grid size-11 place-items-center rounded-[.9rem] bg-white/80 text-[#AD806A]"><ShoppingBag className="size-5"/></span>
-    <span><span className="block text-base font-semibold text-ink">{ar?"اشتري بذكاء":"Buy wisely"}</span><span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{ar?"قارن القيمة قبل السعر.":"Compare value, not just price."}</span></span>
+    <span><span className="block text-base font-semibold text-ink">{ar?"اشتري بذكاء":"Buy wisely"}</span><span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{ar?"اعثر على المنتج في متاجر أردنية ثم قارِن.":"Find the product at Jordanian retailers first."}</span></span>
    </Link>
    <Link to="/occasions" className="soft-action flex min-h-43 flex-col justify-between bg-[#EEF0E9] p-4 sm:min-h-48 sm:p-5">
     <span className="grid size-11 place-items-center rounded-[.9rem] bg-white/80 text-[#678672]"><Gift className="size-5"/></span>

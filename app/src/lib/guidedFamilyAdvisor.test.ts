@@ -65,8 +65,9 @@ describe("family question advisor",()=>{
  });
  it("does not invent unentered store prices or a confirmed savings figure",()=>{
   const a=answerFamilyQuestion("How can we buy more wisely?",args());
-  expect(a.textEn).toContain("manually entered");
-  expect(a.textEn).toContain("not verified");
+  expect(a.textEn).toContain("Search current public listings");
+  expect(a.textEn).toContain("not connected yet");
+  expect(a.route).toBe("/explore/market");
  });
 
  it("answers actual due family responsibilities without inventing sent assignments",()=>{

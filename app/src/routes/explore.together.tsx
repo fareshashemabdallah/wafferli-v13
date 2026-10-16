@@ -59,7 +59,8 @@ const focusNames: Record<ChildFocus,string> = {
 };
 
 function TogetherPage() {
-  const { tr } = useI18n();
+  const { tr,lang } = useI18n();
+  const ar=lang==="ar";
   const navigate = useNavigate();
   const [saved, setSaved] = useLocalState<SavedOuting[]>("outings", []);
   const [familyPrefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
@@ -173,7 +174,14 @@ function TogetherPage() {
         <Link to="/plans" className="text-xs font-semibold text-brand underline">{tr("Open plan")} →</Link>
        </div>
       </div>}
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 rounded-2xl border border-[#D7E5D3] bg-[#F2F8EE] p-4">
+        <h2 className="text-lg font-semibold">{ar?"بلّش بالأفكار، مش باستمارة طويلة":"Start with ideas, not a long form"}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+         {ar?"سنفتح قوائم أنشطة خارجية حسب المنطقة ومشاركة الأطفال اللي اخترتها. دبّرنا لا يؤكد سلامة المكان أو السعر أو دخول الأطفال أو التوفر.":
+"We'll search current external activity listings using your chosen area and attendance settings. Dabberna does not verify venue safety, pricing, admission or availability."}
+        </p>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <a href={googleActivitiesLink} target="_blank" rel="noopener noreferrer" className="flex min-h-30 flex-col justify-center rounded-2xl border border-border bg-white p-4 transition hover:border-brand/40">
           <span className="text-base font-semibold text-brand">① {tr("Find activity ideas")}</span>
           <span className="mt-2 text-sm text-muted-foreground">{tr("Search")} {tr("near")} {f.neighborhood || tr("Amman")} ↗</span>
@@ -183,9 +191,16 @@ function TogetherPage() {
           <span className="mt-2 block text-sm text-muted-foreground">{showVoteForm?(tr("Close")+" −"):(tr("Create outing vote & get link")+" →")}</span>
         </button>
       </div>
-      <ChildAwareOutingCompare childrenAttendance={children} ages={ageBands}
-       stroller={stroller} quiet={quiet} maximum={cost.maximum} city={f.neighborhood}
-       preferredDistance={familyPrefs.distanceKm}/>
+      <details className="mt-4 rounded-2xl border border-[#DFE7DC] bg-white p-4">
+       <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
+        {ar?"اختياري: قارن الأماكن حسب أعمار الأطفال والميزانية":"Optional: compare places against your children's needs and your budget"} +
+       </summary>
+       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?"استخدمها بعد ما تختار أماكن ممكنة. تأكد من دخول الأطفال والأعمار والأسعار والتوفر مع المكان.":
+"Use this after you have shortlisted places. Child admission, ages, prices and availability must be confirmed with providers."}</p>
+       <ChildAwareOutingCompare childrenAttendance={children} ages={ageBands}
+        stroller={stroller} quiet={quiet} maximum={cost.maximum} city={f.neighborhood}
+        preferredDistance={familyPrefs.distanceKm}/>
+      </details>
       <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer">{tr("A note on choosing safe, suitable venues")}</summary>
         <p className="mt-2">{tr("Check child admission, age limits, access, venue safety and prices directly with the provider. Google Maps results are third-party information.")}</p>
       </details>
