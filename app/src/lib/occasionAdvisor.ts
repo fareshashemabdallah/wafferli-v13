@@ -1,5 +1,6 @@
 import {allFamilyMoments,dateKey,parseCalendarDate,upcomingMoments,type FamilyMoment,type MomentOccurrence} from "./familyCalendar";
 import type {Member,MoneyState} from "./money";
+import {realFamilyMembers} from "./familySetup";
 import {buildForecast,legacyIncome} from "./cashflow";
 
 export type OccasionPlan={budgetJod:number|null;chosenIdea?:string;done?:string[];updatedAt?:string};
@@ -12,7 +13,7 @@ export const daysUntil=(date:string,now:Date)=>{
  return Math.round((d.getTime()-new Date(now.getFullYear(),now.getMonth(),now.getDate(),12).getTime())/86400000);
 };
 export function upcomingPlanEvents(events:FamilyMoment[],members:Member[],now:Date,days=100,arabic=false){
- return upcomingMoments(allFamilyMoments(events,members,arabic),now,days+1);
+ return upcomingMoments(allFamilyMoments(events,realFamilyMembers(members),arabic),now,days+1);
 }
 export function leadAdvice(days:number,ar:boolean):string{
  if(days>45)return ar?"وقت مناسب لابتكار فكرة والتعرّف على خيارات جديدة.":"You have time to explore ideas, not rush into buying.";
