@@ -1,6 +1,6 @@
 # Dabberna feature implementation register
 
-_Last engineering review: 15 October 2026. Source: `main` after PR #59._
+_Last engineering review: 15 October 2026. Source: `main` after PR #61._
 
 This register distinguishes **implemented code**, **actually enabled in the public browser pilot**, and **production readiness**. A green TypeScript/test/build workflow validates code quality only; it is **not** evidence that a sensitive database was deployed, that a provider is verified, or that a payment was completed.
 
@@ -27,12 +27,12 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 | Private merchant quote decisions | Parent-created RFQ drafts, self-entered offers, total cost and expiry, quote-to-Plan (#35, #38) | Local pilot | No real quotation dispatch, verified bidders or binding transaction |
 | Family outings | Child attendance/focus, costs, group voting, explicit parent-checked venue suitability (#48) | Local pilot with third-party voting service | No guaranteed accessibility, venue safety, live availability or forecast-linked age rules |
 | Provider and doctor comparisons | Private service checklist and source URLs, parent observations (#36) | Local pilot | No verified practitioner licensing, independent reviews or medical recommendations |
-| Guided parent questions | Ten deterministic EN/AR on-device topics and source-staged, authenticated live AI client + Edge Function/SQL (#59) | Local pilot + staged backend | Server secrets, quota SQL and Edge deployment plus independent security testing not completed; no verified web research |
+| Guided parent questions | Ten deterministic EN/AR on-device topics and source-staged, authenticated live AI client + Edge Function/SQL (#61) | Local pilot + staged backend | Server secrets, quota SQL and Edge deployment plus independent security testing not completed; no verified web research |
 | In-app attention | Important financial/family/task/wishlist dates with local snoozes (#46, #49) | Local pilot | No reliable background push/OS notification permission flow |
 | Calendar reminders | Explicit .ics export of selected bills, family dates, open tasks and unpurchased wishlists (#32, #52) | Local pilot | Notification delivery delegated to imported calendar; user acknowledges cloud-sync privacy |
 | Encrypted local backups | Selected recovery, strict schemas and parent passphrase-protected offline file (#29, #45) | Local pilot | Independent cryptography/UX QA, key-recovery policies and real-device validation |
 | Offline/mobile | Browser install metadata, static-asset-only offline service worker and offline notice (#39) | Limited local pilot | Real iOS/Android install/update/offline tests, accessibility audit, store packages if required |
-| Arabic + English | RTL/LTR navigation, bilingual major journeys, skip-to-main landmark and visible keyboard focus across desktop/mobile (#59) | Local pilot | Full linguistic review, localization of error strings, independent screen-reader and WCAG testing |
+| Arabic + English | RTL/LTR navigation, bilingual major journeys, skip-to-main landmark and visible keyboard focus across desktop/mobile (#61) | Local pilot | Full linguistic review, localization of error strings, independent screen-reader and WCAG testing |
 | UI / logic testing | Unit tests, static SQL checks, selected React click-path smoke tests (#37, #50) | CI passes | Real browser E2E, accessibility, multi-device, load and red-team security tests missing |
 
 ## Sensitive family accounts and monetization
@@ -59,7 +59,7 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 
 ## Remaining work that can still advance without external credentials
 
-**Live AI external blocker:** an authorized Supabase project operator must review/deploy SQL and the Edge Function, add private OpenAI credentials and activate the public build flag after testing. The app does not become live merely by merging PR #59.
+**Live AI external blocker:** an authorized Supabase project operator must review/deploy SQL and the Edge Function, add private OpenAI credentials and activate the public build flag after testing. The app does not become live merely by merging PR #61.
 
 - Improve past-budget provenance beyond snapshots taken at parent review; historical completeness cannot be proven from manual entries.
 - Improve recurring-shopping reminders and skipped-cycle visibility; automatic orders or charges remain unavailable.
@@ -86,7 +86,7 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 - #55 — anchored repeat-purchase planning with explicit parent confirmations.
 - #56 — past-month review snapshots with stale-entry detection.
 - #57 — private-by-default new financial records and hypothetical sharing preview.
-- #59 — source-ready opt-in live AI conversation, authenticated Edge backend and strict usage quota; NOT DEPLOYED.
-- #59 — bilingual keyboard skip navigation and focus indicators with component tests.
+- #61 — source-ready opt-in live AI conversation, authenticated Edge backend and strict usage quota; NOT DEPLOYED.
+- #61 — bilingual keyboard skip navigation and focus indicators with component tests.
 
 **Deployment truth:** source merged into GitHub `main` does not prove the GitHub Pages host has already deployed the newest commit. The public UI must be independently checked after deployment.
