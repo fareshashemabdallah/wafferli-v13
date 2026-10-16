@@ -8,6 +8,7 @@ import {MerchantQuoteDraft} from "@/components/MerchantQuoteDraft";
 import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
 import {PrivateOfferWorkspace} from "@/components/PrivateOfferWorkspace";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
+import {compareManuallyEnteredPrices} from "@/lib/clearShoppingResult";
 import {dateKey} from "@/lib/familyCalendar";
 import {isSampleBasketEntry,type BasketEntry} from "@/lib/basketRecording";
 import { Field, inputCls } from "@/components/Field";
@@ -64,18 +65,39 @@ export function SmartBuy() {
   // price is a verified seller quote or import it as an offer.
   const availableBasketItems=basket.filter(item=>!isSampleBasketEntry(item)&&item.name.trim()).slice(0,30);
   const budget = Number(s.budget) || 0;
+  const comparison=compareManuallyEnteredPrices(s.alts);
   const rows = s.alts.map((a) => ({ ...a, total: (Number(a.price) || 0) + (Number(a.extra) || 0) }));
-  const valid = rows.filter((r) => Number(r.price) > 0);
-  const lowestCost = valid.length ? valid.reduce((a, b) => (b.total < a.total ? b : a)) : null;
+  const valid = rows.filter((r) => r.store.trim()&&Number(r.price)>0&&Number.isFinite(r.total)&&r.total>=0);
+  const lowestCost = comparison.ready?valid.find(r=>r.id===comparison.cheaper?.id)??null:null;
   const setAlt = (id: string, p: Partial<Alt>) => setS({ ...s, alts: s.alts.map((a) => (a.id === id ? { ...a, ...p } : a)) });
 
   return (
-    <AppShell title={tr("Compare & Choose")}>
+    <AppShell title={ar?"قارن أسعار متجرين":"Which store costs less?"}>
       <PlanContextBanner onUseBudget={amount=>setS(old=>({...old,budget:String(amount)}))}/>
       <p className="mb-3 text-sm text-muted-foreground">
-        {ar?"قارن خيارين بسهولة، مع التوصيل أو المواصلات. الأسعار من إدخالك أنت وليست عروضاً مباشرة من المتاجر.":
-        "Compare two options including delivery or travel. Prices are entered by you, not fetched or verified retailer offers."}
+        {ar?"إذا عرفت سعر منتج في متجرين، أدخلهما وسنوضح لك الأرخص بعد التوصيل أو المواصلات. دبّرنا لا يجلب الأسعار مباشرة.":
+        "Already have prices from two stores? Enter them and see which entered total is lower, including delivery or travel. Dabberna does not find live prices for you."}
       </p>
+      <section role="status" aria-label={ar?"نتيجة مقارنة الأسعار":"Price comparison result"}
+       className="mb-4 rounded-2xl border border-[#D5E5D3] bg-[#EFF6EC] p-4">
+       <p className="text-xs font-semibold uppercase tracking-wide text-brand">{ar?"النتيجة":"YOUR ANSWER"}</p>
+       <h2 className="mt-2 text-base font-semibold">
+        {!comparison.ready?(ar?"أدخل سعرين من متجرين مختلفين لتظهر النتيجة":"Enter prices from two different stores to get an answer"):
+         comparison.tied?(ar?"السعر النهائي متساوٍ بين الخيارين":"Both entered totals are the same"):
+         (ar?"الأقل كلفة حسب إدخالك: ":"Lower entered total: ")+(comparison.cheaper?.store??"")}
+       </h2>
+       {comparison.ready&&<p className="mt-2 text-sm leading-relaxed">
+        {comparison.tied?(ar?"الخياران يكلفان ":"Both options total ")+fmtJOD(comparison.cheapestTotalJod??0):
+         (ar?"الإجمالي مع التوصيل/المواصلات ":"Total including delivery/travel ")+
+         fmtJOD(comparison.cheapestTotalJod??0)+" · "+
+         (ar?"أقل من ":"Lower than ")+(comparison.runnerUp?.store??"")+" "+
+         (ar?"بمقدار ":"by ")+fmtJOD(comparison.differenceJod??0)}
+       </p>}
+       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        {ar?"الأسعار التي تدخلها غير مؤكّدة من المتاجر. الأرخص ليس دائماً الأفضل؛ تحقق من الجودة والتوفر قبل الشراء. لا يوجد شراء أو خصم مالي.":
+         "These are prices YOU entered, not verified retailer offers or guaranteed savings. Compare quality and availability before buying. Nothing is purchased or charged."}
+       </p>
+      </section>
       <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-[#DCE7D9] bg-[#F4F8F1] p-3 text-sm">
         <span>{ar?"عندك قائمة مشتريات يومية؟":"Making an everyday shopping list?"}</span>
         <Link to="/explore/shopping" className="inline-flex min-h-11 items-center font-semibold text-brand underline">
