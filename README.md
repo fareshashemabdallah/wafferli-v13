@@ -9,11 +9,17 @@ In GitHub Settings → Pages select **GitHub Actions** as the deployment source.
 
 **Implementation status and production release gates:** [Dabberna feature implementation register](docs/dabberna-feature-implementation-register.md). Use this to distinguish enabled pilot features, staged code and external blockers.
 
+## Live AI integration (requires separate secure activation)
+- Live bilingual conversational UI and a signed-in, rate-limited Supabase Edge endpoint are implemented in source, but **GitHub Pages alone does not deploy or operate the backend**.
+- Parents agree before each question is sent. Optional numeric-only financial context is **OFF by default** and separately previewed. No local expenses, child identities, transaction notes, profiles or bank tokens are sent automatically.
+- OpenAI credentials exist only in Supabase Edge Function secrets; model responses are requested with `store:false`. No provider, price or account details are treated as verified facts. Offline rule-based guidance remains available.
+- An operator must deploy [the reviewed quota SQL](app/supabase/ai_quota_v1.sql) and [Edge Function](app/supabase/functions/dabberna-family-ai/index.ts), validate sign-in, CORS, quotas and privacy, set provider secrets, and then enable the public Vite switch. See [the live AI activation runbook](docs/live-ai-activation.md). Never put the API key in the frontend.
+
 ## Features in this pilot
 - **Home:** financial snapshot using the same browser-local household budget as My Money; upcoming obligations, practical family insights and a family-friendly style.
 - **Weather:** real Open-Meteo forecast when the parent chooses a city. Practical clothing and umbrella suggestions; no passive location tracking. A provider outage shows an honest error.
 - **My Money:** income sources, expense categories, actual spending, savings targets, dated bills, cash flow and conservative cash-available calculation. Entered figures are estimates and not professional financial advice.
-- **Family Advisor:** practical affordability calculator that considers entered cash, future bills and reserve; guides users to relevant modules. A conversational AI model is **not connected**.
+- **Family Advisor:** practical offline affordability guidance plus a separate **source-implemented, opt-in live conversational AI** requiring signed-in Supabase Edge Function deployment, reviewed database usage quotas, private OpenAI provider credentials and explicit operator activation. Live AI is **not activated by merging this code**.
 - **Explore:** child-aware family/friends outings with estimated costs and group voting, restaurants and cuisines, shopping basket and manual purchase comparison.
 - **Family Services:** on-demand search of doctors, education, home services, activities and gifts via attributed third-party Google Maps links. No invented doctors, rankings, verified reviews or clinical advice.
 - **Family profiles and preferences:** parent-controlled visibility of weather and suggestions, preferred outing budget/distance, and in-app guidance frequency.
