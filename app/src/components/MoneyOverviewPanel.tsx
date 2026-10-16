@@ -7,6 +7,7 @@ import {emptyRealMoney,getMoneyOverview} from "@/lib/moneyOverview";
 import {budgetAlignment} from "@/lib/financeAlignment";
 import {budgetPlainResult} from "@/lib/budgetPlainResult";
 import {MoneyGuidance} from "@/components/MoneyGuidance";
+import {SpendingBreakdownCard} from "@/components/SpendingBreakdownCard";
 import {MoneyReadinessCard} from "@/components/MoneyReadinessCard";
 import {SavingsGoalsPanel} from "@/components/SavingsGoalsPanel";
 import {QuickMoneySetup} from "@/components/QuickMoneySetup";
@@ -15,8 +16,8 @@ import {monthCarryover,nextMonthKey} from "@/lib/monthlyCarryover";
 import {useI18n} from "@/lib/i18n";
 
 type Section="overview"|"spending"|"planning";
-type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(s:Section)=>void};
-export function MoneyOverviewPanel({state,setState,goTo}:Props){
+type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(s:Section)=>void;onManageCategories?:()=>void};
+export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
  const [familyPlans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const plannedItems=upcomingFamilyPlans(familyPlans);
@@ -40,6 +41,7 @@ export function MoneyOverviewPanel({state,setState,goTo}:Props){
    <Link to="/plans" className="inline-flex min-h-11 items-center rounded-full border border-[#D3E0D3] px-4 text-sm font-semibold text-brand">{ar?"ارجع إلى خططنا":"Return to Plans"} →</Link>
   </div>;
  return <div className="space-y-4">
+   <SpendingBreakdownCard state={state} onChange={next=>setState(()=>next)} onEdit={onManageCategories}/>
    {!state.demo&&<MoneyReadinessCard state={state} setState={setState} goTo={goTo}/>}
 
    {state.demo&&!needsStarterBudget(state)&&<section className="rounded-2xl border border-[#EBDCC9] bg-[#FFF6E9] px-4 py-4">
