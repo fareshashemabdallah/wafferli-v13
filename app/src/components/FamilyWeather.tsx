@@ -2,6 +2,8 @@ import { CloudSun, MapPin, Umbrella } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useLocalState } from "@/lib/storage";
+import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
+import {preferredWeatherCity} from "@/lib/weatherCity";
 
 const places = [
   { name: "Amman", ar: "عمّان", lat: 31.9539, lon: 35.9106 },
@@ -15,10 +17,12 @@ export function FamilyWeather() {
   const { lang } = useI18n();
   const ar = lang === "ar";
   const [selected, setSelected] = useLocalState<string>("weatherCity", "");
+  const [prefs] = useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
+  const city = preferredWeatherCity(prefs.city,selected);
   const [forecast, setForecast] = useState<Forecast | null>(null);
   const [status, setStatus] = useState<"idle"|"loading"|"error"|"ready">("idle");
   useEffect(() => {
-    const place = places.find((p) => p.name === selected);
+    const place = places.find((p) => p.name === city);
     if (!place) { setForecast(null); setStatus("idle"); return; }
     const controller = new AbortController();
     setStatus("loading");
@@ -43,7 +47,7 @@ export function FamilyWeather() {
       }
     }).catch(() => { if (!controller.signal.aborted) setStatus("error"); });
     return () => controller.abort();
-  }, [selected]);
+  }, [city]);
   const tip = !forecast ? "" : [
     forecast.temperature < 13
       ? (ar ? "الجو بارد؛ قد يحتاج الأطفال إلى جاكيت دافئ." : "It's chilly; a warmer jacket may help the children.")
@@ -69,13 +73,13 @@ export function FamilyWeather() {
         <label className="inline-flex items-center gap-1.5 text-sm">
           <MapPin className="size-4 text-muted-foreground"/>
           <span className="sr-only">{ar ? "اختر المدينة" : "Choose city"}</span>
-          <select className="rounded-xl border border-border bg-background px-2 py-2 text-sm" value={selected} onChange={e=>setSelected(e.target.value)}>
+          <select className="rounded-xl border border-border bg-background px-2 py-2 text-sm" value={city} onChange={e=>setSelected(e.target.value)}>
             <option value="">{ar ? "اختر المدينة" : "Choose city"}</option>
             {places.map(p=><option value={p.name} key={p.name}>{ar?p.ar:p.name}</option>)}
           </select>
         </label>
       </div>
-      {!selected && <p className="mt-3 text-sm text-muted-foreground">{ar ? "اختر مدينتك لعرض الطقس الحقيقي. لا حاجة لتفعيل تتبّع الموقع." : "Choose your city for a live forecast. No location tracking is required."}</p>}
+      {!city && <p className="mt-3 text-sm text-muted-foreground">{ar ? "اختر مدينتك لعرض الطقس الحقيقي. لا حاجة لتفعيل تتبّع الموقع." : "Choose your city for a live forecast. No location tracking is required."}</p>}
       {status==="loading" && <p className="mt-3 text-sm text-muted-foreground">{ar ? "جارٍ التحقق من حالة الطقس..." : "Checking the forecast…"}</p>}
       {status==="error" && <p className="mt-3 text-sm text-muted-foreground" role="status">{ar ? "الطقس غير متاح حالياً. حاول لاحقاً." : "Weather is temporarily unavailable. Please try later."}</p>}
       {status==="ready" && forecast && <div className="mt-3 flex items-start gap-3">
