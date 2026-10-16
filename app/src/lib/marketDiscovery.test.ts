@@ -54,7 +54,7 @@ describe("licensed in-app prices require a configured and current source",()=>{
  });
  it("passes only the public product name to a configured source and validates offers",async()=>{
   const mock=vi.spyOn(globalThis,"fetch").mockResolvedValue({
-   ok:true,json:async()=>({offers:[offer(),offer({id:"stale",priceJod:99,url:"https://evil.example/p"})]})
+   ok:true,json:async()=>({offers:[offer({sourceCheckedAt:new Date(Date.now()-60_000).toISOString()}),offer({id:"stale",priceJod:99,url:"https://evil.example/p"})]})
   } as Response);
   const x=await searchConfiguredMarketFeed("baby shampoo","https://prices.example.com/retail-search");
   expect(x.status).toBe("ready");
