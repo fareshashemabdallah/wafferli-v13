@@ -9,7 +9,7 @@ import {nextWishlistReminder} from "./wishlistAttention";
 import type {WishlistItem} from "./familyWishlist";
 export type DecisionStep={
  id:string;titleEn:string;titleAr:string;detailEn:string;detailAr:string;
- link:"/money"|"/plans"|"/calendar"|"/space"|"/explore/together"|"/explore/smartbuy"|"/occasions";
+ link:"/money"|"/plans"|"/calendar"|"/space"|"/explore/together"|"/explore/market"|"/occasions";
  urgency:"important"|"normal";
 };
 export type FamilyDecisionBrief={

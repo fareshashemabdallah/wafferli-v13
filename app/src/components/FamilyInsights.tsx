@@ -23,7 +23,7 @@ export function FamilyInsights() {
   }), [money]);
   const dueSoon = forecast.events.find(e=>e.kind==="bill" && e.date <= new Date(Date.now()+7*86400000).toISOString().slice(0,10));
   const hasChildren = members.some(m=>m.role==="child");
-  const cards: {title:string;desc:string;link:"/money"|"/explore/together"|"/explore/smartbuy";cta:string;Icon:typeof Sparkles}[]=[];
+  const cards: {title:string;desc:string;link:"/money"|"/explore/together"|"/explore/market";cta:string;Icon:typeof Sparkles}[]=[];
   if (prefs.billReminders && dueSoon) cards.push({
     title: ar?"التزام قادم":"Upcoming commitment",
     desc: (ar?"تحقّق من الدفع المخطط لـ ":"Review the planned payment for ")+dueSoon.name+" ("+fmtJOD(dueSoon.amount)+").",
@@ -39,7 +39,7 @@ export function FamilyInsights() {
   if (prefs.shoppingTips && cards.length<2) cards.push({
     title:ar?"تسوّقوا بذكاء":"Shop with confidence",
     desc: ar?"قارنوا كلفة المنتجات مع التنقل أو التوصيل قبل الشراء.":"Compare total item, delivery and travel costs before buying.",
-    link:"/explore/smartbuy",cta:ar?"قارنوا الأسعار":"Compare costs",Icon:ShoppingBag
+    link:"/explore/market",cta:ar?"ابحثوا عن المنتجات":"Find seller listings",Icon:ShoppingBag
   });
   const shown=cards.slice(0,2);
   if (!shown.length) return null;

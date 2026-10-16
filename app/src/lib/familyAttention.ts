@@ -18,7 +18,7 @@ export type AttentionItem={
  titleEn:string;titleAr:string;
  detailEn:string;detailAr:string;
  actionEn:string;actionAr:string;
- link:"/money"|"/plans"|"/space"|"/calendar"|"/explore/together"|"/explore/smartbuy"|"/occasions";
+ link:"/money"|"/plans"|"/space"|"/calendar"|"/explore/together"|"/explore/market"|"/occasions";
  /** Critical warnings must remain visible until the underlying data changes. */
  canSnooze:boolean;
 };

@@ -1,12 +1,10 @@
 import { useI18n } from "@/lib/i18n";
 import { createFileRoute,Link } from "@tanstack/react-router";
-import { CheckCircle2, ImagePlus, Plus, Receipt, RotateCcw, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CheckCircle2, Plus, RotateCcw, Trash2 } from "lucide-react";
+import {useState} from "react";
 import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
-import {MerchantQuoteDraft} from "@/components/MerchantQuoteDraft";
 import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
-import {PrivateOfferWorkspace} from "@/components/PrivateOfferWorkspace";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import {compareManuallyEnteredPrices} from "@/lib/clearShoppingResult";
 import {dateKey} from "@/lib/familyCalendar";
@@ -31,20 +29,6 @@ export const Route = createFileRoute("/explore/smartbuy")({
 });
 
 type Alt = { id: string; store: string; price: string; extra: string; verified: boolean; quality?: string; fit?: string; note?: string; sourceUrl?:string; checkedDate?:string|undefined };
-
-function Photo({ label, icon: Icon }: { label: string; icon: typeof Receipt }) {
-  const { tr } = useI18n();
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
-  return (
-    <label className="card-soft flex cursor-pointer flex-col items-center justify-center gap-2 p-4 text-center text-sm">
-      {url ? <img src={url} alt={label} className="h-28 w-full rounded-lg object-cover" /> : <Icon className="size-7 text-brand" />}
-      <span className="font-medium">{label}</span>
-      <span className="text-[11px] text-muted-foreground">{tr("Preview only · AI extraction not connected")}</span>
-      <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) setUrl(URL.createObjectURL(f)); }} />
-    </label>
-  );
-}
 
 export function SmartBuy() {
   const { tr,lang } = useI18n();
@@ -216,24 +200,6 @@ export function SmartBuy() {
            "Save future needs and prices you personally checked. No automatic orders or live price feeds."}
         </p>
         <FamilyWishlistPanel mode="shopping"/>
-      </details>
-      <details className="group mt-4 rounded-2xl border border-[#DDE9DB] bg-white p-4">
-        <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
-          {ar?"خيارات متقدمة: عروض ومرفقات (اختياري)":"Advanced: quote drafts, offers & photos (optional)"}
-        </summary>
-        <p className="mt-2 text-xs text-muted-foreground">
-          {ar?"هذه أدوات لتنظيم الأسعار والطلبات التي تتحقق منها أنت. لا يرسل دبّرنا طلباً لتاجر ولا يدير مدفوعات.":
-           "Organize your own comparisons and quotes. Dabberna does not send merchant requests or handle payments."}
-        </p>
-        <MerchantQuoteDraft product={s.product} budget={s.budget}/>
-        <PrivateOfferWorkspace/>
-        <details className="mt-5 rounded-2xl border border-border bg-white p-4">
-          <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{tr("Add photos (optional)")}</summary>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <Photo label={tr("Product photo")} icon={ImagePlus} />
-            <Photo label={tr("Receipt photo")} icon={Receipt} />
-          </div>
-        </details>
       </details>
     </AppShell>
   );

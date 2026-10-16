@@ -19,7 +19,7 @@ export function PlanDecisionPanel({plan,money,plans,onUpdate,setMoney}:Props){
  const v=evaluatePlan(plan,money,plans);
  const [editing,setEditing]=useState(false),[limit,setLimit]=useState(""),[when,setWhen]=useState("");
  const [error,setError]=useState("");
- const explore=plan.kind==="purchase"?"/explore/smartbuy":plan.kind==="outing"?"/explore/together":plan.kind==="occasion"?"/occasions":"/explore";
+ const explore=plan.kind==="purchase"?"/explore/market":plan.kind==="outing"?"/explore/together":plan.kind==="occasion"?"/occasions":"/explore";
  const openEdit=()=>{setLimit(plan.budgetJod===undefined?"":String(plan.budgetJod));setWhen(plan.date??"");setEditing(v=>!v);setError("");};
  const save=()=>{
   const amount=moneyAmount(limit);

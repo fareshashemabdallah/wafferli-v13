@@ -1,5 +1,5 @@
 export type Intent = {
-  to: "/explore/together" | "/money" | "/explore/shopping" | "/explore/smartbuy" | "/explore/restaurants" | "/space";
+  to: "/explore/together" | "/money" | "/explore/shopping" | "/explore/market" | "/explore/restaurants" | "/space";
   label: string;
   reply: string;
 };
@@ -23,7 +23,7 @@ const rules: { words: string[]; intent: Intent }[] = [
   },
   {
     words: ["buy", "shoe", "shirt", "dress", "clothes", "jacket", "phone", "laptop", "price", "اشتري", "شراء", "حذاء", "ملابس", "قميص", "جاكيت", "سعر", "موبايل"],
-    intent: { to: "/explore/smartbuy", label: "Compare & Choose", reply: "Compare the total cost, then consider quality and convenience before choosing." },
+    intent: { to: "/explore/market", label: "Find seller listings", reply: "Search real retailer pages for the product first, then verify its price, availability and delivery with the seller." },
   },
   {
     words: ["family", "kids", "child", "wife", "husband", "household", "عائلة", "أطفال", "اطفال", "زوجة", "زوج"],

@@ -60,7 +60,7 @@ describe("family decisions orchestrator",()=>{
   expect(reminder?.urgency).toBe("important");
   expect(reminder?.detailEn).toContain("exceeds your chosen ceiling");
   expect(reminder?.detailEn).toContain("cash and bills");
-  expect(reminder?.link).toBe("/explore/smartbuy");
+  expect(reminder?.link).toBe("/explore/market");
  });
  it("links an upcoming gift reminder to a family date without assuming ownership",()=>{
   const gift=makeWishlistItem({id:"present",name:"Birthday gift",kind:"gift",
