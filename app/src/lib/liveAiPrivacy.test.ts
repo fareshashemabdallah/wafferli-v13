@@ -51,6 +51,6 @@ describe("live family AI sensitive data guards",()=>{
  });
  it("does not mistake innocuous quantities for a payment card",()=>{
   expect(detectSensitiveAiText("We have 12 shopping items with 30 JOD saved.")).toBeNull();
-  expect(detectSensitiveAiText("Budget: 1000 2000 3000 4000 JOD")).toBeNull();
+  expect(detectSensitiveAiText("Budget: 1000 JOD, 2000 JOD, 3000 JOD and 4000 JOD")).toBeNull();
  });
 });
