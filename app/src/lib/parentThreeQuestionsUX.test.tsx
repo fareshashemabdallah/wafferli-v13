@@ -4,6 +4,7 @@ import type {ReactNode,AnchorHTMLAttributes} from "react";
 import {I18nProvider} from "@/lib/i18n";
 import {MarketDiscovery} from "@/routes/explore.market";
 import {FamilyChoiceHome} from "@/components/FamilyChoiceHome";
+import {sampleMoney} from "@/lib/money";
 
 vi.mock("@tanstack/react-router",()=>({
  createFileRoute:()=> (options:unknown)=>options,
@@ -27,6 +28,14 @@ describe("three parent outcomes and retailer-backed discovery",()=>{
   expect(screen.getByText(/Start with three numbers/)).toBeInTheDocument();
   expect(screen.getByText(/in-app live prices require a connected source/)).toBeInTheDocument();
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
+ });
+ it("shows a specific useful budget margin from previously entered figures",()=>{
+  const parent={...sampleMoney(),demo:false,income:1200,savingsTargetAmount:200,
+   categories:[{id:"home",name:"Household",type:"fixed" as const,planned:850}],expenses:[]};
+  window.localStorage.setItem("wafferli.v13.money",JSON.stringify(parent));
+  wrap(<FamilyChoiceHome/>);
+  expect(screen.getByText(/Unallocated this month:/)).toHaveTextContent("150 JOD");
+  expect(screen.getByText("A planning result, not confirmed spendable bank cash.")).toBeInTheDocument();
  });
  it("lets parents search verified retailer DOMAINS without inventing price figures",async()=>{
   wrap(<MarketDiscovery/>);
