@@ -44,7 +44,7 @@ export function GuidedFamilyAdvisor(){
  const checkCost=(e:FormEvent)=>{
   e.preventDefault();
   const n=Number(quickAmount);
-  if(!/^\\d{1,6}(?:\\.\\d{1,2})?$/.test(quickAmount)||!Number.isFinite(n)||n<=0||n>100000){
+  if(!/^\d{1,6}(?:\.\d{1,2})?$/.test(quickAmount)||!Number.isFinite(n)||n<=0||n>100000){
    setQuickError(ar?"أدخل مبلغاً بالدينار (منزلتان عشريتان كحد أقصى).":
     "Enter a JOD amount with up to two decimal places.");
    return;
