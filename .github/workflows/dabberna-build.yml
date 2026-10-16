@@ -40,6 +40,9 @@ jobs:
       - name: Verify compiled entry page
         run: |
           test -s react-dist/index.html
+          test -s react-dist/404.html
+          test -s react-dist/explore/weekend/index.html
+          grep -Fq '/wafferli-v13/#/explore/weekend' react-dist/explore/weekend/index.html
           grep -qi "Dabberna" react-dist/index.html
       - name: Upload compiled app
         uses: actions/upload-artifact@v4
