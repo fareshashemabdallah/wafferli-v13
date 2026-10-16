@@ -5,7 +5,6 @@ import {AppShell} from "@/components/AppShell";
 import {TodayFamilyBrief} from "@/components/TodayFamilyBrief";
 import {QuickExpenseCard} from "@/components/QuickExpenseCard";
 import {FamilySetupCard} from "@/components/FamilySetupCard";
-import {HomeJourneyHighlights} from "@/components/HomeJourneyHighlights";
 import {FamilyWeather} from "@/components/FamilyWeather";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 import {useLocalState,writeLocal} from "@/lib/storage";
@@ -126,7 +125,6 @@ function Index(){
     </div>
     {quickExpenseOpen&&<QuickExpenseCard onClose={()=>setQuickExpenseOpen(false)}/>}
    </section>
-   <HomeJourneyHighlights/>
    {prefs.weather&&<details className="group editorial-card mt-4 overflow-hidden">
     <summary className="flex min-h-16 cursor-pointer items-center gap-3 px-4 py-3">
      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF1E8] text-brand"><CloudSun className="size-5"/></span>
