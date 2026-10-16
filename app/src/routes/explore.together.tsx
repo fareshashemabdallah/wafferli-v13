@@ -167,7 +167,7 @@ function TogetherPage() {
        <p className="mt-1 text-xs text-muted-foreground">{ar?
         "هذا السقف تقديري، مش مبلغ مضمون للإنفاق. تم نقله باختيارك ولم يتغير رصيدك.":
         "This is an estimated planning ceiling—not confirmed money to spend. You chose to carry it here; no cash record changed."}</p>
-      </div>
+      </div>}
       <p className="mb-4 text-sm text-muted-foreground">{tr("Plan a great experience together—balance everyone’s enjoyment, needs and your planned budget.")}</p>
       {familyPlan&&<div className="mb-4 rounded-2xl border border-[#D9E5D8] bg-[#F4F9F1] p-4">
        <p className="text-sm font-semibold">{tr("Save an outing estimate to your plan")} · {familyPlan.title}</p>
