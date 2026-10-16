@@ -15,6 +15,7 @@ afterEach(()=>{cleanup();vi.restoreAllMocks();window.localStorage.clear();});
 describe("parent's one-field spending check",()=>{
  it("shows a direct entry with a clear limitation, not a false connected-AI claim",async()=>{
   render(<I18nProvider><GuidedFamilyAdvisor/></I18nProvider>);
+  fireEvent.click(screen.getByText("Suggested questions & amount check (optional)"));
   const field=await screen.findByRole("spinbutton",{name:"Proposed spending amount JOD"});
   expect(field).toHaveAttribute("type","number");
   expect(screen.getByText(/without recording a payment/)).toBeInTheDocument();
@@ -33,6 +34,7 @@ describe("parent's one-field spending check",()=>{
   const serialized=JSON.stringify(real);
   window.localStorage.setItem("wafferli.v13.money",serialized);
   render(<I18nProvider><GuidedFamilyAdvisor/></I18nProvider>);
+  fireEvent.click(screen.getByText("Suggested questions & amount check (optional)"));
   const input=await screen.findByRole("spinbutton",{name:"Proposed spending amount JOD"});
   fireEvent.change(input,{target:{value:"650"}});
   fireEvent.click(screen.getByRole("button",{name:/Check amount/}));
