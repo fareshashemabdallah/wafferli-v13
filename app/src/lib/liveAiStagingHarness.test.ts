@@ -1,7 +1,7 @@
 import {readFileSync} from "node:fs";
 import {describe,expect,it} from "vitest";
 /** Contract assertions, NOT execution against a Supabase project. */
-const source=readFileSync(new URL("../../scripts/verify-live-ai-staging.mjs",import.meta.url),"utf8");
+const source=readFileSync("scripts/verify-live-ai-staging.mjs","utf8");
 describe("manual live AI staging verification cannot silently target public data",()=>{
  it("requires an explicit disposable project and rejects the public production reference",()=>{
   expect(source).toContain("DABBERNA_CONFIRM_STAGING");
