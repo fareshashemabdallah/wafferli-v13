@@ -9,12 +9,12 @@ const prefs={...defaultFamilyPreferences,city:"Amman",outingLimit:50};
 const money=():MoneyState=>({...sampleMoney(),demo:false,income:2000,
  savingsTargetAmount:200,
  categories:[
-  {id:"rent",name:"Rent",type:"fixed",planned:1000},
-  {id:"groceries",name:"Groceries",type:"variable",planned:500},
+  {id:"rent",name:"Rent",type:"fixed",planned:330},
+  {id:"groceries",name:"Groceries",type:"variable",planned:55},
   {id:"out",name:"Family outings",type:"variable",planned:100}
  ],
  expenses:[],cashOnHand:650,cashReserve:200,cashUpdatedAt:"2026-10-16",
- commitments:[{id:"bill",name:"School",frequency:"once",amount:330,dueDate:"2026-10-17"}],
+ commitments:[{id:"bill",name:"School",frequency:"once",amount:330,dueDate:"2026-10-17",categoryId:"rent"}],
  incomeSources:[{id:"salary",name:"Salary",amount:2000,frequency:"monthly",nextDate:"2026-11-01",shared:true}]
 });
 describe("weekend assessment gives an answer without overpromising",()=>{
@@ -41,12 +41,13 @@ describe("weekend assessment gives an answer without overpromising",()=>{
   const base=money(),old=JSON.stringify(base);
   const r=decideWeekendOuting(base,prefs,now);
   expect(r.status).toBe("possible");
-  expect(r.suggestedJod).toBe(40);
-  expect(r.recordedMarginJod).toBe(120);
+  expect(r.suggestedJod).toBe(35);
+  expect(r.recordedMarginJod).toBe(65);
+  expect(r.essentialBudgetJod).toBe(55);
   expect(r.monthlyRoomJod).toBe(100);
   expect(r.unpaidBillsJod).toBe(330);
   expect(r.emergencyReserveJod).toBe(200);
-  expect(r.explanationEn).toContain("before other everyday spending");
+  expect(r.explanationEn).toContain("remaining non-bill planned costs 55.00");
   expect(r.nextEn).toContain("not confirmed money available to spend");
   expect(JSON.stringify(base)).toBe(old);
  });
@@ -54,7 +55,7 @@ describe("weekend assessment gives an answer without overpromising",()=>{
   const base=money();
   expect(decideWeekendOuting({...base,cashOnHand:400},prefs,now).status).toBe("review");
   expect(decideWeekendOuting({...base,
-   categories:[...base.categories,{id:"new",name:"Major payment",type:"fixed",planned:600}]
+   categories:[...base.categories,{id:"new",name:"Major payment",type:"fixed",planned:1600}]
   },prefs,now).status).toBe("review");
   expect(decideWeekendOuting({...base,
    expenses:[{id:"out1",date:"2026-10-12",categoryId:"out",amount:100,shared:true}]
@@ -67,6 +68,7 @@ describe("weekend assessment gives an answer without overpromising",()=>{
   const r=decideWeekendOuting({...money(),cashReserve:0},prefs,now);
   expect(r.explanationEn).toContain("No emergency cushion was set");
   expect(r.emergencyReserveJod).toBe(0);
+  expect(r.status).toBe("review");
  });
 });
 describe("source-backed city-centre activity listings",()=>{
