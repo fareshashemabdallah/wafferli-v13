@@ -11,9 +11,8 @@ import {localToday} from "@/lib/cashflow";
 import {outingCity,weekendCityName,findWeekendPlaces,weekendPlaceSearchUrl,
  type WeekendPlace,type WeekendCity} from "@/lib/weekendPlaceSearch";
 import {OUTING_SHORTLIST_KEY,type OutingOption,compareOutingOptions} from "@/lib/childAwareOutingCompare";
+import {WEEKEND_HANDOFF_KEY,type WeekendPlanDraft} from "@/lib/weekendOutingHandoff";
 
-export const WEEKEND_HANDOFF_KEY="weekendOutingPlanDraft";
-export type WeekendPlanDraft={budgetJod:number;createdAt:string;city:string;from:string;to:string};
 const googlePlaces=(city:string,category:string)=>
  "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(category+" "+city+" Jordan");
 
