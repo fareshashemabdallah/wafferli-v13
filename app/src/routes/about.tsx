@@ -10,7 +10,7 @@ export const Route=createFileRoute("/about")({
   {name:"description",content:"What Dabberna can really help with, what it cannot verify, and how to protect or export your family data."}
  ]}),component:About
 });
-function About(){
+export function About(){
  const {lang}=useI18n(),ar=lang==="ar";
  return <AppShell title={ar?"كيف بيساعدك دبّرنا؟":"What Dabberna can do today"}>
   <section className="rounded-2xl border border-[#DDE8D9] bg-[#F3F8EF] p-5">
