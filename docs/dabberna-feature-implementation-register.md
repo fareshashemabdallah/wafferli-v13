@@ -1,6 +1,6 @@
 # Dabberna feature implementation register
 
-_Last engineering review: 15 October 2026. Source: `main` after PR #57._
+_Last engineering review: 15 October 2026. Source: `main` after PR #59._
 
 This register distinguishes **implemented code**, **actually enabled in the public browser pilot**, and **production readiness**. A green TypeScript/test/build workflow validates code quality only; it is **not** evidence that a sensitive database was deployed, that a provider is verified, or that a payment was completed.
 
@@ -32,7 +32,7 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 | Calendar reminders | Explicit .ics export of selected bills, family dates, open tasks and unpurchased wishlists (#32, #52) | Local pilot | Notification delivery delegated to imported calendar; user acknowledges cloud-sync privacy |
 | Encrypted local backups | Selected recovery, strict schemas and parent passphrase-protected offline file (#29, #45) | Local pilot | Independent cryptography/UX QA, key-recovery policies and real-device validation |
 | Offline/mobile | Browser install metadata, static-asset-only offline service worker and offline notice (#39) | Limited local pilot | Real iOS/Android install/update/offline tests, accessibility audit, store packages if required |
-| Arabic + English | RTL/LTR navigation, bilingual major user journeys | Local pilot | Full linguistic review, localization of error strings and screen-reader testing |
+| Arabic + English | RTL/LTR navigation, bilingual major journeys, skip-to-main landmark and visible keyboard focus across desktop/mobile (#59) | Local pilot | Full linguistic review, localization of error strings, independent screen-reader and WCAG testing |
 | UI / logic testing | Unit tests, static SQL checks, selected React click-path smoke tests (#37, #50) | CI passes | Real browser E2E, accessibility, multi-device, load and red-team security tests missing |
 
 ## Sensitive family accounts and monetization
@@ -84,5 +84,6 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 - #55 — anchored repeat-purchase planning with explicit parent confirmations.
 - #56 — past-month review snapshots with stale-entry detection.
 - #57 — private-by-default new financial records and hypothetical sharing preview.
+- #59 — bilingual keyboard skip navigation and focus indicators with component tests.
 
 **Deployment truth:** source merged into GitHub `main` does not prove the GitHub Pages host has already deployed the newest commit. The public UI must be independently checked after deployment.
