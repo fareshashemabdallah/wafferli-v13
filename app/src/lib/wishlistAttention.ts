@@ -2,7 +2,7 @@ import {dateKey,shiftDays,parseCalendarDate} from "./familyCalendar";
 import {summarizeWishlistPrice,type WishlistItem} from "./familyWishlist";
 export type WishlistReminder={
  item:WishlistItem;daysUntil:number;priceStatus:"missing"|"stale"|"recent";
- overBudget:boolean;lastRecordedJod:number|null;link:"/occasions"|"/explore/smartbuy";
+ overBudget:boolean;lastRecordedJod:number|null;link:"/occasions"|"/explore/market";
 };
 /** Only parent-entered, unpaid wishlist intentions are considered.
  * No external prices, merchant availability or purchase history inferred.
@@ -27,6 +27,6 @@ export function nextWishlistReminder(items:readonly WishlistItem[],now=new Date(
   item,daysUntil:days,priceStatus:latest?(stale?"stale":"recent"):"missing",
   overBudget:!!latest&&item.budgetJod!==undefined&&latest.amountJod>item.budgetJod,
   lastRecordedJod:latest?.amountJod??null,
-  link:item.kind==="gift"?"/occasions":"/explore/smartbuy"
+  link:item.kind==="gift"?"/occasions":"/explore/market"
  };
 }
