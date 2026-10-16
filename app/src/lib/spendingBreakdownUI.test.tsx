@@ -11,7 +11,7 @@ vi.mock("@tanstack/react-router",()=>({
 }));
 afterEach(()=>{cleanup();vi.restoreAllMocks()});
 const renderCard=(money:MoneyState,compact=false,onChange?:(v:MoneyState)=>void)=>
- render(<I18nProvider><SpendingBreakdownCard state={money} compact={compact} onChange={onChange}/></I18nProvider>);
+ render(<I18nProvider><SpendingBreakdownCard state={money} compact={compact} {...(onChange?{onChange}:{})}/></I18nProvider>);
 describe("parent understands monthly spending without digging through forms",()=>{
  it("shows fixed and variable budgets and their actual category line items",()=>{
   renderCard({...sampleMoney(),demo:false,expenses:[
