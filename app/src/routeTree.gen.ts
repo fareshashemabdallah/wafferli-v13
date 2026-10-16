@@ -25,6 +25,7 @@ import { Route as ExploreRestaurantsRouteImport } from './routes/explore.restaur
 import { Route as ExploreServicesRouteImport } from './routes/explore.services'
 import { Route as ExploreShoppingRouteImport } from './routes/explore.shopping'
 import { Route as ExploreSmartbuyRouteImport } from './routes/explore.smartbuy'
+import { Route as ExploreMarketRouteImport } from './routes/explore.market'
 import { Route as ExploreTogetherRouteImport } from './routes/explore.together'
 import { Route as TogetherAdminTokenRouteImport } from './routes/together.$adminToken'
 import { Route as VoteTokenRouteImport } from './routes/vote.$token'
@@ -104,6 +105,11 @@ const ExploreShoppingRoute = ExploreShoppingRouteImport.update({
   path: '/explore/shopping',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExploreMarketRoute = ExploreMarketRouteImport.update({
+  id: '/explore/market',
+  path: '/explore/market',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExploreSmartbuyRoute = ExploreSmartbuyRouteImport.update({
   id: '/explore/smartbuy',
   path: '/explore/smartbuy',
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/explore/services': typeof ExploreServicesRoute
   '/explore/restaurants': typeof ExploreRestaurantsRoute
   '/explore/shopping': typeof ExploreShoppingRoute
+  '/explore/market': typeof ExploreMarketRoute
   '/explore/smartbuy': typeof ExploreSmartbuyRoute
   '/explore/together': typeof ExploreTogetherRoute
   '/together/$adminToken': typeof TogetherAdminTokenRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/explore/services': typeof ExploreServicesRoute
   '/explore/restaurants': typeof ExploreRestaurantsRoute
   '/explore/shopping': typeof ExploreShoppingRoute
+  '/explore/market': typeof ExploreMarketRoute
   '/explore/smartbuy': typeof ExploreSmartbuyRoute
   '/explore/together': typeof ExploreTogetherRoute
   '/together/$adminToken': typeof TogetherAdminTokenRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/explore/services': typeof ExploreServicesRoute
   '/explore/restaurants': typeof ExploreRestaurantsRoute
   '/explore/shopping': typeof ExploreShoppingRoute
+  '/explore/market': typeof ExploreMarketRoute
   '/explore/smartbuy': typeof ExploreSmartbuyRoute
   '/explore/together': typeof ExploreTogetherRoute
   '/together/$adminToken': typeof TogetherAdminTokenRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/explore/services'
     | '/explore/restaurants'
     | '/explore/shopping'
+    | '/explore/market'
     | '/explore/smartbuy'
     | '/explore/together'
     | '/together/$adminToken'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/explore/services'
     | '/explore/restaurants'
     | '/explore/shopping'
+    | '/explore/market'
     | '/explore/smartbuy'
     | '/explore/together'
     | '/together/$adminToken'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/explore/services'
     | '/explore/restaurants'
     | '/explore/shopping'
+    | '/explore/market'
     | '/explore/smartbuy'
     | '/explore/together'
     | '/together/$adminToken'
@@ -270,6 +282,7 @@ export interface RootRouteChildren {
   ExploreServicesRoute: typeof ExploreServicesRoute
   ExploreRestaurantsRoute: typeof ExploreRestaurantsRoute
   ExploreShoppingRoute: typeof ExploreShoppingRoute
+  ExploreMarketRoute: typeof ExploreMarketRoute
   ExploreSmartbuyRoute: typeof ExploreSmartbuyRoute
   ExploreTogetherRoute: typeof ExploreTogetherRoute
   TogetherAdminTokenRoute: typeof TogetherAdminTokenRoute
@@ -384,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreShoppingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/explore/market': {
+      id: '/explore/market'
+      path: '/explore/market'
+      fullPath: '/explore/market'
+      preLoaderRoute: typeof ExploreMarketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/explore/smartbuy': {
       id: '/explore/smartbuy'
       path: '/explore/smartbuy'
@@ -430,6 +450,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreServicesRoute: ExploreServicesRoute,
   ExploreRestaurantsRoute: ExploreRestaurantsRoute,
   ExploreShoppingRoute: ExploreShoppingRoute,
+  ExploreMarketRoute: ExploreMarketRoute,
   ExploreSmartbuyRoute: ExploreSmartbuyRoute,
   ExploreTogetherRoute: ExploreTogetherRoute,
   TogetherAdminTokenRoute: TogetherAdminTokenRoute,
