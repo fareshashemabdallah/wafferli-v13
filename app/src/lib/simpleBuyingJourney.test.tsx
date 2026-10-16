@@ -35,7 +35,7 @@ describe("simple buying journey",()=>{
   fireEvent.change(prices[1]!,{target:{value:"18"}});
   fireEvent.change(delivery[1]!,{target:{value:"1"}});
   await screen.findByText("Lower entered total: Local Shop");
-  expect(screen.getByText(/Lower than Family Store by/)).toHaveTextContent("5.00");
+  expect(screen.getByText(/Lower than Family Store by/)).toHaveTextContent("5 JOD");
   expect(screen.getByText(/not verified retailer offers or guaranteed savings/)).toBeInTheDocument();
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
  });
