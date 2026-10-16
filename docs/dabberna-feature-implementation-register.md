@@ -27,7 +27,7 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 | Private merchant quote decisions | Parent-created RFQ drafts, self-entered offers, total cost and expiry, quote-to-Plan (#35, #38) | Local pilot | No real quotation dispatch, verified bidders or binding transaction |
 | Family outings | Child attendance/focus, costs, group voting, explicit parent-checked venue suitability (#48) | Local pilot with third-party voting service | No guaranteed accessibility, venue safety, live availability or forecast-linked age rules |
 | Provider and doctor comparisons | Private service checklist and source URLs, parent observations (#36) | Local pilot | No verified practitioner licensing, independent reviews or medical recommendations |
-| Guided parent questions | Ten deterministic English/Arabic question topics with local-record sources (#31, #51) | Local pilot | No connected generative AI, long-memory dialogue or verified web research inside answers |
+| Guided parent questions | Ten deterministic EN/AR on-device topics and source-staged, authenticated live AI client + Edge Function/SQL (#59) | Local pilot + staged backend | Server secrets, quota SQL and Edge deployment plus independent security testing not completed; no verified web research |
 | In-app attention | Important financial/family/task/wishlist dates with local snoozes (#46, #49) | Local pilot | No reliable background push/OS notification permission flow |
 | Calendar reminders | Explicit .ics export of selected bills, family dates, open tasks and unpurchased wishlists (#32, #52) | Local pilot | Notification delivery delegated to imported calendar; user acknowledges cloud-sync privacy |
 | Encrypted local backups | Selected recovery, strict schemas and parent passphrase-protected offline file (#29, #45) | Local pilot | Independent cryptography/UX QA, key-recovery policies and real-device validation |
@@ -59,6 +59,8 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 
 ## Remaining work that can still advance without external credentials
 
+**Live AI external blocker:** an authorized Supabase project operator must review/deploy SQL and the Edge Function, add private OpenAI credentials and activate the public build flag after testing. The app does not become live merely by merging PR #59.
+
 - Improve past-budget provenance beyond snapshots taken at parent review; historical completeness cannot be proven from manual entries.
 - Improve recurring-shopping reminders and skipped-cycle visibility; automatic orders or charges remain unavailable.
 - Broader UI/browser-path automated tests including payment-blocked paths, all AR/EN form validation and older Safari.
@@ -84,6 +86,7 @@ This register distinguishes **implemented code**, **actually enabled in the publ
 - #55 — anchored repeat-purchase planning with explicit parent confirmations.
 - #56 — past-month review snapshots with stale-entry detection.
 - #57 — private-by-default new financial records and hypothetical sharing preview.
+- #59 — source-ready opt-in live AI conversation, authenticated Edge backend and strict usage quota; NOT DEPLOYED.
 - #59 — bilingual keyboard skip navigation and focus indicators with component tests.
 
 **Deployment truth:** source merged into GitHub `main` does not prove the GitHub Pages host has already deployed the newest commit. The public UI must be independently checked after deployment.
