@@ -95,7 +95,7 @@ export function SmartBuy() {
        </p>}
        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
         {ar?"الأسعار التي تدخلها غير مؤكّدة من المتاجر. الأرخص ليس دائماً الأفضل؛ تحقق من الجودة والتوفر قبل الشراء. لا يوجد شراء أو خصم مالي.":
-         "These are prices YOU entered, not verified retailer offers or guaranteed savings. Compare quality and availability before buying. Nothing is purchased or charged."}
+         "Prices are entered by you, not verified retailer offers or guaranteed savings. Compare quality and availability before buying. Nothing is purchased or charged."}
        </p>
       </section>
       <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-[#DCE7D9] bg-[#F4F8F1] p-3 text-sm">
