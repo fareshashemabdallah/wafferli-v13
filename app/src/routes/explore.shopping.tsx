@@ -81,6 +81,12 @@ function Shopping() {
     <AppShell title={tr("My Basket")}>
       <p className="mb-4 text-sm text-muted-foreground">{tr("Plan what you need, see the total, and make room for what matters.")}</p>
       <p className="mb-3 flex items-center gap-2 text-sm text-muted-foreground"><PilotBadge>{tr("Device only")}</PilotBadge> {tr("Prices are what you enter — no live store prices.")}</p>
+      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-[#DCE7DA] bg-[#F5F9F3] p-3 text-sm">
+        <span>{ar?"عم تشتري منتج كبير أو بدك تقارن سعرين؟":"Buying one larger item or comparing store prices?"}</span>
+        <Link to="/explore/smartbuy" className="inline-flex min-h-11 items-center font-semibold text-brand underline">
+          {ar?"قارن الخيارات":"Compare options"} →
+        </Link>
+      </div>
       {sampleRows.length>0&&<div className="mb-3 rounded-xl border border-[#E8D3BB] bg-[#FFF8ED] p-3 text-sm">
         <p>{ar?"تحتوي سلّتك القديمة على عناصر تجريبية؛ لن تُسجّل كمصروف حقيقي.":"Your saved basket has sample products. They cannot be recorded as real spending."}</p>
         <button type="button" className="mt-2 min-h-10 rounded-lg bg-white px-3 font-semibold text-brand"
