@@ -38,6 +38,19 @@ describe("live AI deployment security invariants",()=>{
   expect(quota).toContain("AI_RATE_LIMIT");
   expect(quota).not.toContain("prompt text");
  });
+
+ it("uses the same sensitive-text guard on browser and Edge, with no automatic conversation reuse",()=>{
+  const protocol=root("../../supabase/functions/_shared/liveAiProtocol.ts");
+  const privacy=root("../../supabase/functions/_shared/liveAiPrivacy.ts");
+  expect(protocol).toContain('detectSensitiveAiText(input["question"])');
+  expect(protocol).toContain('detectSensitiveAiText(item["content"])');
+  expect(privacy).toContain("containsSensitiveAiContent");
+  expect(ui).toContain('useState(false),[includeHistory,setIncludeHistory]');
+  expect(ui).toContain("(!includeHistory?[]:history.slice(-2))");
+  expect(ui).toContain("Preview exactly what will be sent before consenting");
+  expect(ui).toContain("requestGeneration.current++");
+  expect(ui).not.toContain("localStorage.setItem");
+ });
  it("cannot turn on the public UI accidentally with an OpenAI secret",()=>{
   expect(workflow).toContain("vars.DABBERNA_ENABLE_LIVE_AI");
   expect(workflow).toContain("VITE_ENABLE_LIVE_AI");

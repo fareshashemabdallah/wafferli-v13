@@ -2,6 +2,8 @@
  * Input from the browser remains untrusted until the Edge Function validates it.
  * Never send raw localStorage, expense notes, children's identities or profiles.
  */
+import {detectSensitiveAiText} from "./liveAiPrivacy.ts";
+
 export type LiveAiLanguage="en"|"ar";
 export type LiveAiTurn={role:"user"|"assistant";content:string};
 export type LiveAiFinancialSummary={
@@ -33,6 +35,7 @@ export function parseLiveAiRequest(input:unknown):LiveAiRequest {
    typeof item["content"]!=="string"||item["content"].trim().length<1||
    item["content"].length>800)
    throw new Error("Invalid conversation history");
+  if(detectSensitiveAiText(item["content"]))throw new Error("Remove sensitive details from the AI conversation before sending");
   history.push({role:item["role"],content:item["content"].trim()});
  }
  let context:LiveAiFinancialSummary|undefined;
@@ -55,6 +58,8 @@ export function parseLiveAiRequest(input:unknown):LiveAiRequest {
    ...(c["cashOnHandJod"]!==undefined?{cashOnHandJod:c["cashOnHandJod"] as number}:{})
   };
  }
+ if(detectSensitiveAiText(input["question"]))
+  throw new Error("Remove sensitive details from the AI question before sending");
  const result:LiveAiRequest={question:input["question"].trim(),
   language:input["language"],history,...(context?{context}:{})};
  if(new TextEncoder().encode(JSON.stringify(result)).byteLength>maxBytes)
