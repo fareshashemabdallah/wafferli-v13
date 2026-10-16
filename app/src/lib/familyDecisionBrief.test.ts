@@ -4,6 +4,7 @@ import {sampleMoney,sampleMembers,type MoneyState} from "./money";
 import {defaultFamilyPreferences} from "./familyPreferences";
 import {makeFamilyPlan} from "./familyPlans";
 import {makeFamilyTask} from "./familyTasks";
+import {makeWishlistItem,recordWishlistPrice} from "./familyWishlist";
 const now=new Date(2026,9,15,12);
 const money:MoneyState={...sampleMoney(),demo:false,income:2000,
  cashOnHand:200,cashReserve:100,cashUpdatedAt:"2026-10-15",
@@ -47,4 +48,37 @@ describe("family decisions orchestrator",()=>{
   buildFamilyDecisionBrief(input);
   expect(JSON.stringify(input)).toBe(snapshot);
  });
+ it("connects a parent-entered children's purchase, local price and cash readiness",()=>{
+  const item=makeWishlistItem({id:"school",name:"School supplies",kind:"children",
+   targetDate:"2026-10-18",budgetJod:300},now)!;
+  const priced=recordWishlistPrice(item,{id:"checked",amountJod:325,
+   checkedAt:"2026-10-15",store:"Manually checked seller"},now);
+  const x=buildFamilyDecisionBrief(args({plans:[],tasks:[],wishlist:[priced],
+   preferences:{...defaultFamilyPreferences,shoppingTips:true}}));
+  const reminder=x.steps.find(step=>step.id==="shopping");
+  expect(reminder).toBeDefined();
+  expect(reminder?.urgency).toBe("important");
+  expect(reminder?.detailEn).toContain("exceeds your chosen ceiling");
+  expect(reminder?.detailEn).toContain("cash and bills");
+  expect(reminder?.link).toBe("/explore/smartbuy");
+ });
+ it("links an upcoming gift reminder to a family date without assuming ownership",()=>{
+  const gift=makeWishlistItem({id:"present",name:"Birthday gift",kind:"gift",
+   targetDate:"2026-10-18"},now)!;
+  const event={id:"date-1",title:"Birthday",kind:"birthday" as const,
+   date:"2026-10-19",annual:false};
+  const x=buildFamilyDecisionBrief(args({plans:[],tasks:[],members:[],moments:[event],wishlist:[gift],
+   preferences:{...defaultFamilyPreferences,shoppingTips:true}}));
+  expect(x.steps.find(s=>s.id==="shopping")?.detailEn).toContain("Check whether");
+  expect(x.steps.find(s=>s.id==="shopping")?.link).toBe("/occasions");
+ });
+ it("never reads purchase reminders when shopping tips are disabled",()=>{
+  const item=makeWishlistItem({id:"hidden",name:"Private family purchase",kind:"household",
+   targetDate:"2026-10-18"},now)!;
+  const x=buildFamilyDecisionBrief(args({wishlist:[item],plans:[],tasks:[],
+   preferences:{...defaultFamilyPreferences,shoppingTips:false}}));
+  expect(x.steps.some(s=>s.id==="shopping")).toBe(false);
+  expect(JSON.stringify(x)).not.toContain("Private family purchase");
+ });
+
 });
