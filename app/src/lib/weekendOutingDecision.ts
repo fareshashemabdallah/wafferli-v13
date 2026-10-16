@@ -36,7 +36,7 @@ export function decideWeekendOuting(
 ):WeekendOutingDecision{
  const weekend=nextJordanWeekend(now),readiness=getFinancialReadiness(money,now);
  const base={weekendFrom:weekend.from,weekendTo:weekend.to};
- const updated=money.cashUpdatedAt&&/^\\d{4}-\\d{2}-\\d{2}$/.test(money.cashUpdatedAt)?
+ const updated=money.cashUpdatedAt&&/^\d{4}-\d{2}-\d{2}$/.test(money.cashUpdatedAt)?
   new Date(money.cashUpdatedAt+"T12:00:00"):null;
  const freshWeekend=readiness.cashFresh&&!!updated&&
   now.getTime()-updated.getTime()>=-86400000&&now.getTime()-updated.getTime()<=3*86400000;
