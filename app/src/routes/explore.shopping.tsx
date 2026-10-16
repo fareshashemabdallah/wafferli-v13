@@ -53,7 +53,7 @@ function Shopping() {
     setMoney((m) => {
       const cat = m.categories.find((c) => /grocer/i.test(c.name)) ?? m.categories[0];
       if (!cat) return m;
-      return { ...m, expenses: [{ id: uid(), date: new Date().toISOString().slice(0, 10), categoryId: cat.id, amount: Math.round(total * 100) / 100, note: "Shopping basket", shared: true }, ...m.expenses] };
+      return { ...m, expenses: [{ id: uid(), date: new Date().toISOString().slice(0, 10), categoryId: cat.id, amount: Math.round(total * 100) / 100, note: "Shopping basket", shared: false }, ...m.expenses] };
     });
     toast.success(`${tr("Recorded")} ${fmtJOD(total)} ${tr("in My Money")}`);
   };
