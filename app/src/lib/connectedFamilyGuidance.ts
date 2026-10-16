@@ -164,7 +164,8 @@ export function personalOutingAdvice(ctx:ConnectedContext):ConnectedAdvice{
  const budgetEn=constraint.budgetJod!==null?constraint.budgetJod.toFixed(2)+" JOD":"not set";
  const budgetAr=constraint.budgetJod!==null?constraint.budgetJod.toFixed(2)+" د.أ":"غير محدد";
  const city=prefs.city.trim().slice(0,60);
- const baseEn=(planned?"Upcoming plan: "+planned.title+" ("+planned.date+"). ":"")+
+ const baseEn=((ctx.outings??[]).length?(ctx.outings??[]).length+" venues saved in your private comparison. ":"")+
+  (planned?"Upcoming plan: "+planned.title+" ("+planned.date+"). ":"")+
   "Your entered outing ceiling is "+budgetEn+
   (city?"; city: "+city:"")+
   (children==="yes"?"; children usually join.":children==="no"?"; children usually do not join.":"; confirm whether children are attending.")+
@@ -194,7 +195,7 @@ export function personalOutingAdvice(ctx:ConnectedContext):ConnectedAdvice{
  return {
   titleEn:"Review one of your saved outing options",titleAr:"راجع أحد خيارات الطلعات المحفوظة",
   detailEn:baseEn+viable.option.name+costText+". "+
-   viable.reasonsEn.slice(0,2).join(" ")+" Your notes do not verify live prices, child admission, weather or availability. This is not a booking.",
+   viable.reasonsEn.slice(0,2).join(" ")+" Live prices, child admission, weather and availability are not verified. This is not a booking.",
   detailAr:baseAr+viable.option.name+costAr+". "+
    viable.reasonsAr.slice(0,2).join(" ")+" ملاحظاتك لا تؤكد الأسعار أو دخول الأطفال أو الطقس أو التوفر؛ هذا ليس حجزاً.",
   sourceEn:"Parent-entered outing shortlist + stated family preferences",sourceAr:"أماكن سجلتها بنفسك وتفضيلات العائلة",
