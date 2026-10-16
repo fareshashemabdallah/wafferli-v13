@@ -20,7 +20,7 @@ export type GuidedAnswer={
  titleEn:string;titleAr:string;
  textEn:string;textAr:string;
  sourceEn:string;sourceAr:string;
- route:"/money"|"/calendar"|"/plans"|"/explore/smartbuy"|"/explore/together"|"/space"|"/occasions"|"/explore/services";
+ route:"/money"|"/calendar"|"/plans"|"/explore/market"|"/explore/smartbuy"|"/explore/together"|"/space"|"/occasions"|"/explore/services";
  actionEn:string;actionAr:string;
 };
 export type AdvisorContext={
@@ -233,10 +233,10 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
    "Family Services: entered provider notes","خدمات العائلة: ملاحظاتك المسجلة","/explore/services","Review providers","راجع الجهات");
  }
  if(intent==="shopping")
-  return answer(intent,"Compare the complete cost, not just the sticker","قارن التكلفة الكاملة مش السعر وحده",
-   "Enter at least two actual offers including delivery or travel and review durability and suitability. Prices are manually entered, not verified live feeds; don't call the lowest entry a confirmed saving.",
-   "أدخل عرضين فعليين على الأقل مع التوصيل أو النقل وراجع المتانة والملاءمة. الأسعار مدخلة يدوياً وليست أسعاراً مباشرة مؤكدة؛ الأرخص ليس وفراً مضموناً.",
-   "Compare & Choose: entered prices and quality","قارن واختر: أسعار وتقييمات مدخلة يدوياً","/explore/smartbuy","Compare choices","قارن الخيارات");
+  return answer(intent,"First find the actual product and seller","أول شي فتّش على المنتج والبائع",
+   "Search current public listings from Jordanian retailers using the product name or exact model. Check actual prices, size, delivery and stock on seller pages. Dabberna's in-app live price feed is not connected yet; manual comparison is optional afterward.",
+   "فتّش بالمنتج أو الموديل على مواقع متاجر أردنية حقيقية. تأكد من السعر والحجم والتوصيل والتوفر من موقع البائع. عرض الأسعار مباشرة داخل دبّرنا ليس متصلاً بعد، والمقارنة اليدوية اختيارية.",
+   "External Jordan retailer product listings (not live in-app prices)","صفحات منتجات المتاجر الأردنية الخارجية، بلا أسعار مباشرة داخل التطبيق","/explore/market","Find seller listings","ابحث عن عروض المتاجر");
  return answer("unsupported","Here are the questions I can answer safely","هذه الأسئلة التي يمكنني الإجابة عليها",
   "I can review cash risks, bills, tasks, gifts, local service notes, outings and shopping. I cannot verify providers, diagnose conditions, access bank accounts or hold a free-form AI conversation in this pilot.",
   "بقدر أساعدك بمراجعة الرصيد والفواتير والادخار والمناسبات والخطط والشراء. ما بقدر أتحقق من الحسابات البنكية أو أشخّص مشاكل صحية أو أقدّم محادثة ذكاء اصطناعي حرّة بهالنسخة.",
