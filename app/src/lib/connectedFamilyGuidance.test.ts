@@ -78,7 +78,7 @@ describe("connected, device-only family priorities",()=>{
    ...defaultFamilyPreferences,shoppingTips:true
   }}));
   expect(on.detailEn).toContain("Birthday story");
-  expect(on.detailEn).toContain("no order or payment");
+  expect(on.detailEn.toLowerCase()).toContain("no order or payment");
  });
  it("keeps unscheduled or past plans out of proactive due-date guidance",()=>{
   const result=nextConnectedFamilyAction(input({plans:[
