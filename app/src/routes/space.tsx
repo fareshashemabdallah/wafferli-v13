@@ -120,6 +120,7 @@ function Space() {
             </NativeSelect></Field>
             <details className="sm:col-span-2 rounded-xl border border-border bg-white p-3"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"معلومات إضافية (اختياري)":"More about this person (optional)"}</summary><div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Field label={tr("Age group")}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
+              <option value="">{ar?"أفضل عدم الإجابة":"Not provided"}</option>
               {ages.map(a=><option key={a}>{a}</option>)}
             </NativeSelect></Field>
             <Field label={tr("Preferences")}><Input className={inputCls} maxLength={120} value={edit.prefs} onChange={e=>setEdit({...edit,prefs:e.target.value})}/></Field>
