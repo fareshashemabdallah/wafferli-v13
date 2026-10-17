@@ -10,6 +10,7 @@ import {FAMILY_WISHLIST_KEY,type WishlistItem} from "@/lib/familyWishlist";
 import {type BasketEntry,isSampleBasketEntry} from "@/lib/basketRecording";
 import {type FamilyMoment,dateKey,shiftDays} from "@/lib/familyCalendar";
 import {getMoneyOverview} from "@/lib/moneyOverview";
+import {assessFinancialReality} from "@/lib/financialReality";
 import {realFamilyMembers} from "@/lib/familySetup";
 import {homeSnapshot} from "@/lib/homeSnapshot";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
@@ -101,7 +102,8 @@ export function FocusedFamilyHome(){
  const showWelcome=loaded&&!introDone&&!existing;
  const snapshot=homeSnapshot({money,members,moments,plans,tasks,basket,wishlist,now,arabic:ar});
  const spending=!money.demo?computeMoney(money,now):null;
- const dueBills=money.demo?[]:getMoneyOverview(money,now).forecast.events.filter(e=>
+ const reality=!money.demo?assessFinancialReality(money,plans,now):null;
+ const dueBills=money.demo?[]:getMoneyOverview(money,now,plans).forecast.events.filter(e=>
   e.kind==="bill"&&!e.overdue&&e.displayDate>=dateKey(now)&&
   e.displayDate<=dateKey(shiftDays(now,7)));
  const nextMoment=snapshot.plans.find(x=>!!x.date&&x.date>=dateKey(now));
@@ -168,6 +170,10 @@ export function FocusedFamilyHome(){
      <Link to="/money" className="mt-2 inline-flex min-h-10 items-center gap-1 text-xs font-bold text-[#31866F] underline">
       {text("Set up my money","رتّب ماليتي")}<ArrowRight className="size-4 rtl:rotate-180"/>
      </Link>
+    </div>}
+    {reality&&<div className="mt-3 rounded-xl bg-[#F7F8F6] p-3" aria-label={text("Financial reality","الواقع المالي")}>
+     <p className="text-xs font-bold">{ar?reality.titleAr:reality.titleEn}</p>
+     <p className="mt-1 text-xs leading-relaxed text-[#667487]">{ar?reality.messageAr:reality.messageEn}</p>
     </div>}
     <p className="mt-3 text-[11px] text-[#7B8491]">{text(
      "Recorded spending and entered bill dates are not verified bank balances or confirmed payment status.",
