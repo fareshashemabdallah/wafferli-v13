@@ -1,8 +1,8 @@
-import {useEffect,useState,type FormEvent,type ReactNode} from "react";
+import {useState,type FormEvent,type ReactNode} from "react";
 import {CheckCircle2,MessageCircle,Plus,Receipt,ShoppingBasket,X} from "lucide-react";
 import {Link} from "@tanstack/react-router";
 import {useI18n} from "@/lib/i18n";
-import {useLocalState,uid,fmtJOD} from "@/lib/storage";
+import {useLocalState,writeLocal,uid,fmtJOD} from "@/lib/storage";
 import {computeMoney,sampleMoney,type MoneyState} from "@/lib/money";
 import {isSampleBasketEntry,type BasketEntry} from "@/lib/basketRecording";
 import {QuickExpenseCard} from "./QuickExpenseCard";
@@ -16,25 +16,17 @@ export function TodayQuickActions({onAsk}:{onAsk:()=>void}){
  const {lang}=useI18n(),ar=lang==="ar";
  const tr=(en:string,arabic:string)=>ar?arabic:en;
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
- const [basket,setBasket,basketReady]=useLocalState<BasketEntry[]>("shopping",[]);
+ const [basket,,basketReady]=useLocalState<BasketEntry[]>("shopping",[]);
  const [active,setActive]=useState<Action>(null);
  const [need,setNeed]=useState("");
  const [error,setError]=useState("");
- const [pendingId,setPendingId]=useState("");
  const [savedName,setSavedName]=useState("");
  const ready=moneyReady&&basketReady;
  const actualBasket=basket.filter(b=>!isSampleBasketEntry(b)&&b.name.trim());
  const outstanding=actualBasket.filter(b=>!b.done).length;
  const spent=!money.demo&&moneyReady?computeMoney(money).spent:null;
- useEffect(()=>{
-  if(pendingId&&basket.some(b=>b.id===pendingId)){
-   setPendingId("");
-   setSavedName(tr("Saved to your family basket.","تم الحفظ في سلّة العائلة."));
-  }
- // lang is included via translated message; value is only announced after persisted state confirms.
- },[basket,pendingId,lang]);
  const addNeed=(e:FormEvent)=>{
-  e.preventDefault();if(!ready||pendingId)return;
+  e.preventDefault();if(!ready)return;
   const name=need.replace(/[\u0000-\u001f\u007f]/g," ").replace(/\s+/g," ").trim().slice(0,60);
   if(name.length<2||/\(sample\)/i.test(name)){
    setError(tr("Enter a real shopping item (at least 2 characters).","أدخل اسماً حقيقياً لا يقل عن حرفين."));return;
@@ -42,10 +34,14 @@ export function TodayQuickActions({onAsk}:{onAsk:()=>void}){
   if(actualBasket.some(b=>!b.done&&b.name.toLocaleLowerCase()===name.toLocaleLowerCase())){
    setError(tr("This item is already on your open shopping list.","هذا العنصر موجود بالفعل في قائمة مشترياتك."));return;
   }
-  const id=uid();
-  setError("");setSavedName("");setPendingId(id);
-  setBasket(old=>[...old,{id,name,qty:1,price:0,done:false}]);
-  setNeed("");
+  const next=[...basket,{id:uid(),name,qty:1,price:0,done:false}];
+  if(!writeLocal("shopping",next)){
+   setError(tr("Unable to save on this device. Free browser storage and try again.",
+    "تعذّر الحفظ على هذا الجهاز. حرّر مساحة وأعد المحاولة."));
+   setSavedName("");return;
+  }
+  setError("");setNeed("");
+  setSavedName(tr("Saved to your family basket.","تم الحفظ في سلّة العائلة."));
  };
  const button=(name:string,icon:ReactNode,action:()=>void,chosen:boolean,theme:string)=>
   <button type="button" onClick={action} aria-pressed={chosen}
@@ -82,11 +78,11 @@ export function TodayQuickActions({onAsk}:{onAsk:()=>void}){
    </div>
    <form onSubmit={addNeed} className="flex flex-wrap gap-2">
     <label className="min-w-40 flex-1 text-xs font-semibold">{tr("What do you need?","شو ناقصكم؟")}
-     <input required minLength={2} maxLength={60} value={need} onChange={e=>setNeed(e.target.value)}
+     <input required autoFocus minLength={2} maxLength={60} value={need} onChange={e=>setNeed(e.target.value)}
       placeholder={tr("e.g. milk or school supplies","مثلاً حليب أو مستلزمات المدرسة")}
       className="mt-1 min-h-11 w-full rounded-xl border border-[#EADDE5] bg-white px-3 text-base"/>
     </label>
-    <button type="submit" disabled={!ready||!!pendingId}
+    <button type="submit" disabled={!ready}
      className="mt-auto inline-flex min-h-11 items-center gap-1 rounded-xl bg-[#C54E83] px-4 text-sm font-bold text-white disabled:opacity-50">
      <Plus className="size-4"/>{tr("Save item","احفظ العنصر")}
     </button>
