@@ -1,7 +1,7 @@
-import {useState} from "react";
+import {useState,type ReactNode} from "react";
 import {Link} from "@tanstack/react-router";
-import {ArrowRight, BookOpen, CalendarDays, Check, ChevronRight, Heart,
-  Home, Languages, Lightbulb, MessageCircle, PlayCircle, Search,
+import {ArrowRight, BookOpen, CalendarDays, ChevronRight, Heart,
+  Languages, Lightbulb, PlayCircle,
   ShieldCheck, ShoppingBasket, Sparkles, Star, UsersRound, Wallet} from "lucide-react";
 import {Logo} from "@/components/Logo";
 import {useI18n} from "@/lib/i18n";
@@ -235,6 +235,6 @@ export function LandingDesignPreview(){
   </div>
  </div>;
 }
-function SmallEmpty({children}:{children:React.ReactNode}){
+function SmallEmpty({children}:{children:ReactNode}){
  return <p className="mt-4 rounded-xl bg-[#F6F9F4] p-4 text-sm leading-relaxed text-[#718583]">{children}</p>;
 }
