@@ -1,6 +1,6 @@
 import {Link} from "@tanstack/react-router";
 import {ChevronRight,Info,Languages,Plus,UsersRound} from "lucide-react";
-import type {ReactNode} from "react";
+import type {CSSProperties,ReactNode} from "react";
 import {useI18n} from "@/lib/i18n";
 import {sampleMembers,type Member} from "@/lib/money";
 import {realFamilyMembers} from "@/lib/familySetup";
@@ -40,7 +40,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
  const colors={
   "--family-accent":current.accent,
   "--family-soft":current.soft
- } as React.CSSProperties;
+ } as CSSProperties;
  const navName=shopping?text("Family navigation","التنقل العائلي"):text("Main","التنقل الرئيسي");
  const mobileName=shopping?text("Shopping mobile navigation","تنقل الهاتف"):text("Main","التنقل الرئيسي");
  const largeLinkClass="group flex min-h-12 items-center gap-3 rounded-2xl border border-transparent px-3 text-[13px] font-semibold transition hover:bg-[#FFF0F4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AA75A6] focus-visible:ring-offset-2";
