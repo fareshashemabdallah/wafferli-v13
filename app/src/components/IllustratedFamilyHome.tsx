@@ -90,10 +90,10 @@ export function IllustratedFamilyHome(){
    <div className="pointer-events-none absolute -end-16 -top-16 size-64 rounded-full bg-[#FFF1C7]/55 blur-xl" aria-hidden="true"/>
    <div className="grid items-center gap-1 lg:grid-cols-[36%_1fr_19%]">
     <div className="relative h-48 overflow-hidden sm:h-60 lg:h-72" dir="ltr">
-     <img src={import.meta.env.BASE_URL+"family-hero.svg"} alt={label(
-      "Illustration of a smiling family: father, mother with long uncovered hair, and two children",
-      "رسم لعائلة مبتسمة: أب وأم بشعر طويل مكشوف وطفلان")}
-      className="absolute inset-0 size-full object-contain object-bottom" loading="eager"/>
+     <img src={import.meta.env.BASE_URL+"family-hero-cartoon.avif"} alt={label(
+      "Stylized cartoon portrait of a smiling family of four, with the mother’s hair uncovered",
+      "رسم كرتوني لعائلة من أربعة أفراد مبتسمين، الأم بشعر مكشوف")}
+      className="absolute inset-0 size-full object-contain object-bottom" loading="eager" decoding="async"/>
     </div>
     <div className="relative px-5 pb-6 text-center sm:px-7 lg:py-8">
      <p className="text-xs font-semibold tracking-[.15em] text-[#668876]">{label("WELCOME TO YOUR FAMILY SPACE","مساحة لعيلتك")}</p>
