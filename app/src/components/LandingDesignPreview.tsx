@@ -48,7 +48,7 @@ export function LandingDesignPreview(){
  const tiles=[
   {to:"/" as const,en:"Today",ar:"اليوم",desc:"See what's next for your family.",ardesc:"شو عند العيلة قريباً",icon:CalendarDays,color:"#E9F4FC",ink:"#449CD6"},
   {to:"/money" as const,en:"Money & Bills",ar:"المال والفواتير",desc:"Stay on top of spending and savings.",ardesc:"خليك عارف مصاريفك وادخارك",icon:Wallet,color:"#EDF6E9",ink:"#2B9D71"},
-  {to:"/explore/smartbuy" as const,en:"Shopping & Wishlist",ar:"مشترياتنا ورغباتنا",desc:"Find items and compare useful options.",ardesc:"ابحث وقارن الخيارات",icon:ShoppingBasket,color:"#FFF0E7",ink:"#EB7657"},
+  {to:"/explore/family-shop" as const,en:"Shopping & Wishlist",ar:"مشترياتنا ورغباتنا",desc:"Find items and compare useful options.",ardesc:"ابحث وقارن الخيارات",icon:ShoppingBasket,color:"#FFF0E7",ink:"#EB7657"},
   {to:"/calendar" as const,en:"Family Calendar",ar:"تقويم العيلة",desc:"Keep important dates in one place.",ardesc:"المناسبات والمواعيد بمكان واحد",icon:CalendarDays,color:"#F3EDFC",ink:"#9C71DA"},
   {to:"/plans" as const,en:"Our Plans",ar:"خططنا",desc:"Turn family ideas into decisions.",ardesc:"حوّل الأفكار لخطط واضحة",icon:BookOpen,color:"#FFF6E3",ink:"#E0A33C"},
   {to:"/advisor" as const,en:"Ask Dabberna",ar:"اسأل دبّرنا",desc:"Get guidance from saved family context.",ardesc:"نصيحة مبنية على معلومات عيلتك",icon:Sparkles,color:"#EAF7F0",ink:"#2BA981"}
