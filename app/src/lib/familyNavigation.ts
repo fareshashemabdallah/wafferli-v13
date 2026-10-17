@@ -24,12 +24,3 @@ export function currentRoutePath(){
  const hash=window.location.hash.replace(/^#/,"").split("?")[0]??"/";
  return hash.startsWith("/")?hash:"/";
 }
-export const familyFollowUps:Record<FamilyArea,readonly FamilyArea[]>={
- today:["ask","plans","calendar"],
- ask:["plans","money","shopping"],
- plans:["money","calendar","shopping"],
- money:["plans","shopping","ask"],
- shopping:["money","plans","calendar"],
- calendar:["plans","shopping","today"]
-};
-export function destination(area:FamilyArea){return familyDestinations.find(item=>item.id===area)!;}
