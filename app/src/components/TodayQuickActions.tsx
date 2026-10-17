@@ -1,4 +1,4 @@
-import {useEffect,useState,type FormEvent} from "react";
+import {useEffect,useState,type FormEvent,type ReactNode} from "react";
 import {CheckCircle2,MessageCircle,Plus,Receipt,ShoppingBasket,X} from "lucide-react";
 import {Link} from "@tanstack/react-router";
 import {useI18n} from "@/lib/i18n";
@@ -47,7 +47,7 @@ export function TodayQuickActions({onAsk}:{onAsk:()=>void}){
   setBasket(old=>[...old,{id,name,qty:1,price:0,done:false}]);
   setNeed("");
  };
- const button=(name:string,icon:React.ReactNode,action:()=>void,chosen:boolean,theme:string)=>
+ const button=(name:string,icon:ReactNode,action:()=>void,chosen:boolean,theme:string)=>
   <button type="button" onClick={action} aria-pressed={chosen}
    className="flex min-h-[85px] flex-col items-center justify-center gap-2 rounded-[1.1rem] border border-[#F1E3E8] bg-white px-2 py-3 text-center text-[12px] font-bold leading-snug text-[#25354B] shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C974A2]"
    style={chosen?{borderColor:theme,backgroundColor:"#FFF8FB"}:{}}>
