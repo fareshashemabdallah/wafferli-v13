@@ -185,3 +185,17 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* The approved family-home visual uses clean rounded sans headings rather than
+ * the editorial serif used by older specialist pages. Other pages are unchanged. */
+.dabberna-new-home h1,
+.dabberna-new-home h2,
+.dabberna-new-home h3 {
+  font-family: "Manrope", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.025em;
+}
+[dir="rtl"] .dabberna-new-home h1,
+[dir="rtl"] .dabberna-new-home h2,
+[dir="rtl"] .dabberna-new-home h3 {
+  letter-spacing: 0;
+}
