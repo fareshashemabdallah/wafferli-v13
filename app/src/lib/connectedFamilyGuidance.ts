@@ -53,7 +53,7 @@ export function nextConnectedFamilyAction(ctx:ConnectedContext):ConnectedAdvice{
  if(usePlan&&earliestPlan){
   const cost=earliestPlan.choice?.estimatedJod??earliestPlan.budgetJod;
   const assessment=prefs.financeTips&&typeof cost==="number"&&cost>0?
-   assessImmediateSpending(ctx.money,cost,now):null;
+   assessImmediateSpending(ctx.money,cost,now,ctx.plans.filter(p=>p.id!==earliestPlan.id)):null;
   const en=assessment?.outcome==="review"?
    " Your recorded bills/cash may be pressured; review Money before committing.":
    assessment?.outcome==="unknown"?
