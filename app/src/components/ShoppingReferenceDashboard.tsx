@@ -144,19 +144,20 @@ export function ShoppingReferenceDashboard(){
    <Link to="/explore/market" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#F2E7EA] bg-white px-4 text-xs font-bold text-[#57667D]">
     <Search className="size-4"/>{tr("Find products","استكشف المنتجات")}</Link>
   </div>
-  <section className="relative isolate grid min-h-[260px] grid-cols-[minmax(0,44%)_minmax(0,56%)] overflow-hidden rounded-[1.65rem] border border-[#FFECF0] px-3 sm:min-h-[280px] sm:gap-3 sm:px-6 lg:min-h-[300px]"
+  <section className="relative isolate grid min-h-[290px] grid-cols-[minmax(0,44%)_minmax(0,56%)] overflow-hidden rounded-[1.7rem] border border-[#FFECF0] px-3 sm:min-h-[310px] sm:gap-3 sm:px-6 lg:min-h-[345px]"
    style={{background:"radial-gradient(circle at 8% 18%, var(--wish-soft), transparent 55%),linear-gradient(120deg,var(--wish-soft),#FFF7F8 70%,var(--wish-pale))"}}>
    <span aria-hidden="true" className="absolute end-[8%] top-4 text-4xl opacity-35">♥</span>
-   <div className="relative min-h-[220px] self-end sm:min-h-[260px]">
+   <div className="relative min-h-[255px] self-end sm:min-h-[290px] lg:min-h-[325px]">
     <img src={avatar} alt={cartoon?tr("Your selected cartoon-style portrait","الصورة الكرتونية المختارة"):tr("Cartoon of Sophia with a fruit drink","رسم كرتوني لصوفيا تحمل عصيراً")}
      className="pointer-events-none absolute inset-x-0 bottom-0 h-full w-full object-contain object-bottom drop-shadow-[0_10px_12px_rgba(113,54,66,.18)]"
      style={cartoon?{borderRadius:"40% 40% 0 0"}:{}} loading="eager"/>
    </div>
    <div className="relative z-10 flex min-w-0 flex-col items-start justify-center py-9 sm:py-10">
     <p className="mb-3 text-xs font-black uppercase tracking-widest" style={{color:ink}}>{tr("For the little things that matter ♥","للحظات الحلوة ♥")}</p>
-    <h1 className="break-words text-[clamp(1.65rem,4.2vw,3.4rem)] font-black leading-[1.05] tracking-[-.06em]">
-     {ar?<>{tr("Wishlist","قائمة رغبات")} <span style={{color:ink}}>{named||"العائلة"}</span></>:<><span style={{color:ink}}>{named?named+"’s":"Family"}</span> Wishlist</>}
+    <h1 className="break-words text-[clamp(1.8rem,5.5vw,4.3rem)] font-black leading-[.99] tracking-[-.06em]">
+     {tr("Shopping &","المشتريات")} <span className="block" style={{color:ink}}>{tr("Wishlist","والرغبات")}</span>
     </h1>
+    <p className="mt-3 inline-flex max-w-full rounded-full bg-white/70 px-3 py-1.5 text-xs font-extrabold" style={{color:ink}}>{title}</p>
     <p className="mt-3 max-w-md text-xs font-medium leading-relaxed text-[#5F6578] sm:text-sm">
      {tr("All the things your family loves, needs and dreams about.","كل ما تحبه العائلة وتحتاجه وتحلم به، في مكان واحد.")}
     </p>
