@@ -58,7 +58,7 @@ describe("shopping design reference and local cartoon editor",()=>{
  it("uses real shared wishlist and basket data and meaningful filters",async()=>{
   draw();
   fireEvent.change(screen.getByRole("textbox",{name:"Add a wish"}),{target:{value:"Story book"}});
-  fireEvent.click(screen.getByRole("button",{name:"Add",exact:false}));
+  fireEvent.click(screen.getByRole("button",{name:/^Add$/}));
   await waitFor(()=>expect(screen.getByText("Story book")).toBeInTheDocument());
   fireEvent.click(screen.getByRole("button",{name:/Books & Learning/}));
   expect(screen.getByText("Story book")).toBeInTheDocument();
