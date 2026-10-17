@@ -73,7 +73,9 @@ describe("shopping design reference and local cartoon editor",()=>{
   render(<I18nProvider><ShoppingExperienceShell><p>Reference shopping content</p></ShoppingExperienceShell></I18nProvider>);
   expect(screen.getByRole("navigation",{name:"Family navigation"}).querySelectorAll("a")).toHaveLength(6);
   expect(screen.getByRole("navigation",{name:"Shopping mobile navigation"}).querySelectorAll("a")).toHaveLength(6);
-  expect(screen.getByText("All Family")).toBeInTheDocument();
+  expect(screen.getByRole("link",{name:"Family & settings"})).toHaveAttribute("href","/space");
+  expect(screen.queryByRole("navigation",{name:"Related family actions"})).not.toBeInTheDocument();
+  expect(screen.queryByText("All Family")).not.toBeInTheDocument();
   expect(screen.queryByText("Partner (sample)")).not.toBeInTheDocument();
  });
 });
