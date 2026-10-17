@@ -22,7 +22,7 @@ describe("opt-in illustrated landing experience",()=>{
   const features=[...nav.querySelectorAll("a")];
   expect(features).toHaveLength(6);
   expect(features[0]?.getAttribute("href")?.endsWith("#/")).toBe(true);
-  expect(features[2]).toHaveAttribute("href","/explore/smartbuy");
+  expect(features[2]).toHaveAttribute("href","/explore/family-shop");
   expect(screen.getByRole("link",{name:"Dabberna home"}).getAttribute("href")?.endsWith("#/")).toBe(true);
   expect(screen.getAllByRole("link",{name:/Ask Dabberna/}).length).toBeGreaterThan(0);
   expect(screen.getAllByRole("link",{name:/Back to current home|Current homepage/}).length).toBeGreaterThan(0);
