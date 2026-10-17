@@ -9,9 +9,9 @@ const prefs={...defaultFamilyPreferences,city:"Amman",outingLimit:50};
 const money=():MoneyState=>({...sampleMoney(),demo:false,income:2000,
  savingsTargetAmount:200,
  categories:[
-  {id:"rent",name:"Rent",type:"fixed",planned:330},
-  {id:"groceries",name:"Groceries",type:"variable",planned:55},
-  {id:"out",name:"Family outings",type:"variable",planned:100}
+  {id:"rent",name:"Rent",type:"fixed",planned:330,priority:"essential"},
+  {id:"groceries",name:"Groceries",type:"variable",planned:55,priority:"essential"},
+  {id:"out",name:"Family outings",type:"variable",planned:100,priority:"flexible"}
  ],
  expenses:[],cashOnHand:650,cashReserve:200,cashUpdatedAt:"2026-10-16",
  commitments:[{id:"bill",name:"School",frequency:"once",amount:330,dueDate:"2026-10-17",categoryId:"rent"}],
