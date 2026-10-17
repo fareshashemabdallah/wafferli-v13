@@ -55,7 +55,7 @@ describe("Existing Calendar → Plans occasion integration",()=>{
   await waitFor(()=>expect(screen.getAllByRole("checkbox")).toHaveLength(3));
   const tasks=get<Array<{id:string;planId:string;status:string}>>("familyTasks");
   expect(tasks).toHaveLength(3);
-  expect(tasks.every(x=>x.planId===plans[0].id)).toBe(true);
+  expect(tasks.every(x=>x.planId===plans[0]!.id)).toBe(true);
   expect(screen.queryByRole("button",{name:"Add preparation tasks"})).not.toBeInTheDocument();
   fireEvent.click(screen.getAllByRole("checkbox")[0]!);
   await waitFor(()=>expect(get<Array<{status:string}>>("familyTasks").filter(x=>x.status==="done")).toHaveLength(1));
