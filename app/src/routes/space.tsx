@@ -142,8 +142,8 @@ function Space() {
             <div className="min-w-0 flex-1">
               <p className="font-medium">{tr(m.name)}</p>
               <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")} · {m.ageGroup}{m.prefs&&" · "+m.prefs}</p>
-              {m.birthday&&parseCalendarDate(m.birthday)&&
-                <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":"Birthday: "}{formatMomentDate(m.birthday,ar)}</p>}
+              {(m.birthday||m.birthdayMonthDay)&&
+                <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":"Birthday: "}{m.birthdayMonthDay??(m.birthday?formatMomentDate(m.birthday,ar):"")}</p>}
             </div>
             <Button size="icon" variant="ghost" aria-label={(ar?"تعديل ":"Edit ")+m.name} onClick={()=>{setEdit(m);setErr("");}}><Pencil className="size-4"/></Button>
             <Button size="icon" variant="ghost" aria-label={(ar?"حذف ":"Delete ")+m.name} onClick={()=>removeMember(m)}><Trash2 className="size-4"/></Button>
