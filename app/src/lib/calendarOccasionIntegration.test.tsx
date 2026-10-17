@@ -67,7 +67,7 @@ describe("Existing Calendar → Plans occasion integration",()=>{
   await screen.findByRole("heading",{name:"Gift, celebration & preparation"});
   fireEvent.change(screen.getByRole("spinbutton",{name:"Gift (JOD)"}),{target:{value:"100"}});
   fireEvent.click(screen.getByRole("button",{name:"Save occasion costs"}));
-  expect(await screen.findByText(/Sample budgets cannot support advice/)).toBeInTheDocument();
+  expect(await screen.findByText(/sample data cannot support recommendations/)).toBeInTheDocument();
   expect(screen.getByRole("link",{name:"Review My Money"})).toHaveAttribute("href","/money");
  });
 });
