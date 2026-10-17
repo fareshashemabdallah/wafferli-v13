@@ -59,7 +59,7 @@ function Space() {
       const date=parseCalendarDate(edit.birthday);
       if(!date||date.getTime()>new Date().getTime())return setErr(ar?"تاريخ الميلاد غير صالح أو في المستقبل.":"Please enter a valid birth date that is not in the future.");
     }
-    const m:Member={...edit,name:edit.name.trim().slice(0,30),prefs:edit.prefs.slice(0,120),birthday:edit.birthday||undefined};
+    const m:Member={...edit,name:edit.name.trim().slice(0,30),prefs:edit.prefs.slice(0,120),birthday:edit.birthday||undefined,birthdayMonthDay:edit.birthdayMonthDay||undefined};
     setMembers(old=>m.id?old.map(x=>x.id===m.id?m:x):[...old,{...m,id:uid()}]);
     setEdit(null);setErr("");
   };
@@ -107,7 +107,7 @@ function Space() {
             <h2 className="text-lg font-semibold">{tr("Household members")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">{ar?"أضف تاريخ الميلاد مرة واحدة ليظهر تلقائياً في التقويم وفي يومي.":"Add a birthday once: it automatically appears in the Family Calendar and My Day."}</p>
           </div>
-          <Button size="sm" onClick={()=>{setEdit({id:"",name:"",role:"adult",ageGroup:"30–44",prefs:"",birthday:""});setErr("");}} disabled={members.length>=12}>
+          <Button size="sm" onClick={()=>{setEdit({id:"",name:"",role:"adult",ageGroup:"",prefs:"",birthday:"",birthdayMonthDay:""});setErr("");}} disabled={members.length>=12}>
             <Plus className="size-4"/> {tr("Add")}
           </Button>
         </div>
