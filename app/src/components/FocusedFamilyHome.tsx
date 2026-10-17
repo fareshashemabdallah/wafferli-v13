@@ -113,7 +113,7 @@ export function FocusedFamilyHome(){
    <div>
     <p className="text-xs font-semibold text-[#9B6784]">{displayDate}</p>
     <h1 className="mt-1 text-[1.75rem] font-extrabold leading-tight tracking-tight sm:text-[2.25rem]">
-     {dayGreeting(ar,now)} <span aria-hidden="true">☀️</span>
+     {dayGreeting(ar,now)} <span aria-hidden="true">{now.getHours()<12?"☀️":now.getHours()<18?"🌤️":"🌙"}</span>
     </h1>
     <p className="mt-1 text-sm text-[#687387]">{text("Your family, made simpler.","عيلتك، صار تنظيمها أبسط.")}</p>
    </div>
@@ -197,8 +197,8 @@ export function FocusedFamilyHome(){
   <footer className="flex items-start gap-2 px-1 pt-1 text-[11px] leading-relaxed text-[#7B8491]">
    <ShieldCheck className="mt-0.5 size-4 shrink-0"/>
    <span>{text(
-    "Your family's information remains in this browser. Suggestions are based on what you saved; no bank or live shopping connection is implied.",
-    "معلومات العيلة محفوظة بهذا المتصفح. الاقتراحات تعتمد على مدخلاتك، من دون ربط بنكي أو أسعار تسوق مباشرة.")}</span>
+    "Saved family records stay in this browser. Optional weather requests use your selected city. No bank or live shopping connection is implied.",
+    "سجلات العيلة محفوظة بهذا المتصفح. الطقس الاختياري يستخدم المدينة المحددة فقط، من دون ربط بنكي أو أسعار تسوق مباشرة.")}</span>
   </footer>
  </div>;
 }
