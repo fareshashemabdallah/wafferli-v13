@@ -141,7 +141,7 @@ export function FamilyLifePage(){
      </div>
     </details>
    </div>}
-   {view==="calendar"&&<FamilyCalendarWorkspace key={calendarFocus??"calendar"} embedded focusDate={calendarFocus}/>}
+   {view==="calendar"&&<FamilyCalendarWorkspace key={calendarFocus??"calendar"} embedded {...(calendarFocus?{focusDate:calendarFocus}:{})}/>}
    {view==="plans"&&<PlansWorkspace embedded/>}
    {view==="tasks"&&<FamilyTasksPanel/>}
    <p className="px-1 text-[11px] leading-relaxed text-[#7B8491]">
