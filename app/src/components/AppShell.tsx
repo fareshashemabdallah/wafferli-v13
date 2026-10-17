@@ -6,7 +6,7 @@ import {UnifiedFamilyShell} from "./UnifiedFamilyShell";
 export function AppShell({children,title,homeLayout=false}:{
  children:ReactNode;title?:string;homeLayout?:boolean
 }){
- return <UnifiedFamilyShell title={title} homeLayout={homeLayout}>{children}</UnifiedFamilyShell>;
+ return <UnifiedFamilyShell {...(title!==undefined?{title}:{})} homeLayout={homeLayout}>{children}</UnifiedFamilyShell>;
 }
 export function PilotBadge({children="Sample"}:{children?:ReactNode}){
  return <span className="inline-flex rounded-full bg-warn px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-warn-foreground">{children}</span>;
