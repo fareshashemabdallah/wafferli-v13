@@ -21,7 +21,7 @@ export function areaFromRoute(path:string):FamilyArea {
 }
 export function currentRoutePath(){
  if(typeof window==="undefined")return "/";
- const hash=window.location.hash.replace(/^#/,"").split("?")[0];
+ const hash=window.location.hash.replace(/^#/,"").split("?")[0]??"/";
  return hash.startsWith("/")?hash:"/";
 }
 export const familyFollowUps:Record<FamilyArea,readonly FamilyArea[]>={
