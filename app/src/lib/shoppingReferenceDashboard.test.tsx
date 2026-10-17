@@ -29,7 +29,7 @@ describe("shopping design reference and local cartoon editor",()=>{
   fireEvent.click(screen.getByRole("button",{name:"Change Theme & Picture"}));
   const name=screen.getByRole("textbox",{name:"Name before Wishlist"});
   fireEvent.change(name,{target:{value:"Faris"}});
-  await waitFor(()=>expect(screen.getByRole("heading",{level:1})).toHaveTextContent("Faris Wishlist"));
+  await waitFor(()=>expect(screen.getByRole("heading",{level:1})).toHaveTextContent("Faris’s Wishlist"));
   fireEvent.click(screen.getByRole("button",{name:"Blue"}));
   await waitFor(()=>expect(JSON.parse(localStorage.getItem("wafferli.v13.shoppingWishlistTheme")??"null").preset).toBe("blue"));
   expect(JSON.parse(localStorage.getItem("wafferli.v13.shoppingWishlistOwner")??"null")).toBe("Faris");
