@@ -14,13 +14,13 @@ export function initialOccasionPreparation(occasionDate:string):OccasionPreparat
 }
 export function validateOccasionPreparation(value:OccasionPreparation,occasionDate:string):string|null{
  if(!parseCalendarDate(occasionDate))return "invalid-event-date";
- const total=occasionKinds.reduce((a,k)=>a+(value[k]?.amountJod??0),0);
- if(!jod(total))return "invalid-total";
  for(const kind of occasionKinds){
   const item=value[kind];
   if(!item||!jod(item.amountJod))return "invalid-amount";
   if(!parseCalendarDate(item.dueDate)||item.dueDate>occasionDate)return "invalid-deadline";
  }
+ const total=occasionKinds.reduce((a,k)=>a+value[k].amountJod,0);
+ if(!jod(total))return "invalid-total";
  if(value.gift.description.length>100)return "invalid-description";
  return null;
 }
@@ -39,7 +39,7 @@ export function occasionFunding(preparation:OccasionPreparation,now=new Date()):
  const lines=occasionKinds.map(kind=>{
   const item=preparation[kind];
   const d=parseCalendarDate(item.dueDate);
-  const months=d?Math.max(0,d.getFullYear()*12+d.getMonth()-todayMonth+1):0;
+  const months=d&&item.dueDate>=today?Math.max(1,d.getFullYear()*12+d.getMonth()-todayMonth+1):0;
   const daysLeft=d?Math.round((d.getTime()-parseCalendarDate(today)!.getTime())/86400000):-1;
   return {kind,amountJod:item.amountJod,deadline:item.dueDate,months,daysLeft,
    monthlyJod:months>0?roundJod(item.amountJod/months):item.amountJod,
