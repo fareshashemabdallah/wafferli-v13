@@ -28,7 +28,7 @@ describe("opt-in illustrated landing experience",()=>{
  it("keeps demo finance figures out of the new family page",async()=>{
   draw();
   expect(await screen.findByText(/Enter your household finances once/)).toBeInTheDocument();
-  expect(screen.getByText(/Planned minus recorded is not available cash/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Planned minus recorded is not available cash/)).not.toBeInTheDocument();
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
  });
  it("reads fixed, variable and periodic amounts already stored by the user",async()=>{
@@ -41,7 +41,7 @@ describe("opt-in illustrated landing experience",()=>{
    ]
   }));
   draw();
-  expect(await screen.findByText("1,225 JOD")).toBeInTheDocument();
+  await waitFor(()=>expect(screen.getAllByText("1,225 JOD").length).toBeGreaterThan(0));
   expect(screen.getByText("Fixed expenses")).toBeInTheDocument();
   expect(screen.getByText("Variable expenses")).toBeInTheDocument();
   expect(screen.getByText("Periodic expenses")).toBeInTheDocument();
