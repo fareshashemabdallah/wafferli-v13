@@ -126,7 +126,7 @@ function Space() {
             </div></details>
             <label className="block text-sm font-medium sm:col-span-2">
               <span className="flex items-center gap-2"><Cake className="size-4 text-[#B87976]"/>{ar?"تاريخ الميلاد (اختياري)":"Date of birth (optional)"}</span>
-              <Input type="date" className={inputCls+" mt-1"} max={dateKey(new Date())} value={edit.birthday??""} onChange={e=>setEdit({...edit,birthday:e.target.value})}/>
+              <Input type="text" inputMode="numeric" maxLength={5} placeholder="MM-DD" className={inputCls+" mt-1"} value={edit.birthdayMonthDay??(edit.birthday?.slice(5)??"")} onChange={e=>setEdit({...edit,birthdayMonthDay:e.target.value,birthday:undefined})}/>
               <span className="mt-1 block text-xs font-normal text-muted-foreground">{ar?"يتكرر عيد الميلاد تلقائياً كل سنة. لا يُعرض تاريخ الميلاد لأعضاء المجموعات.":"The birthday repeats every year. This date is not visible to group members."}</span>
             </label>
             {err&&<p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
