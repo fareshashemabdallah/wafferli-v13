@@ -13,7 +13,7 @@ const places = [
 ];
 type Forecast = { temperature: number; rain: number | null; code: number };
 
-export function FamilyWeather() {
+export function FamilyWeather({compact=false}:{compact?:boolean}={}) {
   const { lang } = useI18n();
   const ar = lang === "ar";
   const [selected, setSelected] = useLocalState<string>("weatherCity", "");
@@ -60,6 +60,20 @@ export function FamilyWeather() {
       ? (ar ? "هناك احتمال للمطر اليوم؛ خذوا مظلة." : "Rain is possible today; consider bringing an umbrella.")
       : ""
   ].filter(Boolean).join(" ");
+  if(compact){
+    // A calm optional clothing tip only when the parent has selected a city,
+    // the preference is enabled, and this request returned a real forecast.
+    if(!prefs.weather||!city||status!=="ready"||!forecast)return null;
+    return <section aria-label={ar?"الطقس للعائلة":"Family weather"}
+      className="flex items-start gap-3 rounded-2xl border border-[#F0E4E9] bg-white/85 p-3">
+      <CloudSun className="mt-0.5 size-5 shrink-0 text-[#6493B4]" aria-hidden="true"/>
+      <div className="min-w-0">
+       <p className="text-xs font-bold text-[#25354B]">{ar?"طقس العائلة":"Family weather"} · {ar?places.find(p=>p.name===city)?.ar:city} · {Math.round(forecast.temperature)}°C</p>
+       <p className="mt-1 text-xs leading-relaxed text-[#657185]">{tip}</p>
+       <p className="mt-1 text-[10px] text-[#8B93A0]">Open-Meteo</p>
+      </div>
+     </section>;
+  }
   return (
     <section className="card-soft mt-4 p-4" aria-label={ar ? "الطقس للعائلة" : "Family weather"}>
       <div className="flex flex-wrap items-center justify-between gap-3">

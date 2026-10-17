@@ -2,8 +2,7 @@ import {useState,type FormEvent,type ReactNode} from "react";
 import {CheckCircle2,MessageCircle,Plus,Receipt,ShoppingBasket,X} from "lucide-react";
 import {Link} from "@tanstack/react-router";
 import {useI18n} from "@/lib/i18n";
-import {useLocalState,writeLocal,uid,fmtJOD} from "@/lib/storage";
-import {computeMoney,sampleMoney,type MoneyState} from "@/lib/money";
+import {useLocalState,writeLocal,uid} from "@/lib/storage";
 import {isSampleBasketEntry,type BasketEntry} from "@/lib/basketRecording";
 import {QuickExpenseCard} from "./QuickExpenseCard";
 
@@ -12,19 +11,16 @@ type Action="expense"|"shopping"|null;
 /** Fast actions change the existing Money and shopping records, never parallel lists.
  *  Guided advice uses the already-mounted question input on Today.
  */
-export function TodayQuickActions({onAsk}:{onAsk:()=>void}){
+export function TodayQuickActions({onAsk,onOtherAction}:{onAsk:()=>void;onOtherAction?:()=>void}){
  const {lang}=useI18n(),ar=lang==="ar";
  const tr=(en:string,arabic:string)=>ar?arabic:en;
- const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [basket,,basketReady]=useLocalState<BasketEntry[]>("shopping",[]);
  const [active,setActive]=useState<Action>(null);
  const [need,setNeed]=useState("");
  const [error,setError]=useState("");
  const [savedName,setSavedName]=useState("");
- const ready=moneyReady&&basketReady;
+ const ready=basketReady;
  const actualBasket=basket.filter(b=>!isSampleBasketEntry(b)&&b.name.trim());
- const outstanding=actualBasket.filter(b=>!b.done).length;
- const spent=!money.demo&&moneyReady?computeMoney(money).spent:null;
  const addNeed=(e:FormEvent)=>{
   e.preventDefault();if(!ready)return;
   const name=need.replace(/[\u0000-\u001f\u007f]/g," ").replace(/\s+/g," ").trim().slice(0,60);
@@ -57,14 +53,11 @@ export function TodayQuickActions({onAsk}:{onAsk:()=>void}){
     <h2 className="text-base font-extrabold text-[#25354B]">{tr("What do you need to do?","شو بدك تعمل هلّق؟")}</h2>
     <p className="mt-1 text-xs text-[#748093]">{tr("Three frequent actions. No searching through pages.","ثلاث خطوات سريعة من دون البحث بين الصفحات.")}</p>
    </div>
-   {ready&&<span className="text-[11px] text-[#68758A]">
-    {spent!==null?tr("Recorded this month: ","المصروف المسجّل هذا الشهر: ")+fmtJOD(spent)+" · ":""}
-    {outstanding} {tr("shopping items open","احتياجات مشتريات مفتوحة")}
-   </span>}
+
   </div>
   <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-   {button(tr("Add expense","سجّل مصروف"),<Receipt className="size-5"/>,()=>{setActive(x=>x==="expense"?null:"expense");setError("");},active==="expense","#389683")}
-   {button(tr("Add shopping item","أضف للمشتريات"),<ShoppingBasket className="size-5"/>,()=>{setActive(x=>x==="shopping"?null:"shopping");setError("");},active==="shopping","#DC679A")}
+   {button(tr("Add expense","سجّل مصروف"),<Receipt className="size-5"/>,()=>{onOtherAction?.();setActive(x=>x==="expense"?null:"expense");setError("");},active==="expense","#389683")}
+   {button(tr("Add shopping item","أضف للمشتريات"),<ShoppingBasket className="size-5"/>,()=>{onOtherAction?.();setActive(x=>x==="shopping"?null:"shopping");setError("");},active==="shopping","#DC679A")}
    {button(tr("Ask Dabberna","اسأل دبّرنا"),<MessageCircle className="size-5"/>,()=>{setActive(null);onAsk();},false,"#8774BE",tr("Jump to Ask Dabberna","اذهب لسؤال دبّرنا"))}
   </div>
   {active==="expense"&&<div className="mt-3" data-testid="fast-expense-panel">
