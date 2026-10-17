@@ -5,6 +5,7 @@ import {useState} from "react";
 import { AppShell, Notice } from "@/components/AppShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
 import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
+import {ShoppingWishlistHome} from "@/components/ShoppingWishlistHome";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import {compareManuallyEnteredPrices} from "@/lib/clearShoppingResult";
 import {dateKey} from "@/lib/familyCalendar";
@@ -56,7 +57,14 @@ export function SmartBuy() {
   const setAlt = (id: string, p: Partial<Alt>) => setS({ ...s, alts: s.alts.map((a) => (a.id === id ? { ...a, ...p } : a)) });
 
   return (
-    <AppShell title={ar?"قارن أسعار متجرين":"Which store costs less?"}>
+    <AppShell>
+      <ShoppingWishlistHome/>
+      <details id="shopping-tools" className="group mt-6 rounded-[1.6rem] border border-[#E2E8E1] bg-white p-4 sm:p-5">
+       <summary className="min-h-12 cursor-pointer text-base font-bold text-brand">
+        {ar?"أدوات إضافية: مقارنة الأسعار المحفوظة وسجل الرغبات":"More tools: saved price comparisons and wishlist price history"}
+       </summary>
+       <div className="mt-4 border-t border-[#E2E8E1] pt-4">
+       <h2 className="mb-3 text-xl font-semibold">{ar?"قارن أسعار متجرين":"Which store costs less?"}</h2>
       <Link to="/explore/market" className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#EAF3E8] px-4 text-sm font-semibold text-brand">
         {ar?"أولاً، ابحث عن سعر المنتج عند متاجر حقيقية":"First, find real seller listings"} →
        </Link>
@@ -200,6 +208,8 @@ export function SmartBuy() {
            "Save future needs and prices you personally checked. No automatic orders or live price feeds."}
         </p>
         <FamilyWishlistPanel mode="shopping"/>
+      </details>
+       </div>
       </details>
     </AppShell>
   );
