@@ -18,7 +18,7 @@ import {homeSnapshot,type HomeAgendaItem} from "@/lib/homeSnapshot";
 import {decideWeekendOuting} from "@/lib/weekendOutingDecision";
 import {needsStarterBudget} from "@/lib/starterBudget";
 import {TodayFamilyBrief} from "@/components/TodayFamilyBrief";
-import {QuickExpenseCard} from "@/components/QuickExpenseCard";
+import {TodayQuickActions} from "@/components/TodayQuickActions";
 import {FamilyStarterCard} from "@/components/FamilyStarterCard";
 import {FamilySetupCard} from "@/components/FamilySetupCard";
 import {FamilyWeather} from "@/components/FamilyWeather";
@@ -43,7 +43,6 @@ export function IllustratedFamilyHome(){
  const [prefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
  const [draft,setDraft]=useState("");
  const [answer,setAnswer]=useState<{question:string;result:GuidedAnswer}|null>(null);
- const [quickExpenseOpen,setQuickExpenseOpen]=useState(false);
  const now=new Date();
  const ready=moneyReady&&membersReady&&momentsReady&&tasksReady&&plansReady&&basketReady&&wishlistReady&&prefsReady;
  const view=homeSnapshot({money,members,moments,plans,tasks,basket,wishlist,now,arabic:ar});
@@ -86,6 +85,12 @@ export function IllustratedFamilyHome(){
  const dateText=(item:HomeAgendaItem)=>item.date===view.nowKey?label("Today","اليوم"):dateLabel(item.date,ar);
  const loaded=(section:string)=>ready?section:label("Loading saved family data…","عم نحمّل معلومات العائلة…");
  return <div className="dabberna-new-home mx-auto max-w-[1420px] space-y-4 pb-6 sm:space-y-5">
+  <TodayQuickActions onAsk={()=>{
+   const field=document.getElementById("dab-home-question");
+   field?.scrollIntoView?.({behavior:"smooth",block:"center"});
+   field?.focus();
+  }}/>
+  <TodayFamilyBrief/>
   <header className="relative isolate overflow-hidden rounded-[1.9rem] border border-[#F1E3E7] bg-gradient-to-r from-[#FDECF0] via-[#F8F8F0] to-[#EAF5EE] shadow-[0_20px_60px_-45px_rgba(28,79,49,.42)]">
    <div className="pointer-events-none absolute -end-16 -top-16 size-64 rounded-full bg-[#FFF1C7]/55 blur-xl" aria-hidden="true"/>
    <div className="grid items-center gap-1 lg:grid-cols-[36%_1fr_19%]">
@@ -307,7 +312,6 @@ export function IllustratedFamilyHome(){
    </div>
   </section>
 
-  <TodayFamilyBrief/>
   {!money.demo&&ready&&<details className="rounded-[1.4rem] border border-[#E0E8DB] bg-white p-4">
    <summary className="min-h-11 cursor-pointer text-sm font-bold text-brand">{label(
     "Show every fixed, variable and periodic expense category",
@@ -317,15 +321,8 @@ export function IllustratedFamilyHome(){
   {needsStarterBudget(money)&&ready&&<FamilyStarterCard/>}
   <details className="rounded-[1.4rem] border border-[#E0E8DB] bg-white p-4">
    <summary className="min-h-11 cursor-pointer text-sm font-bold text-brand">
-    {label("Update household information or record a payment (optional)","حدّث معلومات العيلة أو سجّل مصروف (اختياري)")}
+    {label("Family preferences and optional weather","تفضيلات العائلة والطقس الاختياري")}
    </summary>
-   <div className="mt-3 flex flex-wrap gap-2">
-    <button type="button" onClick={()=>setQuickExpenseOpen(v=>!v)} aria-expanded={quickExpenseOpen}
-     className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#EDF6EA] px-4 text-sm font-semibold text-brand">
-     <Receipt className="size-4"/>{label("Record a paid expense","سجّل مصروف مدفوع")}
-    </button>
-   </div>
-   {quickExpenseOpen&&<QuickExpenseCard onClose={()=>setQuickExpenseOpen(false)}/>}
    <details className="mt-3">
     <summary className="min-h-10 cursor-pointer text-xs font-bold text-brand">{label("Personalize your family guidance","خصص إرشادات العيلة")}</summary>
     <FamilySetupCard/>
