@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="360" viewBox="0 0 660 360" role="img" aria-labelledby="title desc">
+<title id="title">An illustrated family together</title><desc id="desc">Father, mother with long uncovered brown hair, and two happy children surrounded by green plants.</desc>
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#F5FBF5"/><stop offset="1" stop-color="#E3F0E2"/></linearGradient>
+ <linearGradient id="shrub" x2=".2" y2="1"><stop stop-color="#C8E2B6"/><stop offset="1" stop-color="#87B39A"/></linearGradient>
+ <linearGradient id="shirt" x2="0" y2="1"><stop stop-color="#A8C7BB"/><stop offset="1" stop-color="#568C87"/></linearGradient>
+</defs>
+<path d="M0 64 Q165 6 317 49 T660 49 V360 H0Z" fill="url(#sky)" opacity=".47"/>
+<g opacity=".75" fill="#BBD8AB">
+ <ellipse cx="57" cy="189" rx="60" ry="115" transform="rotate(-27 57 189)"/>
+ <ellipse cx="88" cy="153" rx="28" ry="95" transform="rotate(33 88 153)"/>
+ <ellipse cx="558" cy="235" rx="45" ry="123" transform="rotate(31 558 235)"/>
+ <ellipse cx="596" cy="189" rx="28" ry="98" transform="rotate(-35 596 189)"/>
+ <ellipse cx="624" cy="275" rx="30" ry="74" transform="rotate(50 624 275)"/>
+</g>
+<g fill="#7EA88A" opacity=".72">
+ <path d="M32 344 C28 264 45 190 108 110" fill="none" stroke="#69997E" stroke-width="5"/>
+ <ellipse cx="55" cy="280" rx="17" ry="48" transform="rotate(-48 55 280)"/>
+ <ellipse cx="49" cy="224" rx="15" ry="42" transform="rotate(-55 49 224)"/>
+ <ellipse cx="92" cy="190" rx="16" ry="43" transform="rotate(36 92 190)"/>
+ <ellipse cx="108" cy="138" rx="14" ry="36" transform="rotate(36 108 138)"/>
+ <path d="M643 350 Q608 230 554 150" fill="none" stroke="#69997E" stroke-width="5"/>
+ <ellipse cx="594" cy="252" rx="17" ry="45" transform="rotate(36 594 252)"/>
+ <ellipse cx="570" cy="216" rx="17" ry="46" transform="rotate(-36 570 216)"/>
+</g>
+<!-- Parent silhouettes; soft outlines keep cartoon characters legible against greenery. -->
+<g stroke="#745745" stroke-width="2" stroke-linejoin="round">
+ <!-- father: cream jacket and neck -->
+ <path d="M36 357 Q36 237 130 210 L185 200 Q246 222 256 360Z" fill="#E5D4BE"/>
+ <path d="M122 235 L133 192 L165 188 L179 231 Q149 256 122 235Z" fill="#D59A77"/>
+ <path d="M80 235 Q57 266 55 345 L125 350 L134 257Z" fill="#F0E2CD"/>
+ <path d="M184 241 Q217 256 231 340 L172 344 L163 258Z" fill="#D7C3AC"/>
+ <!-- father's face & hair -->
+ <ellipse cx="144" cy="146" rx="68" ry="76" transform="rotate(-10 144 146)" fill="#E7B087"/>
+ <path d="M79 122 C61 51 101 29 138 45 C179 15 225 69 209 131 Q190 111 185 91 Q139 117 94 109Z" fill="#52392F"/>
+ <path d="M79 131 C67 115 58 130 72 153 Q80 159 89 150Z" fill="#E4A681"/>
+ <path d="M87 164 Q93 223 143 226 Q195 215 198 166 Q182 191 158 199 Q124 205 105 182Z" fill="#614338"/>
+ <path d="M99 174 Q131 195 163 189 Q175 186 186 174 Q174 211 142 214 Q115 210 99 174Z" fill="#513A33"/>
+ <path d="M108 158 Q116 153 125 158 M160 150 Q169 144 178 150" fill="none" stroke="#583B34" stroke-width="4" stroke-linecap="round"/>
+ <circle cx="121" cy="162" r="3.8" fill="#382B29" stroke="none"/><circle cx="169" cy="155" r="3.8" fill="#382B29" stroke="none"/>
+ <path d="M130 187 Q148 193 164 181" fill="none" stroke="#FFF3E6" stroke-width="4" stroke-linecap="round"/>
+ <!-- mother long visible brown hair -->
+ <path d="M276 252 Q234 217 242 150 Q223 84 286 66 Q345 47 369 109 Q395 170 367 253 Q345 283 329 281 L268 281Z" fill="#654236"/>
+ <path d="M253 358 Q246 283 278 248 L346 254 Q377 286 401 359Z" fill="url(#shirt)"/>
+ <path d="M289 257 L294 220 L335 219 L341 266 Q316 292 289 257Z" fill="#E9AD85"/>
+ <ellipse cx="312" cy="166" rx="56" ry="72" fill="#EEB88F"/>
+ <path d="M259 153 Q245 110 267 87 Q278 57 313 61 Q354 59 370 113 Q358 137 355 140 Q349 119 337 106 Q305 139 260 138Z" fill="#70483A"/>
+ <path d="M267 132 Q240 215 274 259 Q249 252 240 218 Q230 179 251 131" fill="#674338"/>
+ <path d="M351 129 Q380 212 359 258 Q380 240 385 197 Q379 150 361 119" fill="#674338"/>
+ <path d="M280 161 Q288 155 296 160 M323 158 Q330 152 338 157" fill="none" stroke="#634438" stroke-width="3.5" stroke-linecap="round"/>
+ <circle cx="291" cy="164" r="3.2" fill="#3D322D" stroke="none"/><circle cx="332" cy="162" r="3.2" fill="#3D322D" stroke="none"/>
+ <path d="M294 201 Q315 218 335 199" fill="none" stroke="#8A4943" stroke-width="4" stroke-linecap="round"/>
+ <circle cx="281" cy="190" r="9" fill="#ECA899" stroke="none" opacity=".5"/>
+ <circle cx="343" cy="187" r="9" fill="#ECA899" stroke="none" opacity=".5"/>
+ <!-- young boy -->
+ <path d="M102 357 Q94 299 137 285 L208 283 Q240 311 243 359Z" fill="#6FA4BA"/>
+ <rect x="156" y="263" width="28" height="40" rx="12" fill="#EAA77F"/>
+ <ellipse cx="170" cy="238" rx="50" ry="56" fill="#E9B083"/>
+ <path d="M117 230 Q105 193 131 182 Q137 155 165 173 Q192 160 202 182 Q225 183 220 214 Q210 222 207 241 Q193 223 188 213 Q153 224 133 212Z" fill="#493630"/>
+ <circle cx="150" cy="240" r="4" fill="#382A27" stroke="none"/><circle cx="188" cy="239" r="4" fill="#382A27" stroke="none"/>
+ <path d="M151 266 Q172 278 190 262" fill="none" stroke="#8C5044" stroke-width="3.5" stroke-linecap="round"/>
+ <circle cx="143" cy="255" r="7" fill="#ED9986" stroke="none" opacity=".45"/>
+ <!-- young girl -->
+ <path d="M380 355 Q368 299 407 279 L489 284 Q528 312 539 355Z" fill="#EFA18D"/>
+ <rect x="442" y="263" width="27" height="38" rx="11" fill="#EAB08E"/>
+ <path d="M408 283 Q383 253 396 214 Q391 175 449 176 Q507 164 513 230 Q513 281 491 293Z" fill="#6B4138"/>
+ <ellipse cx="455" cy="230" rx="49" ry="53" fill="#F3BE9C"/>
+ <path d="M408 217 Q401 178 444 179 Q464 159 498 185 Q516 202 508 221 Q488 215 482 198 Q451 219 425 209Z" fill="#664037"/>
+ <circle cx="441" cy="236" r="3.7" fill="#3D302E" stroke="none"/><circle cx="475" cy="235" r="3.7" fill="#3D302E" stroke="none"/>
+ <path d="M439 255 Q457 266 476 254" fill="none" stroke="#93574D" stroke-width="3" stroke-linecap="round"/>
+ <path d="M497 196 Q520 179 529 204 Q510 224 497 204Z" fill="#EDAFAE" stroke="none"/>
+ <circle cx="516" cy="202" r="6" fill="#F8DED1" stroke="none"/>
+</g>
+<g fill="#CEE3BA" opacity=".9">
+ <ellipse cx="37" cy="338" rx="62" ry="29"/><ellipse cx="594" cy="348" rx="81" ry="32"/>
+ <ellipse cx="555" cy="322" rx="41" ry="19"/><ellipse cx="14" cy="302" rx="40" ry="19"/>
+</g>
+<g fill="#80A78A" opacity=".8"><path d="M10 346 Q35 297 69 310 Q48 337 10 346Z"/><path d="M518 357 Q559 309 587 322 Q566 351 518 357Z"/></g>
+</svg>
