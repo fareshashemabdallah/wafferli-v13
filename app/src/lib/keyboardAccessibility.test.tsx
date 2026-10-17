@@ -27,10 +27,10 @@ describe("keyboard navigation and bilingual accessibility",()=>{
   const nav=screen.getAllByRole("navigation",{name:"Main"});
   expect(nav).toHaveLength(2);
   const links=nav.flatMap(n=>Array.from(n.querySelectorAll("a")));
-  expect(links).toHaveLength(12); // Six connected family sections on desktop and mobile.
+  expect(links).toHaveLength(8); // Four connected family pillars on desktop and mobile.
   for(const link of links)expect(link.className).toContain("focus-visible:ring-2");
-  expect(nav[0]?.querySelector('a[href="/explore/smartbuy"]')).toBeTruthy();
-  expect(nav[1]?.querySelector('a[href="/calendar"]')).toBeTruthy();
+  expect(nav[0]?.querySelector('a[href="/family"]')).toBeTruthy();
+  expect(nav[1]?.querySelector('a[href="/advisor"]')).toBeTruthy();
  });
  it("updates the skip wording for Arabic without changing saved finances",()=>{
   render(<I18nProvider><AppShell title="عائلتي">المحتوى</AppShell></I18nProvider>);
