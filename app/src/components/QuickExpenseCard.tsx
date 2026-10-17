@@ -36,10 +36,13 @@ export function QuickExpenseCard({onClose}:{onClose:()=>void}){
  const [note,setNote]=useState("");
  const [error,setError]=useState("");
  const saved=money.expenses.some(e=>e.id===id);
+ // Only a genuinely recorded category may be preselected; never guess from demo data.
+ const recentCategory=!money.demo?money.expenses.find(e=>e.status!=="planned"&&money.categories.some(c=>c.id===e.categoryId))?.categoryId:"";
+ const selectedCategoryId=categoryId||(recentCategory??"");
  const record=(e:FormEvent)=>{
   e.preventDefault();
   if(!ready||saved)return;
-  const draft={id,amount,categoryId,note};
+  const draft={id,amount,categoryId:selectedCategoryId,note};
   if(saveQuickExpense(money,draft,localToday())===money){
    setError(ar?"راجع المبلغ والفئة. يجب أن يكون المبلغ بالدينار مع منزلتين عشريتين كحد أقصى.":
     "Check the amount and category. Enter a positive JOD amount with at most two decimals.");
@@ -79,7 +82,7 @@ export function QuickExpenseCard({onClose}:{onClose:()=>void}){
    <div className="flex items-center gap-2 text-brand"><CheckCircle2 className="size-5"/><strong>
     {ar?"تم تسجيل المصروف مرة واحدة":"Expense recorded once"}
    </strong></div>
-   <p className="mt-2 text-sm">{fmtJOD(Number(amount))} · {tr(money.categories.find(c=>c.id===categoryId)?.name??"")}</p>
+   <p className="mt-2 text-sm">{fmtJOD(Number(amount))} · {tr(money.categories.find(c=>c.id===selectedCategoryId)?.name??"")}</p>
    <div className="mt-3 flex flex-wrap gap-3">
     <Button onClick={()=>{setId(uid());setAmount("");setNote("");setError("");}}>
      {ar?"مصروف جديد":"Add another"}
@@ -91,22 +94,23 @@ export function QuickExpenseCard({onClose}:{onClose:()=>void}){
   </div>:
   <form onSubmit={record} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr]">
    <label className="block text-sm font-medium">{ar?"المبلغ (دينار)":"Amount (JOD)"}
-    <Input required className="mt-1 bg-white" inputMode="decimal" type="number" min=".01" max="100000" step=".01"
+    <Input required autoFocus className="mt-1 bg-white" inputMode="decimal" type="number" min=".01" max="100000" step=".01"
      placeholder={ar?"مثلاً ٨٫٥٠":"e.g. 8.50"} value={amount} onChange={e=>setAmount(e.target.value)}/>
    </label>
    <label className="block text-sm font-medium">{ar?"فئة المصروف":"Category"}
-    <select required value={categoryId} onChange={e=>setCategoryId(e.target.value)}
+    <select required value={selectedCategoryId} onChange={e=>setCategoryId(e.target.value)}
      className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm">
      <option value="">{ar?"اختر الفئة":"Choose category"}</option>
      {money.categories.map(cat=><option key={cat.id} value={cat.id}>{tr(cat.name)}</option>)}
     </select>
+    {recentCategory&&<span className="mt-1 block text-[11px] text-muted-foreground">{ar?"الفئة الأخيرة محدّدة، تأكد أنها مناسبة.":"Last-used category selected. Please confirm it fits."}</span>}
    </label>
    <label className="block text-sm font-medium sm:col-span-2">{ar?"ملاحظة (اختياري)":"Note (optional)"}
     <Input className="mt-1 bg-white" maxLength={160} value={note} onChange={e=>setNote(e.target.value)}
      placeholder={ar?"مثلاً: مشتريات المدرسة":"e.g. School supplies"}/>
    </label>
    {error&&<p role="alert" className="text-sm text-destructive sm:col-span-2">{error}</p>}
-   <Button type="submit" className="min-h-11 sm:col-span-2" disabled={!amount||!categoryId}>
+   <Button type="submit" className="min-h-11 sm:col-span-2" disabled={!amount||!selectedCategoryId}>
     {ar?"احفظ المصروف":"Save expense"}
    </Button>
   </form>}
