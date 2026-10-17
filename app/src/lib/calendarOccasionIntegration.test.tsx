@@ -51,12 +51,12 @@ describe("Existing Calendar → Plans occasion integration",()=>{
   }});
   expect(get("money")).toEqual(money);
   expect(localStorage.getItem("wafferli.v13.familyTasks")).toBeNull();
-  fireEvent.click(await screen.findByRole("button",{name:"Add preparation tasks"}));
+  fireEvent.click(await screen.findByRole("button",{name:"Add / align preparation tasks"}));
   await waitFor(()=>expect(screen.getAllByRole("checkbox")).toHaveLength(3));
   const tasks=get<Array<{id:string;planId:string;status:string}>>("familyTasks");
   expect(tasks).toHaveLength(3);
   expect(tasks.every(x=>x.planId===plans[0]!.id)).toBe(true);
-  expect(screen.queryByRole("button",{name:"Add preparation tasks"})).not.toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Add / align preparation tasks"})).not.toBeInTheDocument();
   fireEvent.click(screen.getAllByRole("checkbox")[0]!);
   await waitFor(()=>expect(get<Array<{status:string}>>("familyTasks").filter(x=>x.status==="done")).toHaveLength(1));
   expect(get("money")).toEqual(money);
