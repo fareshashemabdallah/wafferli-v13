@@ -19,7 +19,7 @@ export const Route=createFileRoute("/calendar")({
 type Draft={id:string;title:string;date:string;kind:MomentKind;annual:boolean;time:string;note:string};
 const blank=(date:string):Draft=>({id:"",title:"",date,kind:"birthday",annual:true,time:"",note:""});
 function FamilyCalendarPage(){return <FamilyCalendarWorkspace/>;}
-export function FamilyCalendarWorkspace({embedded=false}:{embedded?:boolean}={}){
+export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:boolean;focusDate?:string}={}){
  const {lang}=useI18n(),ar=lang==="ar";
  const today=useMemo(()=>new Date(),[]);
  const todayKey=dateKey(today);
@@ -28,8 +28,9 @@ export function FamilyCalendarWorkspace({embedded=false}:{embedded?:boolean}={})
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const ready=eventsReady&&membersReady;
  const combined=useMemo(()=>allFamilyMoments(events,realFamilyMembers(members),ar),[events,members,ar]);
- const [month,setMonth]=useState(()=>new Date(today.getFullYear(),today.getMonth(),1,12));
- const [selected,setSelected]=useState(todayKey);
+ const initiallyFocused=focusDate?parseCalendarDate(focusDate):null;
+ const [month,setMonth]=useState(()=>new Date((initiallyFocused??today).getFullYear(),(initiallyFocused??today).getMonth(),1,12));
+ const [selected,setSelected]=useState(()=>initiallyFocused?dateKey(initiallyFocused):todayKey);
  const [editing,setEditing]=useState(false);
  const [form,setForm]=useState<Draft>(()=>blank(todayKey));
  const [error,setError]=useState("");
