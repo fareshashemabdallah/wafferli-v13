@@ -22,7 +22,7 @@ export function getFinancialReadiness(state:MoneyState,now=new Date(),plans:read
  const invalidBills=(state.commitments??[]).filter(c=>!c.dueDate||
   scheduleDates(c.dueDate,"once",c.dueDate,c.dueDate).length!==1).length;
  const billsReviewed=(state.commitments??[]).length>0?invalidBills===0:
-  state.noBillsConfirmedMonth===monthOf(now);
+  overview.hasBillSchedule;
  const caution=overview.forecast.overdueCount>0||
   overview.cashAfterBills!==null&&overview.cashAfterBills<0;
  const next:FinancialReadiness["next"]=!budgetReady?"income":!cashKnown?"cash":
