@@ -4,6 +4,7 @@ import {applyStarterBudget,needsStarterBudget} from "./starterBudget";
 import {emptyRealMoney} from "./moneyOverview";
 import {familyFinancialSummary,familyForecastCommitments} from "./familyFinancialCommitments";
 import {getFinancialReadiness} from "./financialReadiness";
+import {occasionBudgetAdvice} from "./occasionPreparation";
 import {memberBirthdayMoments} from "./familyCalendar";
 import type {MoneyState,Member} from "./money";
 import type {FamilyPlan} from "./familyPlans";
@@ -72,6 +73,20 @@ describe("Dabberna financial reality and respectful data collection",()=>{
   });
   const byDate=assessFinancialReality({...m,cashOnHand:100,cashReserve:20},[occasion],today);
   expect(byDate.forecastCashRisk).toBe(true);
+ });
+ it("does not infer that all essential bills have been reviewed from a scheduled birthday alone",()=>{
+  const money=real(1600,800,250);
+  const r=getFinancialReadiness(money,today,[occasion]);
+  expect(r.billsReviewed).toBe(false);
+  expect(r.next).toBe("cash");
+  const withCash={...money,cashOnHand:1000,cashUpdatedAt:"2026-10-17"};
+  expect(getFinancialReadiness(withCash,today,[occasion]).next).toBe("bills");
+  expect(getFinancialReadiness({...withCash,noBillsConfirmedMonth:"2026-10"},today,[occasion]).billsReviewed).toBe(true);
+ });
+ it("recognizes zero income in event budget advice as a genuine essential-cost shortfall",()=>{
+  const money=real(0,250,0);
+  const a=occasionBudgetAdvice(occasion.occasionPreparation!,money,today);
+  expect(a.status).toBe("essentials-gap");
  });
  it("stores only a birthday month and day when parents do not supply a birth year",()=>{
   const person:Member={id:"child1",name:"Child",role:"child",ageGroup:"",prefs:"",birthdayMonthDay:"02-29"};
