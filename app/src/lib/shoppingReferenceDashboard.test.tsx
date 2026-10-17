@@ -15,7 +15,8 @@ const draw=()=>render(<I18nProvider><ShoppingReferenceDashboard/></I18nProvider>
 describe("shopping design reference and local cartoon editor",()=>{
  it("matches visual structure without suggesting fabricated verified offers",async()=>{
   draw();
-  expect(screen.getByRole("heading",{level:1})).toHaveTextContent(/Sophia.*Wishlist/);
+  expect(screen.getByRole("heading",{level:1})).toHaveTextContent(/Shopping.*Wishlist/);
+  expect(screen.getByText("Sophia’s Wishlist")).toBeInTheDocument();
   expect(screen.getByRole("img",{name:/Cartoon of Sophia/})).toBeInTheDocument();
   expect(screen.getByRole("navigation",{name:"Shopping categories"}).querySelectorAll("a")).toHaveLength(6);
   expect(screen.getByRole("group",{name:"Wishlist filters"}).querySelectorAll("button")).toHaveLength(7);
@@ -29,7 +30,7 @@ describe("shopping design reference and local cartoon editor",()=>{
   fireEvent.click(screen.getByRole("button",{name:"Change Theme & Picture"}));
   const name=screen.getByRole("textbox",{name:"Name before Wishlist"});
   fireEvent.change(name,{target:{value:"Faris"}});
-  await waitFor(()=>expect(screen.getByRole("heading",{level:1})).toHaveTextContent("Faris’s Wishlist"));
+  await waitFor(()=>expect(screen.getByText("Faris’s Wishlist")).toBeInTheDocument());
   fireEvent.click(screen.getByRole("button",{name:"Blue"}));
   await waitFor(()=>expect(JSON.parse(localStorage.getItem("wafferli.v13.shoppingWishlistTheme")??"null").preset).toBe("blue"));
   expect(JSON.parse(localStorage.getItem("wafferli.v13.shoppingWishlistOwner")??"null")).toBe("Faris");
