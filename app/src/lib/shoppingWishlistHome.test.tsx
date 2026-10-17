@@ -46,7 +46,7 @@ describe("Dabberna illustrated family shopping",()=>{
   draw();
   fireEvent.change(screen.getByRole("textbox",{name:"Wish or item"}),{target:{value:"School backpack"}});
   fireEvent.change(screen.getByRole("spinbutton",{name:/Budget/}),{target:{value:"30"}});
-  fireEvent.click(screen.getByRole("button",{name:"Add",exact:true}));
+  fireEvent.click(screen.getByRole("button",{name:/^Add$/}));
   await waitFor(()=>expect(screen.getByText("School backpack")).toBeInTheDocument());
   expect(screen.getByText("Your budget ceiling: 30 JOD")).toBeInTheDocument();
   expect(screen.getByText("No price recorded or verified")).toBeInTheDocument();
