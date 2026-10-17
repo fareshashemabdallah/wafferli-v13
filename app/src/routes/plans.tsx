@@ -12,6 +12,7 @@ import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,makeFamilyPlan,markPlanComplete,moneyAm
 import {PlanDecisionPanel} from "@/components/PlanDecisionPanel";
 import {checkFamilyPlan,postponeFlexiblePlan,markPlanDoneWithoutCost,addPlanActualCost} from "@/lib/familyPlanCheckIn";
 import {FamilyNextActions} from "@/components/FamilyNextActions";
+import {OccasionPreparationSection} from "@/components/OccasionPreparationSection";
 import {localToday} from "@/lib/cashflow";
 export const Route=createFileRoute("/plans")({
  head:()=>({meta:[{title:"My Plans — Dabberna"},{name:"description",content:"Plan meaningful purchases, outings and occasions in one private place."}]}),
@@ -189,6 +190,7 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
        </div>;
       })}
     </div>}
+    {currentPlan.kind==="occasion"&&<OccasionPreparationSection planId={currentPlan.id}/>}
     {currentPlan.status!=="completed"&&<>
       <div className="mt-5 rounded-xl bg-[#F4F7F0] p-4">
        <h3 className="font-semibold">{ar?"الخطوة التالية: قارن الخيارات":"Next step: compare suitable options"}</h3>
