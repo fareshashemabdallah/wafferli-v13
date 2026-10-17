@@ -247,6 +247,7 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
   const [type, setType] = useState<CatType>(initial.type);
   const [planned, setPlanned] = useState(initial.planned ? String(initial.planned) : "");
   const [priority,setPriority]=useState<Category["priority"]>(initial.priority);
+  const [confirmed,setConfirmed]=useState(initial.amountConfidence==="confirmed");
   const [err, setErr] = useState("");
   return (
     <form
@@ -256,7 +257,7 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
         const p = planned === "" || planned === "0" ? 0 : parseAmount(planned, 100000);
         if (!name.trim()) return setErr(tr("Name is required."));
         if (p === null) return setErr(tr("Planned amount must be 0 or a positive number."));
-        const next:Category={...initial,id:initial.id,name:name.trim().slice(0,40),type,planned:p,amountConfidence:"estimate"};
+        const next:Category={...initial,id:initial.id,name:name.trim().slice(0,40),type,planned:p,amountConfidence:confirmed?"confirmed":"estimate"};
         if(priority)next.priority=priority;else delete next.priority;
         onSave(next);
       }}
@@ -279,6 +280,7 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
        </NativeSelect>
       </Field>
       <p className="text-xs text-muted-foreground sm:col-span-2">{tr("Fixed, variable and periodic describe timing, not importance. Dabberna will only suggest adjustments to categories you explicitly mark flexible.")}</p>
+      <label className="flex items-center gap-2 text-xs sm:col-span-2"><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>{tr("I have checked this monthly estimate")}</label>
       <div className="flex items-end gap-2">
         <Button type="submit" className="h-11 flex-1">{tr("Save")}</Button>
         <Button type="button" variant="outline" className="h-11" onClick={onCancel}>{tr("Cancel")}</Button>
