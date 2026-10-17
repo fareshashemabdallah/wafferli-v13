@@ -17,7 +17,7 @@ import {buildTodaySignals} from "@/lib/todaySignals";
 
 /** One parent-facing briefing replaces parallel attention and decision panels
  * on Today. All inputs remain local; none is uploaded or silently altered. */
-export function TodayFamilyBrief(){
+export function TodayFamilyBrief({compact=false}:{compact?:boolean}={}){
  const {lang}=useI18n(),ar=lang==="ar";
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
@@ -45,7 +45,7 @@ export function TodayFamilyBrief(){
  if(!signals.length)return null;
  const first=signals[0]!;
  const other=signals.slice(1);
- return <section className="mt-5 rounded-2xl border border-[#DCE7DC] bg-[#F5F9F3] p-4 sm:p-5"
+ return <section className="rounded-[1.55rem] border border-[#F0E4E9] bg-white/95 p-4 shadow-[0_16px_35px_-28px_rgba(57,40,64,.20)] sm:p-5"
    aria-label={ar?"ملخص يوم العائلة":"Your family today"}>
   <div className="flex items-center gap-3">
    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-brand">
@@ -78,7 +78,7 @@ export function TodayFamilyBrief(){
     </div>
    </div>
   </article>
-  {other.length>0&&<div className="mt-3">
+  {!compact&&other.length>0&&<div className="mt-3">
    <button type="button" aria-expanded={more} onClick={()=>setMore(v=>!v)}
     className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-[#DDE9DA] bg-white px-4 py-2 text-sm font-semibold text-brand">
     {ar?"خطوات أخرى ممكنة":"Other useful steps"} ({other.length})
@@ -101,7 +101,7 @@ export function TodayFamilyBrief(){
     </article>)}
    </div>}
   </div>}
-  <details className="mt-3">
+  {!compact&&<details className="mt-3">
    <summary className="cursor-pointer py-2 text-xs font-semibold text-brand">
     {ar?"تذكيرات التقويم والخيارات الإضافية":"Calendar reminders and additional options"}
    </summary>
@@ -109,9 +109,9 @@ export function TodayFamilyBrief(){
    <Link to="/advisor" className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-brand underline">
     {ar?"اسأل دبّرنا عن قرار عائلي":"Ask Dabberna about a family decision"} →
    </Link>
-  </details>
-  <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+  </details>}
+  {!compact&&<p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
    {ar?"الخطوات تعتمد على معلومات هذا الجهاز فقط. لا يوجد تحقق بنكي أو أسعار مباشرة أو إشعارات خلفية.":"Guidance is based only on information you saved on this device; not bank-verified, live-priced or background notifications."}
-  </p>
+  </p>}
  </section>;
 }
