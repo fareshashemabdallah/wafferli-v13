@@ -4,7 +4,7 @@ import {CalendarClock,CheckCircle2,Gift,Plus,Wallet,AlertTriangle,ListChecks} fr
 import {useI18n} from "@/lib/i18n";
 import {fmtJOD,uid,useLocalState,writeLocal} from "@/lib/storage";
 import {type MomentOccurrence} from "@/lib/familyCalendar";
-import {planKey} from "@/lib/occasionAdvisor";
+import {planKey,type OccasionPlans} from "@/lib/occasionAdvisor";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,makeFamilyPlan,type FamilyPlan,type OccasionPreparation,type OccasionCost} from "@/lib/familyPlans";
 import {sampleMoney,type MoneyState} from "@/lib/money";
 import {FAMILY_TASKS_KEY,makeFamilyTask,setTaskComplete,type FamilyTask} from "@/lib/familyTasks";
@@ -25,18 +25,21 @@ export function OccasionPreparationSection({event,planId}:{event?:MomentOccurren
  const {lang}=useI18n(),ar=lang==="ar";
  const t=(en:string,arabic:string)=>ar?arabic:en;
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [olderOccasions,,oldReady]=useLocalState<OccasionPlans>("occasionPlans",{});
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
  const [,,activeReady]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
  const [status,setStatus]=useState("");
  const ref=event?"occasion:"+planKey(event):null;
  const plan=planId?plans.find(p=>p.id===planId):plans.find(p=>p.sourceRef===ref);
- const ready=plansReady&&moneyReady&&tasksReady&&activeReady;
+ const ready=plansReady&&moneyReady&&tasksReady&&activeReady&&oldReady;
  const create=()=>{
   if(!event||!ready)return;
   const existing=plans.find(p=>p.sourceRef===ref);
   if(existing){writeLocal(ACTIVE_PLAN_KEY,existing.id);return;}
-  const candidate=makeFamilyPlan({id:uid(),kind:"occasion",title:event.title,date:event.occursOn,sourceRef:ref!});
+  const legacyCeiling=olderOccasions[planKey(event)]?.budgetJod;
+  const candidate=makeFamilyPlan({id:uid(),kind:"occasion",title:event.title,date:event.occursOn,sourceRef:ref!,
+   ...(typeof legacyCeiling==="number"&&Number.isFinite(legacyCeiling)&&legacyCeiling>=0&&legacyCeiling<=100000?{budgetJod:legacyCeiling}:{})});
   if(!candidate)return;
   if(!writeLocal(FAMILY_PLANS_KEY,[candidate,...plans])){
    setStatus(t("Unable to save the plan on this device.","تعذّر حفظ الخطة على هذا الجهاز."));return;
@@ -72,7 +75,7 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
  const [celebrationDate,setCelebrationDate]=useState(initial.celebration.dueDate);
  const [extrasDate,setExtrasDate]=useState(initial.extras.dueDate);
  const [error,setError]=useState(""),[saved,setSaved]=useState("");
- const [showMore,setShowMore]=useState(false);
+ const [showMore,setShowMore]=useState(initial.extras.amountJod>0);
  const [allPlans]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [allTasks]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
  const savedPreparation=plan.occasionPreparation;
@@ -188,6 +191,19 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
      <p className="text-sm font-bold">{t("Planned occasion cost","التكلفة المخططة للمناسبة")}</p>
      <strong className="text-lg tabular-nums">{fmtJOD(funding.totalJod)}</strong>
     </div>
+    {plan.budgetJod!==undefined&&funding.totalJod>plan.budgetJod&&plan.status!=="completed"&&
+     <button type="button" onClick={()=>{
+      const current=allPlans.find(x=>x.id===plan.id);
+      if(!current)return;
+      const adjusted={...current,budgetJod:funding.totalJod,updatedAt:new Date().toISOString()};
+      if(writeLocal(FAMILY_PLANS_KEY,allPlans.map(x=>x.id===plan.id?adjusted:x))){
+       setSaved(t("Plan spending ceiling updated to match the saved breakdown. Our Money is unchanged.",
+        "تم تحديث سقف الخطة ليتوافق مع التفاصيل المحفوظة، دون تغيير سجلات المالية."));
+       setError("");
+      }else setError(t("Unable to update the plan ceiling.","تعذّر تحديث سقف الخطة."));
+     }} className="mt-2 min-h-11 rounded-xl border border-[#B67A69] px-3 text-xs font-bold text-[#8F5D50]">
+      {t("Set plan ceiling to this estimate","اجعل سقف الخطة يساوي هذا التقدير")}
+     </button>}
     {plan.budgetJod!==undefined&&funding.totalJod>plan.budgetJod&&<p role="status" className="mt-2 text-xs text-[#A46C38]">
      <AlertTriangle className="me-1 inline size-4"/>{t(
       "The breakdown exceeds your existing plan ceiling of ","التفاصيل تتجاوز سقف الخطة السابق: ")}{fmtJOD(plan.budgetJod)}.
