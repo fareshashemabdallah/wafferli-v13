@@ -19,11 +19,22 @@ describe("opt-in illustrated landing experience",()=>{
   expect(image).toHaveAttribute("src",expect.stringContaining("landing-family-characters.avif"));
   expect(screen.getByRole("heading",{name:/A calmer, brighter tomorrow for your family/})).toBeInTheDocument();
   const nav=screen.getByRole("navigation",{name:"Explore family features"});
-  expect(nav.querySelectorAll("a")).toHaveLength(6);
+  const features=[...nav.querySelectorAll("a")];
+  expect(features).toHaveLength(6);
+  expect(features[0]?.getAttribute("href")?.endsWith("#/")).toBe(true);
+  expect(features[2]).toHaveAttribute("href","/explore/smartbuy");
+  expect(screen.getByRole("link",{name:"Dabberna home"}).getAttribute("href")?.endsWith("#/")).toBe(true);
   expect(screen.getAllByRole("link",{name:/Ask Dabberna/}).length).toBeGreaterThan(0);
   expect(screen.getAllByRole("link",{name:/Back to current home|Current homepage/}).length).toBeGreaterThan(0);
   expect(screen.queryByText("1,250 JOD")).not.toBeInTheDocument();
   expect(screen.queryByText("$1,250")).not.toBeInTheDocument();
+ });
+ it("opens the mobile menu with real destination links",()=>{
+  draw();
+  fireEvent.click(screen.getByRole("button",{name:"Menu"}));
+  const mobile=screen.getByRole("navigation",{name:"Mobile menu"});
+  expect(mobile.querySelectorAll("a")).toHaveLength(4);
+  expect(mobile.querySelector('a[href="/plans"]')).toBeTruthy();
  });
  it("keeps demo finance figures out of the new family page",async()=>{
   draw();
