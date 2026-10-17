@@ -7,6 +7,14 @@ export const FAMILY_PLANS_KEY="familyPlans";
 export const ACTIVE_PLAN_KEY="activeFamilyPlanId";
 export type PlanKind="purchase"|"outing"|"occasion"|"other";
 export type PlanStatus="planning"|"decided"|"completed";
+export type OccasionCost={amountJod:number;dueDate:string};
+export type OccasionPreparation={
+ gift:OccasionCost&{description:string};
+ celebration:OccasionCost;
+ extras:OccasionCost;
+};
+/** Costs and dates belong to the existing plan. No second occasion record,
+ * automated savings transfer, bill or paid expense is created. */
 export type FamilyPlan={
  id:string;title:string;kind:PlanKind;status:PlanStatus;
  createdAt:string;updatedAt:string;date?:string;budgetJod?:number;
@@ -15,6 +23,7 @@ export type FamilyPlan={
  sourceRef?:string;
  /** Optional link to a named Money savings goal; linking never spends money. */
  savingsGoalId?:string;
+ occasionPreparation?:OccasionPreparation;
 };
 const value=(n:unknown):n is number=>typeof n==="number"&&Number.isFinite(n)&&n>=0&&n<=100000;
 const dateOk=(s:string)=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s+"T12:00:00"));

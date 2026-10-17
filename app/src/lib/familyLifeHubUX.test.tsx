@@ -17,7 +17,7 @@ vi.mock("@/routes/plans",()=>({
  PlansWorkspace:({embedded}:{embedded?:boolean})=><section data-testid="embedded-plans" data-embedded={String(embedded)}>Real saved plans workspace</section>
 }));
 vi.mock("@/routes/calendar",()=>({
- FamilyCalendarWorkspace:({embedded}:{embedded?:boolean})=><section data-testid="embedded-calendar" data-embedded={String(embedded)}>Real calendar workspace</section>
+ FamilyCalendarWorkspace:({embedded,focusDate}:{embedded?:boolean;focusDate?:string})=><section data-testid="embedded-calendar" data-embedded={String(embedded)} data-focus={focusDate??""}>Real calendar workspace</section>
 }));
 vi.mock("@/components/FamilyTasksPanel",()=>({
  FamilyTasksPanel:()=> <section data-testid="embedded-tasks">Real family task editor</section>
@@ -58,9 +58,11 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
   await waitFor(()=>expect(screen.getByText("School recital")).toBeInTheDocument());
   expect(screen.getByText("Visit grandparents")).toBeInTheDocument();
   expect(screen.queryByText("Partner (sample)")).not.toBeInTheDocument();
-  const cards=screen.getAllByText("1");
-  expect(cards.length).toBeGreaterThan(0);
+  expect(screen.getByText("Family members").previousElementSibling).toHaveTextContent("1");
   expect(screen.getByRole("link",{name:"Manage family members"})).toHaveAttribute("href","/space");
+  fireEvent.click(screen.getByRole("button",{name:"Prepare School recital"}));
+  expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-focus",localDate);
+  expect(screen.queryByTestId("embedded-plans")).not.toBeInTheDocument();
  });
  it("keeps specialist family experiences available but not as extra global tabs",()=>{
   draw();

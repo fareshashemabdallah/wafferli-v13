@@ -28,13 +28,15 @@ export function FamilyLifePage(){
  const {lang}=useI18n(),ar=lang==="ar";
  const label=(en:string,arabic:string)=>ar?arabic:en;
  const [view,setView]=useState<View>("overview");
+ const [calendarFocus,setCalendarFocus]=useState<string|undefined>();
+ const openFamilyDate=(day:string)=>{setCalendarFocus(day);setView("calendar");};
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
  const ready=membersReady&&momentsReady&&plansReady&&tasksReady;
  const realMembers=realFamilyMembers(members);
- const upcoming=upcomingMoments(allFamilyMoments(moments,realMembers,ar),new Date(),60);
+ const upcoming=upcomingMoments(allFamilyMoments(moments,realMembers,ar),new Date(),180);
  const activePlans=upcomingFamilyPlans(plans.filter(p=>p.status!=="completed"),new Date(),5);
  const activeTasks=taskSummary(tasks);
  const card="rounded-[1.55rem] border border-[#F0E4E9] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,40,64,.20)] sm:p-5";
@@ -74,7 +76,7 @@ export function FamilyLifePage(){
       </div>
       <div className="rounded-2xl bg-[#F0F5FB] p-3 text-center">
        <strong className="text-xl tabular-nums">{ready?upcoming.length:"—"}</strong>
-       <p className="mt-1 text-[11px] text-[#68748A]">{label("Dates next 60 days","مواعيد خلال ٦٠ يوماً")}</p>
+       <p className="mt-1 text-[11px] text-[#68748A]">{label("Dates next 6 months","مواعيد خلال ٦ أشهر")}</p>
       </div>
       <div className="rounded-2xl bg-[#EFF8F2] p-3 text-center">
        <strong className="text-xl tabular-nums">{ready?activeTasks.open:"—"}</strong>
@@ -88,11 +90,12 @@ export function FamilyLifePage(){
        <CalendarDays className="size-5 text-[#668DB5]"/><h2 className="text-base font-extrabold">{label("Upcoming dates","المواعيد القادمة")}</h2>
       </div>
       {!ready?<p className="mt-3 text-sm text-[#727C91]">{label("Loading family records…","جارٍ تحميل بيانات العيلة…")}</p>
-       :upcoming.length===0?<p className="mt-3 text-sm text-[#727C91]">{label("No saved dates in the next 60 days.","ما في مواعيد مسجّلة خلال الستين يوم المقبلة.")}</p>
+       :upcoming.length===0?<p className="mt-3 text-sm text-[#727C91]">{label("No saved dates in the next six months.","ما في مواعيد مسجّلة خلال الأشهر الستة المقبلة.")}</p>
        :<ol className="mt-3 space-y-2">{upcoming.slice(0,3).map(item=><li key={item.id+"-"+item.occursOn}
         className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-[#F8F9FC] px-3 py-2">
          <span className="min-w-0 truncate text-sm font-semibold">{item.title}</span>
          <span className="shrink-0 text-xs text-[#728094]">{formatMomentDate(item.occursOn,ar)}</span>
+         <button type="button" onClick={()=>openFamilyDate(item.occursOn)} aria-label={label("Prepare "+item.title,"حضّر "+item.title)} className="shrink-0 rounded-lg bg-white px-2 py-2 text-xs font-semibold text-[#B15380] underline">{label("Prepare","حضّر")}</button>
         </li>)}</ol>}
       <button onClick={()=>setView("calendar")} type="button" className="mt-3 inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#628BB4] underline">
        {label("Open family calendar","افتح تقويم العيلة")}<ChevronRight className="size-4 rtl:rotate-180"/>
@@ -138,7 +141,7 @@ export function FamilyLifePage(){
      </div>
     </details>
    </div>}
-   {view==="calendar"&&<FamilyCalendarWorkspace embedded/>}
+   {view==="calendar"&&<FamilyCalendarWorkspace key={calendarFocus??"calendar"} embedded {...(calendarFocus?{focusDate:calendarFocus}:{})}/>}
    {view==="plans"&&<PlansWorkspace embedded/>}
    {view==="tasks"&&<FamilyTasksPanel/>}
    <p className="px-1 text-[11px] leading-relaxed text-[#7B8491]">
