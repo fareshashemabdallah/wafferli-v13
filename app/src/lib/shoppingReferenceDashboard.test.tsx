@@ -71,8 +71,9 @@ describe("shopping design reference and local cartoon editor",()=>{
  });
  it("presents four accessible family navigation choices, without sample people",()=>{
   render(<I18nProvider><ShoppingExperienceShell><p>Reference shopping content</p></ShoppingExperienceShell></I18nProvider>);
-  expect(screen.getByRole("navigation",{name:"Main"}).querySelectorAll("a")).toHaveLength(4);
-  expect(screen.getByRole("navigation",{name:"Main"}).querySelectorAll("a")).toHaveLength(4);
+  const navs=screen.getAllByRole("navigation",{name:"Main"});
+  expect(navs).toHaveLength(2);
+  for(const nav of navs)expect(nav.querySelectorAll("a")).toHaveLength(4);
   expect(screen.getByRole("link",{name:"Family & settings"})).toHaveAttribute("href","/space");
   expect(screen.queryByRole("navigation",{name:"Related family actions"})).not.toBeInTheDocument();
   expect(screen.queryByText("All Family")).not.toBeInTheDocument();
