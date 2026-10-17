@@ -2,9 +2,10 @@ import {CheckCircle2,Info,ShieldAlert} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {getFinancialReadiness,monthOf} from "@/lib/financialReadiness";
 import type {MoneyState} from "@/lib/money";
-type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(tab:"overview"|"spending"|"planning")=>void};
-export function MoneyReadinessCard({state,setState,goTo}:Props){
- const {lang}=useI18n(),ar=lang==="ar",r=getFinancialReadiness(state);
+import type {FamilyPlan} from "@/lib/familyPlans";
+type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(tab:"overview"|"spending"|"planning")=>void;plans?:readonly FamilyPlan[]};
+export function MoneyReadinessCard({state,setState,goTo,plans=[]}:Props){
+ const {lang}=useI18n(),ar=lang==="ar",r=getFinancialReadiness(state,new Date(),plans);
  if(state.demo)return null;
  const title=r.level==="ready"?(ar?"الأرقام جاهزة للتقدير":"Figures ready for an estimate"):
   r.level==="caution"?(ar?"هناك التزامات تحتاج مراجعة":"Review upcoming commitments"):
