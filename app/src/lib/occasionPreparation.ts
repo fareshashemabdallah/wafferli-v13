@@ -71,7 +71,7 @@ export function occasionBudgetAdvice(preparation:OccasionPreparation,money:Money
  if(!money.categories.length||money.income<=0&&!money.incomeSources?.length&&!money.incomeKnown)
   return {status:"missing-plan" as const,...unknown};
  const summary=computeMoney(money,now);
- if(!Number.isFinite(summary.monthlyIncome)||summary.monthlyIncome<=0)
+ if(!Number.isFinite(summary.monthlyIncome)||(summary.monthlyIncome<=0&&!money.incomeKnown))
   return {status:"missing-plan" as const,...unknown};
  // Household-defined priorities, never category-name guesses or a default percentage cut.
  const essentials=money.categories.filter(c=>c.priority==="essential")
