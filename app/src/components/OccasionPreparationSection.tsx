@@ -112,11 +112,11 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
  const funding=prep?occasionFunding(prep):null;
  const advice=prep?occasionBudgetAdvice(prep,money):null;
  const linked=tasks.filter(x=>x.planId===plan.id);
- const taskSpecs: {key:OccasionCostKind;title:string;date:string}[]=prep?[
+ const taskSpecs: {key:OccasionCostKind;title:string;date:string}[]=prep?([
   {key:"gift",title:t("Choose and arrange the gift","اختيار الهدية وترتيبها"),date:prep.gift.dueDate},
   {key:"celebration",title:t("Confirm the celebration arrangements","تأكيد ترتيبات الاحتفال"),date:prep.celebration.dueDate},
   {key:"extras",title:t("Prepare cake and final details","تجهيز الكعكة والتفاصيل"),date:prep.extras.dueDate}
- ].filter(x=>prep[x.key].amountJod>0):[];
+ ] as {key:OccasionCostKind;title:string;date:string}[]).filter(x=>prep[x.key].amountJod>0):[];
  const addTasks=()=>{
   const now=new Date();
   const missing=taskSpecs.filter(x=>!allTasks.some(a=>a.id==="occasion-"+x.key+"-"+plan.id));
