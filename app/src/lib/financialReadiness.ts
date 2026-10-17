@@ -21,8 +21,9 @@ export function getFinancialReadiness(state:MoneyState,now=new Date(),plans:read
  const cashFresh=!!last&&elapsed>=-86400000&&elapsed<=35*86400000;
  const invalidBills=(state.commitments??[]).filter(c=>!c.dueDate||
   scheduleDates(c.dueDate,"once",c.dueDate,c.dueDate).length!==1).length;
+ // A birthday bill does not prove that rent, utilities or other necessities were reviewed.
  const billsReviewed=(state.commitments??[]).length>0?invalidBills===0:
-  overview.hasBillSchedule;
+  state.noBillsConfirmedMonth===monthOf(now);
  const caution=overview.forecast.overdueCount>0||
   overview.cashAfterBills!==null&&overview.cashAfterBills<0;
  const next:FinancialReadiness["next"]=!budgetReady?"income":!cashKnown?"cash":
