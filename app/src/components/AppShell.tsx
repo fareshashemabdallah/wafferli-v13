@@ -1,127 +1,15 @@
-import { Link } from "@tanstack/react-router";
-import { CalendarCheck2, CalendarDays, ChevronDown, Home, Info, Languages, ShoppingBasket, Sparkles, UserRound, Wallet } from "lucide-react";
-import type { ReactNode } from "react";
-import { useI18n } from "@/lib/i18n";
-import { writeLocal } from "@/lib/storage";
-import { Logo } from "./Logo";
-import { ConnectivityNotice } from "./ConnectivityNotice";
-import { LocalSaveNotice } from "./LocalSaveNotice";
+import type {ReactNode} from "react";
+import {UnifiedFamilyShell} from "./UnifiedFamilyShell";
 
-// Parent navigation is organized by outcomes, not by separate data-entry tools.
-// Money, Family, Calendar, Discover and specialist tools stay available from
-// contextual actions and Family settings, without changing their stored data.
-const tabs: {to:"/"|"/advisor"|"/plans";en:string;ar:string;icon:typeof Home;exact?:boolean}[]=[
- {to:"/",en:"Today",ar:"اليوم",icon:Home,exact:true},
- {to:"/advisor",en:"Ask Dabberna",ar:"اسأل دبّرنا",icon:Sparkles},
- {to:"/plans",en:"Our Plans",ar:"خططنا",icon:CalendarCheck2}
-];
-
-function LangToggle(){
- const {lang,setLang}=useI18n();
- return <button type="button" onClick={()=>setLang(lang==="en"?"ar":"en")}
-  className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#DDE5DB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 bg-white/80 px-3 text-xs font-semibold text-brand shadow-sm transition hover:bg-white"
-  aria-label={lang==="en"?"Switch to Arabic":"Switch to English"}>
-  <Languages className="size-4" aria-hidden="true"/>{lang==="en"?"العربية":"English"}
- </button>;
-}
-
-export function AppShell({children,title,homeLayout=false}:{children:ReactNode;title?:string;homeLayout?:boolean}){
- const {t,lang}=useI18n();
- return <div className="min-h-dvh md:flex">
-  <a href="#dabberna-main-content" className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-[100] focus:rounded-xl focus:bg-brand focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-white focus:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#B9D8BB]">{lang==="ar"?"انتقل إلى المحتوى الرئيسي":"Skip to main content"}</a>
-  {!homeLayout&&<aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-e border-[#E4E9E0] bg-[#FFFEFA]/95 px-5 pb-6 pt-8 md:flex">
-   <Link to="/" aria-label={lang==="ar"?"الصفحة الرئيسية لدبّرنا":"Dabberna home"} className="inline-flex rounded-lg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"><Logo className="scale-105 origin-left"/></Link>
-   <p className="mt-3 max-w-44 text-xs leading-relaxed text-muted-foreground">{lang==="ar"?"أنفق بذكاء، وعِش براحة.":"Spend wisely. Live well."}</p>
-   <div className="mt-8 premium-divider"/>
-   <nav className="mt-5 flex flex-col gap-1.5" aria-label={lang==="ar"?"التنقل الرئيسي":"Main"}>
-    {tabs.map(({to,en,ar,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
-      onClick={()=>{if(to!=="/")writeLocal("homeIntroDone",true);}}
-      className="flex min-h-12 items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 px-3 text-sm font-semibold text-muted-foreground transition hover:bg-[#F1F5EF] data-[status=active]:bg-[#E6F0E7] data-[status=active]:text-brand">
-      <Icon className="size-5" aria-hidden="true"/>{lang==="ar"?ar:en}
-    </Link>)}
-   </nav>
-   <div className="mt-6 rounded-[1.4rem] bg-[#EDF3EA] p-4">
-    <Sparkles className="size-5 text-brand" aria-hidden="true"/>
-    <p className="mt-2 text-sm font-semibold">{lang==="ar"?"ساعدني أختار":"Help me decide"}</p>
-    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{lang==="ar"?"تحقق من قرار إنفاق قبل الالتزام به.":"Check a spending decision before you commit."}</p>
-    <Link to="/advisor" className="mt-3 inline-flex min-h-11 items-center rounded-full bg-brand px-4 text-xs font-semibold text-white focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2">{lang==="ar"?"ابدأ":"Get started"} →</Link>
-   </div>
-   <div className="mt-auto flex items-center justify-between gap-2">
-    <Link to="/space" className="flex min-h-11 items-center gap-1.5 rounded-lg text-xs font-medium text-brand"><UserRound className="size-4"/>{lang==="ar"?"العائلة والإعدادات":"Family & settings"}</Link>
-    <Link to="/about" className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-brand focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"><Info className="size-4"/>{t("about")}</Link>
-    <LangToggle/>
-   </div>
-  </aside>}
-  <div className="flex min-w-0 flex-1 flex-col">
-   {homeLayout&&<header className="sticky top-0 z-30 hidden border-b border-[#E3E9E0] bg-[#FFFEFB]/95 backdrop-blur-xl md:block">
-    <div className="mx-auto flex h-20 max-w-[1460px] items-center justify-between gap-4 px-6 xl:px-10">
-     <Link to="/" className="inline-flex min-w-0 items-center gap-2 rounded-lg" aria-label={lang==="ar"?"دبّرنا الرئيسية":"Dabberna home"}>
-      <Logo className="shrink-0"/><span className="hidden text-xl font-bold text-[#1A6051] xl:inline" dir="ltr">| {lang==="ar"?"Dabberna":"دبّرنا"}</span>
-     </Link>
-     <nav aria-label={lang==="ar"?"التنقل الرئيسي":"Main"} className="flex items-center gap-1">
-      {tabs.map(({to,en,ar,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
-       className="flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-semibold text-[#526D65] hover:bg-[#EEF7ED] data-[status=active]:bg-[#DDF0DF] data-[status=active]:text-[#196445]">
-       <Icon className="size-4"/>{lang==="ar"?ar:en}
-      </Link>)}
-      <details className="group relative ms-2">
-       <summary className="flex min-h-11 cursor-pointer items-center gap-1 rounded-full px-3 text-sm font-semibold text-[#526D65] hover:bg-[#EEF7ED]">
-        {lang==="ar"?"المزيد":"More"}<ChevronDown className="size-4"/>
-       </summary>
-       <div className="absolute end-0 top-full z-40 mt-2 w-56 rounded-2xl border border-[#DCE8DD] bg-white p-2 shadow-lg">
-        {([
-         {to:"/space" as const,en:"My Family",ar:"عائلتي",Icon:UserRound},
-         {to:"/money" as const,en:"Money & Bills",ar:"المال والفواتير",Icon:Wallet},
-         {to:"/calendar" as const,en:"Family Calendar",ar:"تقويم العيلة",Icon:CalendarDays},
-         {to:"/explore/smartbuy" as const,en:"Shopping & Wishlist",ar:"المشتريات",Icon:ShoppingBasket},
-         {to:"/about" as const,en:"About & privacy",ar:"حول دبّرنا والخصوصية",Icon:Info}
-        ]).map(({to,en,ar,Icon})=><Link key={to} to={to}
-         className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm text-brand hover:bg-[#F1F7EF]">
-         <Icon className="size-4"/>{lang==="ar"?ar:en}</Link>)}
-       </div>
-      </details>
-     </nav>
-     <div className="flex shrink-0 items-center gap-2">
-      <Link to="/space" aria-label={lang==="ar"?"العائلة والإعدادات":"Family & settings"}
-       className="grid size-10 place-items-center rounded-full bg-[#E4F2EE] font-bold text-brand"><UserRound className="size-5"/></Link>
-      <LangToggle/>
-     </div>
-    </div>
-   </header>}
-
-   <header className="pt-safe sticky top-0 z-30 border-b border-[#E4E8DD]/80 bg-[#F9F8F4]/95 backdrop-blur-xl md:hidden">
-    <div className="mx-auto flex h-[66px] max-w-4xl items-center justify-between gap-2 px-4">
-     <Link to="/" aria-label={lang==="ar"?"الصفحة الرئيسية لدبّرنا":"Dabberna home"} className="inline-flex min-w-0 rounded-lg focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"><Logo/></Link>
-     <div className="flex shrink-0 items-center gap-2">
-      <Link to="/advisor" aria-label={t("advisor")} title={t("advisor")}
-       className="grid size-11 place-items-center rounded-full border border-[#DDE5DB] bg-[#EAF1E8] text-brand transition hover:bg-white focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2">
-       <Sparkles className="size-5" aria-hidden="true"/>
-      </Link>
-      <Link to="/space" className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#DDE5DB] bg-white/80 px-3 text-xs font-semibold text-brand" aria-label={lang==="ar"?"العائلة والإعدادات":"Family & settings"}><UserRound className="size-4"/><span className="hidden sm:inline">{lang==="ar"?"العائلة":"Family"}</span></Link>
-      <LangToggle/>
-     </div>
-    </div>
-   </header>
-   <main id="dabberna-main-content" tabIndex={-1} className={homeLayout?"mx-auto w-full max-w-[1460px] flex-1 px-3 pb-32 pt-3 sm:px-5 sm:pt-5 md:px-7 md:pb-12 lg:px-10":"mx-auto w-full max-w-4xl flex-1 px-4 pb-32 pt-5 sm:px-6 sm:pt-7 md:px-8 md:pb-12 md:pt-10"}>
-    <ConnectivityNotice/>
-    <LocalSaveNotice/>
-    {title&&<h1 className="mb-5 text-[1.8rem] font-semibold tracking-tight text-ink sm:text-4xl">{title}</h1>}
-    {children}
-   </main>
-  </div>
-
-  <nav aria-label={lang==="ar"?"التنقل الرئيسي":"Main"} className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-[#DEE6DD] bg-[#FFFEFC]/95 px-2 pt-2 shadow-[0_-12px_28px_-26px_rgba(42,68,47,.36)] backdrop-blur-xl md:hidden">
-   <div className="mx-auto grid max-w-xl grid-cols-3 gap-2">
-    {tabs.map(({to,en,ar,icon:Icon,exact})=><Link key={to} to={to} activeOptions={exact?{exact:true}:{}}
-      onClick={()=>{if(to!=="/")writeLocal("homeIntroDone",true);}}
-      className="group flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 px-0.5 text-xs font-medium text-[#708174] transition hover:bg-[#F2F6F0] data-[status=active]:bg-[#ECF4EC] data-[status=active]:font-semibold data-[status=active]:text-brand">
-      <Icon className="size-[21px]" aria-hidden="true"/><span>{lang==="ar"?ar:en}</span>
-    </Link>)}
-   </div>
-  </nav>
- </div>;
+/** Every signed-in family page uses the same navigation and visual frame.
+ * Keep the AppShell API stable so no existing workflows or records change. */
+export function AppShell({children,title,homeLayout=false}:{
+ children:ReactNode;title?:string;homeLayout?:boolean
+}){
+ return <UnifiedFamilyShell {...(title!==undefined?{title}:{})} homeLayout={homeLayout}>{children}</UnifiedFamilyShell>;
 }
 export function PilotBadge({children="Sample"}:{children?:ReactNode}){
- return <span className="inline-flex items-center rounded-full bg-warn px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-warn-foreground">{children}</span>;
+ return <span className="inline-flex rounded-full bg-warn px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-warn-foreground">{children}</span>;
 }
 export function Notice({children}:{children:ReactNode}){
  return <div className="rounded-2xl border border-[#DAE6D8] bg-[#F0F6EC] p-4 text-sm leading-relaxed text-ink">{children}</div>;
