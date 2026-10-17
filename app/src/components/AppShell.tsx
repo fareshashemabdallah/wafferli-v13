@@ -72,7 +72,7 @@ export function AppShell({children,title,homeLayout=false}:{children:ReactNode;t
          {to:"/space" as const,en:"My Family",ar:"عائلتي",Icon:UserRound},
          {to:"/money" as const,en:"Money & Bills",ar:"المال والفواتير",Icon:Wallet},
          {to:"/calendar" as const,en:"Family Calendar",ar:"تقويم العيلة",Icon:CalendarDays},
-         {to:"/explore/shopping" as const,en:"Shopping & Wishlist",ar:"المشتريات",Icon:ShoppingBasket},
+         {to:"/explore/smartbuy" as const,en:"Shopping & Wishlist",ar:"المشتريات",Icon:ShoppingBasket},
          {to:"/about" as const,en:"About & privacy",ar:"حول دبّرنا والخصوصية",Icon:Info}
         ]).map(({to,en,ar,Icon})=><Link key={to} to={to}
          className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm text-brand hover:bg-[#F1F7EF]">
