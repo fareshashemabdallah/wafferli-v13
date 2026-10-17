@@ -28,6 +28,8 @@ export function FamilyLifePage(){
  const {lang}=useI18n(),ar=lang==="ar";
  const label=(en:string,arabic:string)=>ar?arabic:en;
  const [view,setView]=useState<View>("overview");
+ const [calendarFocus,setCalendarFocus]=useState<string|undefined>();
+ const openFamilyDate=(day:string)=>{setCalendarFocus(day);setView("calendar");};
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
@@ -93,6 +95,7 @@ export function FamilyLifePage(){
         className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-[#F8F9FC] px-3 py-2">
          <span className="min-w-0 truncate text-sm font-semibold">{item.title}</span>
          <span className="shrink-0 text-xs text-[#728094]">{formatMomentDate(item.occursOn,ar)}</span>
+         <button type="button" onClick={()=>openFamilyDate(item.occursOn)} aria-label={label("Prepare "+item.title,"حضّر "+item.title)} className="shrink-0 rounded-lg bg-white px-2 py-2 text-xs font-semibold text-[#B15380] underline">{label("Prepare","حضّر")}</button>
         </li>)}</ol>}
       <button onClick={()=>setView("calendar")} type="button" className="mt-3 inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#628BB4] underline">
        {label("Open family calendar","افتح تقويم العيلة")}<ChevronRight className="size-4 rtl:rotate-180"/>
@@ -138,7 +141,7 @@ export function FamilyLifePage(){
      </div>
     </details>
    </div>}
-   {view==="calendar"&&<FamilyCalendarWorkspace embedded/>}
+   {view==="calendar"&&<FamilyCalendarWorkspace key={calendarFocus??"calendar"} embedded focusDate={calendarFocus}/>}
    {view==="plans"&&<PlansWorkspace embedded/>}
    {view==="tasks"&&<FamilyTasksPanel/>}
    <p className="px-1 text-[11px] leading-relaxed text-[#7B8491]">
