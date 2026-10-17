@@ -39,6 +39,16 @@ describe("Today speed actions without another navigation layer",()=>{
   expect(screen.getByRole("alert")).toHaveTextContent("already on your open shopping list");
   expect(JSON.parse(localStorage.getItem("wafferli.v13.shopping")??"[]")).toHaveLength(1);
  });
+ it("does not claim success if the browser refuses to save a shopping item",async()=>{
+  draw();
+  fireEvent.click(screen.getByRole("button",{name:"Add shopping item"}));
+  fireEvent.change(screen.getByRole("textbox",{name:"What do you need?"}),{target:{value:"Bread"}});
+  const spy=vi.spyOn(Storage.prototype,"setItem").mockImplementation(()=>{throw new Error("Quota exceeded")});
+  fireEvent.click(screen.getByRole("button",{name:"Save item"}));
+  expect(screen.getByRole("alert")).toHaveTextContent("Unable to save on this device");
+  expect(screen.queryByText("Saved to your family basket.")).not.toBeInTheDocument();
+  spy.mockRestore();
+ });
  it("records an expense once and updates Today recorded-month figure from the same local Money key",async()=>{
   localStorage.setItem("wafferli.v13.money",JSON.stringify(realMoney()));
   draw();
