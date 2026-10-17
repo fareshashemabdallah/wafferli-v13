@@ -55,7 +55,7 @@ function TodayAskInline({onClose}:{onClose:()=>void}){
   <form onSubmit={submit} className="mt-3 flex items-center gap-2 rounded-xl border border-[#E9E1E9] bg-[#FFF9FB] p-2">
    <label className="sr-only" htmlFor="focused-home-question">{text("Ask about your family","اسأل عن عائلتك")}</label>
    <input id="focused-home-question" ref={input} value={question} onChange={e=>setQuestion(e.target.value)}
-    maxLength={400} placeholder={text("e.g. How are our savings goals?","مثلاً كيف ماشيين بأهداف الادخار؟")}
+    maxLength={400} placeholder={text("e.g. What should we prepare for next?","مثلاً شو لازم نجهّز له بالفترة القادمة؟")}
     className="min-h-11 min-w-0 flex-1 bg-transparent px-2 text-base outline-none"/>
    <button type="submit" disabled={!ready||!question.trim()}
     aria-label={text("Get family guidance","اعرض إرشاد العائلة")}
