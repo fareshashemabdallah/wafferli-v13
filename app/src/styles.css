@@ -123,13 +123,13 @@
 @utility card-soft {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: calc(var(--radius) + 2px);
+  border-radius: 1.5rem;
   box-shadow: var(--shadow-soft);
 }
 @utility hero-surface {
-  background: var(--gradient-hero);
+  background: linear-gradient(128deg, #FFF0F4, #F5F8F3);
   color: var(--ink);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(90,67,93,.11);
 }
 @utility pb-safe {
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
@@ -141,7 +141,7 @@
 /* Dabberna design language: editorial warmth instead of dashboard density. */
 @utility editorial-card {
   border: 1px solid rgba(90,67,93,.11);
-  border-radius: 1.45rem;
+  border-radius: 1.5rem;
   background: #fffdfd;
   box-shadow: 0 14px 36px -30px rgba(48,45,67,.26), 0 1px 1px rgba(48,45,67,.035);
 }
@@ -165,9 +165,9 @@
   min-width: 44px;
 }
 @utility page-intro {
-  border: 1px solid rgba(59,96,74,.08);
+  border: 1px solid rgba(90,67,93,.11);
   border-radius: 1.5rem;
-  background: linear-gradient(128deg, #FDEEF1, #F2F7F2);
+  background: linear-gradient(128deg, #FFF0F4, #F7F9F5);
   padding: 1.1rem 1.25rem;
 }
 @utility premium-divider {
@@ -198,4 +198,26 @@
 [dir="rtl"] .dabberna-new-home h2,
 [dir="rtl"] .dabberna-new-home h3 {
   letter-spacing: 0;
+}
+
+/* The family pages use the same visual primitives, whether they started as
+   an older specialist screen or a newer illustrated page. Section color is
+   expressed in a small accent; it must not create a second page identity. */
+.dabberna-app :where(.card-soft,.editorial-card,.page-intro,.hero-surface) {
+  border-color: #F0E4E9;
+  border-radius: 1.5rem;
+  box-shadow: 0 16px 36px -30px rgba(57,40,64,.20);
+}
+.dabberna-app :where(.card-soft,.editorial-card) {
+  background-color: #FFFDFD;
+}
+.dabberna-app :where(.page-intro,.hero-surface) {
+  background: linear-gradient(128deg, #FFF0F4, #F5F8F3);
+}
+.dabberna-app :where(.card-soft,.editorial-card,.page-intro,.hero-surface) :is(h2,h3) {
+  color: #25354B;
+  font-family: "Manrope", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+}
+.dabberna-app :where(.soft-action):hover {
+  border-color: #E6CED9;
 }
