@@ -8,7 +8,7 @@ const near=(a:number,b:number)=>Math.abs(a-b)<.01;
  * It can be incomplete even when real bills, actual cash and expenses exist. */
 export function needsStarterBudget(s:MoneyState):boolean{
  const m=computeMoney(s);
- return s.demo||m.monthlyIncome<=0||s.categories.length===0;
+ return s.demo||(m.monthlyIncome<=0&&!s.incomeKnown)||s.categories.length===0;
 }
 export function applyStarterBudget(s:MoneyState,input:StarterBudgetInput):MoneyState{
  if(!needsStarterBudget(s)||!valid(input.income)||input.income===0&&!input.zeroIncomeConfirmed||
