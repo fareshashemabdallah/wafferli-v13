@@ -20,6 +20,7 @@ export function FinancialRealityPanel({money,plans=[],update,compact=false,goTo}
  if(money.demo)return null;
  const r=assessFinancialReality(money,plans);
  const caution=r.kind==="essentials-gap"||r.kind==="plan-gap"||r.kind==="tight";
+ const protectedChoices=choices.filter(c=>money.protectedLifestyle?.includes(c.id));
  return <section className={"rounded-2xl border p-4 "+(caution?"border-[#EACFBC] bg-[#FFF9F4]":"border-[#D8E5DA] bg-[#F8FAF7]")}
   aria-label={ar?"الواقع المالي للعائلة":"Family financial reality"}>
   <div className="flex items-start gap-2">
@@ -27,6 +28,9 @@ export function FinancialRealityPanel({money,plans=[],update,compact=false,goTo}
    <div>
     <h2 className="text-sm font-extrabold">{ar?r.titleAr:r.titleEn}</h2>
     <p className="mt-2 text-sm leading-relaxed text-[#596878]">{ar?r.messageAr:r.messageEn}</p>
+    {protectedChoices.length>0&&<p className="mt-2 text-xs font-medium text-[#507865]">{ar?"الأولويات التي اخترتها: ":"Priorities you want to protect: "}
+     {protectedChoices.map(c=>ar?c.ar:c.en).join(" · ")}.
+     {ar?" إذا فئة صرف معيّنة بتدعمها، صنّفها «مهمة للعيلة» حتى ما نقترح تخفيضها.":" If a spending category supports these priorities, mark it Protected in Spending so it won't be suggested for cuts."}</p>}
     <p className="mt-2 text-[11px] text-muted-foreground">{r.confidence==="reviewed"?
      (ar?"حسب المبالغ التي أكّدتها؛ ليست بيانات بنكية.":"Based on parent-reviewed amounts, not bank-verified data."):
      (ar?"حسب التقديرات المحفوظة؛ وقد تكون هناك مصاريف ناقصة.":"Based on saved estimates; unrecorded costs may change the result.")}</p>
