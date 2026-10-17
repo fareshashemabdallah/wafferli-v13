@@ -15,7 +15,7 @@ import { fmtJOD, uid } from "@/lib/storage";
 import {recordBillPayment,reverseBillPayment,type PaidBillCashMode} from "@/lib/billPayment";
 import {FamilyCommitmentsPanel} from "@/components/FamilyCommitmentsPanel";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
-import {familyForecastCommitments} from "@/lib/familyFinancialCommitments";
+import {familyForecastCommitments,familyFinancialCommitments} from "@/lib/familyFinancialCommitments";
 import {useLocalState} from "@/lib/storage";
 import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 import {previousMonthKey} from "@/lib/monthlyCarryover";
@@ -40,6 +40,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const bills=state.commitments ?? [];
    const [familyPlans]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
    const financialCommitments=familyForecastCommitments(familyPlans,state);
+   const familyBills=familyFinancialCommitments(familyPlans,state).filter(item=>!item.paid);
   const forecast=buildForecast({incomes,commitments:[...bills,...financialCommitments],openingBalance:state.cashOnHand??null,
     reserve:state.cashReserve??0,today,days:30});
   const [cash,setCash]=useState(state.cashOnHand===null||state.cashOnHand===undefined?"":String(state.cashOnHand));
@@ -141,7 +142,6 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const totalsReady=state.cashOnHand!==null&&state.cashOnHand!==undefined;
   return (
     <div className="space-y-4" id="cash-flow">
-       <FamilyCommitmentsPanel money={state} compact/>
       <section className="card-soft mt-6 p-4 sm:p-5">
         <div className="flex items-center gap-2"><CalendarClock className="size-5 text-brand"/>
           <h2 className="text-lg font-semibold">{ar?"رصيد اليوم والاحتياطي":"Your cash balance & reserve"}</h2>
@@ -168,7 +168,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
       <section className="card-soft p-4">
         <div className="flex items-center justify-between gap-2">
           <div><h2 className="font-semibold">{tr("Upcoming bills · الالتزامات")}</h2>
-            <p className="text-xs text-muted-foreground">{tr("Add due dates for rent, utilities, school or other commitments.")}</p></div>
+            <p className="text-xs text-muted-foreground">{ar?"الفواتير العادية تُضاف يدوياً، وتكاليف المناسبات تظهر تلقائياً من تقويم العيلة.":"Add regular bills here. Gift and celebration costs from Family Life appear automatically below."}</p></div>
           <Button size="sm" onClick={()=>{setEditBill(blankBill());setBillAmount("");setError("");}}><Plus className="size-4"/> {tr("Add bill")}</Button>
         </div>
         {editBill&&<form onSubmit={saveBill} className="mt-3 space-y-3 rounded-xl border bg-muted/40 p-3">
@@ -199,7 +199,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
           <div className="flex gap-2"><Button type="submit">{tr("Save bill")}</Button>
             <Button type="button" variant="outline" onClick={()=>{setEditBill(null);setError("");}}>{tr("Cancel")}</Button></div>
         </form>}
-        {bills.length===0&&<p className="mt-3 text-sm text-muted-foreground">{tr("No scheduled bills. Planned categories above do not automatically create due dates.")}</p>}
+        {bills.length===0&&familyBills.length===0&&<p className="mt-3 text-sm text-muted-foreground">{tr("No scheduled bills. Planned categories above do not automatically create due dates.")}</p>}
         <div className="mt-2 divide-y">
           {bills.map(bill=>{
             const next=upcomingBills.find(e=>e.sourceId===bill.id);
@@ -285,6 +285,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
             </div>;
           })}
         </div>
+        <FamilyCommitmentsPanel money={state} withinBills/>
       </section>
 
       <section className="card-soft p-4">
