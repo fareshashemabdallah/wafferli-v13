@@ -125,9 +125,9 @@ function Space() {
             <Field label={tr("Preferences")}><Input className={inputCls} maxLength={120} value={edit.prefs} onChange={e=>setEdit({...edit,prefs:e.target.value})}/></Field>
             </div></details>
             <label className="block text-sm font-medium sm:col-span-2">
-              <span className="flex items-center gap-2"><Cake className="size-4 text-[#B87976]"/>{ar?"تاريخ الميلاد (اختياري)":"Date of birth (optional)"}</span>
+              <span className="flex items-center gap-2"><Cake className="size-4 text-[#B87976]"/>{ar?"عيد الميلاد (شهر-يوم اختياري)":"Birthday (month-day, optional)"}</span>
               <Input type="text" inputMode="numeric" maxLength={5} placeholder="MM-DD" className={inputCls+" mt-1"} value={edit.birthdayMonthDay??(edit.birthday?.slice(5)??"")} onChange={e=>setEdit({...edit,birthdayMonthDay:e.target.value,birthday:undefined})}/>
-              <span className="mt-1 block text-xs font-normal text-muted-foreground">{ar?"يتكرر عيد الميلاد تلقائياً كل سنة. لا يُعرض تاريخ الميلاد لأعضاء المجموعات.":"The birthday repeats every year. This date is not visible to group members."}</span>
+              <span className="mt-1 block text-xs font-normal text-muted-foreground">{ar?"الشهر واليوم كافيان للتذكير. إذا عدّلت هذه الخانة، لن نحفظ سنة الميلاد.":"Month and day are enough for reminders. Changing this field does not retain the birth year."}</span>
             </label>
             {err&&<p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
             <div className="flex gap-2 sm:col-span-2">
