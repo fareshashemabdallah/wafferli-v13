@@ -41,7 +41,7 @@ export function buildFamilyDecisionBrief(input:{
  if(moneyAllowed&&first){
   const cost=first.choice?.estimatedJod??first.budgetJod;
   if(cost!==undefined&&cost>0){
-   const check=assessImmediateSpending(input.money,cost,now);
+   const check=assessImmediateSpending(input.money,cost,now,input.plans.filter(p=>p.id!==upcomingPlans[0]?.id));
    if(check.outcome!=="provisional"){
     hasCashRisk=true;
     add({id:"cash-review",urgency:"important",
@@ -75,7 +75,7 @@ export function buildFamilyDecisionBrief(input:{
   // This is an entered intention, not a bill, merchant offer or recorded expense.
   const amount=item.budgetJod;
   const cashCheck=moneyAllowed&&typeof amount==="number"&&amount>0?
-   assessImmediateSpending(input.money,amount,now).outcome:null;
+   assessImmediateSpending(input.money,amount,now,input.plans).outcome:null;
   const caution=cashCheck==="review"||cashCheck==="unknown";
   const gift=item.kind==="gift";
   const priceNote=overBudget?

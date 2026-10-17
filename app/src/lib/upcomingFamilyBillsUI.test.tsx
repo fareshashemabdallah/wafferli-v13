@@ -65,6 +65,20 @@ describe("Family commitments appear directly within Upcoming Bills",()=>{
   expect(readLocal<MoneyState>("money",money).expenses).toHaveLength(1);
   expect(readLocal<MoneyState>("money",money).savingsGoals).toBeUndefined();
  });
+ it("keeps tentative occasion ideas OUT of Upcoming Bills while retaining confirmed costs",async()=>{
+  const revised:FamilyPlan={...plan,occasionPreparation:{...plan.occasionPreparation!,
+   gift:{...plan.occasionPreparation!.gift,certainty:"idea"},
+   celebration:{...plan.occasionPreparation!.celebration,certainty:"firm"},
+   extras:{...plan.occasionPreparation!.extras,certainty:"planned"}}};
+  writeLocal("familyPlans",[revised]);
+  render(<I18nProvider><View/></I18nProvider>);
+  const bills=screen.getByRole("heading",{name:/Upcoming bills/}).closest("section")!;
+  const family=await within(bills).findByRole("region",{name:"Family commitments from calendar"});
+  expect(within(family).queryByText("Sophia's birthday · Gift")).not.toBeInTheDocument();
+  expect(within(family).getByText("Sophia's birthday · Celebration")).toBeInTheDocument();
+  expect(within(family).getByText("230 JOD")).toBeInTheDocument();
+  expect(readLocal<MoneyState>("money",money).expenses).toHaveLength(0);
+ });
  it("counts family-only dated items as a financial commitment without treating it as a savings target or paid expense",()=>{
   const noRent={...money,commitments:[],cashOnHand:500};
   const snapshot=getMoneyOverview(noRent,new Date(2026,10,19,12),[plan]);

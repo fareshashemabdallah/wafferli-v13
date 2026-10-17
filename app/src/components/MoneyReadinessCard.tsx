@@ -2,16 +2,19 @@ import {CheckCircle2,Info,ShieldAlert} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {getFinancialReadiness,monthOf} from "@/lib/financialReadiness";
 import type {MoneyState} from "@/lib/money";
-type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(tab:"overview"|"spending"|"planning")=>void};
-export function MoneyReadinessCard({state,setState,goTo}:Props){
- const {lang}=useI18n(),ar=lang==="ar",r=getFinancialReadiness(state);
+import type {FamilyPlan} from "@/lib/familyPlans";
+import {familyForecastCommitments} from "@/lib/familyFinancialCommitments";
+type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(tab:"overview"|"spending"|"planning")=>void;plans?:readonly FamilyPlan[]};
+export function MoneyReadinessCard({state,setState,goTo,plans=[]}:Props){
+ const {lang}=useI18n(),ar=lang==="ar",r=getFinancialReadiness(state,new Date(),plans);
  if(state.demo)return null;
+ const knownFamilyPayments=familyForecastCommitments(plans,state).length>0;
  const title=r.level==="ready"?(ar?"الأرقام جاهزة للتقدير":"Figures ready for an estimate"):
   r.level==="caution"?(ar?"هناك التزامات تحتاج مراجعة":"Review upcoming commitments"):
   (ar?"خطوة صغيرة لتحسين دقة النصيحة":"One more step for clearer advice");
  const details=["income","savings","cash","bills","cash-date","risk"] as const;
  const step=(k:typeof details[number])=>k==="income"?(ar?"أكمل الدخل ومخصصات المصاريف":"Complete income & spending budgets"):
-  k==="savings"?(ar?"أدخل هدف الادخار الشهري":"Enter a monthly savings target"):
+  k==="savings"?(ar?"الادخار اختياري":"Savings are optional"):
   k==="cash"?(ar?"أدخل رصيدك النقدي الفعلي":"Enter your actual cash balance"):
   k==="bills"?(ar?"أضف الفواتير المستحقة أو أكد عدم وجودها":"Add dated bills or confirm you have none"):
   k==="cash-date"?(ar?"أكد رصيدك الحالي بتحديثه":"Refresh the date of your cash balance"):
@@ -29,9 +32,9 @@ export function MoneyReadinessCard({state,setState,goTo}:Props){
   </div>
   {r.level!=="ready"&&r.next!=="none"&&<div className="mt-3 flex flex-wrap gap-2">
     {r.next==="bills"&&(state.commitments??[]).length===0&&<button type="button" onClick={()=>{
-      if(!window.confirm(ar?"هل تؤكد أنه لا توجد فواتير أو التزامات مجدولة غير مدفوعة هذا الشهر؟ هذا التأكيد ينتهي بنهاية الشهر.":"Confirm you have no unpaid scheduled bills or commitments this month? This confirmation expires next month."))return;
+      if(!window.confirm(ar?"هل تؤكد أنه لا توجد فواتير عادية أخرى غير مسددة هذا الشهر، عدا الالتزامات العائلية المسجلة؟ ينتهي التأكيد بنهاية الشهر.":"Confirm there are no OTHER regular unpaid bills this month, beyond any family commitments already entered? This review expires next month."))return;
       setState(prev=>({...prev,noBillsConfirmedMonth:monthOf()}));
-    }} className="min-h-10 rounded-full border border-[#CADECC] bg-white px-3 text-xs font-semibold text-brand">{ar?"أؤكد: ما عندي فواتير مجدولة":"Confirm: no scheduled bills"}</button>}
+    }} className="min-h-10 rounded-full border border-[#CADECC] bg-white px-3 text-xs font-semibold text-brand">{knownFamilyPayments?(ar?"أؤكد: ما في فواتير أخرى":"Confirm: no other bills"):(ar?"أؤكد: ما عندي فواتير مجدولة":"Confirm: no scheduled bills")}</button>}
     <button type="button" className="min-h-10 rounded-full bg-brand px-4 text-xs font-semibold text-white" onClick={()=>goTo("planning")}>
      {r.next==="cash"||r.next==="cash-date"?(ar?"حدّث الرصيد":"Update cash balance"):
       r.next==="bills"?(ar?"إدارة الفواتير":"Review bills"):
@@ -43,7 +46,7 @@ export function MoneyReadinessCard({state,setState,goTo}:Props){
    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
     {[
      [r.budgetReady,ar?"ميزانية الشهر":"Monthly budget"],
-     [r.savingsReady,ar?"هدف الادخار":"Savings target"],
+     [r.savingsReady,ar?"الادخار (اختياري)":"Savings (optional)"],
      [r.cashKnown,ar?"رصيد النقد":"Cash balance"],
      [r.cashFresh,ar?"تحديث الرصيد":"Recent cash update"],
      [r.billsReviewed,ar?"الفواتير المجدولة":"Scheduled bills"]

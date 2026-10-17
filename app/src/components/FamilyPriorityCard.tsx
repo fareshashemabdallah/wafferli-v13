@@ -5,14 +5,16 @@ import {useLocalState} from "@/lib/storage";
 import {sampleMoney,type MoneyState} from "@/lib/money";
 import {defaultFamilyPreferences} from "@/lib/familyPreferences";
 import {selectFamilyPriority} from "@/lib/familyPriority";
+import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 
 /** A single next action on Today, not a feed of repetitive financial alerts. */
 export function FamilyPriorityCard(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [prefs,,prefsReady]=useLocalState("familyPreferences",defaultFamilyPreferences);
- if(!moneyReady||!prefsReady)return null;
- const priority=selectFamilyPriority(money,prefs);
+ const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ if(!moneyReady||!prefsReady||!plansReady)return null;
+ const priority=selectFamilyPriority(money,prefs,new Date(),plans);
  if(!priority)return null;
  const urgent=priority.severity==="attention";
  const Icon=urgent?ShieldAlert:Lightbulb;

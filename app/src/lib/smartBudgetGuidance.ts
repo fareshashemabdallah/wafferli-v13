@@ -15,7 +15,9 @@ export function smartVarianceGuidance(state:MoneyState,expense:Expense,now=new D
  const budget=computeMoney(state,monthDate);
  const category=state.categories.find(c=>c.id===expense.categoryId);
  const isFixed=category?.type==="fixed"||category?.type==="periodic"||!!expense.billId;
- const candidates=allocationOptions(state,delta,expense.categoryId,ym);
+ const candidates=allocationOptions(state,delta,expense.categoryId,ym)
+  .filter(choice=>delta<=0||choice.kind==="savings"||
+   state.categories.some(c=>c.id===choice.categoryId&&c.priority==="flexible"));
  const bySlack=(choice:AllocationChoice)=>{
   if(choice.kind==="savings")return -10000;
   return roundJod(budget.plannedBy(choice.categoryId!)-budget.spentBy(choice.categoryId!));
@@ -35,8 +37,8 @@ export function smartVarianceGuidance(state:MoneyState,expense:Expense,now=new D
    "Keep this difference visible in next month's plan rather than silently reducing savings.",
   ar:spare?"الأفضل أولاً مراجعة المصاريف المرنة قبل تخفيض الادخار.":
    "احتفظ بالفرق واضحاً في خطة الشهر القادم بدلاً من خفض الادخار تلقائياً.",
-  detailsEn:`You paid ${roundJod(delta).toFixed(2)} JOD above plan${isFixed?" on a bill or committed cost":""}. ${spare?"A variable category has room for a voluntary transfer.":"No flexible category currently has enough unspent allocation."} If you make no transfer, the difference is deducted from next month's budget calculation.`,
-  detailsAr:`دفعت ${roundJod(delta).toFixed(2)} دينار فوق المخطط${isFixed?" على التزام أو فاتورة":""}. ${spare?"توجد فئة مصروف مرنة تسمح بنقل المخصص بموافقتك.":"لا توجد حالياً فئة مرنة فيها مخصص كافٍ."} إذا لم تُجرِ توزيعاً، يُحتسب الفرق خصماً من ميزانية الشهر القادم.`,
+  detailsEn:`You paid ${roundJod(delta).toFixed(2)} JOD above plan${isFixed?" on a bill or committed cost":""}. ${spare?"A category you explicitly marked flexible has room for a voluntary transfer.":"No flexible category currently has enough unspent allocation."} If you make no transfer, the difference is deducted from next month's budget calculation.`,
+  detailsAr:`دفعت ${roundJod(delta).toFixed(2)} دينار فوق المخطط${isFixed?" على التزام أو فاتورة":""}. ${spare?"هناك فئة صنّفتها مرنة وفيها مخصص يمكن نقله بموافقتك.":"لا توجد حالياً فئة مرنة فيها مخصص كافٍ."} إذا لم تُجرِ توزيعاً، يُحتسب الفرق خصماً من ميزانية الشهر القادم.`,
   ranked,cautionEn:risk?"Upcoming bills or cash shortage need attention; avoid assuming the savings target is cash available.":
    "Category transfers adjust plans, not your actual bank balance.",
   cautionAr:risk?"توجد فواتير قادمة أو ضائقة سيولة؛ لا تفترض أن هدف الادخار مال متاح للدفع.":

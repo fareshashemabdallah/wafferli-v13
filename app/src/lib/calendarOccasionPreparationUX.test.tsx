@@ -47,7 +47,7 @@ describe("calendar-integrated occasion preparation",()=>{
   expect(read("occasionPlans")).toBeNull();
   expect(read("familyTasks")).toBeNull();
   expect(screen.getByText("Planned occasion cost")).toBeInTheDocument();
-  expect(screen.getByText(/Sample budgets cannot support advice/)).toBeInTheDocument();
+  expect(screen.getByText(/sample data cannot support recommendations/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"Add / align preparation tasks"}));
   await waitFor(()=>expect(read("familyTasks")).toHaveLength(3));
   expect(read("familyTasks").every((x:{planId:string})=>x.planId===firstId)).toBe(true);

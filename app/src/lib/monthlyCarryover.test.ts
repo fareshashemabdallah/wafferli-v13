@@ -63,8 +63,9 @@ describe("Next-month carryover from confirmed payments",()=>{
   expect(computeMoney(approved,new Date(2026,10,15)).plannedBy("leisure")).toBe(200);
   expect(budgetAlignment(approved,new Date(2026,9,15)).gap).toBe(0);
  });
- it("ranks flexible-spending cover ahead of savings when a confirmed bill is overpaid",()=>{
+ it("ranks parent-declared flexible spending ahead of savings when a confirmed bill is overpaid",()=>{
   const s=make();
+  s.categories=s.categories.map(c=>c.id==="leisure"?{...c,priority:"flexible" as const}:c);
   const bill={id:"e",date:"2026-10-15",categoryId:"housing",billId:"bill",plannedAmount:400,amount:435,status:"paid" as const,shared:true};
   s.expenses=[bill];
   const rec=smartVarianceGuidance(s,bill,new Date(2026,9,15));

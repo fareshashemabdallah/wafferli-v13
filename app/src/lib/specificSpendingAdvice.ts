@@ -1,4 +1,5 @@
 import {assessImmediateSpending} from "./spendingScenario";
+import type {FamilyPlan} from "./familyPlans";
 import type {MoneyState} from "./money";
 import type {SpendingScenario} from "./spendingScenario";
 
@@ -52,8 +53,8 @@ export type SpecificSpendingGuidance={
 /** Reuses the conservative Money scenario engine; no extra financial model.
  * A provisional outcome is NEVER affirmative permission to spend.
  */
-export function explainSpecificSpending(money:MoneyState,amountJod:number,now=new Date()):SpecificSpendingGuidance{
- const result=assessImmediateSpending(money,amountJod,now);
+export function explainSpecificSpending(money:MoneyState,amountJod:number,now=new Date(),plans:readonly FamilyPlan[]=[]):SpecificSpendingGuidance{
+ const result=assessImmediateSpending(money,amountJod,now,plans);
  const amount=amountJod.toFixed(2)+" JOD";
  const reasonsEn=result.riskReasons.slice(0,3).join(" ");
  const reasonsAr=result.riskReasons.slice(0,3).map(x=>arReasons[x]??"راجع تفاصيل المالية قبل الإنفاق.").join(" ");

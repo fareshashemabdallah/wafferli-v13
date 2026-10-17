@@ -7,7 +7,7 @@ export const FAMILY_PLANS_KEY="familyPlans";
 export const ACTIVE_PLAN_KEY="activeFamilyPlanId";
 export type PlanKind="purchase"|"outing"|"occasion"|"other";
 export type PlanStatus="planning"|"decided"|"completed";
-export type OccasionCost={amountJod:number;dueDate:string};
+export type OccasionCost={amountJod:number;dueDate:string;/** Idea is a potential cost, planned enters forecasts, firm is parent-confirmed commitment. */certainty?:"idea"|"planned"|"firm"};
 export type OccasionPreparation={
  gift:OccasionCost&{description:string};
  celebration:OccasionCost;

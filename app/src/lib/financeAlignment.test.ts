@@ -2,6 +2,7 @@ import {describe,expect,it} from "vitest";
 import {applyAlignmentSuggestion,applyVarianceAllocation,budgetAlignment,varianceOf,reverseVarianceAllocation,allocationOptions} from "./financeAlignment";
 import {computeMoney,type MoneyState} from "./money";
 import {recordBillPayment} from "./billPayment";
+import {smartVarianceGuidance} from "./smartBudgetGuidance";
 const fixture=():MoneyState=>({
  demo:false,income:1000,savingsPct:10,savingsTargetAmount:100,
  categories:[{id:"rent",name:"Rent",type:"fixed",planned:400},{id:"food",name:"Groceries",type:"variable",planned:300},{id:"fun",name:"Leisure",type:"variable",planned:200}],
@@ -63,6 +64,15 @@ describe("Existing Money flows: alignment & confirmed actuals",()=>{
   state.expenses[0]={...state.expenses[0]!,amount:65,status:"paid"};
   expect(computeMoney(state,new Date(2026,9,15,12)).spent).toBe(65);
   expect(varianceOf(state.expenses[0]!)).toBe(15);
+ });
+ it("does not recommend financing overspending from protected or unclassified variable categories",()=>{
+  const base=fixture();
+  const categories=base.categories.map(c=>({...c,...(c.id==="food"?{priority:"essential" as const}:c.id==="fun"?{priority:"protected" as const}:{})}));
+  const paid=recordBillPayment({...base,categories},"bill","2026-10-20","2026-10-15","priority-bill","already",460);
+  const advice=smartVarianceGuidance(paid,paid.expenses[0]!,new Date(2026,9,15,12));
+  expect(advice.ranked.filter(x=>x.kind==="variable")).toHaveLength(0);
+  const revised={...paid,categories:categories.map(c=>c.id==="fun"?{...c,priority:"flexible" as const}:c)};
+  expect(smartVarianceGuidance(revised,revised.expenses[0]!,new Date(2026,9,15,12)).ranked.some(x=>x.categoryId==="fun")).toBe(true);
  });
  it("never reallocates demo data or money from a variable budget already spent",()=>{
   const paid=recordBillPayment(fixture(),"bill","2026-10-20","2026-10-15","e4","already",460);

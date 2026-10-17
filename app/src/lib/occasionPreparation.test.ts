@@ -55,9 +55,14 @@ describe("one connected occasion plan: funding and budgets",()=>{
   expect(guidance.status).toBe("pressure");
   expect(guidance.monthlyUnallocatedJod).toBe(0);
   expect(guidance.monthlyTargetJod).toBe(107.5);
-  expect(guidance.hints.map(h=>h.categoryId)).toEqual(["out","ent"]);
-  expect(guidance.hints.map(h=>h.reviewJod)).toEqual([16,12]);
-  expect(guidance.notCoveredJod).toBe(79.5);
+  // A category name alone is not consent to reduce family life.
+  expect(guidance.hints).toEqual([]);
+  expect(guidance.notCoveredJod).toBe(107.5);
+  const reviewed={...money,categories:money.categories.map(c=>c.id==="out"||c.id==="ent"?{...c,priority:"flexible" as const}:c)};
+  const personalized=occasionBudgetAdvice(prep(),reviewed,today);
+  expect(personalized.hints.map(h=>h.categoryId)).toEqual(["out","ent"]);
+  expect(personalized.hints.map(h=>h.reviewJod)).toEqual([80,27.5]);
+  expect(personalized.notCoveredJod).toBe(0);
   expect(money.categories.find(x=>x.id==="out")?.planned).toBe(80);
   expect(money.expenses).toEqual([]);
  });

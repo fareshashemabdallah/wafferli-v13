@@ -1,4 +1,5 @@
 import {getMoneyOverview} from "./moneyOverview";
+import {assessFinancialReality} from "./financialReality";
 import {decideWeekendOuting} from "./weekendOutingDecision";
 import {nextConnectedFamilyAction,personalOutingAdvice} from "./connectedFamilyGuidance";
 import {explicitJodAmount,explainSpecificSpending} from "./specificSpendingAdvice";
@@ -73,11 +74,11 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
  const intent=guidedPrompts.find(p=>question===p.en||question===p.ar)?.id??detectAdvisorIntent(question);
  const now=ctx.now??new Date(),day=dateKey(now);
  const m=ctx.money;
- const overview=getMoneyOverview(m,now);
+ const overview=getMoneyOverview(m,now,ctx.plans);
  // A weekend affordability question deserves the same source-grounded
  // question-to-answer-to-places journey as the dedicated experience.
  if(intent==="safety"&&explicitJodAmount(question)===null&&/outing|weekend|picnic|نزهة|طلعة|مشوار|ويكند|عائلية.*طلعة/i.test(question)){
-  const outing=decideWeekendOuting(m,ctx.preferences,now);
+  const outing=decideWeekendOuting(m,ctx.preferences,now,ctx.plans);
   return answer(intent,outing.headlineEn,outing.headlineAr,
    outing.nextEn+" "+outing.explanationEn,
    outing.nextAr+" "+outing.explanationAr,
@@ -91,9 +92,12 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
    next.sourceEn,next.sourceAr,next.route,next.actionEn,next.actionAr);
  }
  if(intent==="safety"){
+  const reality=assessFinancialReality(m,ctx.plans,now);
+  if(reality.kind==="essentials-gap"||reality.kind==="plan-gap")return answer(intent,reality.titleEn,reality.titleAr,reality.messageEn,reality.messageAr,
+   "Money: estimated household priorities and commitments","المالية: أولويات العيلة والالتزامات التقديرية","/money",reality.actionEn,reality.actionAr);
   const jod=explicitJodAmount(question);
   if(jod!==null){
-   const assessment=explainSpecificSpending(m,jod,now);
+   const assessment=explainSpecificSpending(m,jod,now,ctx.plans);
    return answer(intent,assessment.titleEn,assessment.titleAr,
     assessment.detailEn,assessment.detailAr,assessment.sourceEn,assessment.sourceAr,
     "/money","Review Money assumptions","راجع أرقام المالية");

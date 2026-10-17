@@ -1,5 +1,12 @@
 /* Arabic text for the Dabberna UI. Translate UI copy, never user-entered names or secrets. */
 const labels:Record<string,string> = {
+  "I have checked this monthly estimate":"راجعت هذا التقدير الشهري",
+  "How important is this spending to your family?":"قديش هالمصروف مهم لعيلتك؟",
+  "Not decided — don't assume":"بعدني ما قررت — ما تفترض",
+  "Essential — needs to be covered":"أساسي — لازم يتغطّى",
+  "Important to our quality of life":"مهم لراحة العيلة ونمط حياتها",
+  "Flexible — open to reviewing":"مرن — قابل للمراجعة",
+  "Fixed, variable and periodic describe timing, not importance. Dabberna will only suggest adjustments to categories you explicitly mark flexible.":"ثابت ومتغيّر ودوري بتوصف مواعيد المصروف، مش أهميته. دبّرنا يقترح مراجعة الفئات اللي أنت بتحدّدها مرنة فقط.",
   "Save an outing estimate to your plan": "احفظ تقدير كلفة الطلعة في خطتك",
   "Only the outing title and estimate are saved on this device. Creating a public vote remains optional.": "يُحفظ اسم الطلعة وتقدير كلفتها على هذا الجهاز فقط. إنشاء تصويت للمجموعة اختياري.",
   "Outing estimate saved to your plan.": "تم حفظ تقدير كلفة الطلعة في خطتك.",

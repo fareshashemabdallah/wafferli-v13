@@ -217,6 +217,7 @@ function Categories({ cats, spentBy, plannedBy, onChange }: { cats: Category[]; 
                 <div className="flex items-center gap-2">
                   <span className="truncate font-medium">{tr(c.name)}</span>
                   <span className="rounded-full bg-mint px-2 text-[11px] text-brand">{tr(typeLabel[c.type])}</span>
+                  {c.priority&&<span className="rounded-full border px-2 text-[11px] text-muted-foreground">{c.priority==="essential"?(lang==="ar"?"أساسي":"Essential"):c.priority==="protected"?(lang==="ar"?"مهم للعيلة":"Protected"):(lang==="ar"?"مرن":"Flexible")}</span>}
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
                   <div className={`h-full ${a > effective ? "bg-destructive" : "bg-brand-2"}`} style={{ width: `${pct}%` }} />
@@ -245,6 +246,8 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState<CatType>(initial.type);
   const [planned, setPlanned] = useState(initial.planned ? String(initial.planned) : "");
+  const [priority,setPriority]=useState<Category["priority"]>(initial.priority);
+  const [confirmed,setConfirmed]=useState(initial.amountConfidence==="confirmed");
   const [err, setErr] = useState("");
   return (
     <form
@@ -254,7 +257,9 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
         const p = planned === "" || planned === "0" ? 0 : parseAmount(planned, 100000);
         if (!name.trim()) return setErr(tr("Name is required."));
         if (p === null) return setErr(tr("Planned amount must be 0 or a positive number."));
-        onSave({ id: initial.id, name: name.trim().slice(0, 40), type, planned: p });
+        const next:Category={...initial,id:initial.id,name:name.trim().slice(0,40),type,planned:p,amountConfidence:confirmed?"confirmed":"estimate"};
+        if(priority)next.priority=priority;else delete next.priority;
+        onSave(next);
       }}
     >
       <Field label={tr("Name")}><Input className={inputCls} value={name} maxLength={40} onChange={(e) => setName(e.target.value)} /></Field>
@@ -266,6 +271,16 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
         </NativeSelect>
       </Field>
       <Field label={tr("Planned per month (JOD)")}><Input className={inputCls} inputMode="decimal" value={planned} onChange={(e) => setPlanned(e.target.value)} /></Field>
+      <Field label={tr("How important is this spending to your family?")}>
+       <NativeSelect value={priority??""} onChange={e=>setPriority(e.target.value===""?undefined:e.target.value as Category["priority"])}>
+        <option value="">{tr("Not decided — don't assume")}</option>
+        <option value="essential">{tr("Essential — needs to be covered")}</option>
+        <option value="protected">{tr("Important to our quality of life")}</option>
+        <option value="flexible">{tr("Flexible — open to reviewing")}</option>
+       </NativeSelect>
+      </Field>
+      <p className="text-xs text-muted-foreground sm:col-span-2">{tr("Fixed, variable and periodic describe timing, not importance. Dabberna will only suggest adjustments to categories you explicitly mark flexible.")}</p>
+      <label className="flex items-center gap-2 text-xs sm:col-span-2"><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>{tr("I have checked this monthly estimate")}</label>
       <div className="flex items-end gap-2">
         <Button type="submit" className="h-11 flex-1">{tr("Save")}</Button>
         <Button type="button" variant="outline" className="h-11" onClick={onCancel}>{tr("Cancel")}</Button>

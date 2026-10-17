@@ -9,6 +9,7 @@ import {budgetPlainResult} from "@/lib/budgetPlainResult";
 import {MoneyGuidance} from "@/components/MoneyGuidance";
 import {SpendingBreakdownCard} from "@/components/SpendingBreakdownCard";
 import {MoneyReadinessCard} from "@/components/MoneyReadinessCard";
+import {FinancialRealityPanel} from "@/components/FinancialRealityPanel";
 import {SavingsGoalsPanel} from "@/components/SavingsGoalsPanel";
 import {FamilyCommitmentsPanel} from "@/components/FamilyCommitmentsPanel";
 import {QuickMoneySetup} from "@/components/QuickMoneySetup";
@@ -43,8 +44,9 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Prop
    <Link to="/plans" className="inline-flex min-h-11 items-center rounded-full border border-[#D3E0D3] px-4 text-sm font-semibold text-brand">{ar?"ارجع إلى خططنا":"Return to Plans"} →</Link>
   </div>;
  return <div className="space-y-4">
+   <FinancialRealityPanel money={state} plans={familyPlans} update={setState} goTo={goTo}/>
    <SpendingBreakdownCard state={state} onChange={next=>setState(()=>next)} {...(onManageCategories?{onEdit:onManageCategories}:{})}/>
-   {!state.demo&&<MoneyReadinessCard state={state} setState={setState} goTo={goTo}/>}
+   {!state.demo&&<MoneyReadinessCard state={state} setState={setState} goTo={goTo} plans={familyPlans}/>}
 
    {state.demo&&!needsStarterBudget(state)&&<section className="rounded-2xl border border-[#EBDCC9] bg-[#FFF6E9] px-4 py-4">
      <p className="text-sm font-semibold text-ink">{ar?"هذه أرقام للتجربة فقط":"You're viewing example finances"}</p>

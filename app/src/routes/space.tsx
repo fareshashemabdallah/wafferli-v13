@@ -59,7 +59,8 @@ function Space() {
       const date=parseCalendarDate(edit.birthday);
       if(!date||date.getTime()>new Date().getTime())return setErr(ar?"تاريخ الميلاد غير صالح أو في المستقبل.":"Please enter a valid birth date that is not in the future.");
     }
-    const m:Member={...edit,name:edit.name.trim().slice(0,30),prefs:edit.prefs.slice(0,120),birthday:edit.birthday||undefined};
+    if(edit.birthdayMonthDay&&(!/^\d{2}-\d{2}$/.test(edit.birthdayMonthDay)||!parseCalendarDate("2000-"+edit.birthdayMonthDay)))return setErr(ar?"أدخل شهراً ويوماً صحيحين بصيغة MM-DD.":"Enter a valid birthday month and day as MM-DD.");
+    const m:Member={...edit,name:edit.name.trim().slice(0,30),prefs:edit.prefs.slice(0,120),birthday:edit.birthday||undefined,birthdayMonthDay:edit.birthdayMonthDay||undefined};
     setMembers(old=>m.id?old.map(x=>x.id===m.id?m:x):[...old,{...m,id:uid()}]);
     setEdit(null);setErr("");
   };
@@ -107,7 +108,7 @@ function Space() {
             <h2 className="text-lg font-semibold">{tr("Household members")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">{ar?"أضف تاريخ الميلاد مرة واحدة ليظهر تلقائياً في التقويم وفي يومي.":"Add a birthday once: it automatically appears in the Family Calendar and My Day."}</p>
           </div>
-          <Button size="sm" onClick={()=>{setEdit({id:"",name:"",role:"adult",ageGroup:"30–44",prefs:"",birthday:""});setErr("");}} disabled={members.length>=12}>
+          <Button size="sm" onClick={()=>{setEdit({id:"",name:"",role:"adult",ageGroup:"",prefs:"",birthday:"",birthdayMonthDay:""});setErr("");}} disabled={members.length>=12}>
             <Plus className="size-4"/> {tr("Add")}
           </Button>
         </div>
@@ -119,14 +120,15 @@ function Space() {
             </NativeSelect></Field>
             <details className="sm:col-span-2 rounded-xl border border-border bg-white p-3"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"معلومات إضافية (اختياري)":"More about this person (optional)"}</summary><div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Field label={tr("Age group")}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
+              <option value="">{ar?"أفضل عدم الإجابة":"Not provided"}</option>
               {ages.map(a=><option key={a}>{a}</option>)}
             </NativeSelect></Field>
             <Field label={tr("Preferences")}><Input className={inputCls} maxLength={120} value={edit.prefs} onChange={e=>setEdit({...edit,prefs:e.target.value})}/></Field>
             </div></details>
             <label className="block text-sm font-medium sm:col-span-2">
-              <span className="flex items-center gap-2"><Cake className="size-4 text-[#B87976]"/>{ar?"تاريخ الميلاد (اختياري)":"Date of birth (optional)"}</span>
-              <Input type="date" className={inputCls+" mt-1"} max={dateKey(new Date())} value={edit.birthday??""} onChange={e=>setEdit({...edit,birthday:e.target.value})}/>
-              <span className="mt-1 block text-xs font-normal text-muted-foreground">{ar?"يتكرر عيد الميلاد تلقائياً كل سنة. لا يُعرض تاريخ الميلاد لأعضاء المجموعات.":"The birthday repeats every year. This date is not visible to group members."}</span>
+              <span className="flex items-center gap-2"><Cake className="size-4 text-[#B87976]"/>{ar?"عيد الميلاد (شهر-يوم اختياري)":"Birthday (month-day, optional)"}</span>
+              <Input type="text" inputMode="numeric" maxLength={5} placeholder="MM-DD" className={inputCls+" mt-1"} value={edit.birthdayMonthDay??(edit.birthday?.slice(5)??"")} onChange={e=>setEdit({...edit,birthdayMonthDay:e.target.value,birthday:undefined})}/>
+              <span className="mt-1 block text-xs font-normal text-muted-foreground">{ar?"الشهر واليوم كافيان للتذكير. إذا عدّلت هذه الخانة، لن نحفظ سنة الميلاد.":"Month and day are enough for reminders. Changing this field does not retain the birth year."}</span>
             </label>
             {err&&<p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
             <div className="flex gap-2 sm:col-span-2">
@@ -141,8 +143,8 @@ function Space() {
             <div className="min-w-0 flex-1">
               <p className="font-medium">{tr(m.name)}</p>
               <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")} · {m.ageGroup}{m.prefs&&" · "+m.prefs}</p>
-              {m.birthday&&parseCalendarDate(m.birthday)&&
-                <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":"Birthday: "}{formatMomentDate(m.birthday,ar)}</p>}
+              {(m.birthday||m.birthdayMonthDay)&&
+                <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":"Birthday: "}{m.birthdayMonthDay??(m.birthday?formatMomentDate(m.birthday,ar):"")}</p>}
             </div>
             <Button size="icon" variant="ghost" aria-label={(ar?"تعديل ":"Edit ")+m.name} onClick={()=>{setEdit(m);setErr("");}}><Pencil className="size-4"/></Button>
             <Button size="icon" variant="ghost" aria-label={(ar?"حذف ":"Delete ")+m.name} onClick={()=>removeMember(m)}><Trash2 className="size-4"/></Button>

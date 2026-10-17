@@ -2,6 +2,7 @@ import {roundJod} from "./cashflow";
 import {getFinancialReadiness} from "./financialReadiness";
 import {getMoneyOverview} from "./moneyOverview";
 import type {MoneyState} from "./money";
+import type {FamilyPlan} from "./familyPlans";
 
 export type SpendingScenario={
  outcome:"unknown"|"review"|"provisional";
@@ -18,15 +19,15 @@ export type SpendingScenario={
  * This intentionally does not infer balances from historical expenditures.
  */
 export function assessImmediateSpending(
- state:MoneyState,amount:number,now=new Date()
+ state:MoneyState,amount:number,now=new Date(),plans:readonly FamilyPlan[]=[]
 ):SpendingScenario{
  const valid=Number.isFinite(amount)&&amount>0&&amount<=100000&&
   Math.abs(amount*100-Math.round(amount*100))<0.00001;
  if(!valid)return {outcome:"unknown",amountJod:null,projectedLowJod:null,
   reserveJod:null,billOnlyHeadroomJod:null,
   riskReasons:["Enter a valid one-off amount in JOD (up to 2 decimals)."],caveats:[]};
- const money=getMoneyOverview(state,now);
- const ready=getFinancialReadiness(state,now);
+ const money=getMoneyOverview(state,now,plans);
+ const ready=getFinancialReadiness(state,now,plans);
  const reasons:string[]=[];
  const caveats=[
   "This models payment TODAY; prices, bank balances and transaction status are not verified.",

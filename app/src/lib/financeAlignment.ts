@@ -9,7 +9,7 @@ const monthKey=(d:Date)=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"
 export const plannedSavings=(s:MoneyState,month=monthKey(new Date())):number=>roundJod(computeMoney(s,monthDate(month)).savingsTarget);
 export function budgetAlignment(state:MoneyState,now=new Date()):Alignment{
  const m=computeMoney(state,now),income=roundJod(m.monthlyIncome),savings=roundJod(m.savingsTarget),categories=roundJod(m.planned);
- const carryover=m.carryover.net,gap=roundJod(income+carryover-savings-categories),incomplete=state.demo||income<=0||state.categories.length===0;
+ const carryover=m.carryover.net,gap=roundJod(income+carryover-savings-categories),incomplete=state.demo||(income<=0&&!state.incomeKnown)||state.categories.length===0;
  return {income,savings,categories,carryover,gap,status:incomplete?"incomplete":Math.abs(gap)<.005?"balanced":gap<0?"deficit":"surplus"};
 }
 export function varianceOf(expense:Expense):number{
