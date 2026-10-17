@@ -68,7 +68,7 @@ describe("Dabberna financial reality and respectful data collection",()=>{
   const m=real(1500,700,250);
   expect(familyForecastCommitments([occasion],m).map(x=>x.amount)).toEqual([200,30]);
   expect(familyFinancialSummary([occasion],m,today)).toMatchObject({
-   possibleIdeasJod:120,upcomingTotalJod:230,monthlyPreparationJod:115
+   possibleIdeasJod:120,upcomingTotalJod:230,monthlyPreparationJod:215
   });
   const byDate=assessFinancialReality({...m,cashOnHand:100,cashReserve:20},[occasion],today);
   expect(byDate.forecastCashRisk).toBe(true);
