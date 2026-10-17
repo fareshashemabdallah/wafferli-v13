@@ -24,7 +24,7 @@ import {FamilySetupCard} from "@/components/FamilySetupCard";
 import {FamilyWeather} from "@/components/FamilyWeather";
 import {SpendingBreakdownCard} from "@/components/SpendingBreakdownCard";
 
-const homeCard="rounded-[1.55rem] border border-[#DAE8DA] bg-white/95 p-4 shadow-[0_16px_35px_-28px_rgba(27,78,55,.32)] sm:p-5";
+const homeCard="rounded-[1.55rem] border border-[#F0E4E9] bg-white/95 p-4 shadow-[0_16px_35px_-28px_rgba(57,40,64,.20)] sm:p-5";
 const iconBox="grid size-11 shrink-0 place-items-center rounded-2xl";
 const dateLabel=(value:string,ar:boolean)=> {
  const date=parseCalendarDate(value);
@@ -86,7 +86,7 @@ export function IllustratedFamilyHome(){
  const dateText=(item:HomeAgendaItem)=>item.date===view.nowKey?label("Today","اليوم"):dateLabel(item.date,ar);
  const loaded=(section:string)=>ready?section:label("Loading saved family data…","عم نحمّل معلومات العائلة…");
  return <div className="dabberna-new-home mx-auto max-w-[1420px] space-y-4 pb-6 sm:space-y-5">
-  <header className="relative isolate overflow-hidden rounded-[1.9rem] border border-[#DCEBDD] bg-gradient-to-r from-[#E7F2E2] via-[#F5F7EE] to-[#FFF5E7] shadow-[0_20px_60px_-45px_rgba(28,79,49,.42)]">
+  <header className="relative isolate overflow-hidden rounded-[1.9rem] border border-[#F1E3E7] bg-gradient-to-r from-[#FDECF0] via-[#F8F8F0] to-[#EAF5EE] shadow-[0_20px_60px_-45px_rgba(28,79,49,.42)]">
    <div className="pointer-events-none absolute -end-16 -top-16 size-64 rounded-full bg-[#FFF1C7]/55 blur-xl" aria-hidden="true"/>
    <div className="grid items-center gap-1 lg:grid-cols-[36%_1fr_19%]">
     <div className="relative h-48 overflow-hidden sm:h-60 lg:h-72" dir="ltr">
@@ -96,17 +96,14 @@ export function IllustratedFamilyHome(){
       className="absolute inset-0 size-full object-contain object-bottom" loading="eager" decoding="async"/>
     </div>
     <div className="relative px-5 pb-6 text-center sm:px-7 lg:py-8">
-     <p className="text-xs font-semibold tracking-[.15em] text-[#668876]">{label("WELCOME TO YOUR FAMILY SPACE","مساحة لعيلتك")}</p>
-     <h1 className="mt-2 text-[1.7rem] font-extrabold leading-[1.15] tracking-tight text-[#194C46] sm:text-[2rem] xl:text-[2.55rem]">
+     <p className="text-xs font-semibold tracking-[.15em] text-[#A16F86]">{label("WELCOME TO YOUR FAMILY SPACE","مساحة لعيلتك")}</p>
+     <h1 className="mt-2 text-[1.7rem] font-extrabold leading-[1.15] tracking-tight text-[#25354B] sm:text-[2rem] xl:text-[2.55rem]">
       {label("A calmer, brighter tomorrow for your family","يوم أهدأ ومستقبل أحلى لعيلتك")}
      </h1>
-     <p className="mx-auto mt-3 max-w-[34rem] text-sm leading-relaxed text-[#4F716B]">
+     <p className="mx-auto mt-3 max-w-[34rem] text-sm leading-relaxed text-[#657185]">
       {label("Plan, manage, decide, monitor and adjust — all in one place.",
        "خطّط، نظّم، قرّر، تابع وعدّل — كل شي بمكان واحد.")}
      </p>
-     <Link to="/advisor" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#176548] px-6 text-sm font-bold text-white shadow-[0_9px_18px_-12px_rgba(13,90,47,.9)] transition hover:bg-[#134F3B]">
-      <MessageCircle className="size-5"/>{labels.ask}<ArrowRight className="size-4 rtl:rotate-180"/>
-     </Link>
     </div>
     <div className="relative hidden p-5 text-center lg:block">
      <div className="text-sm font-semibold italic leading-7 text-[#577A88]">
@@ -123,7 +120,7 @@ export function IllustratedFamilyHome(){
   <div className="grid items-stretch gap-4 lg:grid-cols-3">
    <section className={homeCard} aria-labelledby="dab-today">
     <CardHeading id="dab-today" title={labels.today} desc={label("Your current picture and next steps","صورة يومك والخطوة الجاية")}
-     icon={<CalendarDays className="size-6"/>} color="green" to="/calendar" cta={label("View all","شوف الكل")}/>
+     icon={<CalendarDays className="size-6"/>} color="green"/>
     {!ready?<EmptyText>{loaded("")}</EmptyText>:view.agenda.length===0?
      <EmptyText>{label("No upcoming tasks, unpaid scheduled bills or family occasions are recorded for the next seven days.","ما في مهام أو فواتير غير مدفوعة أو مناسبات مسجّلة للأسبوع الجاي.")}</EmptyText>:
      <ol className="mt-4 space-y-1">
@@ -145,7 +142,7 @@ export function IllustratedFamilyHome(){
 
    <section className={homeCard} aria-labelledby="dab-ask">
     <CardHeading id="dab-ask" title={labels.ask} desc={label("Personalized guidance from your saved information","إرشاد يناسب معلومات عيلتك")}
-     icon={<MessageCircle className="size-6"/>} color="blue" to="/advisor" cta={label("More guidance","المزيد")}/>
+     icon={<MessageCircle className="size-6"/>} color="blue"/>
     <form className="mt-4 flex gap-2 rounded-xl border border-[#D9E7DF] bg-[#FAFDFC] p-2" onSubmit={submit}>
      <label className="sr-only" htmlFor="dab-home-question">{label("Ask about your family","اسأل عن العائلة")}</label>
      <input id="dab-home-question" type="text" maxLength={400} value={draft} onChange={e=>setDraft(e.target.value)}
@@ -175,7 +172,7 @@ export function IllustratedFamilyHome(){
 
    <section className={homeCard} aria-labelledby="dab-plans">
     <CardHeading id="dab-plans" title={labels.plans} desc={label("Upcoming plans and milestones","الخطط والمناسبات القادمة")}
-     icon={<BookOpen className="size-6"/>} color="blue" to="/plans" cta={label("View all","شوف الكل")}/>
+     icon={<BookOpen className="size-6"/>} color="blue"/>
     {!ready?<EmptyText>{loaded("")}</EmptyText>:view.plans.length===0?
      <EmptyText>{label("No upcoming saved plans or family dates. Ask Dabberna to help with a new plan.","ما في خطط أو مناسبات مسجّلة. اسأل دبّرنا يساعدك بخطة جديدة.")}</EmptyText>:
      <div className="mt-3 divide-y divide-[#E9EFE9]">{view.plans.map(item=><Link key={item.id}
@@ -190,16 +187,13 @@ export function IllustratedFamilyHome(){
       </span>
       <ChevronRight className="size-4 text-[#92AFA0] rtl:rotate-180"/>
      </Link>)}</div>}
-    <Link to="/plans" className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-xs font-bold text-brand underline">
-     {label("Review and adjust plans","راجع وعدّل الخطط")}<ArrowRight className="size-4 rtl:rotate-180"/>
-    </Link>
    </section>
   </div>
 
   <div className="grid items-stretch gap-4 lg:grid-cols-3">
    <section className={homeCard} aria-labelledby="dab-money">
     <CardHeading id="dab-money" title={labels.money} desc={label("Your monthly household picture","صورة مصاريف البيت هالشهر")}
-     icon={<Wallet className="size-6"/>} color="green" to="/money" cta={label("View details","التفاصيل")}/>
+     icon={<Wallet className="size-6"/>} color="green"/>
     {!ready?<EmptyText>{loaded("")}</EmptyText>:!view.budget?
      <div className="mt-4 rounded-xl bg-[#F2F8EE] p-4">
       <p className="text-sm font-semibold">{label("Your actual household figures are not set yet.","لسه ما في أرقام مالية حقيقية للعائلة.")}</p>
@@ -239,10 +233,10 @@ export function IllustratedFamilyHome(){
 
    <section className={homeCard} aria-labelledby="dab-shopping">
     <CardHeading id="dab-shopping" title={labels.shopping} desc={label("Shopping needs and saved ideas","احتياجات ومشتريات العيلة")}
-     icon={<ShoppingBasket className="size-6"/>} color="green" to="/explore/shopping" cta={label("View all","شوف الكل")}/>
+     icon={<ShoppingBasket className="size-6"/>} color="green"/>
     {!ready?<EmptyText>{loaded("")}</EmptyText>:view.shopping.length===0?
      <EmptyText>{label("Your shopping list and wishlist are empty. Save an item whenever you need one.","قائمة المشتريات والرغبات فاضية. أضف شي وقت تحتاجه.")}</EmptyText>:
-     <div className="mt-4 divide-y divide-[#E9EFEA]">{view.shopping.map(item=><Link to={item.kind==="basket"?"/explore/shopping":"/occasions"} key={item.id}
+     <div className="mt-4 divide-y divide-[#E9EFEA]">{view.shopping.map(item=><Link to={item.kind==="basket"?"/explore/shopping":"/explore/smartbuy"} key={item.id}
       className="flex min-h-[3.5rem] items-center gap-3 hover:bg-[#F9FBF7]">
       <span className={"grid size-9 shrink-0 place-items-center rounded-xl "+(item.kind==="basket"?"bg-[#EAF4E9] text-[#53926F]":"bg-[#FDF0EE] text-[#B2746E]")}>
        {item.kind==="basket"?<ShoppingBasket className="size-5"/>:<Gift className="size-5"/>}
@@ -250,14 +244,11 @@ export function IllustratedFamilyHome(){
       <span className={"min-w-0 flex-1 truncate text-sm font-semibold "+(item.status==="done"?"text-muted-foreground line-through":"")}>{item.title}</span>
       {item.status==="done"?<CheckCircle2 className="size-4 text-[#629B72]"/>:<ChevronRight className="size-4 text-[#91A9A1] rtl:rotate-180"/>}
      </Link>)}</div>}
-    <Link to="/explore/market" className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-xs font-bold text-brand underline">
-     {label("Research a product","ابحث عن منتج")}<ArrowRight className="size-4 rtl:rotate-180"/>
-    </Link>
    </section>
 
    <section className={homeCard} aria-labelledby="dab-calendar">
     <CardHeading id="dab-calendar" title={labels.calendar} desc={month}
-     icon={<CalendarDays className="size-6"/>} color="blue" to="/calendar" cta={label("View calendar","شوف التقويم")}/>
+     icon={<CalendarDays className="size-6"/>} color="blue"/>
     <div className="mt-4 grid grid-cols-7 gap-1">
      {view.week.map(({day,events})=>{
       const date=parseCalendarDate(day);
@@ -333,12 +324,6 @@ export function IllustratedFamilyHome(){
      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#EDF6EA] px-4 text-sm font-semibold text-brand">
      <Receipt className="size-4"/>{label("Record a paid expense","سجّل مصروف مدفوع")}
     </button>
-    <Link to="/money" className="inline-flex min-h-11 items-center gap-2 px-3 text-sm font-semibold text-brand underline">
-     <Wallet className="size-4"/>{label("Detailed Money","تفاصيل المالية")}
-    </Link>
-    <Link to="/space" className="inline-flex min-h-11 items-center gap-2 px-3 text-sm font-semibold text-brand underline">
-     <Home className="size-4"/>{label("Family & settings","العيلة والإعدادات")}
-    </Link>
    </div>
    {quickExpenseOpen&&<QuickExpenseCard onClose={()=>setQuickExpenseOpen(false)}/>}
    <details className="mt-3">
@@ -360,17 +345,16 @@ export function IllustratedFamilyHome(){
   </footer>
  </div>;
 }
-function CardHeading({id,title,desc,icon,color,to,cta}:{
- id:string;title:string;desc:string;icon:ReactNode;color:"green"|"blue";to:"/calendar"|"/plans"|"/money"|"/advisor"|"/explore/shopping";cta:string
+function CardHeading({id,title,desc,icon,color}:{
+ id:string;title:string;desc:string;icon:ReactNode;color:"green"|"blue"
 }){
  return <div className="flex items-center gap-3">
-  <span className={iconBox+" "+(color==="green"?"bg-[#E0F2E0] text-[#247351]":"bg-[#E1F2FD] text-[#2676A1]")}>
+  <span className={iconBox+" "+(color==="green"?"bg-[#E6F5EF] text-[#2A8874]":"bg-[#F2EAFE] text-[#8573C3]")}>
    {icon}
   </span>
-  <div className="min-w-0 flex-1"><h2 id={id} className="text-lg font-extrabold text-[#163F43]">{title}</h2>
-   <p className="mt-0.5 text-xs leading-snug text-[#71908B]">{desc}</p>
+  <div className="min-w-0 flex-1"><h2 id={id} className="text-lg font-extrabold text-[#25354B]">{title}</h2>
+   <p className="mt-0.5 text-xs leading-snug text-[#758094]">{desc}</p>
   </div>
-  <Link to={to} className="shrink-0 rounded-full border border-[#D2E6E0] bg-white px-3 py-2 text-[11px] font-semibold text-[#427A77] hover:bg-[#F1F9F5]">{cta}</Link>
  </div>;
 }
 function EmptyText({children}:{children:ReactNode}){
