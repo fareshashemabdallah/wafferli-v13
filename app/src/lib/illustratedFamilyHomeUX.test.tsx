@@ -20,7 +20,7 @@ function draw(){return render(<I18nProvider><IllustratedFamilyHome/></I18nProvid
 describe("illustrated family homepage",()=>{
  it("renders the six real live cards and illustration with uncovered-haired mother",async()=>{
   draw();
-  expect(screen.getByRole("img",{name:/mother with long uncovered hair/})).toHaveAttribute("src",expect.stringContaining("family-hero-cartoon.avif"));
+  expect(screen.getByRole("img",{name:/cartoon portrait.*mother.s hair uncovered/i})).toHaveAttribute("src",expect.stringContaining("family-hero-cartoon.avif"));
   for(const title of ["Today","Ask Dabberna","Our Plans","Money & Bills","Shopping & Wishlist","Family Calendar"]){
    expect(screen.getByRole("heading",{name:title})).toBeInTheDocument();
   }
