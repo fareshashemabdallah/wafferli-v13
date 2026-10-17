@@ -2,9 +2,11 @@ import {computeMoney,type MoneyState} from "./money";
 import type {FamilyPreferences} from "./familyPreferences";
 import {getFinancialReadiness} from "./financialReadiness";
 import {getMoneyOverview} from "./moneyOverview";
+import type {FamilyPlan} from "./familyPlans";
+import {assessFinancialReality} from "./financialReality";
 
 export type FamilyPriority = {
-  id: "cash-risk"|"goals-overallocated"|"goal-deadline"|"cash-missing"|"bills-missing"|"cash-stale"|"savings-purpose";
+  id: "essentials-gap"|"cash-risk"|"goals-overallocated"|"goal-deadline"|"cash-missing"|"bills-missing"|"cash-stale"|"savings-purpose";
   severity: "attention"|"gentle";
   titleEn:string; titleAr:string;
   detailEn:string; detailAr:string;
@@ -19,13 +21,15 @@ export type FamilyPriority = {
 export function selectFamilyPriority(
   state:MoneyState,
   prefs:FamilyPreferences,
-  now=new Date()
+  now=new Date(),plans:readonly FamilyPlan[]=[]
 ):FamilyPriority|null {
   if(state.demo || !prefs.financeTips || prefs.notificationFrequency==="off")return null;
-  const readiness=getFinancialReadiness(state,now);
+  const readiness=getFinancialReadiness(state,now,plans);
   // The Home and Money start-up screens already explain missing basic budgets.
   if(!readiness.budgetReady)return null;
-  const overview=getMoneyOverview(state,now);
+  const reality=assessFinancialReality(state,plans,now);
+  if(reality.kind==="essentials-gap")return {id:"essentials-gap",severity:"attention",titleEn:reality.titleEn,titleAr:reality.titleAr,detailEn:reality.messageEn,detailAr:reality.messageAr,actionEn:reality.actionEn,actionAr:reality.actionAr};
+  const overview=getMoneyOverview(state,now,plans);
   if(overview.forecast.overdueCount>0 ||
      (overview.cashAfterBills!==null && overview.cashAfterBills<0) ||
      (overview.forecast.minimumBalance!==null && overview.forecast.minimumBalance<0)){
