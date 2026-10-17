@@ -48,7 +48,7 @@ export function LandingDesignPreview(){
  const tiles=[
   {to:"/" as const,en:"Today",ar:"اليوم",desc:"See what's next for your family.",ardesc:"شو عند العيلة قريباً",icon:CalendarDays,color:"#E9F4FC",ink:"#449CD6"},
   {to:"/money" as const,en:"Money & Bills",ar:"المال والفواتير",desc:"Stay on top of spending and savings.",ardesc:"خليك عارف مصاريفك وادخارك",icon:Wallet,color:"#EDF6E9",ink:"#2B9D71"},
-  {to:"/explore/market" as const,en:"Shopping & Wishlist",ar:"مشترياتنا ورغباتنا",desc:"Find items and compare useful options.",ardesc:"ابحث وقارن الخيارات",icon:ShoppingBasket,color:"#FFF0E7",ink:"#EB7657"},
+  {to:"/explore/smartbuy" as const,en:"Shopping & Wishlist",ar:"مشترياتنا ورغباتنا",desc:"Find items and compare useful options.",ardesc:"ابحث وقارن الخيارات",icon:ShoppingBasket,color:"#FFF0E7",ink:"#EB7657"},
   {to:"/calendar" as const,en:"Family Calendar",ar:"تقويم العيلة",desc:"Keep important dates in one place.",ardesc:"المناسبات والمواعيد بمكان واحد",icon:CalendarDays,color:"#F3EDFC",ink:"#9C71DA"},
   {to:"/plans" as const,en:"Our Plans",ar:"خططنا",desc:"Turn family ideas into decisions.",ardesc:"حوّل الأفكار لخطط واضحة",icon:BookOpen,color:"#FFF6E3",ink:"#E0A33C"},
   {to:"/advisor" as const,en:"Ask Dabberna",ar:"اسأل دبّرنا",desc:"Get guidance from saved family context.",ardesc:"نصيحة مبنية على معلومات عيلتك",icon:Sparkles,color:"#EAF7F0",ink:"#2BA981"}
@@ -140,7 +140,7 @@ export function LandingDesignPreview(){
      <div className="absolute bottom-[18%] end-0 hidden w-[34%] rotate-[-3deg] rounded-2xl border border-[#E8ECE9] bg-white/95 p-3 shadow-xl shadow-[#597660]/10 lg:block">
       <div className="flex items-center gap-2 text-xs font-extrabold text-[#2D6B56]"><ShoppingBasket className="size-5"/>{display("Shopping & Wishlist","المشتريات")}</div>
       <p className="mt-2 truncate text-[11px] text-[#476563]">{ready&&view.shopping.length?view.shopping[0]?.title:display("Your saved shopping needs","احتياجات العيلة المحفوظة")}</p>
-      <Link to="/explore/shopping" className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[#327B61]">{display("Open list","افتح القائمة")}<ArrowRight className="size-3"/></Link>
+      <Link to="/explore/smartbuy" className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[#327B61]">{display("Open list","افتح القائمة")}<ArrowRight className="size-3"/></Link>
      </div>
     </div>
    </section>
