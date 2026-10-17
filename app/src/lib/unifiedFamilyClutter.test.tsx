@@ -11,12 +11,12 @@ vi.mock("@tanstack/react-router",()=>({
 }));
 afterEach(()=>{cleanup();localStorage.clear();vi.restoreAllMocks();});
 describe("one Dabberna navigation, no automatic link clutter",()=>{
- it("uses one shared six-destination navigation and hides specialist tools until requested",()=>{
+ it("uses one shared four-destination navigation and hides specialist tools until requested",()=>{
   render(<I18nProvider><AppShell title="Our Plans"><p>Saved plan details</p></AppShell></I18nProvider>);
   const navs=screen.getAllByRole("navigation",{name:"Main"});
   expect(navs).toHaveLength(2);
   for(const nav of navs){
-   expect(within(nav).getAllByRole("link")).toHaveLength(6);
+   expect(within(nav).getAllByRole("link")).toHaveLength(4);
   }
   expect(screen.getByText("Other tools").closest("details")).not.toHaveAttribute("open");
   expect(screen.queryByRole("navigation",{name:"Related family actions"})).not.toBeInTheDocument();
@@ -31,7 +31,7 @@ describe("one Dabberna navigation, no automatic link clutter",()=>{
   const mobile=screen.getByRole("navigation",{name:"Shopping mobile navigation"});
   const paths=(node:HTMLElement)=>Array.from(node.querySelectorAll("a")).map(a=>a.getAttribute("href"));
   expect(paths(desktop)).toEqual(paths(mobile));
-  expect(paths(desktop)).toEqual(["/","/advisor","/plans","/money","/explore/smartbuy","/calendar"]);
+  expect(paths(desktop)).toEqual(["/","/money","/family","/advisor"]);
   expect(screen.queryByRole("navigation",{name:"Related family actions"})).not.toBeInTheDocument();
  });
 });
