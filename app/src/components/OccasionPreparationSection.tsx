@@ -75,6 +75,8 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
  const [extrasDate,setExtrasDate]=useState(initial.extras.dueDate);
  const [error,setError]=useState(""),[saved,setSaved]=useState("");
  const [showMore,setShowMore]=useState(initial.extras.amountJod>0);
+ const [showCertainty,setShowCertainty]=useState(occasionKinds.some(k=>initial[k].certainty!==undefined&&initial[k].certainty!=="planned"));
+ const [certainties,setCertainties]=useState<Record<OccasionCostKind,"idea"|"planned"|"firm">>({gift:initial.gift.certainty??"planned",celebration:initial.celebration.certainty??"planned",extras:initial.extras.certainty??"planned"});
  const [allPlans]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [allTasks]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
  const [justSavedPrep,setJustSavedPrep]=useState<OccasionPreparation|undefined>();
@@ -83,9 +85,9 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
   const amounts=[cents(gift),cents(celebration),cents(extras)];
   if(amounts.some(x=>x===null))return null;
   return {
-   gift:{description:giftName.trim(),amountJod:amounts[0]!,dueDate:giftDate},
-   celebration:{amountJod:amounts[1]!,dueDate:celebrationDate},
-   extras:{amountJod:amounts[2]!,dueDate:extrasDate}
+   gift:{description:giftName.trim(),amountJod:amounts[0]!,dueDate:giftDate,certainty:certainties.gift},
+   celebration:{amountJod:amounts[1]!,dueDate:celebrationDate,certainty:certainties.celebration},
+   extras:{amountJod:amounts[2]!,dueDate:extrasDate,certainty:certainties.extras}
   };
  };
  const submit=(e:FormEvent)=>{
