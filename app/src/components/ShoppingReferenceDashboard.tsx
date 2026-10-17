@@ -1,8 +1,8 @@
 import {useRef,useState,type CSSProperties,type ChangeEvent,type FormEvent} from "react";
 import {Link} from "@tanstack/react-router";
-import {BookOpen,Check,CheckCircle2,ChevronRight,Gift,Heart,ImagePlus,Palette,Plus,Search,ShoppingBasket,SlidersHorizontal,Sparkles,Trash2,X} from "lucide-react";
+import {Check,CheckCircle2,ChevronRight,Heart,ImagePlus,Palette,Plus,Search,ShoppingBasket,SlidersHorizontal,Sparkles,Trash2,X} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
-import {useLocalState,fmtJOD,parseAmount,uid} from "@/lib/storage";
+import {useLocalState,fmtJOD,uid,writeLocal} from "@/lib/storage";
 import {FAMILY_WISHLIST_KEY,makeWishlistItem,updateWishlistStatus,summarizeWishlistPrice,type WishlistItem,type WishlistKind} from "@/lib/familyWishlist";
 import {isSampleBasketEntry,type BasketEntry} from "@/lib/basketRecording";
 import {makeLocalCartoonPortrait,validateCartoonPhoto,type CartoonPhotoError} from "@/lib/shoppingCartoon";
@@ -102,8 +102,7 @@ export function ShoppingReferenceDashboard(){
   // Storage hook refuses changes when browser storage is full and issues its global warning.
   try{
    if(candidate.length>900_000){setAvatarError("storage");return;}
-   const key="wafferli.v13.shoppingWishlistCartoon";
-   localStorage.setItem(key,JSON.stringify(candidate));
+   if(!writeLocal("shoppingWishlistCartoon",candidate)){setAvatarError("storage");return;}
    setCartoon(candidate);setCandidate("");setAvatarError(null);
    setAvatarMessage(tr("Cartoon-style picture applied on this device.","تم اعتماد الصورة الكرتونية على هذا الجهاز."));
   }catch{setAvatarError("storage");}
