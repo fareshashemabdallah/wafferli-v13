@@ -58,19 +58,19 @@ export function buildFamilyAttention(input:{
  const snoozes=input.snoozes??{};
  if(p.notificationFrequency==="off")return [];
  const signals:AttentionItem[]=[];
- const finance=selectFamilyPriority(money,p,now);
+ const finance=selectFamilyPriority(money,p,now,plans);
  if(finance){
   signals.push({
    key:"finance:"+finance.id+":"+today.slice(0,7),
-   category:"finance",severity:finance.id==="cash-risk"?"critical":finance.severity==="gentle"?"gentle":"important",
-   priority:finance.id==="cash-risk"?0:finance.severity==="gentle"?80:16,
+   category:"finance",severity:(finance.id==="cash-risk"||finance.id==="essentials-gap")?"critical":finance.severity==="gentle"?"gentle":"important",
+   priority:(finance.id==="cash-risk"||finance.id==="essentials-gap")?0:finance.severity==="gentle"?80:16,
    titleEn:finance.titleEn,titleAr:finance.titleAr,
    detailEn:finance.detailEn,detailAr:finance.detailAr,
    actionEn:finance.actionEn,actionAr:finance.actionAr,
-   link:"/money",canSnooze:finance.id!=="cash-risk"
+   link:"/money",canSnooze:finance.id!=="cash-risk"&&finance.id!=="essentials-gap"
   });
  }
- const overview=getMoneyOverview(money,now);
+ const overview=getMoneyOverview(money,now,plans);
  if(!money.demo&&p.billReminders){
   const bills=overview.forecast.events
    .filter(e=>e.kind==="bill"&&e.displayDate<=dateKey(shiftDays(now,7)));
