@@ -98,7 +98,7 @@ export function QuickExpenseCard({onClose}:{onClose:()=>void}){
      placeholder={ar?"مثلاً ٨٫٥٠":"e.g. 8.50"} value={amount} onChange={e=>setAmount(e.target.value)}/>
    </label>
    <label className="block text-sm font-medium">{ar?"فئة المصروف":"Category"}
-    <select required value={selectedCategoryId} onChange={e=>setCategoryId(e.target.value)}
+    <select required aria-label={ar?"فئة المصروف":"Category"} value={selectedCategoryId} onChange={e=>setCategoryId(e.target.value)}
      className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm">
      <option value="">{ar?"اختر الفئة":"Choose category"}</option>
      {money.categories.map(cat=><option key={cat.id} value={cat.id}>{tr(cat.name)}</option>)}
