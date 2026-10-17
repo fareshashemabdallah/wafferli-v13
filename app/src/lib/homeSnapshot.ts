@@ -50,7 +50,7 @@ export function homeSnapshot(input:{
   id:"plan:"+p.id,title:p.title,...(p.date?{date:p.date}:{}),kind:"plan" as const
  }));
  const plannedDates=new Set(upcoming.map(p=>p.date+"|"+p.title.toLowerCase()));
- const plans:HomePlanItem=[...upcoming,...nextOccasions.filter(e=>!plannedDates.has(e.occursOn+"|"+e.title.toLowerCase()))
+ const plans:HomePlanItem[]=[...upcoming,...nextOccasions.filter(e=>!plannedDates.has(e.occursOn+"|"+e.title.toLowerCase()))
   .map(e=>({id:"moment:"+e.id+":"+e.occursOn,title:e.title,date:e.occursOn,kind:"moment" as const}))]
   .sort((a,b)=>(a.date??"9999-12-31").localeCompare(b.date??"9999-12-31")).slice(0,4);
  const basket=input.basket.filter(item=>!isSampleBasketEntry(item)&&!!item.name.trim()).slice(0,3).map(item=>({
