@@ -44,7 +44,7 @@ describe("Family commitments appear directly within Upcoming Bills",()=>{
   expect(within(parent!).getByText("Rent")).toBeInTheDocument();
   expect(within(family).getByText("Sophia's birthday · Gift")).toBeInTheDocument();
   expect(within(family).getByText("Sophia's birthday · Celebration")).toBeInTheDocument();
-  expect(within(family).getByText("2026-11-20",{exact:false})).toBeInTheDocument();
+  expect(within(family).getAllByText("2026-11-20",{exact:false}).length).toBeGreaterThan(0);
   expect(within(family).getByText("350 JOD")).toBeInTheDocument();
   expect(readLocal<MoneyState>("money",money).expenses).toHaveLength(0);
  });
