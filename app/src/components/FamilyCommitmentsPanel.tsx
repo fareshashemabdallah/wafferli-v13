@@ -7,7 +7,7 @@ import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {familyFinancialCommitments,familyFinancialSummary,recordFamilyCommitmentPayment} from "@/lib/familyFinancialCommitments";
 import type {MoneyState} from "@/lib/money";
 
-export function FamilyCommitmentsPanel({money,compact=false}:{money:MoneyState;compact?:boolean}){
+export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{money:MoneyState;compact?:boolean;withinBills?:boolean}){
  const {lang}=useI18n(),ar=lang==="ar";
  const t=(en:string,arabic:string)=>ar?arabic:en;
  const [plans,,ready]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
@@ -16,7 +16,7 @@ export function FamilyCommitmentsPanel({money,compact=false}:{money:MoneyState;c
  const [categoryId,setCategoryId]=useState("");
  const [message,setMessage]=useState("");
  if(!ready)return null;
- const entries=familyFinancialCommitments(plans,money);
+ const entries=familyFinancialCommitments(plans,money).filter(item=>!withinBills||!item.paid);
  if(!entries.length)return null;
  const totals=familyFinancialSummary(plans,money);
  const amountOk=paidAmount.trim()!==""&&Number.isFinite(Number(paidAmount))&&Number(paidAmount)>0&&
@@ -35,13 +35,13 @@ export function FamilyCommitmentsPanel({money,compact=false}:{money:MoneyState;c
    "Paid expense recorded once. Your bank cash balance has not been changed.",
    "تم تسجيل المصروف المدفوع مرة واحدة. لم يتغيّر رصيدك النقدي."));
  };
- return <section aria-label={t("Upcoming family commitments","الالتزامات العائلية القادمة")}
-  className="editorial-card rounded-[1.5rem] border border-[#E5DAE6] bg-[#FFFDFE] p-4 sm:p-5">
+ return <section aria-label={withinBills?t("Family commitments from calendar","التزامات المناسبات من التقويم"):t("Upcoming family commitments","الالتزامات العائلية القادمة")}
+  className={withinBills?"mt-3 border-t border-[#E7DFE5] pt-4":"editorial-card rounded-[1.5rem] border border-[#E5DAE6] bg-[#FFFDFE] p-4 sm:p-5"}>
   <div className="flex items-start gap-3">
    <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#FBEAF3] text-[#B45B85]">
     <CalendarClock className="size-5"/></span>
    <div className="flex-1">
-    <h2 className="text-base font-bold text-[#27364C]">{t("Upcoming family commitments","التزامات العيلة القادمة")}</h2>
+    <h2 className="text-base font-bold text-[#27364C]">{withinBills?t("From Family Life · automatically added","من حياة العيلة · تُضاف تلقائياً"):t("Upcoming family commitments","التزامات العيلة القادمة")}</h2>
     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t(
      "Automatically linked to your family occasions and their payment dates. This is not a savings goal or a paid expense.",
      "مرتبطة تلقائياً بمناسبات العيلة ومواعيد الدفع، وليست هدف ادخار أو مصروفاً مدفوعاً.")}</p>
