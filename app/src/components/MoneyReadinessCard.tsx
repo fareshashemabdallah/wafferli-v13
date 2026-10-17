@@ -11,7 +11,7 @@ export function MoneyReadinessCard({state,setState,goTo}:Props){
   (ar?"خطوة صغيرة لتحسين دقة النصيحة":"One more step for clearer advice");
  const details=["income","savings","cash","bills","cash-date","risk"] as const;
  const step=(k:typeof details[number])=>k==="income"?(ar?"أكمل الدخل ومخصصات المصاريف":"Complete income & spending budgets"):
-  k==="savings"?(ar?"أدخل هدف الادخار الشهري":"Enter a monthly savings target"):
+  k==="savings"?(ar?"الادخار اختياري":"Savings are optional"):
   k==="cash"?(ar?"أدخل رصيدك النقدي الفعلي":"Enter your actual cash balance"):
   k==="bills"?(ar?"أضف الفواتير المستحقة أو أكد عدم وجودها":"Add dated bills or confirm you have none"):
   k==="cash-date"?(ar?"أكد رصيدك الحالي بتحديثه":"Refresh the date of your cash balance"):
@@ -43,7 +43,7 @@ export function MoneyReadinessCard({state,setState,goTo}:Props){
    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
     {[
      [r.budgetReady,ar?"ميزانية الشهر":"Monthly budget"],
-     [r.savingsReady,ar?"هدف الادخار":"Savings target"],
+     [r.savingsReady,ar?"الادخار (اختياري)":"Savings (optional)"],
      [r.cashKnown,ar?"رصيد النقد":"Cash balance"],
      [r.cashFresh,ar?"تحديث الرصيد":"Recent cash update"],
      [r.billsReviewed,ar?"الفواتير المجدولة":"Scheduled bills"]
