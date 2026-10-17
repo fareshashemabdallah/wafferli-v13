@@ -1,4 +1,4 @@
-import {useState,type FormEvent} from "react";
+import {useState,type FormEvent,type ReactNode} from "react";
 import {Link} from "@tanstack/react-router";
 import {ArrowRight,BookOpen,CalendarDays,CheckCircle2,ChevronRight,CloudSun,Gift,Heart,
  Home,Lightbulb,ListChecks,MessageCircle,Receipt,Send,ShieldCheck,ShoppingBasket,
@@ -356,7 +356,7 @@ export function IllustratedFamilyHome(){
  </div>;
 }
 function CardHeading({id,title,desc,icon,color,to,cta}:{
- id:string;title:string;desc:string;icon:React.ReactNode;color:"green"|"blue";to:"/calendar"|"/plans"|"/money"|"/advisor"|"/explore/shopping";cta:string
+ id:string;title:string;desc:string;icon:ReactNode;color:"green"|"blue";to:"/calendar"|"/plans"|"/money"|"/advisor"|"/explore/shopping";cta:string
 }){
  return <div className="flex items-center gap-3">
   <span className={iconBox+" "+(color==="green"?"bg-[#E0F2E0] text-[#247351]":"bg-[#E1F2FD] text-[#2676A1]")}>
@@ -368,6 +368,6 @@ function CardHeading({id,title,desc,icon,color,to,cta}:{
   <Link to={to} className="shrink-0 rounded-full border border-[#D2E6E0] bg-white px-3 py-2 text-[11px] font-semibold text-[#427A77] hover:bg-[#F1F9F5]">{cta}</Link>
  </div>;
 }
-function EmptyText({children}:{children:React.ReactNode}){
+function EmptyText({children}:{children:ReactNode}){
  return <p className="mt-4 rounded-xl bg-[#F7FAF6] p-4 text-sm leading-relaxed text-[#6B8580]">{children}</p>;
 }
