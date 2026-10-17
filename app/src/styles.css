@@ -58,14 +58,14 @@
 :root {
   --radius: 1.25rem;
   /* Family-first palette: warm ivory, sage, gentle apricot, calm slate */
-  --brand: #315E4B;
-  --brand-2: #638775;
-  --mint: #E9F0E8;
+  --brand: #325C63;
+  --brand-2: #73949C;
+  --mint: #EAF4F0;
   --lime: #EBC78B;
-  --ink: #263E33;
+  --ink: #24354B;
   --warn: #FBEBC8;
   --warn-foreground: #745425;
-  --background: #F8F6F0;
+  --background: #FFF9F8;
   --foreground: var(--ink);
   --card: #FFFFFF;
   --card-foreground: var(--ink);
@@ -75,21 +75,21 @@
   --primary-foreground: #FFFFFF;
   --secondary: var(--mint);
   --secondary-foreground: var(--brand);
-  --muted: #F3F1EA;
-  --muted-foreground: #66786E;
-  --accent: #F5E8D6;
+  --muted: #F8F1F0;
+  --muted-foreground: #6B7788;
+  --accent: #FBE8EC;
   --accent-foreground: var(--ink);
   --destructive: #B84C47;
   --destructive-foreground: #FFFFFF;
-  --border: #E5E7DE;
-  --input: #D7E2D8;
+  --border: #F0E5E9;
+  --input: #DEE3E8;
   --ring: var(--brand-2);
   --chart-1: var(--brand);
   --chart-2: var(--brand-2);
   --chart-3: #E7B5A4;
   --chart-4: #E4BE73;
   --chart-5: #8AA5AD;
-  --sidebar: #FFFEFB;
+  --sidebar: #FFFCFD;
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: #FFFFFF;
@@ -97,8 +97,8 @@
   --sidebar-accent-foreground: var(--brand);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
-  --shadow-soft: 0 2px 3px rgba(34,57,42,0.022), 0 16px 34px -22px rgba(34,57,42,0.20);
-  --gradient-hero: linear-gradient(124deg, #F2E9DB 0%, #E8F0E8 52%, #F6EAE0 100%);
+  --shadow-soft: 0 2px 3px rgba(47,38,62,0.018), 0 16px 34px -22px rgba(47,38,62,0.16);
+  --gradient-hero: linear-gradient(124deg, #FFF0E9 0%, #EEF6F2 52%, #FBE6EE 100%);
 }
 
 @layer base {
@@ -106,13 +106,13 @@
   html { -webkit-text-size-adjust: 100%; }
   body {
     background-color: var(--color-background);
-    background-image: radial-gradient(ellipse 80vw 36rem at 100% -17rem, rgba(217,229,211,0.38), transparent 72%);
+    background-image: radial-gradient(ellipse 80vw 36rem at 100% -17rem, rgba(251,223,231,0.40), transparent 72%);
     background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.018em; line-height: 1.18; }
+  h1, h2, h3 { font-family: var(--font-sans); letter-spacing: -0.025em; line-height: 1.18; }
   [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { font-family: var(--font-sans); letter-spacing: 0; }
   input, select, textarea { font-size: 16px; } /* prevent iOS zoom */
   :where(a, button, input, select, textarea, summary):focus-visible { outline: 3px solid var(--brand-2); outline-offset: 3px; }
@@ -140,10 +140,10 @@
 
 /* Dabberna design language: editorial warmth instead of dashboard density. */
 @utility editorial-card {
-  border: 1px solid rgba(51,91,69,.10);
+  border: 1px solid rgba(90,67,93,.11);
   border-radius: 1.45rem;
-  background: #fffefc;
-  box-shadow: 0 14px 36px -30px rgba(30,66,47,.31), 0 1px 1px rgba(30,66,47,.035);
+  background: #fffdfd;
+  box-shadow: 0 14px 36px -30px rgba(48,45,67,.26), 0 1px 1px rgba(48,45,67,.035);
 }
 @utility section-eyebrow {
   color: #8F785E;
@@ -154,9 +154,9 @@
   text-transform: uppercase;
 }
 @utility soft-action {
-  border: 1px solid rgba(44,83,60,.11);
+  border: 1px solid rgba(73,77,103,.12);
   border-radius: 1.1rem;
-  background: #fffefb;
+  background: #fffdfd;
   box-shadow: 0 12px 28px -26px rgba(20,55,39,.32);
   transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
 }
@@ -167,7 +167,7 @@
 @utility page-intro {
   border: 1px solid rgba(59,96,74,.08);
   border-radius: 1.5rem;
-  background: linear-gradient(128deg, #EFF3E9, #F6F1E9);
+  background: linear-gradient(128deg, #FDEEF1, #F2F7F2);
   padding: 1.1rem 1.25rem;
 }
 @utility premium-divider {
