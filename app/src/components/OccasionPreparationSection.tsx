@@ -9,7 +9,6 @@ import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,makeFamilyPlan,type FamilyPlan,type Occ
 import {sampleMoney,type MoneyState} from "@/lib/money";
 import {FAMILY_TASKS_KEY,makeFamilyTask,setTaskComplete,type FamilyTask} from "@/lib/familyTasks";
 import {initialOccasionPreparation,validateOccasionPreparation,occasionFunding,occasionBudgetAdvice,type OccasionCostKind,occasionKinds} from "@/lib/occasionPreparation";
-import {dateKey} from "@/lib/familyCalendar";
 
 const panel="mt-3 rounded-2xl border border-[#EED9E4] bg-[#FFFCFD] p-4 sm:p-5";
 const labels:Record<OccasionCostKind,{en:string;ar:string}>={
@@ -120,18 +119,35 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
   {key:"celebration",title:t("Confirm the celebration arrangements","تأكيد ترتيبات الاحتفال"),date:prep.celebration.dueDate},
   {key:"extras",title:t("Prepare cake and final details","تجهيز الكعكة والتفاصيل"),date:prep.extras.dueDate}
  ] as {key:OccasionCostKind;title:string;date:string}[]).filter(x=>prep[x.key].amountJod>0):[];
+ const taskNeedsUpdate=(spec:{key:OccasionCostKind;date:string})=>{
+  const existing=tasks.find(x=>x.id==="occasion-"+spec.key+"-"+plan.id);
+  return !existing||(existing.status==="open"&&existing.dueDate!==spec.date);
+ };
  const addTasks=()=>{
   const now=new Date();
-  const missing=taskSpecs.filter(x=>!allTasks.some(a=>a.id==="occasion-"+x.key+"-"+plan.id));
+  const specId=(x:{key:OccasionCostKind})=>"occasion-"+x.key+"-"+plan.id;
+  const missing=taskSpecs.filter(x=>!allTasks.some(a=>a.id===specId(x)));
   const additions=missing.map(x=>makeFamilyTask({
-   id:"occasion-"+x.key+"-"+plan.id,title:x.title,dueDate:x.date,
+   id:specId(x),title:x.title,dueDate:x.date,
    priority:"normal",planId:plan.id
   },now)).filter((x):x is FamilyTask=>!!x);
-  if(!additions.length){setSaved(t("Preparation tasks already exist.","مهام التحضير محفوظة بالفعل."));return;}
-  if(!writeLocal(FAMILY_TASKS_KEY,[...additions,...allTasks])){
+  if(allTasks.length+additions.length>250){
+   setError(t("The family task limit has been reached.","وصلت للحد الأقصى لمهام العيلة."));return;
+  }
+  const adjusted=allTasks.map(task=>{
+   const spec=taskSpecs.find(x=>task.id===specId(x));
+   return spec&&task.status==="open"&&task.dueDate!==spec.date?
+    {...task,dueDate:spec.date,updatedAt:now.toISOString()}:task;
+  });
+  if(!additions.length&&adjusted.every((task,i)=>task===allTasks[i])){
+   setSaved(t("Preparation tasks are already up to date.","مهام التحضير محدثة."));return;
+  }
+  if(!writeLocal(FAMILY_TASKS_KEY,[...additions,...adjusted])){
    setError(t("Unable to save tasks.","تعذّر حفظ المهام."));return;
   }
-  setSaved(t("Preparation tasks added once. No bookings or payments made.","أُضيفت مهام التحضير مرة واحدة من دون حجز أو دفع."));
+  setError("");
+  setSaved(t("Preparation tasks saved with your chosen deadlines. No bookings or payments made.",
+   "تم حفظ مهام التحضير ومواعيدها، دون حجوزات أو دفعات."));
  };
  const toggleTask=(task:FamilyTask)=>{
   const edited=setTaskComplete(task,task.status!=="done");
@@ -259,9 +275,9 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
       className="flex items-center gap-2 rounded-xl border border-[#E7ECE7] bg-white p-2 text-xs">
       <input type="checkbox" className="size-4" checked={task.status==="done"} onChange={()=>toggleTask(task)}/>
       <span className="flex-1">{task.title} · {task.dueDate}</span></label>)}</div>}
-    {taskSpecs.some(spec=>!tasks.some(task=>task.id==="occasion-"+spec.key+"-"+plan.id))&&
+    {taskSpecs.some(taskNeedsUpdate)&&
      <button type="button" onClick={addTasks} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#E6F4EC] px-4 text-xs font-bold text-[#2B7A5E]">
-      <Plus className="size-4"/>{t("Add preparation tasks","أضف مهام التحضير")}
+      <Plus className="size-4"/>{t("Add / align preparation tasks","أضف أو حدّث مهام التحضير")}
      </button>}
     <p className="mt-2 text-[11px] text-[#7B8491]">{t(
      "Tasks are local reminders, not bookings, payments or push notifications.",
