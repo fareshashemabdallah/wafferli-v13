@@ -1,5 +1,7 @@
 import {buildForecast,futureDate,legacyIncome,roundJod,type Forecast} from "./cashflow";
 import {computeMoney,sampleMoney,type MoneyState} from "./money";
+import type {FamilyPlan} from "./familyPlans";
+import {familyForecastCommitments} from "./familyFinancialCommitments";
 
 /**
  * One read-only interpretation of the user's financial records.
@@ -23,13 +25,14 @@ export type MoneyOverview={
   cashAfterBills:number|null;
 };
 const validMoney=(value:unknown):value is number=>typeof value==="number"&&Number.isFinite(value)&&value>=0;
-export function getMoneyOverview(state:MoneyState,now=new Date()):MoneyOverview {
+export function getMoneyOverview(state:MoneyState,now=new Date(),familyPlans:readonly FamilyPlan[]=[]):MoneyOverview {
   const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
   const incomes=state.incomeSources??legacyIncome(state.income);
   const commitments=state.commitments??[];
+  const allScheduled=[...commitments,...familyForecastCommitments(familyPlans,state)];
   const cash=validMoney(state.cashOnHand)?state.cashOnHand:null;
   const forecast=buildForecast({
-    incomes, commitments, openingBalance:cash,
+    incomes, commitments:allScheduled, openingBalance:cash,
     reserve:validMoney(state.cashReserve)?state.cashReserve:0,today,days:30
   });
   const month=computeMoney(state,now);
