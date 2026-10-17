@@ -16,11 +16,14 @@ export const memberBirthdayPrefix = "member-birthday:";
 /** Derived from profiles on each read: editing or deleting a member updates their birthday everywhere automatically. */
 export function memberBirthdayMoments(members: Member[], arabic = false): FamilyMoment[] {
   return members
-    .filter(m => !!m.id && !!m.name.trim() && !!m.birthday && !!parseCalendarDate(m.birthday))
+    .filter(m => !!m.id && !!m.name.trim() &&
+      (!!m.birthday && !!parseCalendarDate(m.birthday)||
+       !!m.birthdayMonthDay && !!parseCalendarDate("2000-"+m.birthdayMonthDay) &&
+       /^\d{2}-\d{2}$/.test(m.birthdayMonthDay)))
     .map(m => ({
       id: memberBirthdayPrefix + m.id,
       title: arabic ? "عيد ميلاد " + m.name.trim() : m.name.trim() + "'s birthday",
-      date: m.birthday!,
+      date: m.birthday||"2000-"+m.birthdayMonthDay!,
       kind: "birthday" as const,
       annual: true,
     }));
