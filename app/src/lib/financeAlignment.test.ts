@@ -67,7 +67,7 @@ describe("Existing Money flows: alignment & confirmed actuals",()=>{
  });
  it("does not recommend financing overspending from protected or unclassified variable categories",()=>{
   const base=fixture();
-  const categories=base.categories.map(c=>({...c,priority:c.id==="food"?"essential" as const:c.id==="fun"?"protected" as const:undefined}));
+  const categories=base.categories.map(c=>({...c,...(c.id==="food"?{priority:"essential" as const}:c.id==="fun"?{priority:"protected" as const}:{})}));
   const paid=recordBillPayment({...base,categories},"bill","2026-10-20","2026-10-15","priority-bill","already",460);
   const advice=smartVarianceGuidance(paid,paid.expenses[0]!,new Date(2026,9,15,12));
   expect(advice.ranked.filter(x=>x.kind==="variable")).toHaveLength(0);
