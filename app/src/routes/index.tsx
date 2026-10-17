@@ -1,6 +1,7 @@
 import {createFileRoute} from "@tanstack/react-router";
 import {AppShell} from "@/components/AppShell";
 import {IllustratedFamilyHome} from "@/components/IllustratedFamilyHome";
+import {LandingDesignPreview} from "@/components/LandingDesignPreview";
 
 export const Route=createFileRoute("/")({
  head:()=>({meta:[
@@ -11,5 +12,6 @@ export const Route=createFileRoute("/")({
  component:Index
 });
 export function Index(){
+ if(typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("preview")==="landing")return <LandingDesignPreview/>;
  return <AppShell homeLayout><IllustratedFamilyHome/></AppShell>;
 }
