@@ -21,9 +21,9 @@ describe("opt-in illustrated landing experience",()=>{
   const nav=screen.getByRole("navigation",{name:"Explore family features"});
   const features=[...nav.querySelectorAll("a")];
   expect(features).toHaveLength(6);
-  expect(features[0]).toHaveAttribute("href",expect.stringMatching(/#\\/$/));
+  expect(features[0]?.getAttribute("href")?.endsWith("#/")).toBe(true);
   expect(features[2]).toHaveAttribute("href","/explore/smartbuy");
-  expect(screen.getByRole("link",{name:"Dabberna home"})).toHaveAttribute("href",expect.stringMatching(/#\\/$/));
+  expect(screen.getByRole("link",{name:"Dabberna home"}).getAttribute("href")?.endsWith("#/")).toBe(true);
   expect(screen.getAllByRole("link",{name:/Ask Dabberna/}).length).toBeGreaterThan(0);
   expect(screen.getAllByRole("link",{name:/Back to current home|Current homepage/}).length).toBeGreaterThan(0);
   expect(screen.queryByText("1,250 JOD")).not.toBeInTheDocument();
