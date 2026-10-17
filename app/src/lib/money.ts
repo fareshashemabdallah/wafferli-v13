@@ -3,12 +3,16 @@ import type {SavingsGoal} from "./savingsGoals";
 import { monthlyTotal } from "./cashflow";
 import { monthCarryover } from "./monthlyCarryover";
 export type CatType = "fixed" | "variable" | "periodic";
-export type Category = { id: string; name: string; type: CatType; planned: number };
+export type Category = { id: string; name: string; type: CatType; planned: number; /** Optional family-declared priority, independent of fixed/variable schedule. */ priority?:"essential"|"protected"|"flexible"; /** Unreviewed legacy values remain estimates. */ amountConfidence?:"estimate"|"confirmed" };
 export type BudgetAllocation = {kind:"variable"|"savings"; categoryId?:string; delta:number; approvedAt:string};
 export type Expense = { id: string; date: string; categoryId: string; amount: number; note?: string; owner?: string; shared: boolean; billId?:string; dueDate?:string; cashDeducted?:boolean; sourcePlanId?:string; /** Identifies exactly one paid component of a family occasion. */ sourceOccasionCost?:"gift"|"celebration"|"extras"; /** Planned entries do not count as actual spending until confirmed. */ status?:"planned"|"paid"; plannedAmount?:number; allocation?:BudgetAllocation; varianceDismissed?:boolean; };
 export type MoneyState = {
   /** Legacy monthly income: retained to preserve users' existing saved budgets. */
   income:number; savingsPct:number; categories:Category[]; expenses:Expense[]; demo:boolean;
+  /** Explicitly distinguishes a parent-entered zero income from unknown income. */
+  incomeKnown?:boolean; incomeConfidence?:"estimate"|"confirmed";
+  /** Declared priorities for family life, not automatically deducted or shared. */
+  protectedLifestyle?:("children"|"education"|"family-time"|"health"|"travel"|"buffer")[];
   incomeSources?:IncomeSource[]; commitments?:Commitment[];
   /** Manual actual cash available now, intentionally not inferred from historic expense entries. */
   cashOnHand?:number|null; cashReserve?:number;
@@ -23,7 +27,7 @@ export type MoneyState = {
   /** User attested there are no scheduled bills this calendar month. */
   noBillsConfirmedMonth?:string;
 };
-export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string; /** Date of birth, stored on this device only. */ birthday?: string | undefined };
+export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string; /** Legacy full date of birth, not required for new profiles. */ birthday?: string | undefined; /** MM-DD only: permits birthday reminders without retaining birth year. */ birthdayMonthDay?:string|undefined };
 
 const today = new Date();
 const d = (day: number) => {
