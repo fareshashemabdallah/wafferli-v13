@@ -256,7 +256,9 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
         const p = planned === "" || planned === "0" ? 0 : parseAmount(planned, 100000);
         if (!name.trim()) return setErr(tr("Name is required."));
         if (p === null) return setErr(tr("Planned amount must be 0 or a positive number."));
-        onSave({ ...initial,id: initial.id, name: name.trim().slice(0, 40), type, planned: p,...(priority?{priority}:{}),amountConfidence:"estimate" });
+        const next:Category={...initial,id:initial.id,name:name.trim().slice(0,40),type,planned:p,amountConfidence:"estimate"};
+        if(priority)next.priority=priority;else delete next.priority;
+        onSave(next);
       }}
     >
       <Field label={tr("Name")}><Input className={inputCls} value={name} maxLength={40} onChange={(e) => setName(e.target.value)} /></Field>
