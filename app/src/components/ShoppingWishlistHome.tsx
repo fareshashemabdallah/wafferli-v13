@@ -1,6 +1,6 @@
 import {useState,type CSSProperties,type FormEvent} from "react";
 import {Link} from "@tanstack/react-router";
-import {BookOpen, Check, CheckCircle2, Gift, Heart, Palette, Plus, Search, ShoppingBasket, Sparkles, Shirt, SlidersHorizontal, Wallet, X} from "lucide-react";
+import {Check, CheckCircle2, Gift, Heart, Palette, Plus, Search, ShoppingBasket, Sparkles, Shirt, SlidersHorizontal, Wallet, X} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {fmtJOD,parseAmount,uid,useLocalState} from "@/lib/storage";
 import {FAMILY_WISHLIST_KEY,makeWishlistItem,updateWishlistStatus,summarizeWishlistPrice,type WishlistItem,type WishlistKind} from "@/lib/familyWishlist";
