@@ -16,7 +16,7 @@ export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{
  const [categoryId,setCategoryId]=useState("");
  const [message,setMessage]=useState("");
  if(!ready)return null;
- const entries=familyFinancialCommitments(plans,money).filter(item=>!withinBills||!item.paid);
+ const entries=familyFinancialCommitments(plans,money).filter(item=>!withinBills||(!item.paid&&item.certainty!=="idea"));
  if(!entries.length)return null;
  const totals=familyFinancialSummary(plans,money);
  const amountOk=paidAmount.trim()!==""&&Number.isFinite(Number(paidAmount))&&Number(paidAmount)>0&&
