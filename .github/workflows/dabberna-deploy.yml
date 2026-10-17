@@ -46,6 +46,7 @@ jobs:
       - name: Verify compiled Dabberna entry page
         run: |
           test -s react-dist/index.html
+          test -s react-dist/landing-family-characters.avif
           test -s react-dist/404.html
           test -s react-dist/explore/weekend/index.html
           grep -Fq '/wafferli-v13/#/explore/weekend' react-dist/explore/weekend/index.html
