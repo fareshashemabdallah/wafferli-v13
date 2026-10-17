@@ -8,7 +8,8 @@ import {FAMILY_TASKS_KEY,type FamilyTask} from "@/lib/familyTasks";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {FAMILY_WISHLIST_KEY,type WishlistItem} from "@/lib/familyWishlist";
 import {type BasketEntry,isSampleBasketEntry} from "@/lib/basketRecording";
-import {type FamilyMoment,dateKey} from "@/lib/familyCalendar";
+import {type FamilyMoment,dateKey,shiftDays} from "@/lib/familyCalendar";
+import {getMoneyOverview} from "@/lib/moneyOverview";
 import {realFamilyMembers} from "@/lib/familySetup";
 import {homeSnapshot} from "@/lib/homeSnapshot";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
@@ -100,7 +101,9 @@ export function FocusedFamilyHome(){
  const showWelcome=loaded&&!introDone&&!existing;
  const snapshot=homeSnapshot({money,members,moments,plans,tasks,basket,wishlist,now,arabic:ar});
  const spending=!money.demo?computeMoney(money,now):null;
- const dueBills=snapshot.agenda.filter(x=>x.kind==="bill");
+ const dueBills=money.demo?[]:getMoneyOverview(money,now).forecast.events.filter(e=>
+  e.kind==="bill"&&!e.overdue&&e.displayDate>=dateKey(now)&&
+  e.displayDate<=dateKey(shiftDays(now,7)));
  const nextMoment=snapshot.plans.find(x=>!!x.date&&x.date>=dateKey(now));
  const nextDate=nextMoment?.date?new Date(Number(nextMoment.date.slice(0,4)),Number(nextMoment.date.slice(5,7))-1,Number(nextMoment.date.slice(8,10)),12):null;
  const eventDate=nextDate?new Intl.DateTimeFormat(ar?"ar-JO":"en-GB",{day:"numeric",month:"long"}).format(nextDate):"";
