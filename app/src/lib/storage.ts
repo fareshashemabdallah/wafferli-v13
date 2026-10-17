@@ -13,6 +13,7 @@ export function readLocal<T>(key: string, fallback: T): T {
 }
 
 export const LOCAL_SAVE_FAILED_EVENT = "dabberna:local-save-failed";
+export const LOCAL_DATA_UPDATED_EVENT = "dabberna:local-data-updated";
 
 /**
  * A failed browser storage write must never masquerade as a successful save.
@@ -22,6 +23,9 @@ export function writeLocal<T>(key: string, value: T): boolean {
   try {
     if (typeof window === "undefined") return false;
     window.localStorage.setItem(PREFIX + key, JSON.stringify(value));
+    // Keep separately mounted Today, Money, and Shopping components coherent
+    // in the same tab. Emit the key only, never private values.
+    queueMicrotask(() => window.dispatchEvent(new CustomEvent(LOCAL_DATA_UPDATED_EVENT, {detail: key})));
     return true;
   } catch {
     // React state updaters may run during render; notify after the commit to
@@ -40,6 +44,18 @@ export function useLocalState<T>(key: string, initial: T) {
   useEffect(() => {
     setValue(readLocal(key, initial));
     setReady(true);
+    const onLocalChange=(event: Event)=>{
+      if((event as CustomEvent<string>).detail===key)setValue(readLocal(key,initial));
+    };
+    const onOtherTab=(event:StorageEvent)=>{
+      if(event.key===PREFIX+key)setValue(readLocal(key,initial));
+    };
+    window.addEventListener(LOCAL_DATA_UPDATED_EVENT,onLocalChange);
+    window.addEventListener("storage",onOtherTab);
+    return ()=>{
+      window.removeEventListener(LOCAL_DATA_UPDATED_EVENT,onLocalChange);
+      window.removeEventListener("storage",onOtherTab);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
   const set = useCallback(
