@@ -20,7 +20,7 @@ describe("Today speed actions without another navigation layer",()=>{
   expect(screen.getByRole("region",{name:"Quick family actions"})).toBeInTheDocument();
   expect(screen.getByRole("button",{name:"Add expense"})).toBeInTheDocument();
   expect(screen.getByRole("button",{name:"Add shopping item"})).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Ask Dabberna"}));
+  fireEvent.click(screen.getByRole("button",{name:"Jump to Ask Dabberna"}));
   expect(ask).toHaveBeenCalledOnce();
   expect(screen.queryByRole("link",{name:"Ask Dabberna"})).not.toBeInTheDocument();
  });
