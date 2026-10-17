@@ -36,7 +36,7 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
  const [error,setError]=useState("");
  const cells=useMemo(()=>monthCells(month.getFullYear(),month.getMonth()),[month]);
  const chosen=useMemo(()=>occurrencesForDate(combined,selected),[combined,selected]);
- const upcoming=useMemo(()=>upcomingMoments(combined,today,60).slice(0,8),[combined,today]);
+ const upcoming=useMemo(()=>upcomingMoments(combined,today,180).slice(0,8),[combined,today]);
  const move=(delta:number)=>setMonth(d=>new Date(d.getFullYear(),d.getMonth()+delta,1,12));
  const monthLabel=new Intl.DateTimeFormat(ar?"ar-JO":"en-US",{month:"long",year:"numeric"}).format(month);
  const weekNames=Array.from({length:7},(_,i)=>new Intl.DateTimeFormat(ar?"ar-JO":"en-US",{weekday:"short"}).format(new Date(2026,9,12+i,12)));
