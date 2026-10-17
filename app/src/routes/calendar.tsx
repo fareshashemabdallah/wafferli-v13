@@ -18,7 +18,8 @@ export const Route=createFileRoute("/calendar")({
 });
 type Draft={id:string;title:string;date:string;kind:MomentKind;annual:boolean;time:string;note:string};
 const blank=(date:string):Draft=>({id:"",title:"",date,kind:"birthday",annual:true,time:"",note:""});
-function FamilyCalendarPage(){
+function FamilyCalendarPage(){return <FamilyCalendarWorkspace/>;}
+export function FamilyCalendarWorkspace({embedded=false}:{embedded?:boolean}={}){
  const {lang}=useI18n(),ar=lang==="ar";
  const today=useMemo(()=>new Date(),[]);
  const todayKey=dateKey(today);
@@ -59,7 +60,7 @@ function FamilyCalendarPage(){
   return d?new Intl.DateTimeFormat(ar?"ar-JO":"en-US",{weekday:"long",month:"long",day:"numeric"}).format(d):day;
  };
  const kindColor=(kind:MomentKind)=>kind==="birthday"?"bg-[#FBE9E7] text-[#A66760]":kind==="holiday"?"bg-[#FCF0DC] text-[#98754A]":kind==="school"?"bg-[#E8EEF8] text-[#5C789B]":"bg-mint text-brand";
- return <AppShell title={ar?"تقويم العائلة":"Family Calendar"}>
+ const content=<>
   <section className="hero-surface rounded-3xl p-5 sm:p-6">
    <div className="flex items-center gap-3"><span className="grid size-12 place-items-center rounded-2xl bg-white/80 text-brand"><CalendarDays className="size-6"/></span>
    <div><h2 className="text-xl font-semibold">{ar?"أيام صغيرة، ذكريات جميلة":"A little planning, more moments together"}</h2>
@@ -155,5 +156,6 @@ function FamilyCalendarPage(){
   <div className="mt-5 rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
    {ar?"هذا التقويم خاص بهذا المتصفح فقط ولا تتم مزامنته بين أفراد العائلة بعد. العطل الرسمية لا تُضاف تلقائيًا؛ أضفها يدويًا. لا تُرسل تذكيرات تلقائية أو إشعارات خارج التطبيق. بالنسبة لميلاد 29 فبراير، تظهر الذكرى فقط في السنوات الكبيسة.":"This calendar is private to this browser, not yet shared across family members. Public holidays must be entered manually. There are no background reminders or push notifications. A 29 February birthday appears only in leap years."}
   </div>
- </AppShell>;
+ </>;
+ return embedded?content:<AppShell title={ar?"تقويم العائلة":"Family Calendar"}>{content}</AppShell>;
 }
