@@ -19,9 +19,9 @@ afterEach(()=>{cleanup();window.localStorage.clear();vi.restoreAllMocks()});
 const draw=()=>render(<I18nProvider><WeekendOutingExperience/></I18nProvider>);
 const real=()=>({...sampleMoney(),demo:false,income:2000,savingsTargetAmount:200,
  categories:[
-  {id:"rent",name:"Rent",type:"fixed" as const,planned:330},
-  {id:"food",name:"Groceries",type:"variable" as const,planned:55},
-  {id:"out",name:"Family outings",type:"variable" as const,planned:100}
+  {id:"rent",name:"Rent",type:"fixed" as const,planned:330,priority:"essential" as const},
+  {id:"food",name:"Groceries",type:"variable" as const,planned:55,priority:"essential" as const},
+  {id:"out",name:"Family outings",type:"variable" as const,planned:100,priority:"flexible" as const}
  ],expenses:[],cashOnHand:650,cashReserve:200,cashUpdatedAt:localToday(),
  commitments:[{id:"bill",name:"School",amount:330,frequency:"once" as const,
   dueDate:futureDate(localToday(),1),categoryId:"rent"}],
