@@ -27,7 +27,7 @@ export function applyStarterBudget(s:MoneyState,input:StarterBudgetInput):MoneyS
    hasCategories&&!near(previous.planned,input.spending))return s;
  const result:MoneyState={...base,demo:false,
   ...(hasSources?{}:{income:Math.round(input.income*100)/100}),
-  incomeKnown:!hasSources,incomeConfidence:hasSources?base.incomeConfidence:(input.approximateIncome===false?"confirmed":"estimate"),
+  ...(!hasSources?{incomeKnown:true,incomeConfidence:input.approximateIncome===false?"confirmed" as const:"estimate" as const}:{}),
   savingsTargetAmount:Math.round(input.savings*100)/100,
   ...(hasCategories?{}:{categories:separated?[
    {id:"household-essential",name:"Essential household costs (estimate)",type:"fixed" as const,planned:Math.round(input.essential!*100)/100,priority:"essential" as const,amountConfidence:"estimate" as const},
