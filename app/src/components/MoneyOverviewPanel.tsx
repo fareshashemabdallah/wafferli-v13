@@ -10,6 +10,7 @@ import {MoneyGuidance} from "@/components/MoneyGuidance";
 import {SpendingBreakdownCard} from "@/components/SpendingBreakdownCard";
 import {MoneyReadinessCard} from "@/components/MoneyReadinessCard";
 import {SavingsGoalsPanel} from "@/components/SavingsGoalsPanel";
+import {FamilyCommitmentsPanel} from "@/components/FamilyCommitmentsPanel";
 import {QuickMoneySetup} from "@/components/QuickMoneySetup";
 import {needsStarterBudget} from "@/lib/starterBudget";
 import {monthCarryover,nextMonthKey} from "@/lib/monthlyCarryover";
@@ -20,8 +21,8 @@ type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo
 export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
  const [familyPlans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
- const plannedItems=upcomingFamilyPlans(familyPlans);
- const v=getMoneyOverview(state);
+ const plannedItems=upcomingFamilyPlans(familyPlans.filter(p=>!p.occasionPreparation));
+ const v=getMoneyOverview(state,new Date(),familyPlans);
  const f=v.forecast,c=v.month;
  const alignment=budgetAlignment(state);
  const plain=budgetPlainResult(alignment);
@@ -35,6 +36,7 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Prop
  };
  if(needsStarterBudget(state))return <div className="space-y-4">
    <QuickMoneySetup money={state} setMoney={setState}/>
+   <FamilyCommitmentsPanel money={state}/>
    <p className="px-2 text-xs leading-relaxed text-muted-foreground">{ar?
    "يمكنك العودة إلى خططنا أو اكتشف في أي وقت. لا تحتاج إلى ربط بنكك.":
    "You can explore Plans and Discover at any time. No bank connection is needed."}</p>
@@ -105,6 +107,7 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Prop
      </details>}
      <MoneyGuidance scope="alignment" state={state} setState={setState}/>
    </section>
+   <FamilyCommitmentsPanel money={state}/>
    {!state.demo&&<SavingsGoalsPanel state={state} setState={setState}/>}
    {plansReady&&plannedItems.length>0&&<section className="editorial-card p-4 sm:p-5" aria-label={ar?"الخطط القادمة":"Upcoming family plans"}>
     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -129,7 +132,7 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Prop
        </div>
      </div>
      {v.cashSet&&!state.demo&&v.hasBillSchedule&&v.dateProblems===0?<>
-       <h3 className="mt-4 text-sm font-semibold">{ar?"المتبقي حسابياً بعد الفواتير المسجلة والاحتياطي":"Cash minus recorded bills and emergency cushion"}</h3>
+       <h3 className="mt-4 text-sm font-semibold">{ar?"المتبقي بعد الفواتير والالتزامات العائلية والاحتياطي":"Cash minus scheduled bills, family commitments and reserve"}</h3>
        <p className="mt-2 text-3xl font-semibold tabular-nums text-ink sm:text-4xl">{fmtJOD(v.cashAfterBills??0)}</p>
        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ar?
         "هذا ليس مبلغاً تستطيع صرفه بأمان؛ لم نحسم منه كل مصاريف الحياة اليومية وقد تكون بعض الفواتير ناقصة. ما رح نسمّيه مالاً متاحاً.":
