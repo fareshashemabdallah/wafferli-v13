@@ -2,7 +2,6 @@ import {useI18n} from "@/lib/i18n";
 import type {MoneyState} from "@/lib/money";
 import type {FamilyPlan} from "@/lib/familyPlans";
 import {assessFinancialReality} from "@/lib/financialReality";
-import {Link} from "@tanstack/react-router";
 import {AlertCircle,HeartHandshake} from "lucide-react";
 
 const choices=[
@@ -13,9 +12,9 @@ const choices=[
  {id:"travel",en:"Travel and holidays",ar:"السفر والعطلات"},
  {id:"buffer",en:"A comfortable safety buffer",ar:"هامش أمان مالي"}
 ] as const;
-export function FinancialRealityPanel({money,plans=[],update,compact=false}:{
+export function FinancialRealityPanel({money,plans=[],update,compact=false,goTo}:{
  money:MoneyState;plans?:readonly FamilyPlan[];
- update?:(fn:(m:MoneyState)=>MoneyState)=>void;compact?:boolean;
+ update?:(fn:(m:MoneyState)=>MoneyState)=>void;compact?:boolean;goTo?:(tab:"overview"|"spending"|"planning")=>void;
 }){
  const {lang}=useI18n(),ar=lang==="ar";
  if(money.demo)return null;
@@ -34,9 +33,10 @@ export function FinancialRealityPanel({money,plans=[],update,compact=false}:{
    </div>
   </div>
   {!compact&&<div className="mt-3">
-   <Link to="/money" className="inline-flex min-h-10 items-center text-xs font-bold text-brand underline">
-    {ar?r.actionAr:r.actionEn}
-   </Link>
+   {goTo&&<button type="button" onClick={()=>goTo(r.kind==="tight"?"planning":"spending")}
+     className="inline-flex min-h-10 items-center text-xs font-bold text-brand underline">
+     {ar?r.actionAr:r.actionEn}
+   </button>}
    {update&&<details className="mt-2 border-t border-[#D8E5DA] pt-3">
     <summary className="cursor-pointer text-xs font-semibold text-brand">{ar?"شو الأشياء اللي بتحب تحافظ عليها من نمط حياة العيلة؟ (اختياري)":"What matters most to protect in family life? (optional)"}</summary>
     <p className="mt-2 text-xs text-muted-foreground">{ar?"اختَر ما يهمّك، أو اتركه لوقت لاحق. هذا يساعد دبّرنا ما يقترح تضحيات غير مناسبة.":"Choose what matters or skip. We won't suggest sacrificing these priorities simply because they appear flexible."}</p>
