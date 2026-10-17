@@ -144,19 +144,20 @@ export function ShoppingReferenceDashboard(){
    <Link to="/explore/market" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#F2E7EA] bg-white px-4 text-xs font-bold text-[#57667D]">
     <Search className="size-4"/>{tr("Find products","استكشف المنتجات")}</Link>
   </div>
-  <section className="relative isolate grid min-h-[260px] grid-cols-[minmax(0,44%)_minmax(0,56%)] overflow-hidden rounded-[1.65rem] border border-[#FFECF0] px-3 sm:min-h-[280px] sm:gap-3 sm:px-6 lg:min-h-[300px]"
+  <section className="relative isolate grid min-h-[290px] grid-cols-[minmax(0,44%)_minmax(0,56%)] overflow-hidden rounded-[1.7rem] border border-[#FFECF0] px-3 sm:min-h-[310px] sm:gap-3 sm:px-6 lg:min-h-[345px]"
    style={{background:"radial-gradient(circle at 8% 18%, var(--wish-soft), transparent 55%),linear-gradient(120deg,var(--wish-soft),#FFF7F8 70%,var(--wish-pale))"}}>
    <span aria-hidden="true" className="absolute end-[8%] top-4 text-4xl opacity-35">♥</span>
-   <div className="relative min-h-[220px] self-end sm:min-h-[260px]">
+   <div className="relative min-h-[255px] self-end sm:min-h-[290px] lg:min-h-[325px]">
     <img src={avatar} alt={cartoon?tr("Your selected cartoon-style portrait","الصورة الكرتونية المختارة"):tr("Cartoon of Sophia with a fruit drink","رسم كرتوني لصوفيا تحمل عصيراً")}
      className="pointer-events-none absolute inset-x-0 bottom-0 h-full w-full object-contain object-bottom drop-shadow-[0_10px_12px_rgba(113,54,66,.18)]"
      style={cartoon?{borderRadius:"40% 40% 0 0"}:{}} loading="eager"/>
    </div>
    <div className="relative z-10 flex min-w-0 flex-col items-start justify-center py-9 sm:py-10">
     <p className="mb-3 text-xs font-black uppercase tracking-widest" style={{color:ink}}>{tr("For the little things that matter ♥","للحظات الحلوة ♥")}</p>
-    <h1 className="break-words text-[clamp(1.65rem,4.2vw,3.4rem)] font-black leading-[1.05] tracking-[-.06em]">
-     {ar?<>{tr("Wishlist","قائمة رغبات")} <span style={{color:ink}}>{named||"العائلة"}</span></>:<><span style={{color:ink}}>{named?named+"’s":"Family"}</span> Wishlist</>}
+    <h1 className="break-words text-[clamp(1.8rem,5.5vw,4.3rem)] font-black leading-[.99] tracking-[-.06em]">
+     {tr("Shopping &","المشتريات")} <span className="block" style={{color:ink}}>{tr("Wishlist","والرغبات")}</span>
     </h1>
+    <p className="mt-3 inline-flex max-w-full rounded-full bg-white/70 px-3 py-1.5 text-xs font-extrabold" style={{color:ink}}>{title}</p>
     <p className="mt-3 max-w-md text-xs font-medium leading-relaxed text-[#5F6578] sm:text-sm">
      {tr("All the things your family loves, needs and dreams about.","كل ما تحبه العائلة وتحتاجه وتحلم به، في مكان واحد.")}
     </p>
@@ -217,12 +218,49 @@ export function ShoppingReferenceDashboard(){
    {categories.map(c=><Link key={c.en} to={c.to} className="flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-[1.2rem] px-2 text-center text-[11px] font-bold shadow-sm transition hover:-translate-y-0.5"
     style={{backgroundColor:c.bg}}><span className="text-3xl" aria-hidden="true">{c.icon}</span>{ar?c.ar:c.en}</Link>)}
   </nav>
+  <section className={panel} aria-label={tr("Saved wishlist","قائمة الرغبات المحفوظة")}>
+   <div className="flex flex-wrap items-center justify-between gap-3">
+    <h2 className="flex items-center gap-2 text-lg font-black"><Heart className="size-5" fill={color} color={color}/>{title}</h2>
+    <button type="button" onClick={()=>{const el=document.getElementById("shopping-tools") as HTMLDetailsElement|null;if(el){el.open=true;el.scrollIntoView?.({behavior:"smooth"});}}} className="inline-flex min-h-10 items-center gap-1 text-xs font-bold" style={{color:ink}}>
+     {tr("Price history & more","سجل الأسعار والمزيد")}<ChevronRight className="size-4"/></button>
+   </div>
   <div role="group" aria-label={tr("Wishlist filters","تصفية قائمة الرغبات")} className="flex flex-wrap gap-2">
    {filters.map(f=><button type="button" key={f.id} aria-pressed={filter===f.id} onClick={()=>setFilter(f.id)}
     className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#F2E5E9] px-3 text-[11px] font-bold shadow-sm sm:px-4"
     style={{background:filter===f.id?color:"white",color:filter===f.id?(theme.preset==="white"?"#24304B":"white"):"#657083"}}>
     <span aria-hidden="true">{f.icon}</span>{ar?f.ar:f.en}</button>)}
   </div>
+   <form onSubmit={addWish} className="mt-3 grid gap-2 rounded-2xl bg-[#FFF9FB] p-3 sm:grid-cols-[1fr_auto_auto]">
+    <input required minLength={2} maxLength={120} aria-label={tr("Add a wish","أضف رغبة")} value={newWish} onChange={e=>setNewWish(e.target.value)}
+     placeholder={tr("Add an item to the wishlist…","أضف شيئاً لقائمة الرغبات…")} className="min-h-11 min-w-0 rounded-xl border border-[#F0E6EB] bg-white px-3 text-sm"/>
+    <select aria-label={tr("Wish category","فئة الرغبة")} value={kind} onChange={e=>setKind(e.target.value as WishlistKind)} className="min-h-11 rounded-xl border border-[#F0E6EB] bg-white px-2 text-xs">
+     <option value="children">{tr("Children","الأطفال")}</option><option value="household">{tr("Needs","الاحتياجات")}</option>
+     <option value="gift">{tr("Gifts","الهدايا")}</option><option value="other">{tr("Other","أخرى")}</option>
+    </select>
+    <button type="submit" disabled={!ready} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-xs font-bold text-white disabled:opacity-50"
+     style={{background:theme.preset==="white"?"#36425C":color}}><Plus className="size-4"/>{tr("Add","أضف")}</button>
+   </form>
+   {!ready?<p className="mt-4 text-sm text-slate-500">{tr("Loading your saved items…","تحميل العناصر المحفوظة…")}</p>:
+    shownWish.length===0?<p className="mt-4 rounded-xl bg-[var(--wish-pale)] p-4 text-sm text-slate-500">
+     {tr("No matching saved items yet. Add your own — examples and prices are not invented.","لا توجد عناصر محفوظة مطابقة. أضف عناصر حقيقية دون أسعار وهمية.")}</p>:
+    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+     {shownWish.slice(0,18).map(item=>{
+      const checked=summarizeWishlistPrice(item).latest;
+      return <article key={item.id} className="flex min-w-0 flex-col overflow-hidden rounded-[1.25rem] border border-[#EEE9EE] bg-white p-2.5 shadow-sm">
+       <div className="relative grid aspect-[1.25] place-items-center rounded-[1rem] bg-[var(--wish-pale)]">
+        <span className="text-[4rem] drop-shadow-sm" aria-hidden="true">{item.kind==="gift"?"🎁":item.kind==="children"?"🧸":item.kind==="household"?"🛒":"⭐"}</span>
+        <Heart className="absolute end-2 top-2 size-5" fill={color} color={color}/>
+       </div>
+       <div className="flex min-w-0 flex-1 flex-col pt-2"><h3 className="break-words text-xs font-bold">{item.name}</h3>
+        <p className="mt-1 text-[11px] text-slate-500">{checked?fmtJOD(checked.amountJod)+" · "+tr("entered","مدخل"):item.budgetJod!==undefined?tr("Your budget: ","ميزانيتك: ")+fmtJOD(item.budgetJod):tr("No verified price","بدون سعر مؤكد")}</p>
+        <button type="button" className="mt-auto inline-flex min-h-10 items-center justify-center gap-1 rounded-full border border-[#EADFE7] px-2 text-[10px] font-bold"
+         onClick={()=>setWishlist(old=>old.map(w=>w.id===item.id?updateWishlistStatus(w,w.status==="purchased"?"considering":"purchased"):w))}>
+         <CheckCircle2 className="size-3.5"/>{item.status==="purchased"?tr("Reopen","إعادة"):tr("Purchased by me","اشتريته بنفسي")}</button>
+       </div>
+      </article>;
+     })}
+    </div>}
+  </section>
   <section className={panel} aria-label={tr("Shopping ideas","أفكار للتسوق")}>
    <div className="flex flex-wrap items-center justify-between gap-2">
     <h2 className="flex items-center gap-2 text-lg font-black"><Sparkles className="size-5 text-[#F5AB30]"/>{tr("Suggested shopping ideas","أفكار للتسوق")}{named?" · "+named:""}</h2>
@@ -240,41 +278,6 @@ export function ShoppingReferenceDashboard(){
       style={{color:ink}}>{tr("Add idea to wishlist","أضف الفكرة للقائمة")}</button>
     </article>)}
    </div>
-  </section>
-  <section className={panel} aria-label={tr("Saved wishlist","قائمة الرغبات المحفوظة")}>
-   <div className="flex flex-wrap items-center justify-between gap-3">
-    <h2 className="flex items-center gap-2 text-lg font-black"><Heart className="size-5" fill={color} color={color}/>{title}</h2>
-    <button type="button" onClick={()=>{const el=document.getElementById("shopping-tools") as HTMLDetailsElement|null;if(el){el.open=true;el.scrollIntoView?.({behavior:"smooth"});}}} className="inline-flex min-h-10 items-center gap-1 text-xs font-bold" style={{color:ink}}>
-     {tr("Price history & more","سجل الأسعار والمزيد")}<ChevronRight className="size-4"/></button>
-   </div>
-   <form onSubmit={addWish} className="mt-3 grid gap-2 rounded-2xl bg-[#FFF9FB] p-3 sm:grid-cols-[1fr_auto_auto]">
-    <input required minLength={2} maxLength={120} aria-label={tr("Add a wish","أضف رغبة")} value={newWish} onChange={e=>setNewWish(e.target.value)}
-     placeholder={tr("Add an item to the wishlist…","أضف شيئاً لقائمة الرغبات…")} className="min-h-11 min-w-0 rounded-xl border border-[#F0E6EB] bg-white px-3 text-sm"/>
-    <select aria-label={tr("Wish category","فئة الرغبة")} value={kind} onChange={e=>setKind(e.target.value as WishlistKind)} className="min-h-11 rounded-xl border border-[#F0E6EB] bg-white px-2 text-xs">
-     <option value="children">{tr("Children","الأطفال")}</option><option value="household">{tr("Needs","الاحتياجات")}</option>
-     <option value="gift">{tr("Gifts","الهدايا")}</option><option value="other">{tr("Other","أخرى")}</option>
-    </select>
-    <button type="submit" disabled={!ready} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-xs font-bold text-white disabled:opacity-50"
-     style={{background:theme.preset==="white"?"#36425C":color}}><Plus className="size-4"/>{tr("Add","أضف")}</button>
-   </form>
-   {!ready?<p className="mt-4 text-sm text-slate-500">{tr("Loading your saved items…","تحميل العناصر المحفوظة…")}</p>:
-    shownWish.length===0?<p className="mt-4 rounded-xl bg-[var(--wish-pale)] p-4 text-sm text-slate-500">
-     {tr("No matching saved items yet. Add your own — examples and prices are not invented.","لا توجد عناصر محفوظة مطابقة. أضف عناصر حقيقية دون أسعار وهمية.")}</p>:
-    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-     {shownWish.slice(0,18).map(item=>{
-      const checked=summarizeWishlistPrice(item).latest;
-      return <article key={item.id} className="flex min-w-0 gap-3 rounded-xl border border-[#EEE9EE] bg-white p-3">
-       <span className="grid size-[68px] shrink-0 place-items-center rounded-xl bg-[var(--wish-pale)] text-3xl" aria-hidden="true">
-        {item.kind==="gift"?"🎁":item.kind==="children"?"🧸":item.kind==="household"?"🛒":"⭐"}</span>
-       <div className="min-w-0 flex-1"><h3 className="break-words text-xs font-bold">{item.name}</h3>
-        <p className="mt-1 text-[11px] text-slate-500">{checked?fmtJOD(checked.amountJod)+" · "+tr("entered","مدخل"):item.budgetJod!==undefined?tr("Your budget: ","ميزانيتك: ")+fmtJOD(item.budgetJod):tr("No verified price","بدون سعر مؤكد")}</p>
-        <button type="button" className="mt-2 inline-flex min-h-9 items-center gap-1 rounded-full border border-[#EADFE7] px-3 text-[11px] font-bold"
-         onClick={()=>setWishlist(old=>old.map(w=>w.id===item.id?updateWishlistStatus(w,w.status==="purchased"?"considering":"purchased"):w))}>
-         <CheckCircle2 className="size-3.5"/>{item.status==="purchased"?tr("Reopen","إعادة"):tr("Purchased by me","اشتريته بنفسي")}</button>
-       </div>
-      </article>;
-     })}
-    </div>}
   </section>
   <section className={panel} aria-label={tr("Saved family needs","احتياجات الأسرة المحفوظة")}>
    <div className="flex items-center justify-between gap-2">
