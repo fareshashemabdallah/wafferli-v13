@@ -20,10 +20,10 @@ import {toast} from "sonner";
 export const Route = createFileRoute("/explore/smartbuy")({
   head: () => ({
     meta: [
-      { title: "Compare & Choose — Dabberna" },
-      { name: "description", content: "Compare buying options by total cost including delivery or travel, against your budget." },
-      { property: "og:title", content: "Compare & Choose — Dabberna" },
-      { property: "og:description", content: "Honest manual price comparison with total cost." },
+      { title: "Shopping & Wishlist — Dabberna" },
+      { name: "description", content: "Your private family wishlist, shopping ideas, saved needs and manual price comparison with a parent-controlled color theme." },
+      { property: "og:title", content: "Shopping & Wishlist — Dabberna" },
+      { property: "og:description", content: "Personalized family wishlists and saved shopping needs — no invented retailer offers." },
     ],
   }),
   component: SmartBuy,
