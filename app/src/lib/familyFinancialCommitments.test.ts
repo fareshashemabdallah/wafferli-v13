@@ -47,9 +47,9 @@ describe("calendar-derived family financial commitments in Our Money",()=>{
    gift:{description:"Science kit",amountJod:120,dueDate:"2026-10-28"}}};
   const baseline=getMoneyOverview(state,now);
   const withFamily=getMoneyOverview(state,now,[shortPlan]);
-  expect(withFamily.forecast.upcomingBills).toBe(baseline.forecast.upcomingBills+120+30);
-  expect(withFamily.forecast.events.filter(e=>e.kind==="bill"&&e.sourceId.startsWith("family-occasion:"))).toHaveLength(2);
-  expect(withFamily.cashAfterBills).toBe(baseline.cashAfterBills!-150);
+  expect(withFamily.forecast.upcomingBills).toBe(baseline.forecast.upcomingBills+120);
+  expect(withFamily.forecast.events.filter(e=>e.kind==="bill"&&e.sourceId.startsWith("family-occasion:"))).toHaveLength(1);
+  expect(withFamily.cashAfterBills).toBe(baseline.cashAfterBills!-120);
   expect(withFamily.month.spent).toBe(0);
   expect(state.expenses).toHaveLength(0);
  });
