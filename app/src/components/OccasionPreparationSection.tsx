@@ -172,6 +172,15 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
       className="mt-1 min-h-11 w-full rounded-xl border border-[#E9DBE6] bg-white px-3 text-base"/>
     </label>
    </div>
+   {showCertainty&&<label className="mt-3 block text-xs font-semibold text-[#586377]">
+    {t("How certain is this cost?","ما مدى تأكيد هذا المبلغ؟")}
+    <select className="mt-1 min-h-11 w-full rounded-xl border bg-white px-3 text-sm" value={certainties[kind]}
+     onChange={e=>setCertainties(prev=>({...prev,[kind]:e.target.value as "idea"|"planned"|"firm"}))}>
+     <option value="idea">{t("Just an idea (not scheduled)","مجرد فكرة (غير مجدولة)")}</option>
+     <option value="planned">{t("Planned (cash-flow estimate)","مخطط (ضمن التوقعات)")}</option>
+     <option value="firm">{t("Confirmed obligation or booking","التزام أو حجز مؤكد")}</option>
+    </select>
+   </label>}
   </div>;
  return <section className={panel} aria-label={t("Occasion budget and preparation","ميزانية المناسبة والتحضير")}>
   <div className="flex items-center gap-2">
@@ -196,6 +205,7 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
     {showMore?t("Hide extras","إخفاء المصاريف الأخرى"):t("Cake, decorations & other costs","الكعكة والزينة ومصاريف أخرى")}
    </button>
    {showMore&&amountField("extras",extras,setExtras,extrasDate,setExtrasDate)}
+   <button type="button" aria-expanded={showCertainty} onClick={()=>setShowCertainty(v=>!v)} className="min-h-10 text-xs font-bold text-[#A14C7A] underline">{t("Cost status (optional)","حالة المبلغ (اختياري)")}</button>
    {error&&<p role="alert" className="rounded-lg bg-[#FFF0F0] p-2 text-xs text-[#A33643]">{error}</p>}
    <button type="submit" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#B95284] px-4 text-sm font-bold text-white">
     <CheckCircle2 className="size-4"/>{t("Save occasion costs","احفظ تكاليف المناسبة")}
