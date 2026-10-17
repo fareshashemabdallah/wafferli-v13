@@ -2,10 +2,11 @@ import { useI18n } from "@/lib/i18n";
 import { createFileRoute,Link } from "@tanstack/react-router";
 import { CheckCircle2, Plus, RotateCcw, Trash2 } from "lucide-react";
 import {useState} from "react";
-import { AppShell, Notice } from "@/components/AppShell";
+import { Notice } from "@/components/AppShell";
+import { ShoppingExperienceShell } from "@/components/ShoppingExperienceShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
 import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
-import {ShoppingWishlistHome} from "@/components/ShoppingWishlistHome";
+import {ShoppingReferenceDashboard} from "@/components/ShoppingReferenceDashboard";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import {compareManuallyEnteredPrices} from "@/lib/clearShoppingResult";
 import {dateKey} from "@/lib/familyCalendar";
@@ -57,8 +58,8 @@ export function SmartBuy() {
   const setAlt = (id: string, p: Partial<Alt>) => setS({ ...s, alts: s.alts.map((a) => (a.id === id ? { ...a, ...p } : a)) });
 
   return (
-    <AppShell>
-      <ShoppingWishlistHome/>
+    <ShoppingExperienceShell>
+      <ShoppingReferenceDashboard/>
       <details id="shopping-tools" className="group mt-6 rounded-[1.6rem] border border-[#E2E8E1] bg-white p-4 sm:p-5">
        <summary className="min-h-12 cursor-pointer text-base font-bold text-brand">
         {ar?"أدوات إضافية: مقارنة الأسعار المحفوظة وسجل الرغبات":"More tools: saved price comparisons and wishlist price history"}
@@ -211,6 +212,6 @@ export function SmartBuy() {
       </details>
        </div>
       </details>
-    </AppShell>
+    </ShoppingExperienceShell>
   );
 }
