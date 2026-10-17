@@ -72,7 +72,7 @@ export function ShoppingWishlistHome(){
   const budget=budgetInput.trim()?parseAmount(budgetInput,100000):undefined;
   if(budgetInput.trim()&&budget===null){setError(tr("Enter a valid budget.","أدخل ميزانية صحيحة."));return;}
   const item=makeWishlistItem({id:uid(),name:wishlistName,kind:category,
-   ...(budget!==undefined?{budgetJod:budget}:{})});
+   ...(typeof budget==="number"?{budgetJod:budget}:{})});
   if(!item){setError(tr("Enter an item name of at least two characters.","أدخل اسم عنصر من حرفين على الأقل."));return;}
   setList(old=>[item,...old]);setWishlistName("");setBudgetInput("");
  };
@@ -154,8 +154,8 @@ export function ShoppingWishlistHome(){
   <section className={surface} aria-label={tr("Saved wishlist","قائمة الرغبات المحفوظة")}>
    <div className="flex flex-wrap items-center justify-between gap-2">
     <h2 className="flex items-center gap-2 text-xl font-extrabold"><Heart className="size-6" fill={accent} color={accent}/>{heading}</h2>
-    <Link to="/explore/smartbuy" className="min-h-11 content-center text-sm font-bold underline" style={{color:theme.preset==="white"?"#34435D":accent}}>
-     {tr("More options & price history","خيارات أكثر وسجل الأسعار")}</Link>
+    <button type="button" onClick={()=>{const el=document.getElementById("shopping-tools") as HTMLDetailsElement|null;if(el){el.open=true;el.scrollIntoView?.({behavior:"smooth"});}}} className="min-h-11 content-center text-sm font-bold underline" style={{color:theme.preset==="white"?"#34435D":accent}}>
+     {tr("More options & price history","خيارات أكثر وسجل الأسعار")}</button>
    </div>
    <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label={tr("Filter wishlist","تصفية الرغبات")}>
     {kinds.map(k=><button key={k.id} type="button" onClick={()=>setKindFilter(k.id)} aria-pressed={kindFilter===k.id}
@@ -260,7 +260,7 @@ export function ShoppingWishlistHome(){
    <span>{tr("Saved on this device · your financial records are unchanged.","محفوظ على هذا الجهاز · سجلاتك المالية لم تتغيّر.")}</span>
    <div className="flex flex-wrap gap-3">
     <Link to="/explore/market" className="inline-flex gap-1 font-bold underline"><Search className="size-4"/>{tr("Find retailers","ابحث عن المتاجر")}</Link>
-    <Link to="/explore/smartbuy" className="inline-flex gap-1 font-bold underline"><SlidersHorizontal className="size-4"/>{tr("Compare entered prices","قارن الأسعار المدخلة")}</Link>
+    <button type="button" onClick={()=>{const el=document.getElementById("shopping-tools") as HTMLDetailsElement|null;if(el){el.open=true;el.scrollIntoView?.({behavior:"smooth"});}}} className="inline-flex gap-1 font-bold underline"><SlidersHorizontal className="size-4"/>{tr("Compare entered prices","قارن الأسعار المدخلة")}</button>
     <Link to="/money" className="inline-flex gap-1 font-bold underline"><Wallet className="size-4"/>{tr("Money & Bills","المال والفواتير")}</Link>
    </div>
   </footer>
