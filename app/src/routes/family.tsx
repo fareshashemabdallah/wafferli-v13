@@ -24,7 +24,7 @@ const views=[
  {id:"plans" as const,en:"Plans & activities",ar:"الخطط والأنشطة",icon:CalendarHeart},
  {id:"tasks" as const,en:"Responsibilities",ar:"المسؤوليات",icon:ClipboardList}
 ];
-function FamilyLifePage(){
+export function FamilyLifePage(){
  const {lang}=useI18n(),ar=lang==="ar";
  const label=(en:string,arabic:string)=>ar?arabic:en;
  const [view,setView]=useState<View>("overview");
