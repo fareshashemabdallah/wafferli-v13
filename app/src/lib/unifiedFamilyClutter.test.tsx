@@ -27,8 +27,7 @@ describe("one Dabberna navigation, no automatic link clutter",()=>{
  });
  it("shares exactly the same primary destinations in Shopping",()=>{
   render(<I18nProvider><ShoppingExperienceShell><p>Wishlist data</p></ShoppingExperienceShell></I18nProvider>);
-  const desktop=screen.getByRole("navigation",{name:"Family navigation"});
-  const mobile=screen.getByRole("navigation",{name:"Shopping mobile navigation"});
+  const [desktop,mobile]=screen.getAllByRole("navigation",{name:"Main"});
   const paths=(node:HTMLElement)=>Array.from(node.querySelectorAll("a")).map(a=>a.getAttribute("href"));
   expect(paths(desktop)).toEqual(paths(mobile));
   expect(paths(desktop)).toEqual(["/","/money","/family","/advisor"]);
