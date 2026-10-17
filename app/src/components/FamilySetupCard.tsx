@@ -2,7 +2,7 @@ import {Link} from "@tanstack/react-router";
 import {ArrowRight,CheckCircle2,HeartHandshake,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {sampleMembers,sampleMoney,type Member,type MoneyState} from "@/lib/money";
-import {familySetupState,FAMILY_SETUP_PREFERENCES_KEY,FAMILY_SETUP_PROFILE_SKIP_KEY} from "@/lib/familySetup";
+import {familySetupState,FAMILY_SETUP_PREFERENCES_KEY,FAMILY_SETUP_PROFILE_SKIP_KEY,FAMILY_SETUP_MONEY_SKIP_KEY} from "@/lib/familySetup";
 import {useLocalState} from "@/lib/storage";
 
 /** Existing family, finance and preference editors remain the only source of truth.
@@ -13,14 +13,15 @@ export function FamilySetupCard(){
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [preferencesConfirmed,,preferencesReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
  const [profileSkipped,setProfileSkipped,skipReady]=useLocalState(FAMILY_SETUP_PROFILE_SKIP_KEY,false);
- if(!membersReady||!moneyReady||!preferencesReady||!skipReady)return null;
- const setup=familySetupState(members,money,preferencesConfirmed,profileSkipped);
+ const [moneySkipped,setMoneySkipped,moneySkipReady]=useLocalState(FAMILY_SETUP_MONEY_SKIP_KEY,false);
+ if(!membersReady||!moneyReady||!preferencesReady||!skipReady||!moneySkipReady)return null;
+ const setup=familySetupState(members,money,preferencesConfirmed,profileSkipped,moneySkipped);
  if(setup.next===null)return null;
  const items=[
   {id:"family",en:"Tell us who you're planning for",ar:"مين الأشخاص اللي عم نخطط لإلن؟",link:"/space" as const,
    detailEn:"Add people if you wish. Child details are optional.",detailAr:"أضف أفراد العائلة إذا بتحب. معلومات الأطفال اختيارية."},
   {id:"money",en:"Build your monthly money picture",ar:"رتّب صورة ميزانيتك الشهرية",link:"/money" as const,
-   detailEn:"Start with income, spending and savings.",detailAr:"ابدأ بالدخل والمصاريف والادخار."},
+   detailEn:"Start with income and essential expenses. Savings can wait.",detailAr:"ابدأ بالدخل والمصاريف الأساسية. الادخار ممكن ينتظر."},
   {id:"preferences",en:"Choose how Dabberna helps",ar:"اختَر شو نصائح دبّرنا بتفيدك",link:"/space" as const,
    detailEn:"Confirm advice, outings and privacy preferences.",detailAr:"أكّد تفضيلات النصائح والطلعات والخصوصية."}
  ];
@@ -50,6 +51,7 @@ export function FamilySetupCard(){
   </div>
   <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
    <span className="inline-flex items-center gap-1.5"><ShieldCheck className="size-3.5"/>{ar?"ما في ربط حسابات أو مشاركة تلقائية":"No automatic account linking or sharing"}</span>
+   {setup.next==="money"&&!moneySkipped&&<button type="button" className="min-h-9 font-semibold text-brand underline" onClick={()=>setMoneySkipped(true)}>{ar?"ليس الآن: لا أريد إدخال أرقام مالية":"Not now: skip financial estimates"}</button>}
    {setup.next==="family"&&!profileSkipped&&<button type="button" className="min-h-9 font-semibold text-brand underline underline-offset-2"
     onClick={()=>setProfileSkipped(true)}>{ar?"كمّل بدون أسماء أفراد العائلة":"Skip family names for now"}</button>}
   </div>
