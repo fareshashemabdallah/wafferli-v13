@@ -15,6 +15,8 @@ import {realFamilyMembers} from "@/lib/familySetup";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {answerFamilyQuestion,type GuidedAnswer} from "@/lib/guidedFamilyAdvisor";
 import {homeSnapshot,type HomeAgendaItem} from "@/lib/homeSnapshot";
+import {decideWeekendOuting} from "@/lib/weekendOutingDecision";
+import {needsStarterBudget} from "@/lib/starterBudget";
 import {TodayFamilyBrief} from "@/components/TodayFamilyBrief";
 import {QuickExpenseCard} from "@/components/QuickExpenseCard";
 import {FamilyStarterCard} from "@/components/FamilyStarterCard";
@@ -45,6 +47,7 @@ export function IllustratedFamilyHome(){
  const now=new Date();
  const ready=moneyReady&&membersReady&&momentsReady&&tasksReady&&plansReady&&basketReady&&wishlistReady&&prefsReady;
  const view=homeSnapshot({money,members,moments,plans,tasks,basket,wishlist,now,arabic:ar});
+ const weekend=decideWeekendOuting(money,prefs,now);
  const [selectedDay,setSelectedDay]=useState(view.nowKey);
  const calendarEvents=occurrencesForDate(allFamilyMoments(moments,realFamilyMembers(members),ar),selectedDay);
  const calendarTasks=tasks.filter(t=>t.status==="open"&&t.dueDate===selectedDay);
@@ -296,13 +299,15 @@ export function IllustratedFamilyHome(){
     </div>
     <div className="min-w-0 flex-1">
      <h2 id="dab-recommendation" className="text-base font-bold text-[#205B4C]">{label("Dabberna suggests","دبّرنا بينصحك")}</h2>
-     <p className="mt-1 text-sm leading-relaxed text-[#527367]">{label(
-      "Thinking about a family outing? Check how it fits your recorded budget, upcoming bills and cash reserve.",
-      "بتفكروا بطلعة عائلية؟ شوفوا أثرها على المصاريف المسجّلة والفواتير والاحتياطي.")}
-     </p>
+     <p className="mt-1 text-sm font-semibold leading-relaxed text-[#315C4E]">{ar?weekend.headlineAr:weekend.headlineEn}</p>
+     <p className="mt-1 text-xs leading-relaxed text-[#527367]">{ar?weekend.nextAr:weekend.nextEn}</p>
+     {weekend.suggestedJod!==null&&<p className="mt-2 text-xs text-[#527367]">{label(
+      "What if it costs "+fmtJOD(weekend.suggestedJod+15)+"? Compare a lower-cost option or postpone; never assume that extra money is available.",
+      "شو لو صارت الكلفة "+fmtJOD(weekend.suggestedJod+15)+"؟ قارن خياراً أرخص أو أجّل الخطة؛ ما تفترض إن المبلغ الإضافي متاح.")}
+     </p>}
      <p className="mt-1 text-[11px] text-[#668377]">{label(
-      "A personal affordability answer needs current cash and scheduled bills—never assumed from your budget alone.",
-      "تقدير القدرة على الدفع بحاجة لرصيد محدث وفواتير مستحقة؛ ما منفترضه من ميزانية الشهر لحالها.")}
+      "Based on saved information, not verified bank funds or venue prices.",
+      "النتيجة مبنية على المعلومات المسجّلة، مش أرصدة بنكية أو أسعار أماكن مؤكّدة.")}
      </p>
     </div>
     <Link to="/explore/weekend" className="inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-[#2F7658] px-5 text-sm font-bold text-white sm:w-auto">
@@ -318,7 +323,7 @@ export function IllustratedFamilyHome(){
     "اعرض كل تفاصيل المصاريف الثابتة والمتغيرة والدورية")}</summary>
    <div className="mt-3"><SpendingBreakdownCard state={money} compact/></div>
   </details>}
-  {money.demo&&ready&&<FamilyStarterCard/>}
+  {needsStarterBudget(money)&&ready&&<FamilyStarterCard/>}
   <details className="rounded-[1.4rem] border border-[#E0E8DB] bg-white p-4">
    <summary className="min-h-11 cursor-pointer text-sm font-bold text-brand">
     {label("Update household information or record a payment (optional)","حدّث معلومات العيلة أو سجّل مصروف (اختياري)")}
