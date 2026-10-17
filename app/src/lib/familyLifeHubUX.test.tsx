@@ -58,7 +58,7 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
   await waitFor(()=>expect(screen.getByText("School recital")).toBeInTheDocument());
   expect(screen.getByText("Visit grandparents")).toBeInTheDocument();
   expect(screen.queryByText("Partner (sample)")).not.toBeInTheDocument();
-  expect(screen.getAllByText("1").length).toBeGreaterThan(0);
+  expect(screen.getByText("Family members").previousElementSibling).toHaveTextContent("1");
   expect(screen.getByRole("link",{name:"Manage family members"})).toHaveAttribute("href","/space");
   fireEvent.click(screen.getByRole("button",{name:"Prepare School recital"}));
   expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-focus",localDate);
