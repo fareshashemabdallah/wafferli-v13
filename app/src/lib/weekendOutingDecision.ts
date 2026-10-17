@@ -4,6 +4,7 @@ import {getMoneyOverview} from "./moneyOverview";
 import {getFinancialReadiness} from "./financialReadiness";
 import {roundJod} from "./cashflow";
 import type {FamilyPreferences} from "./familyPreferences";
+import type {FamilyPlan} from "./familyPlans";
 
 export type WeekendStatus="needs-details"|"review"|"possible";
 export type WeekendMissing="real-budget"|"cash"|"cash-date"|"bills"|null;
@@ -27,14 +28,13 @@ export function nextJordanWeekend(now=new Date()):{from:string;to:string}{
  return {from:iso(friday),to:iso(saturday)};
 }
 const roundDown5=(v:number)=>Math.floor((v+1e-8)/5)*5;
-const leisure=/out(?:ing|ings)?|entertain|recreat|fun|activities|leisure|trip|park|cinema|طلعة|طلعات|نزهة|ترفيه|خروج|نشاط|نشاطات/i;
 /** Conservative planning conversation, not an account, affordability or safety verdict.
  * Never reconstruct spendable bank cash from monthly budgets or unverified income.
  */
 export function decideWeekendOuting(
- money:MoneyState,prefs:FamilyPreferences,now=new Date()
+ money:MoneyState,prefs:FamilyPreferences,now=new Date(),plans:readonly FamilyPlan[]=[]
 ):WeekendOutingDecision{
- const weekend=nextJordanWeekend(now),readiness=getFinancialReadiness(money,now);
+ const weekend=nextJordanWeekend(now),readiness=getFinancialReadiness(money,now,plans);
  const base={weekendFrom:weekend.from,weekendTo:weekend.to};
  const updated=money.cashUpdatedAt&&/^\d{4}-\d{2}-\d{2}$/.test(money.cashUpdatedAt)?
   new Date(money.cashUpdatedAt+"T12:00:00"):null;
@@ -74,16 +74,16 @@ export function decideWeekendOuting(
    nextEn:missing==="cash"||missing==="cash-date"?"Enter or confirm one cash balance":"Review the missing money detail",
    nextAr:missing==="cash"||missing==="cash-date"?"أدخل أو أكّد الرصيد":"راجع المعلومة الناقصة"};
  }
- const budget=budgetAlignment(money,now),month=computeMoney(money,now),overview=getMoneyOverview(money,now);
+ const budget=budgetAlignment(money,now),month=computeMoney(money,now),overview=getMoneyOverview(money,now,plans);
  const reserve=Number.isFinite(money.cashReserve)&&money.cashReserve!>=0?money.cashReserve!:0;
  const cash=money.cashOnHand!;
  const upcoming=overview.forecast.upcomingBills;
- const categories=money.categories.filter(x=>leisure.test(x.name));
+ const categories=money.categories.filter(x=>x.priority==="flexible");
  // Do not double-count a category whose scheduled bill is already deducted.
  // Remaining *non-bill* category envelopes are estimates of essentials yet
  // to be paid; treating them as spending capacity would be misleading.
  const billLinked=new Set((money.commitments??[]).map(x=>x.categoryId).filter(Boolean));
- const essentials=roundJod(money.categories.filter(x=>!leisure.test(x.name)&&!billLinked.has(x.id))
+ const essentials=roundJod(money.categories.filter(x=>x.priority!=="flexible"&&!billLinked.has(x.id))
   .reduce((sum,x)=>sum+Math.max(0,month.plannedBy(x.id)-month.spentBy(x.id)),0));
  const recordedMargin=roundJod(cash-upcoming-essentials-reserve);
  const leisureLeft=roundJod(categories.reduce((sum,x)=>
