@@ -43,8 +43,8 @@ export function TodayQuickActions({onAsk}:{onAsk:()=>void}){
   setError("");setNeed("");
   setSavedName(tr("Saved to your family basket.","تم الحفظ في سلّة العائلة."));
  };
- const button=(name:string,icon:ReactNode,action:()=>void,chosen:boolean,theme:string)=>
-  <button type="button" onClick={action} aria-pressed={chosen}
+ const button=(name:string,icon:ReactNode,action:()=>void,chosen:boolean,theme:string,accessibleName?:string)=>
+  <button type="button" onClick={action} aria-pressed={chosen} aria-label={accessibleName??name}
    className="flex min-h-[85px] flex-col items-center justify-center gap-2 rounded-[1.1rem] border border-[#F1E3E8] bg-white px-2 py-3 text-center text-[12px] font-bold leading-snug text-[#25354B] shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C974A2]"
    style={chosen?{borderColor:theme,backgroundColor:"#FFF8FB"}:{}}>
    <span aria-hidden="true" className="grid size-9 place-items-center rounded-2xl" style={{backgroundColor:theme+"20",color:theme}}>{icon}</span>
@@ -65,7 +65,7 @@ export function TodayQuickActions({onAsk}:{onAsk:()=>void}){
   <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
    {button(tr("Add expense","سجّل مصروف"),<Receipt className="size-5"/>,()=>{setActive(x=>x==="expense"?null:"expense");setError("");},active==="expense","#389683")}
    {button(tr("Add shopping item","أضف للمشتريات"),<ShoppingBasket className="size-5"/>,()=>{setActive(x=>x==="shopping"?null:"shopping");setError("");},active==="shopping","#DC679A")}
-   {button(tr("Ask Dabberna","اسأل دبّرنا"),<MessageCircle className="size-5"/>,()=>{setActive(null);onAsk();},false,"#8774BE")}
+   {button(tr("Ask Dabberna","اسأل دبّرنا"),<MessageCircle className="size-5"/>,()=>{setActive(null);onAsk();},false,"#8774BE",tr("Jump to Ask Dabberna","اذهب لسؤال دبّرنا"))}
   </div>
   {active==="expense"&&<div className="mt-3" data-testid="fast-expense-panel">
    <QuickExpenseCard onClose={()=>setActive(null)}/>
