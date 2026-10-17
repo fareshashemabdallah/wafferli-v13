@@ -69,10 +69,10 @@ describe("shopping design reference and local cartoon editor",()=>{
   expect(JSON.parse(localStorage.getItem("wafferli.v13.familyWishlist")??"[]")).toHaveLength(1);
   expect(JSON.parse(localStorage.getItem("wafferli.v13.shopping")??"[]")).toHaveLength(1);
  });
- it("presents six accessible family navigation choices, without sample people",()=>{
+ it("presents four accessible family navigation choices, without sample people",()=>{
   render(<I18nProvider><ShoppingExperienceShell><p>Reference shopping content</p></ShoppingExperienceShell></I18nProvider>);
-  expect(screen.getByRole("navigation",{name:"Family navigation"}).querySelectorAll("a")).toHaveLength(6);
-  expect(screen.getByRole("navigation",{name:"Shopping mobile navigation"}).querySelectorAll("a")).toHaveLength(6);
+  expect(screen.getByRole("navigation",{name:"Main"}).querySelectorAll("a")).toHaveLength(4);
+  expect(screen.getByRole("navigation",{name:"Main"}).querySelectorAll("a")).toHaveLength(4);
   expect(screen.getByRole("link",{name:"Family & settings"})).toHaveAttribute("href","/space");
   expect(screen.queryByRole("navigation",{name:"Related family actions"})).not.toBeInTheDocument();
   expect(screen.queryByText("All Family")).not.toBeInTheDocument();
