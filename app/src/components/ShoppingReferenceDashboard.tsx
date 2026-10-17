@@ -155,7 +155,7 @@ export function ShoppingReferenceDashboard(){
    <div className="relative z-10 flex min-w-0 flex-col items-start justify-center py-9 sm:py-10">
     <p className="mb-3 text-xs font-black uppercase tracking-widest" style={{color:ink}}>{tr("For the little things that matter ♥","للحظات الحلوة ♥")}</p>
     <h1 className="break-words text-[clamp(1.65rem,4.2vw,3.4rem)] font-black leading-[1.05] tracking-[-.06em]">
-     <span style={{color:ink}}>{named||tr("Family","العائلة")}</span> {tr("Wishlist","قائمة الرغبات")}
+     {ar?<>{tr("Wishlist","قائمة رغبات")} <span style={{color:ink}}>{named||"العائلة"}</span></>:<><span style={{color:ink}}>{named?named+"’s":"Family"}</span> Wishlist</>}
     </h1>
     <p className="mt-3 max-w-md text-xs font-medium leading-relaxed text-[#5F6578] sm:text-sm">
      {tr("All the things your family loves, needs and dreams about.","كل ما تحبه العائلة وتحتاجه وتحلم به، في مكان واحد.")}
