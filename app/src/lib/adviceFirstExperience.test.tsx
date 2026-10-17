@@ -17,12 +17,12 @@ afterEach(()=>{cleanup();window.localStorage.clear();vi.restoreAllMocks()});
 const draw=(view:ReactNode)=>render(<I18nProvider>{view}</I18nProvider>);
 const event={id:"school-gala",title:"School celebration",date:"2026-10-20",kind:"school",annual:false};
 describe("Dabberna advice-first parent experience",()=>{
- it("shows all six connected family destinations while keeping settings and records reachable",()=>{
+ it("shows all four connected family pillars while keeping settings and records reachable",()=>{
   draw(<AppShell><p>Family briefing</p></AppShell>);
   const navs=screen.getAllByRole("navigation",{name:"Main"});
   expect(navs).toHaveLength(2);
   for(const nav of navs){
-   expect(within(nav).getAllByRole("link").map(x=>x.getAttribute("href"))).toEqual(["/","/advisor","/plans","/money","/explore/smartbuy","/calendar"]);
+   expect(within(nav).getAllByRole("link").map(x=>x.getAttribute("href"))).toEqual(["/","/money","/family","/advisor"]);
   }
   expect(screen.getAllByRole("link",{name:/Family & settings/}).length).toBeGreaterThan(0);
   expect(screen.getByText("Family briefing")).toBeInTheDocument();

@@ -20,7 +20,8 @@ export const Route=createFileRoute("/plans")({
 const kinds:{id:PlanKind;en:string;ar:string}[]=[
  {id:"purchase",en:"Purchase",ar:"مشتريات"},{id:"outing",en:"Outing",ar:"طلعة"},{id:"occasion",en:"Occasion",ar:"مناسبة"},{id:"other",en:"Other",ar:"غير ذلك"}
 ];
-function PlansPage(){
+function PlansPage(){return <PlansWorkspace/>;}
+export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
  const {lang}=useI18n(),ar=lang==="ar";
  const [plans,setPlans,ready]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [active,setActive]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
@@ -94,7 +95,7 @@ function PlansPage(){
   update({...plan,expenseId,updatedAt:new Date().toISOString()});setErr("");
   toast.success(ar?"تم الربط بالمالية دون تعديل رصيد البنك.":"Recorded in Money without deducting cash.");
  };
- return <AppShell title={ar?"خططنا":"Our Plans"}>
+ const content=<>
    <div className="mb-5"><FamilyNextActions/></div>
    <section className="page-intro">
      <p className="section-eyebrow">{ar?"خطّة واحدة، خطوات مترابطة":"ONE PLAN · CONNECTED CHOICES"}</p>
@@ -253,5 +254,6 @@ function PlansPage(){
    </section>}
    {err&&<p className="mt-3 rounded-xl bg-[#FFF1F1] p-3 text-sm text-[#9B3E47]" role="alert">{err}</p>}
    <p className="mt-5 text-xs leading-relaxed text-muted-foreground">{ar?"هذه الخطط محفوظة فقط على هذا الجهاز. ليست متزامنة بعد مع حسابات أفراد العائلة.":"Plans remain private to this browser for now. Household cloud sharing and role permissions are not yet connected."}</p>
-  </AppShell>;
+ </>;
+ return embedded?content:<AppShell title={ar?"خططنا":"Our Plans"}>{content}</AppShell>;
 }
