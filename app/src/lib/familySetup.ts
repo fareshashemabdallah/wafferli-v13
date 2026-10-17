@@ -3,6 +3,7 @@ import {needsStarterBudget} from "./starterBudget";
 
 export const FAMILY_SETUP_PREFERENCES_KEY="familySetupPreferencesConfirmed";
 export const FAMILY_SETUP_PROFILE_SKIP_KEY="familySetupProfileSkipped";
+export const FAMILY_SETUP_MONEY_SKIP_KEY="familySetupMoneySkipped";
 
 /** Samples are instructional data, not household profiles. Never infer children
  * or household preferences from these three example records. */
@@ -25,16 +26,16 @@ export type FamilySetupState={
 /** Reads existing local modules without altering money, relatives or plans. */
 export function familySetupState(
  members:readonly Member[],money:MoneyState,
- preferencesConfirmed:boolean,profileSkipped=false
+ preferencesConfirmed:boolean,profileSkipped=false,moneySkipped=false
 ):FamilySetupState {
  const actual=realFamilyMembers(members);
  const family=actual.length>0||profileSkipped;
  const c=computeMoney(money);
- const moneyDone=!needsStarterBudget(money)&&!money.demo&&c.monthlyIncome>0&&
+ const moneyDone=!needsStarterBudget(money)&&!money.demo&&(c.monthlyIncome>0||money.incomeKnown)&&
   c.savingsTarget>=0;
  const steps=[
   {id:"family" as const,complete:family,optional:true},
-  {id:"money" as const,complete:moneyDone,optional:false},
+  {id:"money" as const,complete:moneyDone||moneySkipped,optional:true},
   {id:"preferences" as const,complete:preferencesConfirmed,optional:true}
  ];
  const next=steps.find(step=>!step.complete)?.id??null;
