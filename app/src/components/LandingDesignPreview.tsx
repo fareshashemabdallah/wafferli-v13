@@ -18,6 +18,7 @@ import {decideWeekendOuting} from "@/lib/weekendOutingDecision";
 
 const panel="rounded-[1.5rem] border border-[#E8EDE8] bg-white/90 p-4 shadow-[0_16px_44px_-32px_rgba(20,70,50,.28)] sm:p-5";
 const asset=import.meta.env.BASE_URL+"landing-family-characters.avif";
+const currentHomeUrl=import.meta.env.BASE_URL+"#/";
 
 /** Opt-in, read-only design preview. The current public home at / is unchanged.
  * All amounts and dates are read from this device's existing family records. */
@@ -45,7 +46,7 @@ export function LandingDesignPreview(){
   {to:"/about" as const,en:"How it works",ar:"كيف بيشتغل؟"}
  ];
  const tiles=[
-  {to:"/calendar" as const,en:"Today",ar:"اليوم",desc:"See what's next for your family.",ardesc:"شو عند العيلة قريباً",icon:CalendarDays,color:"#E9F4FC",ink:"#449CD6"},
+  {to:"/" as const,en:"Today",ar:"اليوم",desc:"See what's next for your family.",ardesc:"شو عند العيلة قريباً",icon:CalendarDays,color:"#E9F4FC",ink:"#449CD6"},
   {to:"/money" as const,en:"Money & Bills",ar:"المال والفواتير",desc:"Stay on top of spending and savings.",ardesc:"خليك عارف مصاريفك وادخارك",icon:Wallet,color:"#EDF6E9",ink:"#2B9D71"},
   {to:"/explore/market" as const,en:"Shopping & Wishlist",ar:"مشترياتنا ورغباتنا",desc:"Find items and compare useful options.",ardesc:"ابحث وقارن الخيارات",icon:ShoppingBasket,color:"#FFF0E7",ink:"#EB7657"},
   {to:"/calendar" as const,en:"Family Calendar",ar:"تقويم العيلة",desc:"Keep important dates in one place.",ardesc:"المناسبات والمواعيد بمكان واحد",icon:CalendarDays,color:"#F3EDFC",ink:"#9C71DA"},
@@ -62,9 +63,9 @@ export function LandingDesignPreview(){
  return <div dir={ar?"rtl":"ltr"} className="dabberna-landing-preview min-h-dvh overflow-x-hidden bg-[#FFFCF7] text-[#132C31]">
   <div className="sticky top-0 z-50 border-b border-[#E8EDE7]/80 bg-[#FFFDF8]/90 backdrop-blur-xl">
    <header className="mx-auto flex min-h-[74px] max-w-[1480px] items-center justify-between gap-3 px-4 sm:px-7 lg:px-10">
-    <Link to="/" className="inline-flex shrink-0 items-center gap-2" aria-label={display("Dabberna home","دبّرنا الرئيسية")}>
+    <a href={currentHomeUrl} className="inline-flex shrink-0 items-center gap-2" aria-label={display("Dabberna home","دبّرنا الرئيسية")}>
      <Logo className="scale-110"/>
-    </Link>
+    </a>
     <nav className="hidden items-center gap-2 lg:flex" aria-label={display("Main navigation","التنقل الرئيسي")}>
      <span className="rounded-full bg-[#E9F4E8] px-5 py-2.5 text-sm font-bold text-[#195842]">{display("Home","الرئيسية")}</span>
      {mainLinks.map(l=><Link key={l.to} to={l.to} className="rounded-full px-4 py-2.5 text-sm font-semibold text-[#3D5658] transition hover:bg-[#EFF6EC]">{ar?l.ar:l.en}</Link>)}
@@ -91,7 +92,7 @@ export function LandingDesignPreview(){
      {display("DESIGN TEST PREVIEW — your current homepage has not changed. Cards use your saved records, not the numbers in the illustration.",
        "معاينة اختبار للتصميم — الصفحة الرئيسية الحالية ما تغيّرت. البطاقات تستعمل بياناتك المحفوظة، مش أرقام الصورة.")}
      {" · "}
-     <a href={import.meta.env.BASE_URL+"#/"} className="underline">{display("Back to current home","ارجع للصفحة الحالية")}</a>
+     <a href={currentHomeUrl} className="underline">{display("Back to current home","ارجع للصفحة الحالية")}</a>
     </div>
    </div>
 
@@ -121,10 +122,10 @@ export function LandingDesignPreview(){
      </div>
     </div>
 
-    <div className="relative mt-6 h-[295px] sm:mx-auto sm:h-[420px] sm:max-w-3xl lg:absolute lg:inset-y-0 lg:end-[2%] lg:mt-0 lg:h-full lg:w-[60%]" aria-label={display("Playful cartoon of a family together","رسم كرتوني لعائلة مع بعضها")}>
+    <div className="relative mt-6 h-[295px] sm:mx-auto sm:h-[420px] sm:max-w-3xl lg:absolute lg:inset-y-0 lg:end-[1%] lg:mt-0 lg:h-full lg:w-[56%]" aria-label={display("Playful cartoon of a family together","رسم كرتوني لعائلة مع بعضها")}>
      <img src={asset} alt={display("Cartoon mother and father smiling with their two children and a friendly robot.","أم وأب كرتونيين مبتسمين مع طفلين وروبوت لطيف")}
-      className="absolute bottom-[-28px] start-[-5%] h-[110%] w-[110%] object-contain object-bottom drop-shadow-[0_14px_20px_rgba(77,89,52,.14)] lg:bottom-[-30px] lg:start-[-1%] lg:h-[96%] lg:w-[95%]" loading="eager" decoding="async"/>
-     <div className="absolute start-0 top-0 hidden w-[36%] -rotate-3 rounded-2xl border border-[#E5EAE3] bg-white/95 p-3 shadow-xl shadow-[#597660]/10 lg:block">
+      className="pointer-events-none absolute inset-x-0 bottom-[-12px] h-[103%] w-full object-contain object-bottom drop-shadow-[0_14px_20px_rgba(77,89,52,.14)] lg:bottom-[-8px] lg:h-[96%]" loading="eager" decoding="async"/>
+     <div className="absolute start-[8%] top-[3%] hidden w-[36%] -rotate-3 rounded-2xl border border-[#E5EAE3] bg-white/95 p-3 shadow-xl shadow-[#597660]/10 lg:block">
       <div className="flex items-center gap-2 text-xs font-extrabold text-[#2D6B56]"><CalendarDays className="size-5"/>{display("Family calendar","تقويم العيلة")}</div>
       {ready&&view.agenda.length>0?<p className="mt-2 truncate text-[11px] text-[#344E50]">{view.agenda[0]?.title}</p>:
        <p className="mt-2 text-[11px] text-[#6D8180]">{display("Your important dates in one place","مواعيدك المهمة بمكان واحد")}</p>}
@@ -146,15 +147,20 @@ export function LandingDesignPreview(){
 
    <nav aria-label={display("Explore family features","استكشف ميزات العائلة")}
     className="relative z-20 mx-3 -mt-1 grid grid-cols-2 gap-2 rounded-[2rem] bg-white/95 p-3 shadow-[0_16px_50px_-30px_rgba(34,81,49,.3)] sm:mx-6 sm:grid-cols-3 sm:gap-3 sm:p-4 lg:-mt-9 lg:grid-cols-6">
-    {tiles.map(t=><Link key={t.en} to={t.to} className="group relative flex min-h-[134px] flex-col items-start rounded-[1.4rem] p-4 transition-transform hover:-translate-y-1"
-      style={{backgroundColor:t.color}}>
-     <t.icon className="size-8" color={t.ink} strokeWidth={2.3}/>
-     <span className="mt-3 text-sm font-extrabold leading-tight text-[#152E32]">{ar?t.ar:t.en}</span>
-     <span className="mt-1 max-w-[10rem] text-[11px] leading-relaxed text-[#5A7478]">{ar?t.ardesc:t.desc}</span>
-     <span className="absolute bottom-3 end-3 grid size-8 place-items-center rounded-full bg-white/90 text-[#203D41] transition group-hover:translate-x-0.5">
-      <ChevronRight className="size-4 rtl:rotate-180"/>
-     </span>
-    </Link>)}
+    {tiles.map(t=>{
+     const content=<>
+      <t.icon className="size-8" color={t.ink} strokeWidth={2.3}/>
+      <span className="mt-3 text-sm font-extrabold leading-tight text-[#152E32]">{ar?t.ar:t.en}</span>
+      <span className="mt-1 max-w-[10rem] text-[11px] leading-relaxed text-[#5A7478]">{ar?t.ardesc:t.desc}</span>
+      <span className="absolute bottom-3 end-3 grid size-8 place-items-center rounded-full bg-white/90 text-[#203D41] transition group-hover:translate-x-0.5">
+       <ChevronRight className="size-4 rtl:rotate-180"/>
+      </span>
+     </>;
+     const classes="group relative flex min-h-[134px] flex-col items-start rounded-[1.4rem] p-4 transition-transform hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#155943]";
+     return t.to==="/"?
+      <a key={t.en} href={currentHomeUrl} className={classes} style={{backgroundColor:t.color}}>{content}</a>:
+      <Link key={t.en} to={t.to} className={classes} style={{backgroundColor:t.color}}>{content}</Link>;
+    })}
    </nav>
 
    <div className="mx-3 mt-5 grid gap-4 sm:mx-6 lg:grid-cols-[1.1fr_1fr_1fr]" aria-label={display("Family overview","ملخص العيلة")}>
@@ -230,7 +236,7 @@ export function LandingDesignPreview(){
     <ShieldCheck className="size-5 shrink-0"/>
     {display("Preview only. Existing finance, family and privacy records stay unchanged. Shopping sources and AI research are not yet fully connected.",
      "معاينة فقط. معلومات العيلة والمالية والخصوصية ما تغيرت. البحث المباشر بالمنتجات والذكاء الاصطناعي بعده مش مكتمل.")}
-    <a href={import.meta.env.BASE_URL+"#/"} className="ms-auto shrink-0 font-bold underline">{display("Current homepage","الصفحة الحالية")}</a>
+    <a href={currentHomeUrl} className="ms-auto shrink-0 font-bold underline">{display("Current homepage","الصفحة الحالية")}</a>
    </footer>
   </div>
  </div>;
