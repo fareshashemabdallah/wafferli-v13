@@ -13,6 +13,10 @@ import {
 } from "@/lib/cashflow";
 import { fmtJOD, uid } from "@/lib/storage";
 import {recordBillPayment,reverseBillPayment,type PaidBillCashMode} from "@/lib/billPayment";
+import {FamilyCommitmentsPanel} from "@/components/FamilyCommitmentsPanel";
+import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
+import {familyForecastCommitments} from "@/lib/familyFinancialCommitments";
+import {useLocalState} from "@/lib/storage";
 import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 import {previousMonthKey} from "@/lib/monthlyCarryover";
 
@@ -34,7 +38,9 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const today=localToday();
   const incomes=state.incomeSources ?? legacyIncome(state.income);
   const bills=state.commitments ?? [];
-  const forecast=buildForecast({incomes,commitments:bills,openingBalance:state.cashOnHand??null,
+   const [familyPlans]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+   const financialCommitments=familyForecastCommitments(familyPlans,state);
+  const forecast=buildForecast({incomes,commitments:[...bills,...financialCommitments],openingBalance:state.cashOnHand??null,
     reserve:state.cashReserve??0,today,days:30});
   const [cash,setCash]=useState(state.cashOnHand===null||state.cashOnHand===undefined?"":String(state.cashOnHand));
   const [reserve,setReserve]=useState(String(state.cashReserve??0));
@@ -135,6 +141,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const totalsReady=state.cashOnHand!==null&&state.cashOnHand!==undefined;
   return (
     <div className="space-y-4" id="cash-flow">
+       <FamilyCommitmentsPanel money={state} compact/>
       <section className="card-soft mt-6 p-4 sm:p-5">
         <div className="flex items-center gap-2"><CalendarClock className="size-5 text-brand"/>
           <h2 className="text-lg font-semibold">{ar?"رصيد اليوم والاحتياطي":"Your cash balance & reserve"}</h2>
