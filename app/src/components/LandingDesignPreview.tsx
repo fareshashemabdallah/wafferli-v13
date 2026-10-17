@@ -211,7 +211,7 @@ export function LandingDesignPreview(){
    <section className="mx-3 my-5 rounded-[1.5rem] border border-[#E7EDE6] bg-white/90 p-4 sm:mx-6" aria-label={display("More family options","خيارات أخرى للعيلة")}>
     <div className="flex flex-wrap items-center justify-between gap-2">
      <h2 className="inline-flex items-center gap-2 text-base font-extrabold"><Heart className="size-5 fill-[#F88C82] text-[#F88C82]"/>{display("Explore what your family enjoys","استكشف شو بتحب عيلتك")}</h2>
-     <Link to="/explore/" className="text-xs font-bold text-[#287E64]">{display("See all","شوف الكل")}</Link>
+     <Link to="/explore" className="text-xs font-bold text-[#287E64]">{display("See all","شوف الكل")}</Link>
     </div>
     <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
      {([
