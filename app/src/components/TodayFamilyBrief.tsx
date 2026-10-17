@@ -41,7 +41,7 @@ export function TodayFamilyBrief({compact=false}:{compact?:boolean}={}){
  // advice is shown only for the topics the parent explicitly enabled.
  const decisions=confirmed&&(prefs.financeTips||prefs.lifestyle||prefs.shoppingTips)?
   buildFamilyDecisionBrief({money,members,plans,tasks,wishlist,moments,preferences:prefs,now}).steps:[];
- const signals=buildTodaySignals(attention,decisions);
+ const signals=buildTodaySignals(attention,decisions,compact?1:4);
  if(!signals.length)return null;
  const first=signals[0]!;
  const other=signals.slice(1);
