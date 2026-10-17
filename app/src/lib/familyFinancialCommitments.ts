@@ -10,7 +10,7 @@ import type {Expense,MoneyState} from "./money";
  */
 export type FamilyFinancialCommitment={
  id:string;planId:string;planTitle:string;kind:OccasionCostKind;label:string;
- amountJod:number;dueDate:string;paid:boolean;actualPaidJod:number|null;
+ amountJod:number;dueDate:string;paid:boolean;actualPaidJod:number|null;certainty:"idea"|"planned"|"firm";
 };
 const cents=(n:number)=>Number.isFinite(n)&&n>=0&&n<=100000&&Math.abs(n*100-Math.round(n*100))<.00001;
 export function familyFinancialCommitments(plans:readonly FamilyPlan[],money:MoneyState):FamilyFinancialCommitment[]{
@@ -25,7 +25,7 @@ export function familyFinancialCommitments(plans:readonly FamilyPlan[],money:Mon
    rows.push({
     id:"family-occasion:"+plan.id+":"+kind,planId:plan.id,planTitle:plan.title,
     kind,label:kind==="gift"?(costs.gift.description.trim()||"Gift"):kind==="celebration"?"Celebration":"Cake & extras",
-    amountJod:entry.amountJod,dueDate:entry.dueDate,paid:!!payment,actualPaidJod:payment?.amount??null
+    amountJod:entry.amountJod,dueDate:entry.dueDate,paid:!!payment,actualPaidJod:payment?.amount??null,certainty:entry.certainty??"planned"
    });
   }
  }
@@ -35,17 +35,18 @@ export function familyForecastCommitments(plans:readonly FamilyPlan[],money:Mone
  if(money.demo)return [];
  const existingIds=new Set((money.commitments??[]).map(x=>x.id));
  return familyFinancialCommitments(plans,money)
-  .filter(x=>!x.paid&&!existingIds.has(x.id))
+  .filter(x=>!x.paid&&x.certainty!=="idea"&&!existingIds.has(x.id))
   .map(x=>({id:x.id,name:x.planTitle+" · "+x.label,amount:x.amountJod,frequency:"once" as const,dueDate:x.dueDate}));
 }
 export type FamilyFinancialSummary={
- plannedTotalJod:number;paidTotalJod:number;upcomingTotalJod:number;
+ plannedTotalJod:number;paidTotalJod:number;upcomingTotalJod:number;possibleIdeasJod:number;
  monthlyPreparationJod:number;nextDeadline:string|null;
 };
 /** Monthly preparation is advice only, never a second due bill or transfer. */
 export function familyFinancialSummary(plans:readonly FamilyPlan[],money:MoneyState,now=new Date()):FamilyFinancialSummary{
  const rows=familyFinancialCommitments(plans,money);
- const pending=rows.filter(x=>!x.paid);
+ const pending=rows.filter(x=>!x.paid&&x.certainty!=="idea");
+ const potential=rows.filter(x=>!x.paid&&x.certainty==="idea");
  const pendingByPlan=new Map<string,Set<OccasionCostKind>>();
  for(const row of pending){
   const set=pendingByPlan.get(row.planId)??new Set<OccasionCostKind>();
@@ -65,6 +66,7 @@ export function familyFinancialSummary(plans:readonly FamilyPlan[],money:MoneySt
  return {plannedTotalJod:roundJod(rows.reduce((a,x)=>a+x.amountJod,0)),
   paidTotalJod:roundJod(rows.filter(x=>x.paid).reduce((a,x)=>a+(x.actualPaidJod??0),0)),
   upcomingTotalJod:roundJod(pending.reduce((a,x)=>a+x.amountJod,0)),
+  possibleIdeasJod:roundJod(potential.reduce((a,x)=>a+x.amountJod,0)),
   monthlyPreparationJod:roundJod(monthly),
   nextDeadline:pending.map(x=>x.dueDate).sort()[0]??null};
 }
