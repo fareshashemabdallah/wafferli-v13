@@ -16,13 +16,18 @@ export function MoneyGuidance({state,setState,scope}:Props){
  const item=state.expenses.find(e=>e.date.startsWith(ym)&&varianceOf(e)!==0&&!e.varianceDismissed);
  const delta=item?varianceOf(item):0;
  const reasoning=item?smartVarianceGuidance(state,item):null;
- const choices:AllocationChoice[]=scope==="alignment"?(alignment.status==="balanced"||alignment.status==="incomplete"?[]:[
+ const candidates:AllocationChoice[]=scope==="alignment"?(alignment.status==="balanced"||alignment.status==="incomplete"?[]:[
   ...state.categories.filter(c=>c.type==="variable" && (alignment.gap>0||
    (c.planned+(state.monthlyAdjustments?.[ym]?.categoryDeltas[c.id]??0))+alignment.gap>=Math.max(0,state.expenses.filter(e=>e.status!=="planned"&&e.categoryId===c.id&&e.date.slice(0,7)===new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")).reduce((n,e)=>n+e.amount,0)))).map(c=>({kind:"variable" as const,categoryId:c.id})),
   ...(alignment.gap>0||alignment.savings>=-alignment.gap?[{kind:"savings" as const}]:[])
  ]) : reasoning?.ranked??[];
  if(state.demo)return null;
  if(scope==="variance"&&!item)return null;
+ // Never propose a cut from unlabeled, essential or family-protected categories.
+ // Parents can still edit their own categories deliberately in Spending.
+ const reduction=scope==="alignment"?alignment.gap<0:delta>0;
+ const choices=candidates.filter(choice=>!reduction||choice.kind==="savings"||
+  state.categories.some(c=>c.id===choice.categoryId&&c.priority==="flexible"));
  const selected=choices.find(c=>key(c)===proposal);
  const dir=scope==="alignment"?Math.sign(alignment.gap):Math.sign(delta);
  const amount=scope==="alignment"?Math.abs(alignment.gap):Math.abs(delta);
@@ -43,8 +48,8 @@ export function MoneyGuidance({state,setState,scope}:Props){
   setProposal(null);
   toast.success(ar?"تم تأكيد تعديل الميزانية.":"Budget reallocation confirmed.");
  };
- if(scope==="alignment"&&alignment.status==="balanced")return <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#EDF5EA] p-3 text-sm text-[#3F6B50]"><Check className="size-4"/>{ar?"مخطط المصروف والادخار متوافق مع الدخل الشهري المُدخل.":"Your category budgets and savings goal match entered monthly income."}</div>;
- if(scope==="alignment"&&alignment.status==="incomplete")return <p className="mt-4 text-xs text-muted-foreground">{ar?"أدخل الدخل وهدف الادخار وفئات المصروف لتظهر المقارنة والاقتراحات.":"Enter income, a savings goal and spending-category budgets to see recommendations."}</p>;
+ if(scope==="alignment"&&alignment.status==="balanced")return <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#EDF5EA] p-3 text-sm text-[#3F6B50]"><Check className="size-4"/>{ar?"مصاريفك المخططة وأي ادخار اختياري متوازنين مع تقدير الدخل الشهري.":"Your entered spending and any optional savings intention balance with estimated monthly income."}</div>;
+ if(scope==="alignment"&&alignment.status==="incomplete")return <p className="mt-4 text-xs text-muted-foreground">{ar?"أدخل تقدير الدخل وفئات المصاريف للمقارنة. الادخار ممكن ينتظر.":"Enter an income estimate and spending categories for a planning comparison. Savings can wait."}</p>;
  const title=scope==="alignment"?(dir<0?(ar?"الخطة أعلى من الدخل":"The plan exceeds income"):(ar?"هناك مبلغ لم توزّعه بعد":"Some income is not yet allocated")):
   delta>0?(ar?"المبلغ المدفوع أعلى من المتوقع":"Actual payment exceeded the plan"):(ar?"دفعت أقل من المتوقع":"You spent less than planned");
  return <section className="mt-4 rounded-2xl border border-[#DFE7D9] bg-[#F7F9F3] p-4" aria-label={ar?"اقتراح توزيع الميزانية":"Budget suggestion"}>
