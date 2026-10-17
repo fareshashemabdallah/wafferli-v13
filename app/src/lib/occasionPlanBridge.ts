@@ -27,7 +27,7 @@ export function upsertOccasionFamilyPlan(
  }
  const nextBase:FamilyPlan={...old,date:event.occursOn,
   updatedAt:now.toISOString(),
-  ...(allowed!==undefined?{budgetJod:allowed}:{})};
+  ...(allowed!==undefined&&!old.occasionPreparation?{budgetJod:allowed}:{})};
  // Do not remove an earlier budget or a recorded choice if this local planner
  // has no replacement. A completed plan must never be reopened.
  const next=idea?setPlanChoice(nextBase,{label:language==="ar"?idea.ar:idea.en,source:"occasion"},now):nextBase;
