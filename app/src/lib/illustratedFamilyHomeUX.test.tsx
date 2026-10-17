@@ -51,8 +51,8 @@ describe("illustrated family homepage",()=>{
  it("answers a question in-page and retains the source-based action",async()=>{
   draw();
   const input=screen.getByRole("textbox",{name:"Ask about your family"});
-  await waitFor(()=>expect(screen.getByRole("button",{name:"Ask Dabberna"})).toBeEnabled());
   fireEvent.change(input,{target:{value:"How are our savings goals?"}});
+  await waitFor(()=>expect(screen.getByRole("button",{name:"Ask Dabberna"})).toBeEnabled());
   fireEvent.click(screen.getByRole("button",{name:"Ask Dabberna"}));
   await waitFor(()=>expect(screen.getByText("How are our savings goals?")).toBeInTheDocument());
   expect(screen.getByText(/guided local advice/i)).toBeInTheDocument();
