@@ -211,8 +211,8 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
     <CheckCircle2 className="size-4"/>{t("Save occasion costs","احفظ تكاليف المناسبة")}
    </button>
    <p className="text-[11px] text-[#7C8595]">{t(
-    "Your existing spending ceiling stays unchanged; if none was set, the first cost total becomes the plan's ceiling. Saving does not change Our Money.",
-    "سقف الميزانية السابق يبقى كما هو؛ وإذا لم يكن محدداً يصبح إجمالي التكاليف الأولى هو السقف. الحفظ لا يغيّر سجلات المال.")}</p>
+    "Your previous spending ceiling stays unchanged. Estimated costs appear as linked family commitments in Our Money; no expense, cash deduction or savings transfer is recorded.",
+    "سقف الخطة السابق يبقى كما هو. التكاليف تظهر كالتزامات عائلية في المالية دون تسجيل مصروف أو خصم رصيد أو تحويل ادخار.")}</p>
   </form>}
   {saved&&<p role="status" className="mt-2 rounded-lg bg-[#EDF8F0] p-2 text-xs font-semibold text-[#26765A]">{saved}</p>}
   {prep&&funding&&advice&&<div className="mt-4 space-y-3">
@@ -251,10 +251,10 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
    <div className="rounded-2xl bg-[#F6F5FC] p-4">
     <div className="flex items-center gap-2"><Wallet className="size-4 text-[#7567B7]"/>
      <p className="text-sm font-extrabold">{t("Factor this into Our Money","كيف نحسبها ضمن المالية؟")}</p></div>
-    {advice.status==="demo"||advice.status==="missing-plan"?
+    {advice.status==="essentials-gap"?<p className="mt-2 text-sm text-[#985C4B]">{t("Your recorded essential costs exceed income. Cutting gift costs alone cannot fix an underlying essentials gap. Review necessary spending and income options first.","المصاريف الأساسية المسجلة تتجاوز الدخل. تخفيض الهدايا وحده لا يعالج الفجوة؛ راجع الاحتياجات وخيارات الدخل أولاً.")}</p>:advice.status==="demo"||advice.status==="missing-plan"?
      <p className="mt-2 text-sm text-[#5D6880]">{t(
-      "Add real income, savings and spending categories in Our Money before reviewing possible monthly budget adjustments. Sample budgets cannot support advice.",
-      "أدخل الدخل والادخار وفئات الإنفاق الحقيقية في المالية أولاً. لا يمكن تقديم نصائح من أرقام تجريبية.")}</p>
+      "Add real income and spending estimates in Our Money for cautious advice. Saving is optional and sample data cannot support recommendations.",
+      "أدخل تقديرات الدخل والمصاريف الفعلية في المالية للنصيحة الحذرة. الادخار اختياري، والأرقام التجريبية غير كافية.")}</p>
      :<>
       <p className="mt-2 text-sm">{t("Unallocated amount in your entered monthly plan: ","المبلغ غير الموزّع في خطة الشهر المسجّلة: ")}
        <strong>{fmtJOD(advice.monthlyUnallocatedJod??0)}</strong></p>
@@ -264,9 +264,9 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
        <p className="mt-2 text-sm font-semibold text-[#985C4B]">{t("Additional monthly planning room to find: ","مبلغ إضافي للبحث عنه شهرياً: ")}
         {fmtJOD(advice.monthlyDifferenceJod??0)}</p>}
       {advice.hints.length>0&&<div className="mt-3 space-y-2">
-       <p className="text-xs font-bold">{t("Discretionary categories worth reviewing (not automatic cuts)","فئات مرنة يمكن مراجعتها (من دون تخفيض تلقائي)")}</p>
+       <p className="text-xs font-bold">{t("Only categories you explicitly marked flexible (not automatic cuts)","فقط الفئات التي اخترتها كمرنة (من دون تخفيض تلقائي)")}</p>
        {advice.hints.map(h=><div key={h.categoryId} className="flex items-center justify-between gap-2 rounded-xl bg-white p-2 text-xs">
-        <span>{h.categoryName}</span><strong>{t("Consider up to ","راجع حتى ")}{fmtJOD(h.reviewJod)}</strong>
+        <span>{h.categoryName}</span><strong>{t("Unspent allocation to review, not guaranteed savings: ","مخصص متبقٍ يمكن مراجعته، وليس وفراً مضموناً: ")}{fmtJOD(h.reviewJod)}</strong>
        </div>)}
       </div>}
       {advice.notCoveredJod!==null&&advice.notCoveredJod>0&&<p className="mt-2 text-xs text-[#915942]">{t(
