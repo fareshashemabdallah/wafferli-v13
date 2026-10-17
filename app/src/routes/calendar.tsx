@@ -3,13 +3,13 @@ import { Cake, CalendarDays, Check, ChevronLeft, ChevronRight, Gift, Heart, Penc
 import { useMemo, useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
 import {CalendarReminderExport} from "@/components/CalendarReminderExport";
+import {OccasionPreparationSection} from "@/components/OccasionPreparationSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { allFamilyMoments,dateKey,formatMomentDate,isMemberBirthday,kindNames,monthCells,occurrencesForDate,parseCalendarDate,upcomingMoments,type FamilyMoment,type MomentKind } from "@/lib/familyCalendar";
 import { sampleMembers,sampleMoney,type MoneyState } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
-import { uid,useLocalState,writeLocal } from "@/lib/storage";
-import {planKey} from "@/lib/occasionAdvisor";
+import { uid,useLocalState } from "@/lib/storage";
 import {realFamilyMembers} from "@/lib/familySetup";
 
 export const Route=createFileRoute("/calendar")({
@@ -92,7 +92,7 @@ export function FamilyCalendarWorkspace({embedded=false}:{embedded?:boolean}={})
     <button type="button" className="font-semibold text-brand underline-offset-2 hover:underline" onClick={()=>{setMonth(new Date(today.getFullYear(),today.getMonth(),1,12));setSelected(todayKey);}}>{ar?"اليوم":"Jump to today"}</button>
    </div>
   </div>
-  <section className="card-soft mt-4 p-4 sm:p-5">
+  <section id="selected-family-occasion" className="card-soft mt-4 scroll-mt-24 p-4 sm:p-5">
    <div className="flex flex-wrap items-center justify-between gap-2">
     <div><h2 className="font-semibold">{localeDate(selected)}</h2><p className="text-xs text-muted-foreground">{ar?"المناسبات الخاصة بهذا اليوم":"Occasions on this day"}</p></div>
     <Button size="sm" onClick={()=>startNew(selected)}><Plus className="size-4"/>{ar?"أضف مناسبة":"Add occasion"}</Button>
@@ -105,12 +105,8 @@ export function FamilyCalendarWorkspace({embedded=false}:{embedded?:boolean}={})
      <button type="button" onClick={()=>remove(item)} aria-label={ar?"حذف":"Delete"} className="rounded-lg p-2 text-destructive hover:bg-muted"><Trash2 className="size-4"/></button>
     </>}
    </div>)}</div>
-   {chosen.length>0&&<div className="mt-4 flex flex-wrap gap-2">
-     {chosen.map(item=><Link key={item.id+item.occursOn} to="/occasions"
-      onClick={()=>writeLocal("focusedOccasionKey",planKey(item))}
-      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#EAF2E7] px-4 text-xs font-semibold text-brand">
-      <Gift className="size-4"/>{ar?"حضّر لهذه المناسبة: ":"Plan: "}{item.title} →
-     </Link>)}
+   {chosen.length>0&&<div className="mt-4 space-y-3">
+     {chosen.map(item=><OccasionPreparationSection key={item.id+"@"+item.occursOn} event={item}/>)}
    </div>}
   </section>
   {editing&&<form onSubmit={save} className="card-soft mt-4 space-y-3 p-4 sm:p-5">
@@ -146,10 +142,15 @@ export function FamilyCalendarWorkspace({embedded=false}:{embedded?:boolean}={})
    {!ready?<p className="mt-2 text-sm text-muted-foreground">{ar?"جارٍ تحميل المناسبات...":"Loading saved occasions…"}</p>:upcoming.length===0?<p className="mt-2 rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{ar?"عندما تضيف مناسبات، ستظهر هنا وعلى الصفحة الرئيسية.":"When you add birthdays in My Family or occasions here, they will appear on My Day."}</p>
    :<div className="mt-3 space-y-2">{upcoming.map(item=><div key={item.id+item.occursOn} className="card-soft flex items-center gap-3 p-3">
     <Gift className="size-5 shrink-0 text-brand"/><div className="flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">{formatMomentDate(item.occursOn,ar)} · {kindNames[item.kind][ar?"ar":"en"]}</p></div>
-    <Link to="/occasions" onClick={()=>writeLocal("focusedOccasionKey",planKey(item))}
+    <button type="button" onClick={()=>{
+       setSelected(item.occursOn);
+       const day=parseCalendarDate(item.occursOn);
+       if(day)setMonth(new Date(day.getFullYear(),day.getMonth(),1,12));
+       document.getElementById("selected-family-occasion")?.scrollIntoView?.({behavior:"smooth",block:"start"});
+      }}
      className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-[#D7E6DA] px-3 text-xs font-semibold text-brand">
-     {ar?"خطّط":"Plan"} →
-    </Link>
+     <Gift className="size-4"/>{ar?"حضّر":"Prepare"} →
+    </button>
    </div>)}</div>}
   </section>
   {ready&&moneyReady&&<CalendarReminderExport money={money} members={members} moments={events}/>}
