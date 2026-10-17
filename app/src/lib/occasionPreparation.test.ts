@@ -68,7 +68,7 @@ describe("one connected occasion plan: funding and budgets",()=>{
    occasionPreparation:prep(),createdAt:today.toISOString(),updatedAt:today.toISOString()};
   const result=upsertOccasionFamilyPlan([existing],event,{budgetJod:100},undefined,"id2",today);
   expect(result.plans).toHaveLength(1);
-  expect(result.plans[0].budgetJod).toBe(350);
-  expect(result.plans[0].occasionPreparation).toEqual(prep());
+  expect(result.plans[0]!.budgetJod).toBe(350);
+  expect(result.plans[0]!.occasionPreparation).toEqual(prep());
  });
 });
