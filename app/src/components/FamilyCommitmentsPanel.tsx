@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {Link} from "@tanstack/react-router";
-import {CalendarClock,CheckCircle2,Wallet,ArrowUpRight} from "lucide-react";
+import {CalendarClock,CheckCircle2,ArrowUpRight} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {fmtJOD,readLocal,useLocalState,writeLocal} from "@/lib/storage";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
