@@ -84,7 +84,7 @@ describe("calendar-integrated occasion preparation",()=>{
   draw();
   fireEvent.change(await screen.findByLabelText("Gift (JOD)"),{target:{value:"300"}});
   const native=Storage.prototype.setItem;
-  vi.spyOn(Storage.prototype,"setItem").mockImplementation(function(key,value){
+  vi.spyOn(Storage.prototype,"setItem").mockImplementation(function(this:Storage,key,value){
    if(key==="wafferli.v13.familyPlans")throw new DOMException("Quota","QuotaExceededError");
    return native.call(this,key,value);
   });
