@@ -43,8 +43,8 @@ export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{
    <div className="flex-1">
     <h2 className="text-base font-bold text-[#27364C]">{withinBills?t("From Family Life · automatically added","من حياة العيلة · تُضاف تلقائياً"):t("Upcoming family commitments","التزامات العيلة القادمة")}</h2>
     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t(
-     "Automatically linked to your family occasions and their payment dates. This is not a savings goal or a paid expense.",
-     "مرتبطة تلقائياً بمناسبات العيلة ومواعيد الدفع، وليست هدف ادخار أو مصروفاً مدفوعاً.")}</p>
+     "Linked to family calendar costs. Ideas are not scheduled bills, and even confirmed commitments are not paid expenses or savings goals.",
+     "مرتبطة بتكاليف تقويم العيلة. الأفكار ليست فواتير مجدولة والالتزامات المؤكدة ليست مصاريف مدفوعة أو أهداف ادخار.")}</p>
    </div>
   </div>
   <div className="mt-3 grid grid-cols-2 gap-2">
@@ -63,6 +63,7 @@ export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{
   <p className="mt-2 text-[11px] leading-relaxed text-[#748092]">{t(
    "Monthly preparation is a planning suggestion, not money actually set aside. Planned costs enter the cash-flow outlook once, and leave it when a payment is recorded.",
    "المبلغ الشهري اقتراح للتخطيط وليس مالاً تم توفيره. تدخل الالتزامات ضمن التوقعات المالية مرة واحدة وتُزال عند تسجيل الدفع.")}</p>
+  {totals.possibleIdeasJod>0&&<p className="mt-2 text-xs text-[#76697D]">{t("Ideas not scheduled: ","أفكار غير مجدولة: ")}{fmtJOD(totals.possibleIdeasJod)}</p>}
   <div className="mt-3 divide-y divide-[#F1E8EE]">
    {(compact?entries.slice(0,4):entries).map(item=><div key={item.id} className="py-3">
     <div className="flex flex-wrap justify-between gap-2">
@@ -73,7 +74,7 @@ export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{
      <div className="shrink-0 text-end">
       <strong className="text-sm tabular-nums">{fmtJOD(item.paid?(item.actualPaidJod??0):item.amountJod)}</strong>
       <p className={"mt-1 text-xs font-semibold "+(item.paid?"text-[#36866F]":"text-[#906379]")}>
-       {item.paid?t("Paid","مدفوع"):t("Planned","مخطط")}</p>
+       {item.paid?t("Paid","مدفوع"):item.certainty==="idea"?t("Idea, not due","فكرة، ليست مستحقة"):item.certainty==="firm"?t("Confirmed obligation","التزام مؤكد"):t("Planned estimate","تقدير مخطط")}</p>
      </div>
     </div>
     {item.paid?<p className="mt-2 inline-flex items-center gap-1 text-xs text-[#337C61]"><CheckCircle2 className="size-4"/>
