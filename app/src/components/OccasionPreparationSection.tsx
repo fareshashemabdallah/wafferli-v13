@@ -77,6 +77,7 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
  const [showMore,setShowMore]=useState(initial.extras.amountJod>0);
  const [allPlans]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [allTasks]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
+ const [justSavedPrep,setJustSavedPrep]=useState<OccasionPreparation|undefined>();
  const savedPreparation=plan.occasionPreparation;
  const build=():OccasionPreparation|null=>{
   const amounts=[cents(gift),cents(celebration),cents(extras)];
@@ -107,10 +108,11 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
   if(!writeLocal(FAMILY_PLANS_KEY,allPlans.map(p=>p.id===current.id?updated:p))){
    setError(t("Unable to save in this browser.","تعذّر الحفظ في هذا المتصفح."));return;
   }
+  setJustSavedPrep(next!);
   setError("");setSaved(t("Saved to this existing occasion plan. No expense or transfer was recorded.",
    "تم حفظ التكاليف في الخطة الحالية من دون تسجيل مصروف أو تحويل أموال."));
  };
- const prep=savedPreparation;
+ const prep=justSavedPrep??savedPreparation;
  const funding=prep?occasionFunding(prep):null;
  const advice=prep?occasionBudgetAdvice(prep,money):null;
  const linked=tasks.filter(x=>x.planId===plan.id);
