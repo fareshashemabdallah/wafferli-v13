@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Cake, CalendarDays, Check, ChevronLeft, ChevronRight, Gift, Heart, Pencil, Plus, Trash2 } from "lucide-react";
+import { Cake, CalendarDays, Check, ChevronLeft, ChevronRight, Gift, Heart, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
 import {CalendarReminderExport} from "@/components/CalendarReminderExport";
@@ -65,8 +65,6 @@ function FamilyCalendarPage(){
    <div><h2 className="text-xl font-semibold">{ar?"أيام صغيرة، ذكريات جميلة":"A little planning, more moments together"}</h2>
    <p className="mt-1 text-sm text-muted-foreground">{ar?"تظهر أعياد الميلاد تلقائياً من عائلتي، مع ذكرى الزواج والعطلات والمناسبات الخاصة.":"Birthdays from My Family appear automatically, alongside anniversaries, holidays and other moments."}</p></div></div>
   </section>
-  <Link to="/space" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand">{ar?"أضف أو عدّل عيد ميلاد أحد أفراد العائلة":"Add or edit a family member’s birthday"} →</Link>
-  <Link to="/occasions" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-mint px-4 py-3 text-sm font-semibold text-brand">{ar?"ابدأ تجهيز الهدية والتجربة قبل المناسبة":"Plan gifts and experiences in advance"} →</Link>
   <div className="card-soft mt-4 p-4 sm:p-5">
    <div className="flex items-center justify-between gap-2">
     <Button variant="outline" size="icon" aria-label={ar?"الشهر السابق":"Previous month"} onClick={()=>move(-1)}><ChevronLeft className="size-5 rtl:rotate-180"/></Button>
@@ -157,6 +155,5 @@ function FamilyCalendarPage(){
   <div className="mt-5 rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
    {ar?"هذا التقويم خاص بهذا المتصفح فقط ولا تتم مزامنته بين أفراد العائلة بعد. العطل الرسمية لا تُضاف تلقائيًا؛ أضفها يدويًا. لا تُرسل تذكيرات تلقائية أو إشعارات خارج التطبيق. بالنسبة لميلاد 29 فبراير، تظهر الذكرى فقط في السنوات الكبيسة.":"This calendar is private to this browser, not yet shared across family members. Public holidays must be entered manually. There are no background reminders or push notifications. A 29 February birthday appears only in leap years."}
   </div>
-  <Link to="/" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand">{ar?<ArrowRight className="size-4"/>:<ArrowLeft className="size-4"/>}{ar?"العودة إلى يومي":"Back to My Day"}</Link>
  </AppShell>;
 }
