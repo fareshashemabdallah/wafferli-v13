@@ -1,5 +1,6 @@
 /* Arabic text for the Dabberna UI. Translate UI copy, never user-entered names or secrets. */
 const labels:Record<string,string> = {
+  "I have checked this monthly estimate":"راجعت هذا التقدير الشهري",
   "How important is this spending to your family?":"قديش هالمصروف مهم لعيلتك؟",
   "Not decided — don't assume":"بعدني ما قررت — ما تفترض",
   "Essential — needs to be covered":"أساسي — لازم يتغطّى",
