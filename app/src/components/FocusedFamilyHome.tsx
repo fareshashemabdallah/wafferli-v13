@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState,type FormEvent} from "react";
 import {Link} from "@tanstack/react-router";
-import {ArrowRight,CalendarDays,CheckCircle2,Heart,Send,ShieldCheck,Wallet} from "lucide-react";
+import {ArrowRight,CalendarDays,Heart,Send,ShieldCheck,Wallet} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,fmtJOD} from "@/lib/storage";
 import {sampleMoney,sampleMembers,computeMoney,type MoneyState,type Member} from "@/lib/money";
@@ -138,7 +138,7 @@ export function FocusedFamilyHome(){
    </div>
   </section>}
 
-  <TodayQuickActions onAsk={()=>setAskOpen(true)}/>
+  <TodayQuickActions onAsk={()=>setAskOpen(true)} onOtherAction={()=>setAskOpen(false)}/>
   {askOpen&&<TodayAskInline onClose={()=>setAskOpen(false)}/>}
   <TodayFamilyBrief compact/>
 
