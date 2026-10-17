@@ -17,12 +17,12 @@ describe("plain-language household answers",()=>{
  it("makes the deficit and its next adjustment explicit",()=>{
   const r=budgetPlainResult({...budget(-100,"deficit"),categories:1100});
   expect(r.messageEn).toContain("100.00 JOD");
-  expect(r.titleEn).toContain("adjustment");
-  expect(r.messageEn).toContain("Review a cost or goal");
+  expect(r.titleEn).toContain("gap");
+  expect(r.messageEn).toContain("what is essential");
  });
  it("does not turn a balanced or incomplete monthly plan into an affordability promise",()=>{
   expect(budgetPlainResult(budget(0,"balanced")).messageEn).toContain("Check actual bills and cash");
-  expect(budgetPlainResult(budget(0,"incomplete")).messageEn).toContain("not an estimated bank balance");
+  expect(budgetPlainResult(budget(0,"incomplete")).messageEn).toContain("not your bank balance");
  });
 });
 describe("one clear manual shopping conclusion",()=>{
