@@ -44,7 +44,7 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Prop
    <Link to="/plans" className="inline-flex min-h-11 items-center rounded-full border border-[#D3E0D3] px-4 text-sm font-semibold text-brand">{ar?"ارجع إلى خططنا":"Return to Plans"} →</Link>
   </div>;
  return <div className="space-y-4">
-   <FinancialRealityPanel money={state} plans={familyPlans} update={setState}/>
+   <FinancialRealityPanel money={state} plans={familyPlans} update={setState} goTo={goTo}/>
    <SpendingBreakdownCard state={state} onChange={next=>setState(()=>next)} {...(onManageCategories?{onEdit:onManageCategories}:{})}/>
    {!state.demo&&<MoneyReadinessCard state={state} setState={setState} goTo={goTo}/>}
 
