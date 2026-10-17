@@ -39,7 +39,7 @@ const categories=[
  {en:"Gifts",ar:"الهدايا",icon:"🎁",to:"/occasions" as const,bg:"#FCE7ED"},
  {en:"More",ar:"المزيد",icon:"•••",to:"/explore" as const,bg:"#E9EFFB"}
 ];
-const panel="rounded-[1.55rem] border border-[#F2E7EA] bg-white/95 p-4 shadow-[0_17px_38px_-33px_rgba(57,34,63,.32)] sm:p-5";
+const panel="rounded-[1.55rem] border border-[#F0E4E9] bg-white/95 p-4 shadow-[0_16px_35px_-28px_rgba(57,40,64,.20)] sm:p-5";
 function fitsFilter(item:WishlistItem,filter:Filter){
  if(filter==="all")return true;
  if(filter==="needs")return item.kind==="household";
@@ -134,15 +134,13 @@ export function ShoppingReferenceDashboard(){
   const item=makeWishlistItem({id:uid(),name,kind:"children"});
   if(item)setWishlist(v=>[item,...v]);
  }
- return <div dir={ar?"rtl":"ltr"} style={variables} className="space-y-3 font-sans text-[#1E2B4B]">
+ return <div dir={ar?"rtl":"ltr"} style={variables} className="space-y-4 font-sans text-[#25354B]">
   <div className="flex flex-wrap gap-2 sm:flex-nowrap">
    <label className="flex min-h-12 min-w-[175px] flex-1 items-center gap-2 rounded-full border border-[#F2E7EA] bg-white/95 px-4 shadow-sm">
     <Search className="size-[19px] shrink-0 text-[#7D8597]"/><span className="sr-only">{tr("Search saved shopping items","ابحث في المشتريات المحفوظة")}</span>
     <input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder={tr("Search your saved items…","ابحث في العناصر المحفوظة…")}
      className="w-full min-w-0 bg-transparent py-2.5 text-sm outline-none"/>
    </label>
-   <Link to="/explore/market" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#F2E7EA] bg-white px-4 text-xs font-bold text-[#57667D]">
-    <Search className="size-4"/>{tr("Find products","استكشف المنتجات")}</Link>
   </div>
   <section className="relative isolate grid min-h-[290px] grid-cols-[minmax(0,44%)_minmax(0,56%)] overflow-hidden rounded-[1.7rem] border border-[#FFECF0] px-3 sm:min-h-[310px] sm:gap-3 sm:px-6 lg:min-h-[345px]"
    style={{background:"radial-gradient(circle at 8% 18%, var(--wish-soft), transparent 55%),linear-gradient(120deg,var(--wish-soft),#FFF7F8 70%,var(--wish-pale))"}}>
@@ -301,10 +299,8 @@ export function ShoppingReferenceDashboard(){
     </li>)}</ul>}
   </section>
   {error&&<p role="alert" className="rounded-xl bg-red-50 p-3 text-xs text-red-700">{error}</p>}
-  <div className="flex flex-wrap justify-between gap-2 rounded-xl bg-white/75 p-4 text-[11px] text-[#6B7385]">
+  <div className="rounded-xl bg-white/75 p-4 text-[11px] text-[#6B7385]">
    <p>{tr("Saved only on this device. No live merchant prices or automatic purchases.","البيانات محفوظة على هذا الجهاز. لا أسعار تجار مباشرة ولا شراء تلقائي.")}</p>
-   <button type="button" className="inline-flex min-h-9 items-center gap-2 font-bold" onClick={()=>{const el=document.getElementById("shopping-tools") as HTMLDetailsElement|null;if(el){el.open=true;el.scrollIntoView?.({behavior:"smooth"});}}}>
-    <SlidersHorizontal className="size-4"/>{tr("Manual comparison & price history","المقارنة اليدوية وسجل الأسعار")}</button>
   </div>
  </div>;
 }

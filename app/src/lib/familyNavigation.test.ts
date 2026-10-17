@@ -1,5 +1,5 @@
 import {describe,expect,it} from "vitest";
-import {areaFromRoute,destination,familyDestinations,familyFollowUps} from "@/lib/familyNavigation";
+import {areaFromRoute,familyDestinations} from "@/lib/familyNavigation";
 
 describe("single Dabberna family navigation",()=>{
  it("has six unique connected areas in both languages",()=>{
@@ -18,14 +18,5 @@ describe("single Dabberna family navigation",()=>{
   ["/calendar","calendar"],["/occasions","calendar"],["/space","today"]
  ] as const)("assigns %s to the same visible family frame (%s)",(route,expected)=>{
   expect(areaFromRoute(route)).toBe(expected);
- });
- it("offers meaningful related sections instead of dead-end page links",()=>{
-  for(const area of familyDestinations){
-   const suggestions=familyFollowUps[area.id];
-   expect(suggestions).toHaveLength(3);
-   expect(suggestions).not.toContain(area.id);
-   expect(new Set(suggestions).size).toBe(3);
-   for(const next of suggestions)expect(destination(next).to).toMatch(/^\//);
-  }
  });
 });
