@@ -22,7 +22,10 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
  children:ReactNode;title?:string;homeLayout?:boolean;shopping?:boolean
 }){
  const {lang,setLang}=useI18n();const ar=lang==="ar";
- const area:FamilyArea=homeLayout?"today":areaFromRoute(currentRoutePath());
+ const location=currentRoutePath();
+ const area:FamilyArea=homeLayout?"today":areaFromRoute(location);
+ // Shopping is an optional tool, not part of any of the four pillars.
+ const secondaryShopping=shopping||(location.startsWith("/explore/")&&!location.startsWith("/explore/weekend")&&!location.startsWith("/explore/together"));
  const text=(en:string,arabic:string)=>ar?arabic:en;
  const accent=familyDestinations.find(x=>x.id===area)!;
  const colors={"--family-accent":accent.accent,"--family-soft":accent.soft} as CSSProperties;
@@ -40,7 +43,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
    <p className="mb-7 px-2 text-xs font-medium leading-relaxed text-[#777F8E]">{text("Our family, happier together.","عيلتنا أحلى سوا.")}</p>
    <nav aria-label={navName} className="space-y-1.5">
     {familyDestinations.map(item=>{
-     const Icon=item.icon,active=item.id===area;
+     const Icon=item.icon,active=!secondaryShopping&&item.id===area;
      return <Link key={item.id} to={item.to} aria-current={active?"page":undefined}
       className="group flex min-h-12 items-center gap-3 rounded-2xl px-3 text-[13px] font-semibold text-[#586477] transition hover:bg-[#FAF1F5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B] focus-visible:ring-offset-2"
       style={active?{background:"#FBEFF3",color:"#25354B"}:{}}>
@@ -104,7 +107,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
   <nav aria-label={mobileName}
    className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#F1E4E9] bg-white/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,29,46,.20)] backdrop-blur-xl lg:hidden">
    {familyDestinations.map(item=>{
-    const Icon=item.icon,active=item.id===area;
+    const Icon=item.icon,active=!secondaryShopping&&item.id===area;
     return <Link key={item.id} to={item.to} aria-current={active?"page":undefined}
      className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-xs font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]"
      style={active?{color:item.accent,background:"#FFF2F6"}:{color:"#697488"}}>
