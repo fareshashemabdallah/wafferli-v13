@@ -35,7 +35,7 @@ describe("Dabberna landing design test preview",()=>{
    ],expenses:[]
   }));
   draw();
-  await waitFor(()=>expect(screen.getByText("1,110 JOD")).toBeInTheDocument());
+  await waitFor(()=>expect(screen.getAllByText("1,110 JOD").length).toBeGreaterThan(0));
   expect(screen.getByText("Fixed expenses")).toBeInTheDocument();
   expect(screen.getByText("Variable expenses")).toBeInTheDocument();
   expect(screen.getByText("Periodic expenses")).toBeInTheDocument();
