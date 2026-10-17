@@ -42,13 +42,13 @@ export function occasionFunding(preparation:OccasionPreparation,now=new Date()):
   const months=d&&item.dueDate>=today?Math.max(1,d.getFullYear()*12+d.getMonth()-todayMonth+1):0;
   const daysLeft=d?Math.round((d.getTime()-parseCalendarDate(today)!.getTime())/86400000):-1;
   return {kind,amountJod:item.amountJod,deadline:item.dueDate,months,daysLeft,
-   monthlyJod:months>0?roundJod(item.amountJod/months):item.amountJod,
-   overdue:item.dueDate<today};
+   monthlyJod:item.certainty==="idea"?0:months>0?roundJod(item.amountJod/months):item.amountJod,
+   overdue:item.certainty!=="idea"&&item.dueDate<today};
  }).filter(item=>item.amountJod>0);
  return {totalJod:roundJod(lines.reduce((sum,x)=>sum+x.amountJod,0)),
   monthlyJod:roundJod(lines.reduce((sum,x)=>sum+x.monthlyJod,0)),
   overdueAmountJod:roundJod(lines.filter(x=>x.overdue).reduce((sum,x)=>sum+x.amountJod,0)),
-  nextDueDate:lines.filter(x=>!x.overdue).map(x=>x.deadline).sort()[0]??null,
+  nextDueDate:lines.filter(x=>!x.overdue&&x.monthlyJod>0).map(x=>x.deadline).sort()[0]??null,
   lineItems:lines};
 }
 export type DiscretionaryHint={categoryId:string;categoryName:string;reviewJod:number;plannedJod:number};
