@@ -282,7 +282,7 @@ function Categories({ cats, budgetItems, spentBy, plannedBy, onChange }: { cats:
 }
 
 function CategoryForm({ initial, minimumAllocation, onSave, onCancel }: { initial: Category; minimumAllocation:number; onSave: (c: Category) => void; onCancel: () => void }) {
-  const { tr } = useI18n();
+  const { tr,lang } = useI18n();
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState<CatType>(initial.type);
   const [planned, setPlanned] = useState(initial.planned ? String(initial.planned) : "");
@@ -297,7 +297,7 @@ function CategoryForm({ initial, minimumAllocation, onSave, onCancel }: { initia
         const p = planned === "" || planned === "0" ? 0 : parseAmount(planned, 100000);
         if (!name.trim()) return setErr(tr("Name is required."));
         if (p === null) return setErr(tr("Planned amount must be 0 or a positive number."));
-        if (p < minimumAllocation) return setErr(tr("The detailed items already total ") + fmtJOD(minimumAllocation) + tr(". Reduce those items first, or keep this category allocation at least that high."));
+        if (p < minimumAllocation) return setErr(lang==="ar"?`البنود المفصلة مجموعها ${fmtJOD(minimumAllocation)}. عدّل البنود أولاً أو حافظ على مخصص يكفيها.`:`Detailed items already total ${fmtJOD(minimumAllocation)}. Reduce them first or keep the category plan at least this high.`);
         const next:Category={...initial,id:initial.id,name:name.trim().slice(0,40),type,planned:p,amountConfidence:confirmed?"confirmed":"estimate"};
         if(priority)next.priority=priority;else delete next.priority;
         onSave(next);
