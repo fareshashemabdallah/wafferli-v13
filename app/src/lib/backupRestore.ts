@@ -7,7 +7,7 @@ import {LOCAL_APP_KEYS,type LocalBackup} from "./localDataControls";
  * Outing admin/vote tokens and other unreviewed modules are EXCLUDED.
  */
 export const RESTORABLE_KEYS=[
- "money","members","familyCalendar","familyPreferences","familyPlans","shopping","moneyMonthReviews",
+ "money","members","householdPresence","familyCalendar","familyPreferences","familyPlans","shopping","moneyMonthReviews",
  "privateQuoteRequests","privateServiceShortlist","familyTasks","familyWishlist","privateOutingOptions"
 ] as const;
 export type RestorableKey=typeof RESTORABLE_KEYS[number];
@@ -65,6 +65,29 @@ const goal=opts({
  createdAt:isoTime,updatedAt:isoTime,dueDate:isoDate.optional()
 });
 const schemas:Record<RestorableKey,z.ZodTypeAny>={
+ householdPresence:strict({
+  adults:z.number().int().min(0).max(50).nullable(),
+  children:z.number().int().min(0).max(50).nullable(),
+  helpers:many(strict({
+   id,label:z.string().max(40),
+   arrangement:z.enum(["live-in","daytime"]),
+   count:z.number().int().min(1).max(20),
+   salaryMonthly:smallMoney,foodDaily:smallMoney,
+   workDaysMonthly:z.number().int().min(0).max(31),
+   utilitiesMonthly:smallMoney,suppliesMonthly:smallMoney
+  }),20),
+  guests:many(strict({
+   id,label:z.string().max(40),
+   pattern:z.enum(["one-off","monthly","permanent"]),
+   count:z.number().int().min(1).max(30),
+   startDate:z.union([isoDate,z.literal("")]),
+   endDate:z.union([isoDate,z.literal("")]),
+   daysMonthly:z.number().int().min(0).max(31),
+   foodDaily:smallMoney,utilitiesDaily:smallMoney,otherDaily:smallMoney
+  }).refine(g=>g.pattern!=="one-off"||
+    (!!g.startDate&&!!g.endDate&&g.startDate<=g.endDate),
+    "A dated visit must have valid arrival and departure dates")),100)
+ }),
  money:opts({
   income:maxNumber,savingsPct:maxNumber,categories:many(opts({
    id,name:text,type:z.enum(["fixed","variable","periodic"]),planned:maxNumber
@@ -209,6 +232,7 @@ export type RecoveryPreview={
 };
 const labels:Record<RestorableKey,string>={
  money:"Money: budgets, spending, bills and goals",
+ householdPresence:"People in our home: helpers and visitors",
  members:"Family profiles",
  familyCalendar:"Family calendar",
  familyPreferences:"Family preferences",
@@ -255,6 +279,9 @@ export function inspectLocalBackup(
   const payload=entries[key];
   if(["members","familyCalendar","familyPlans","shopping","privateQuoteRequests","privateServiceShortlist","familyTasks","familyWishlist","privateOutingOptions"].includes(typed)&&!uniqueIds(payload))
    throw new Error("Duplicate item IDs in "+typed+"; no changes were made");
+  if(typed==="householdPresence"&&record(payload)&&
+   (!uniqueIds(payload["helpers"])||!uniqueIds(payload["guests"])))
+   throw new Error("Duplicate helper or visitor IDs; no changes were made");
   if(typed==="moneyMonthReviews"&&Array.isArray(payload)&&new Set(payload.filter(record).map(x=>x["month"])).size!==payload.length)
    throw new Error("Duplicate months in moneyMonthReviews; no changes were made");
   if(typed==="familyWishlist"&&Array.isArray(payload)&&payload.some(item=>record(item)&&!uniqueIds(item["prices"])))
