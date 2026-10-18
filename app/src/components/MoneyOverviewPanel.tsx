@@ -50,8 +50,9 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories,budge
  return <div className="space-y-4">
    <FinancialRealityPanel money={state} plans={familyPlans} update={setState} goTo={goTo}/>
    <SpendingBreakdownCard state={state} onChange={next=>setState(()=>next)} {...(onManageCategories?{onEdit:onManageCategories}:{})}/>
-   <HouseholdBudgetBuilder money={state} setMoney={setState} members={members} onManageCategories={onManageCategories??(()=>{})}/>
+   {/* Keep the editor directly under the button that opens it. The detailed builder follows. */}
    {budgetManagement}
+   <HouseholdBudgetBuilder money={state} setMoney={setState} members={members} onManageCategories={onManageCategories??(()=>{})}/>
    {!state.demo&&<MoneyReadinessCard state={state} setState={setState} goTo={goTo} plans={familyPlans}/>}
 
    {state.demo&&!needsStarterBudget(state)&&<section className="rounded-2xl border border-[#EBDCC9] bg-[#FFF6E9] px-4 py-4">
