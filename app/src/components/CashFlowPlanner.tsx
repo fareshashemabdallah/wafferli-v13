@@ -170,7 +170,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
 
       <section className="order-1 card-soft p-4">
         <div className="flex items-center justify-between gap-2">
-          <div><h2 className="font-semibold">{ar?"الفواتير التي تحتاج متابعة":"Bills to pay"}</h2>
+          <div><h2 className="font-semibold">{ar?"الفواتير القادمة":"Upcoming bills"}</h2>
             <p className="text-xs text-muted-foreground">{ar?"أضف الفاتورة مع تاريخ الاستحقاق، ثم أكّد الدفع من هنا. مناسبات العائلة تظهر تلقائياً عند وجود التزام.":"Add a bill and its due date here; mark it paid when paid. Confirmed family commitments can appear here automatically."}</p></div>
           <Button size="sm" onClick={()=>{setEditBill(blankBill());setBillAmount("");setError("");}}><Plus className="size-4"/> {tr("Add bill")}</Button>
         </div>
