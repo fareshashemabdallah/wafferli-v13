@@ -56,7 +56,7 @@ export function FamilyLifePage(){
        aria-pressed={selected} onClick={()=>setView(item.id)}
        className={"relative isolate min-h-[115px] overflow-hidden rounded-[1.25rem] border p-2.5 text-start transition active:scale-[.99] focus-visible:outline-4 focus-visible:outline-[#479F7E] "+
        (selected?"border-[#69B78F] bg-[#E6F5EA] shadow-[0_3px_0_#8DC7A5]":"border-[#DCEADE] bg-white hover:border-[#B1D5C1]")}>
-       <WorldScene place={item.scene} className="pointer-events-none absolute inset-x-0 top-0 h-[80px] w-full opacity-55"/>
+       <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 block h-[80px] w-full opacity-55"><WorldScene place={item.scene} className="h-full w-full"/></span>
        <span className="absolute inset-0 bg-gradient-to-t from-white via-white/95 to-transparent"/>
        <span className="relative flex h-full min-h-[90px] flex-col justify-end">
         <span className="text-xl" aria-hidden="true">{item.emoji}</span>
