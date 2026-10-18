@@ -66,7 +66,7 @@ function MoneyPage() {
         </div>
       </section>
       <div role="tablist" aria-label={ar?"أقسام المالية":"Money sections"} className="mb-5 grid grid-cols-3 gap-1 rounded-2xl border border-[#E1E8DF] bg-[#EEF2EB] p-1.5">
-        {([{id:"overview",en:"Overview",ar:"لمحة"},{id:"spending",en:"Spending",ar:"مصاريف"},{id:"planning",en:"Bills & plan",ar:"الفواتير"}] as const)
+        {([{id:"overview",en:"Our Money",ar:"مال العيلة"},{id:"spending",en:"Spending",ar:"المصاريف"},{id:"planning",en:"Bills",ar:"الفواتير"}] as const)
           .map(v=><button role="tab" aria-selected={section===v.id} key={v.id} type="button" onClick={()=>setSection(v.id)}
             className={"min-h-11 rounded-xl px-2 text-xs font-semibold transition sm:text-sm "+(section===v.id?"bg-white text-brand shadow-sm":"text-[#64796C] hover:bg-white/60")}>{ar?v.ar:v.en}</button>)}
       </div>
@@ -101,16 +101,23 @@ function MoneyPage() {
        <div className="mt-3"><FinancialIntelligencePanel state={s}/></div>
       </details>}
       {section==="planning"&&<>
-      <section className="editorial-card mb-4 p-4 sm:p-5">
-        <h2 className="text-lg font-semibold">{ar?"دخل الشهر وهدف الادخار":"Monthly income & savings goal"}</h2>
+      <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"الفواتير والدفعات":"Your bills & payments"}</h2>
+       <p className="mt-1 text-sm text-muted-foreground">{ar?"سجّل موعد الاستحقاق مرة واحدة، وبعد الدفع أكّد المبلغ الحقيقي. لإدخال مشترياتك اليومية، استخدم المصاريف.":"Add each bill once with its due date, then confirm the payment when it happens. Use Spending for everyday purchases."}</p></div>
+      <details className="editorial-card mb-4 px-4 py-3">
+        <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"تعديل الدخل الشهري وهدف الادخار (اختياري)":"Edit monthly income & savings goal (optional)"}</summary>
+        <div className="mt-3">
+        <h2 className="text-base font-semibold">{ar?"الدخل والادخار":"Income & savings"}</h2>
         <Settings key={`${c.monthlyIncome}:${recurringSavingsGoal}`} income={c.monthlyIncome} target={recurringSavingsGoal} hasSources={s.incomeSources!==undefined}
          onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
-      </section>
-      <MoneyGuidance scope="variance" state={s} setState={setS}/>
+        </div>
+      </details>
       <CashFlowPlanner state={s} members={members} update={setS} />
       </>}
       {section==="spending"&&<>
-      <MoneyGuidance scope="variance" state={s} setState={setS}/>
+      <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"سجّل اللي دفعته":"Record what you spent"}</h2>
+       <p className="mt-1 text-sm text-muted-foreground">{ar?"سجّل المصروف اليومي مرة واحدة. الفواتير المتكررة ومواعيد الدفع تجدها بقسم الفواتير.":"Add everyday purchases here. For rent, tuition or other payments with due dates, use Bills instead."}</p>
+       <button type="button" className="mt-2 text-sm font-semibold text-brand underline underline-offset-2" onClick={()=>setSection("planning")}>{ar?"عندي فاتورة أو دفعة قادمة":"I have an upcoming bill or payment"} →</button>
+      </div>
       <Expenses
         cats={s.categories}
         members={members}
@@ -139,8 +146,13 @@ function MoneyPage() {
         }}
       />
       <details open={categoryEditorOpen} onToggle={event=>setCategoryEditorOpen(event.currentTarget.open)} className="editorial-card mt-4 px-4 py-3">
-        <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"إدارة فئات المصاريف":"Manage spending categories"} +</summary>
+        <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"تعديل مخصصات الميزانية والفئات":"Edit category budgets and allocations"}</summary>
+        <p className="mt-2 text-xs text-muted-foreground">{ar?"الفئة هي المبلغ اللي خططت تصرفه بالشهر، مش مصروف مدفوع.":"A category allocation is your monthly plan—not a payment or transaction."}</p>
         <Categories cats={s.categories} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={(categories) => upd({categories})}/>
+      </details>
+      <details className="editorial-card mt-4 px-4 py-3">
+        <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"راجع الفروقات بين المخطط والمدفوع (اختياري)":"Review budget differences (optional)"}</summary>
+        <MoneyGuidance scope="variance" state={s} setState={setS}/>
       </details>
       </>}
     </AppShell>
@@ -304,8 +316,8 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
   const [editing, setEditing] = useState<Expense | null>(null);
   const [quickAmount, setQuickAmount] = useState("");
   const [quickExpected,setQuickExpected]=useState("");
-  const [quickMode,setQuickMode]=useState<"planned"|"paid">("paid");
-  const [plannedDate,setPlannedDate]=useState(today());
+  const [quickNote,setQuickNote]=useState("");
+  const [showHistory,setShowHistory]=useState(false);
   const [confirming,setConfirming]=useState<string|null>(null);
   const [actualValue,setActualValue]=useState("");
   const [quickCategory, setQuickCategory] = useState(cats[0]?.id ?? "");
@@ -314,35 +326,28 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
   const recordQuick=(ev:FormEvent)=>{
     ev.preventDefault();
     const amount=parseAmount(quickAmount,50000);
-    if(quickMode==="planned"&&!/^\d{4}-\d{2}-\d{2}$/.test(plannedDate))return setQuickError(ar?"اختر تاريخاً متوقعاً صحيحاً.":"Choose a valid planned payment date.");
     if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
-    if(quickMode==="paid"&&quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":"Enter a valid expected amount.");
+    if(quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":"Enter a valid expected amount.");
     if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
-    const entry:Expense={id:uid(),date:quickMode==="planned"?plannedDate:today(),categoryId:selectedCategory,amount,shared:false,status:quickMode,...(quickMode==="planned"?{plannedAmount:amount}:quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
+    const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:false,status:"paid",...(quickNote.trim()?{note:quickNote.trim().slice(0,60)}:{}),...(quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
     onChange([entry,...expenses]);
-    setQuickAmount("");setQuickExpected("");setQuickError("");
-    toast.success(quickMode==="planned"?(ar?"تم حفظ المصروف كمخطط، دون احتسابه كمدفوع.":"Expense planned, not counted as paid."):(ar?"تم تسجيل المصروف المدفوع.":"Paid expense recorded."));
+    setQuickAmount("");setQuickExpected("");setQuickNote("");setQuickError("");
+    toast.success(ar?"تم تسجيل المصروف المدفوع.":"Paid expense recorded.");
   };
-  const sorted = [...expenses].sort((a, b) => b.date.localeCompare(a.date));
+  const month=today().slice(0,7);
+  const sorted=[...expenses].filter(e=>showHistory||e.date.startsWith(month)||e.status==="planned").sort((a,b)=>b.date.localeCompare(a.date));
+  const olderCount=expenses.filter(e=>!e.date.startsWith(month)&&e.status!=="planned").length;
   const catName = (id: string) => cats.find((c) => c.id === id)?.name ?? "Uncategorized";
   return (
     <section className="card-soft mt-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{ar?"المصاريف المخططة والمدفوعة":"Planned & paid expenses"}</h2>
+        <h2 className="text-lg font-semibold">{ar?"أضف مصروفاً":"Add an expense"}</h2>
         <Button size="sm" variant="outline" onClick={() => setEditing(blank)} disabled={cats.length === 0}>
-          <Plus className="size-4" /> {tr("More details")} </Button>
+          <Plus className="size-4" /> {ar?"إدخال بتفاصيل أكثر":"Add with more details"} </Button>
       </div>
       <form onSubmit={recordQuick} className="mt-3 grid gap-2 rounded-xl bg-muted/40 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-        <div className="sm:col-span-3 flex flex-wrap gap-2" role="group" aria-label={ar?"حالة المصروف":"Expense status"}>
-          <button type="button" onClick={()=>setQuickMode("paid")} aria-pressed={quickMode==="paid"} className={"min-h-10 rounded-full px-4 text-sm font-semibold "+(quickMode==="paid"?"bg-brand text-white":"border border-border bg-white text-brand")}>{ar?"مدفوع الآن":"Already paid"}</button>
-          <button type="button" onClick={()=>setQuickMode("planned")} aria-pressed={quickMode==="planned"} className={"min-h-10 rounded-full px-4 text-sm font-semibold "+(quickMode==="planned"?"bg-brand text-white":"border border-border bg-white text-brand")}>{ar?"سأدفع لاحقاً":"Plan for later"}</button>
-        </div>
-        {quickMode==="planned"&&<div className="sm:col-span-3">
-          <label className="block text-xs font-semibold">{ar?"تاريخ الدفع المتوقع":"Expected payment date"}
-            <Input type="date" className="mt-1 max-w-52" value={plannedDate} onChange={e=>setPlannedDate(e.target.value)}/>
-          </label>
-        </div>}
-        <Field label={tr("Amount (JOD)")}>
+        <p className="sm:col-span-3 text-xs text-muted-foreground">{ar?"هذا لتسجيل مصروف تم دفعه بالفعل، وليس فاتورة قادمة.":"For a purchase already paid—not a future bill."}</p>
+        <Field label={ar?"كم دفعت؟ (د.أ)":"How much did you pay? (JOD)"}>
           <Input className={inputCls} inputMode="decimal" value={quickAmount}
             placeholder={tr("e.g. 12.50")} onChange={e=>setQuickAmount(e.target.value)} />
         </Field>
@@ -352,8 +357,11 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
             {cats.map(cat=><option key={cat.id} value={cat.id}>{tr(cat.name)}</option>)}
           </NativeSelect>
         </Field>
-        <Button type="submit" className="h-11" disabled={!selectedCategory}><Plus className="size-4"/> {tr("Save")}</Button>
-        {quickMode==="paid"&&<details className="sm:col-span-3 rounded-xl border border-border bg-white p-3">
+        <Field label={ar?"على شو صرفت؟ (اختياري)":"What was it for? (optional)"}>
+          <Input className={inputCls} maxLength={60} value={quickNote} onChange={e=>setQuickNote(e.target.value)} placeholder={ar?"مثلاً: تسوّق أسبوعي":"e.g. weekly groceries"}/>
+        </Field>
+        <Button type="submit" className="h-11" disabled={!selectedCategory}><Plus className="size-4"/> {ar?"سجّل المصروف":"Record expense"}</Button>
+        <details className="sm:col-span-3 rounded-xl border border-border bg-white p-3">
           <summary className="cursor-pointer text-xs font-semibold text-brand">{ar?"هل المبلغ مختلف عن المتوقع؟ (اختياري)":"Compare with an expected amount (optional)"} +</summary>
           <label className="mt-2 block text-xs font-medium">{ar?"كم كنت تتوقع أن تدفع؟ (د.أ)":"What did you expect to pay? (JOD)"}
             <Input type="number" step=".01" min={0} max={50000} className="mt-1 max-w-44" value={quickExpected} onChange={e=>setQuickExpected(e.target.value)}/>
@@ -361,7 +369,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
           <p className="mt-2 text-xs text-muted-foreground">{ar?"إذا في فرق، يظهر اقتراح تعديل مخصصاتك بعد التسجيل، وتؤكده أنت.":"If actual differs, you'll be offered a budget adjustment to approve."}</p>
         </details>}
         {quickError&&<p role="alert" className="text-sm text-destructive sm:col-span-3">{quickError}</p>}
-        <p className="text-xs text-muted-foreground sm:col-span-3"> {quickMode==="planned"?(ar?"المبلغ المتوقع لا يُحتسب كمدفوع حتى تأكيد الدفع الفعلي.":"Estimated amount is not counted as spent until you confirm the actual payment."):(ar?"المبلغ المدفوع سيظهر ضمن مصاريف هذا الشهر.":"Paid amount appears in this month’s actual spending.")} </p>
+        <p className="text-xs text-muted-foreground sm:col-span-3">{ar?"التسجيل يضيف المصروف للتاريخ، ولا يخصم من رصيدك اليدوي تلقائياً.":"Recording adds the payment to your spending history. It does not automatically deduct it from your manually entered cash balance."}</p>
       </form>
       {editing && (
         <ExpenseForm
@@ -376,8 +384,12 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
           }}
         />
       )}
+      <div className="mt-5 flex items-center justify-between gap-2">
+       <h3 className="text-sm font-semibold">{showHistory?(ar?"كل المصاريف المسجلة":"All recorded expenses"):(ar?"مصاريف هذا الشهر":"This month's expenses")}</h3>
+       {olderCount>0&&<button type="button" className="min-h-9 text-xs font-semibold text-brand underline" onClick={()=>setShowHistory(v=>!v)}>{showHistory?(ar?"هذا الشهر فقط":"This month only"):(ar?"عرض المصاريف السابقة":"Show older expenses")}</button>}
+      </div>
       {sorted.length === 0 ? (
-        <p className="mt-4 rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">{ar?"لم تسجّل مصاريف بعد. ابدأ بمصروف مخطط أو مدفوع.":"No expenses yet. Add a planned or paid expense above."}</p>
+        <p className="mt-4 rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">{ar?"ما في مصاريف مسجّلة هون. سجّل أول مصروف أعلاه.":"No spending recorded here yet. Add your first expense above."}</p>
       ) : (
         <ul className="mt-3 divide-y">
           {sorted.map((e) => (
