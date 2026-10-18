@@ -162,7 +162,7 @@ export type RecordedItemSpending={total:number;byItem:Record<string,number>;unas
  * Old records and invalid/deleted item links stay visible as unassigned. */
 export function recordedItemSpending(state:MoneyState,categoryId:string,month:string):RecordedItemSpending{
  const empty:RecordedItemSpending={total:0,byItem:{},unassigned:0};
- if(!/^\\d{4}-(0[1-9]|1[0-2])$/.test(month))return empty;
+ if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))return empty;
  const ids=new Set((state.budgetItems??[]).filter(i=>i.categoryId===categoryId).map(i=>i.id));
  for(const expense of state.expenses){
   if(expense.categoryId!==categoryId||!expense.date.startsWith(month+"-")||expense.status==="planned"||
