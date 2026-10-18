@@ -1,5 +1,5 @@
 import {Link} from "@tanstack/react-router";
-import {ArrowRight,Compass,Heart,MessageCircle,ShieldCheck,Sparkles} from "lucide-react";
+import {ArrowRight,Compass,Heart,MessageCircle,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,fmtJOD} from "@/lib/storage";
 import {sampleMoney,sampleMembers,computeMoney,type MoneyState,type Member} from "@/lib/money";
