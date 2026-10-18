@@ -38,7 +38,7 @@ const url=z.string().max(700).refine(raw=>{
   !/^127\./.test(parsed.hostname);}catch{return false;}
 },"Public HTTPS URL required");
 const expense=opts({
- id, date:isoDate, categoryId:id, amount:maxNumber,
+ id, date:isoDate, categoryId:id, budgetItemId:id.optional(), amount:maxNumber,
  shared:z.boolean(),status:z.enum(["planned","paid"]).optional(),
  note:text.optional(),owner:text.optional(),billId:id.optional(),dueDate:isoDate.optional(),
  cashDeducted:z.boolean().optional(),sourcePlanId:id.optional(),
