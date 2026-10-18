@@ -57,11 +57,11 @@ export function AdventurePageHeader({path,title}:{path:string;title?:string}){
  const {lang}=useI18n(),ar=lang==="ar",chapter=adventureChapter(path);
  const t=(en:string,a:string)=>ar?a:en;
  return <header className="dabberna-adventure-stage mb-4 overflow-hidden rounded-[1.65rem] border border-[#C9E6D6] shadow-[0_18px_38px_-32px_rgba(22,87,64,.52)]" aria-label={t("Adventure location","الموقع في المغامرة")}>
-  <div className="relative isolate min-h-[158px] bg-gradient-to-r from-[#E2F5E8] via-[#DDF2E9] to-[#D4EDEC] sm:min-h-[175px]">
+  <div className="relative isolate min-h-[134px] bg-gradient-to-r from-[#E2F5E8] via-[#DDF2E9] to-[#D4EDEC] sm:min-h-[150px]">
    <WorldScene place={chapter.place} className="pointer-events-none absolute inset-y-0 end-0 h-full w-[53%] object-cover opacity-80" />
    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#E5F6EA] via-[#E5F6EA]/95 to-[#E5F6EA]/5 rtl:bg-gradient-to-l"/>
    {path==="/advisor"&&<RobotBuddy className="pointer-events-none absolute bottom-0 end-3 z-10 h-[88px] w-[80px] sm:h-28 sm:w-28"/>}
-   <div className="relative z-10 flex min-h-[158px] w-[72%] flex-col justify-center px-4 py-4 sm:min-h-[175px] sm:w-[64%] sm:px-6">
+   <div className="relative z-10 flex min-h-[134px] w-[72%] flex-col justify-center px-4 py-3 sm:min-h-[150px] sm:w-[64%] sm:px-6">
     <Link to="/" className="mb-2 inline-flex w-fit min-h-9 items-center gap-1 rounded-full border border-[#B8DECB] bg-white/90 px-3 text-[11px] font-extrabold text-[#287A5F] hover:bg-white">
      <MapPinned className="size-3.5"/>{t("My world","عالمي")} <span aria-hidden="true">›</span> {ar?chapter.eyebrowAr:chapter.eyebrowEn}
     </Link>
