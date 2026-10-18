@@ -3,6 +3,7 @@ import {buildLocalBackup} from "./localDataControls";
 import {inspectLocalBackup,restoreLocalSections} from "./backupRestore";
 import {sampleMoney,sampleMembers} from "./money";
 import {defaultFamilyPreferences} from "./familyPreferences";
+import {emptyHouseholdPresence,exampleHelper,exampleGuest} from "./householdPresence";
 
 function storage(){
  const m=new Map<string,string>();
@@ -112,5 +113,24 @@ describe("validated browser-only backup recovery",()=>{
    .toThrow(/not validated/i);
   restoreLocalSections(target,preview,["members","shopping"],true);
   expect(target.getItem(prefix+"outings")).toBeNull();
+ });
+ it("exports, validates and restores household helper and visitor details without touching financial records",()=>{
+  const original=fixture();
+  const presence={...emptyHouseholdPresence(),adults:2,children:2,
+   helpers:[{...exampleHelper(),id:"helper-1"}],
+   guests:[{...exampleGuest(),id:"guest-1",startDate:"2026-10-20",endDate:"2026-10-25"}]};
+  original.setItem(prefix+"householdPresence",JSON.stringify(presence));
+  const target=storage();
+  target.setItem(prefix+"money",'{"keep":"cash"}');
+  const file=backup(original);
+  const preview=inspectLocalBackup(file,target);
+  expect(preview.sections.some(section=>section.key==="householdPresence")).toBe(true);
+  restoreLocalSections(target,preview,["householdPresence"],true);
+  expect(JSON.parse(target.getItem(prefix+"householdPresence")!)).toEqual(presence);
+  expect(target.getItem(prefix+"money")).toBe('{"keep":"cash"}');
+  const bad=JSON.parse(file) as {entries:Record<string,unknown>};
+  const p=bad.entries["householdPresence"] as {guests:Array<{id:string}>};
+  p.guests.push({...p.guests[0]!});
+  expect(()=>inspectLocalBackup(JSON.stringify(bad),storage())).toThrow(/Duplicate helper or visitor IDs/);
  });
 });
