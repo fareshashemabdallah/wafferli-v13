@@ -29,7 +29,7 @@ describe("Adventure Money overview and category exploration",()=>{
   expect(screen.queryByRole("region",{name:"Build household budget"})).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:/Groceries/}));
   expect(screen.getByRole("region",{name:"Build household budget"})).toBeInTheDocument();
-  expect(screen.getByText("Illustrative reference", {exact:false})).toBeInTheDocument();
+  expect(screen.getByText("Reference unavailable")).toBeInTheDocument();
   expect(screen.getByTestId("expense-category-editor")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"Explore another category"}));
   expect(screen.queryByRole("region",{name:"Build household budget"})).not.toBeInTheDocument();
@@ -49,7 +49,7 @@ describe("Adventure Money overview and category exploration",()=>{
   render(<I18nProvider>
    <MoneyOverviewPanel state={sampleMoney()} setState={vi.fn()} goTo={vi.fn()}/>
   </I18nProvider>);
-  expect(screen.getByText("Not entered", {exact:true})).toBeInTheDocument();
+  expect(screen.getAllByText("Not entered", {exact:true}).length).toBe(4);
   expect(screen.queryByText("1,200 JOD")).not.toBeInTheDocument();
   expect(screen.getByRole("button",{name:"Start my family plan"})).toBeInTheDocument();
  });
