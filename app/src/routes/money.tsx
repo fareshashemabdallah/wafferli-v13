@@ -7,7 +7,7 @@ import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
 import {FinancialIntelligencePanel} from "@/components/FinancialIntelligencePanel";
 import { localToday } from "@/lib/cashflow";
 import { Pencil, Plus, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AppShell, PilotBadge } from "@/components/AppShell";
 import { Field, NativeSelect, inputCls } from "@/components/Field";
@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { useI18n } from "@/lib/i18n";
 import { computeMoney, sampleMembers, sampleMoney, type CatType, type Category, type Expense, type Member } from "@/lib/money";
 import { fmtJOD, parseAmount, uid, useLocalState } from "@/lib/storage";
-import type {BudgetItem} from "@/lib/householdBudgetBuilder";
+import {categoryItemTotal,type BudgetItem} from "@/lib/householdBudgetBuilder";
 
 export const Route = createFileRoute("/money")({
   head: () => ({
@@ -41,10 +41,24 @@ function MoneyPage() {
   const [section,setSection]=useState<"overview"|"spending"|"planning">("overview");
   const [categoryEditorOpen,setCategoryEditorOpen]=useState(false);
   const [incomeEditorOpen,setIncomeEditorOpen]=useState(false);
+  const [categoryNavigationRequest,setCategoryNavigationRequest]=useState(0);
+  const categoryEditorRef=useRef<HTMLDetailsElement>(null);
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
   const c = useMemo(() => computeMoney(s), [s]);
   const recurringSavingsGoal=s.savingsTargetAmount??Math.round(c.monthlyIncome*s.savingsPct)/100;
+  const openCategoryEditor=()=>{
+    setSection("overview");
+    setCategoryEditorOpen(true);
+    // Increment even when already open so repeated taps navigate reliably.
+    setCategoryNavigationRequest(n=>n+1);
+  };
+  useEffect(()=>{
+    if(!ready||!categoryNavigationRequest||section!=="overview")return;
+    const editor=categoryEditorRef.current;
+    editor?.scrollIntoView?.({behavior:"smooth",block:"start"});
+    editor?.querySelector("summary")?.focus({preventScroll:true});
+  },[ready,section,categoryNavigationRequest]);
 
   if (!ready)
     return (
@@ -92,13 +106,13 @@ function MoneyPage() {
       </div>
 
       {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}
-        onManageCategories={()=>{setCategoryEditorOpen(true);setSection("overview");}}
+        onManageCategories={openCategoryEditor}
         onEditIncome={()=>{setIncomeEditorOpen(true);setSection("overview");}}
         budgetManagement={<div id="money-budget-controls">
-          <details open={categoryEditorOpen} onToggle={event=>setCategoryEditorOpen(event.currentTarget.open)} className="editorial-card px-4 py-3">
+          <details ref={categoryEditorRef} open={categoryEditorOpen} onToggle={event=>setCategoryEditorOpen(event.currentTarget.open)} className="editorial-card scroll-mt-4 px-4 py-3">
             <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"أضف وعدّل فئات ميزانيتك":"Add or edit budget categories"}</summary>
             <p className="mt-2 text-xs text-muted-foreground">{ar?"المخصصات الشهرية ليست مصاريف مدفوعة ولا مواعيد فواتير.":"Category allocations are monthly plans, not paid transactions or dated bills."}</p>
-            <Categories cats={s.categories} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={categories=>upd({categories,budgetItems:(s.budgetItems??[]).filter(item=>categories.some(cat=>cat.id===item.categoryId))})}/>
+            <Categories cats={s.categories} budgetItems={s.budgetItems??[]} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={categories=>upd({categories,budgetItems:(s.budgetItems??[]).filter(item=>categories.some(cat=>cat.id===item.categoryId))})}/>
           </details>
           <details open={incomeEditorOpen} onToggle={event=>setIncomeEditorOpen(event.currentTarget.open)} className="editorial-card mt-3 px-4 py-3">
             <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"الدخل الشهري وهدف الادخار (اختياري)":"Monthly income & savings goal (optional)"}</summary>
@@ -131,7 +145,7 @@ function MoneyPage() {
         <p className="text-sm font-semibold">{ar?"لحتى تسجّل مصروف، بدك فئة واحدة على الأقل":"Choose your first spending category"}</p>
         <p className="mt-1 text-xs text-muted-foreground">{ar?"مثل الطعام أو المواصلات. ما في حاجة تدخل ميزانية كاملة.":"For example groceries or transport. You can start with one category; a complete budget can wait."}</p>
         <button type="button" className="mt-2 min-h-10 rounded-full bg-brand px-4 text-sm font-semibold text-white"
-          onClick={()=>{setSection("overview");setCategoryEditorOpen(true);}}>{ar?"أضف فئة مصروف":"Add a spending category"}</button>
+          onClick={openCategoryEditor}>{ar?"أضف فئة مصروف":"Add a spending category"}</button>
       </div>}
       <Expenses
         cats={s.categories}
@@ -210,7 +224,7 @@ function Settings({income,target,hasSources,onSave}:{income:number;target:number
 
 const typeLabel: Record<CatType, string> = { fixed: "Fixed", variable: "Variable", periodic: "Periodic" };
 
-function Categories({ cats, spentBy, plannedBy, onChange }: { cats: Category[]; spentBy: (id: string) => number; plannedBy:(id:string)=>number; onChange: (c: Category[]) => void }) {
+function Categories({ cats, budgetItems, spentBy, plannedBy, onChange }: { cats: Category[]; budgetItems:BudgetItem[]; spentBy: (id: string) => number; plannedBy:(id:string)=>number; onChange: (c: Category[]) => void }) {
   const { tr,lang } = useI18n();
   const [editing, setEditing] = useState<Category | null>(null);
   return (
@@ -223,6 +237,7 @@ function Categories({ cats, spentBy, plannedBy, onChange }: { cats: Category[]; 
       {editing && (
         <CategoryForm
           initial={editing}
+          minimumAllocation={editing.id?categoryItemTotal(budgetItems,editing.id):0}
           onCancel={() => setEditing(null)}
           onSave={(cat) => {
             onChange(cat.id && cats.some((c) => c.id === cat.id) ? cats.map((c) => (c.id === cat.id ? cat : c)) : [...cats, { ...cat, id: uid() }]);
@@ -254,7 +269,7 @@ function Categories({ cats, spentBy, plannedBy, onChange }: { cats: Category[]; 
                 size="icon"
                 variant="ghost"
                 aria-label={`Delete ${c.name}`}
-                onClick={() => confirm(`${tr("Delete category")} "${c.name}"?`) && onChange(cats.filter((x) => x.id !== c.id))}
+                onClick={() => confirm(`${tr("Delete category")} "${c.name}"? ${lang==="ar"?"ستُحذف تفاصيل بنود هذه الفئة. تبقى المدفوعات والفواتير القديمة محفوظة ولكن قد تظهر دون فئة.":"Its detailed budget items will be removed. Existing payments and bills remain saved but may become uncategorized."}`) && onChange(cats.filter((x) => x.id !== c.id))}
               >
                 <Trash2 className="size-4" />
               </Button>
@@ -266,8 +281,8 @@ function Categories({ cats, spentBy, plannedBy, onChange }: { cats: Category[]; 
   );
 }
 
-function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave: (c: Category) => void; onCancel: () => void }) {
-  const { tr } = useI18n();
+function CategoryForm({ initial, minimumAllocation, onSave, onCancel }: { initial: Category; minimumAllocation:number; onSave: (c: Category) => void; onCancel: () => void }) {
+  const { tr,lang } = useI18n();
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState<CatType>(initial.type);
   const [planned, setPlanned] = useState(initial.planned ? String(initial.planned) : "");
@@ -282,6 +297,7 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
         const p = planned === "" || planned === "0" ? 0 : parseAmount(planned, 100000);
         if (!name.trim()) return setErr(tr("Name is required."));
         if (p === null) return setErr(tr("Planned amount must be 0 or a positive number."));
+        if (p < minimumAllocation) return setErr(lang==="ar"?`البنود المفصلة مجموعها ${fmtJOD(minimumAllocation)}. عدّل البنود أولاً أو حافظ على مخصص يكفيها.`:`Detailed items already total ${fmtJOD(minimumAllocation)}. Reduce them first or keep the category plan at least this high.`);
         const next:Category={...initial,id:initial.id,name:name.trim().slice(0,40),type,planned:p,amountConfidence:confirmed?"confirmed":"estimate"};
         if(priority)next.priority=priority;else delete next.priority;
         onSave(next);
