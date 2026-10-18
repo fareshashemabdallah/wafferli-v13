@@ -483,13 +483,13 @@ function ExpenseForm({ initial, cats, members, budgetItems, onSave, onCancel }: 
       <Field label={tr("Amount (JOD)")}><Input className={inputCls} inputMode="decimal" autoFocus value={f.amountStr} onChange={(e) => setF({ ...f, amountStr: e.target.value })} /></Field>
       <Field label={tr("Date")}><Input className={inputCls} type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
       <Field label={tr("Category")}>
-        <NativeSelect value={f.categoryId} onChange={(e) => setF({ ...f, categoryId: e.target.value, budgetItemId: undefined })}>
+        <NativeSelect value={f.categoryId} onChange={(e) => setF(previous=>{const {budgetItemId:_item,...rest}=previous;return {...rest,categoryId:e.target.value};})}>
           {cats.map((c) => <option key={c.id} value={c.id}>{tr(c.name)}</option>)}
         </NativeSelect>
       </Field>
       {budgetItems.some(i=>i.categoryId===f.categoryId)&&<Field label={ar?"البند (اختياري)":"Item (optional)"}>
         <NativeSelect value={budgetItems.some(i=>i.id===f.budgetItemId&&i.categoryId===f.categoryId)?f.budgetItemId??"":""}
-         onChange={(e)=>setF({...f,budgetItemId:e.target.value||undefined})}>
+         onChange={(e)=>setF(previous=>{const {budgetItemId:_item,...rest}=previous;return e.target.value?{...rest,budgetItemId:e.target.value}:rest;})}>
          <option value="">{ar?"الفئة فقط":"Category only"}</option>
          {budgetItems.filter(i=>i.categoryId===f.categoryId).map(i=><option key={i.id} value={i.id}>{i.name}</option>)}
         </NativeSelect>
