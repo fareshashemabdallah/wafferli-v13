@@ -72,6 +72,7 @@ function MoneyPage() {
 
   return (
     <AppShell title={tr("Our Finances")}>
+      <h1 className="sr-only">{ar?"مغامرة مال العيلة":"Our Money Adventure"}</h1>
       {section!=="overview"&&<section className="relative isolate mb-4 min-h-[130px] overflow-hidden rounded-[1.55rem] border border-[#CDE8D3] bg-gradient-to-r from-[#E3F7E9] to-[#D8F0EA]" aria-label={ar?"مغامرة مصاريف العيلة":"Family money adventure"}>
         <WorldScene place={section==="spending"?"market":"home"} className="pointer-events-none absolute inset-y-0 end-0 h-full w-[53%] opacity-85"/>
         <div className="absolute inset-0 bg-gradient-to-r from-[#EAF8ED] via-[#EAF8ED]/95 to-transparent rtl:bg-gradient-to-l"/>
