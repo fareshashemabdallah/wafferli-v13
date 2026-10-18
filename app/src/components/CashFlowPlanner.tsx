@@ -141,11 +141,13 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const upcomingBills=forecast.events.filter(e=>e.kind==="bill");
   const totalsReady=state.cashOnHand!==null&&state.cashOnHand!==undefined;
   return (
-    <div className="space-y-4" id="cash-flow">
-      <section className="card-soft mt-6 p-4 sm:p-5">
-        <div className="flex items-center gap-2"><CalendarClock className="size-5 text-brand"/>
-          <h2 className="text-lg font-semibold">{ar?"رصيد اليوم والاحتياطي":"Your cash balance & reserve"}</h2>
-        </div>
+    <div className="flex flex-col gap-4" id="cash-flow">
+      <details className="order-3 card-soft p-4 sm:p-5">
+        <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-sm font-semibold text-brand">
+          <span className="inline-flex items-center gap-2"><CalendarClock className="size-4"/>{ar?"الرصيد والاحتياطي (اختياري)":"Cash balance & safety reserve (optional)"}</span>
+          <span className="text-xs font-normal tabular-nums text-muted-foreground">{state.cashOnHand==null?(ar?"غير مسجّل":"Not entered"):fmtJOD(state.cashOnHand)}</span>
+        </summary>
+        <div className="mt-2">
         <p className="mt-1 text-xs text-muted-foreground">
           {tr("Understand when money actually comes in and when bills are due. Estimates are based on dates you enter; not connected to banks.")}
         </p>
@@ -163,12 +165,13 @@ export function CashFlowPlanner({state,members,update}:Props) {
         {forecast.advice.length>0&&<div className="mt-3 space-y-1 rounded-xl bg-muted px-3 py-3">
           {forecast.advice.slice(0,4).map(text=><p key={text} className="text-xs text-muted-foreground">• {tr(text)}</p>)}
         </div>}
-      </section>
+        </div>
+      </details>
 
-      <section className="card-soft p-4">
+      <section className="order-1 card-soft p-4">
         <div className="flex items-center justify-between gap-2">
-          <div><h2 className="font-semibold">{tr("Upcoming bills · الالتزامات")}</h2>
-            <p className="text-xs text-muted-foreground">{ar?"الفواتير العادية تُضاف يدوياً، وتكاليف المناسبات تظهر تلقائياً من تقويم العيلة.":"Add regular bills here. Gift and celebration costs from Family Life appear automatically below."}</p></div>
+          <div><h2 className="font-semibold">{ar?"الفواتير التي تحتاج متابعة":"Bills to pay"}</h2>
+            <p className="text-xs text-muted-foreground">{ar?"أضف الفاتورة مع تاريخ الاستحقاق، ثم أكّد الدفع من هنا. مناسبات العائلة تظهر تلقائياً عند وجود التزام.":"Add a bill and its due date here; mark it paid when paid. Confirmed family commitments can appear here automatically."}</p></div>
           <Button size="sm" onClick={()=>{setEditBill(blankBill());setBillAmount("");setError("");}}><Plus className="size-4"/> {tr("Add bill")}</Button>
         </div>
         {editBill&&<form onSubmit={saveBill} className="mt-3 space-y-3 rounded-xl border bg-muted/40 p-3">
@@ -199,7 +202,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
           <div className="flex gap-2"><Button type="submit">{tr("Save bill")}</Button>
             <Button type="button" variant="outline" onClick={()=>{setEditBill(null);setError("");}}>{tr("Cancel")}</Button></div>
         </form>}
-        {bills.length===0&&familyBills.length===0&&<p className="mt-3 text-sm text-muted-foreground">{tr("No scheduled bills. Planned categories above do not automatically create due dates.")}</p>}
+        {bills.length===0&&familyBills.length===0&&<p className="mt-3 text-sm text-muted-foreground">{ar?"ما في فواتير مجدولة بعد. إضافة مخصص شهري للميزانية لا تنشئ فاتورة تلقائياً.":"No bills scheduled yet. A monthly budget allocation is not a bill—add a due date here when you know one."}</p>}
         <div className="mt-2 divide-y">
           {bills.map(bill=>{
             const next=upcomingBills.find(e=>e.sourceId===bill.id);
@@ -244,7 +247,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
               </div>}
               {next && <>
                 <Button type="button" className="mt-2" size="sm" variant="secondary"
-                  onClick={()=>{setPendingPaid({bill,dueDate:next.displayDate,actual:String(bill.amount)});setError("");}}><Check className="size-3.5"/> {tr("Mark paid & log expense")}</Button>
+                  onClick={()=>{setPendingPaid({bill,dueDate:next.displayDate,actual:String(bill.amount)});setError("");}}><Check className="size-3.5"/> {ar?"تمّ الدفع":"Mark as paid"}</Button>
                 {pendingPaid?.bill.id===bill.id&&pendingPaid.dueDate===next.displayDate&&
                   <div className="mt-3 rounded-xl border border-[#DAE6D7] bg-[#F5F8F1] p-3">
                     <p className="text-sm font-semibold">{ar?"تأكيد دفع الفاتورة":"Confirm this bill was paid"}</p>
@@ -288,10 +291,14 @@ export function CashFlowPlanner({state,members,update}:Props) {
         <FamilyCommitmentsPanel money={state} withinBills/>
       </section>
 
-      <section className="card-soft p-4">
+      <details className="order-2 card-soft p-4">
+        <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
+          {ar?"الدخل ومواعيد استلامه":"Income & paydays"} · {ar?"المستلم هذا الشهر: ":"Received this month: "}{fmtJOD(received)}
+        </summary>
+        <div className="mt-3">
         <div className="flex items-center justify-between gap-2">
-          <div><h2 className="font-semibold">{tr("Income schedule · مصادر الدخل")}</h2>
-            <p className="text-xs text-muted-foreground">{tr("Received this month:")} {fmtJOD(received)}</p></div>
+          <div><h2 className="font-semibold">{ar?"مصادر الدخل":"Income sources"}</h2>
+            <p className="text-xs text-muted-foreground">{ar?"سجّل موعد الاستلام إذا أردت متابعة التدفق النقدي.":"Add payment dates only if you want a cash-flow forecast."}</p></div>
           <Button size="sm" onClick={()=>{setEditIncome(blankIncome());setIncomeAmount("");setError("");}}>
             <Plus className="size-4"/> {tr("Add income")} </Button>
         </div>
@@ -378,9 +385,10 @@ export function CashFlowPlanner({state,members,update}:Props) {
         <p className="mt-2 text-xs text-muted-foreground">
           {tr("Outstanding income in the last 45 days:")} {fmtJOD(outstanding)}.
           Confirm each receipt with its <em>{tr("actual")}</em> {tr("amount. Expected deposits are not credited to your cash balance automatically.")} </p>
-      </section>
+        </div>
+      </details>
 
-      <details className="editorial-card p-4">
+      <details className="order-4 editorial-card p-4">
         <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"تفاصيل التدفق النقدي خلال ٣٠ يوماً":"Detailed 30-day cash-flow timeline"} +</summary>
         <div className="mt-3">
         <p className="mt-1 text-xs text-muted-foreground">{tr("Projected end balance:")} {forecast.projectedEnd===null?tr("Set today's actual cash balance"):fmtJOD(forecast.projectedEnd)}. {tr("Future income is expected, not yet received.")}</p>
@@ -400,7 +408,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
         </p>
         </div>
       </details>
-      {error&&<p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">{error}</p>}
+      {error&&<p className="order-0 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">{error}</p>}
     </div>
   );
 }
