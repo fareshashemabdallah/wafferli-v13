@@ -90,7 +90,7 @@ describe("Household helper and guest planning",()=>{
   before.monthlyAdjustments={"2026-11":{savingsDelta:15,categoryDeltas:{rent:10}}};
   const result=applyHouseholdPresenceBudget(before,p,members,"2026-11");
   expect(result.monthlyAdjustments?.["2026-11"]?.savingsDelta).toBe(15);
-  expect(result.monthlyAdjustments?.["2026-11"]?.categoryDeltas.rent).toBe(10);
+  expect(result.monthlyAdjustments?.["2026-11"]?.categoryDeltas["rent"]).toBe(10);
   expect(result.monthlyAdjustments?.["2026-11"]?.categoryDeltas["presence-guests-2026-11"]).toBe(21);
   expect(result.monthlyAdjustments?.["2026-10"]).toBeUndefined();
   expect(result.categories.find(c=>c.id==="presence-guests-2026-11")?.planned).toBe(0);
