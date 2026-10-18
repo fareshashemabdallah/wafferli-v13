@@ -4,7 +4,7 @@
  * legacy cloud/group tokens and unsupported sections are never imported.
  */
 export const LOCAL_APP_KEYS=[
- "money","members","familyCalendar","familyPreferences",
+ "money","members","householdPresence","familyCalendar","familyPreferences",
  "familyPlans","activeFamilyPlanId","occasionPlans",
  "outings","smartbuy","shopping","activeDecision",
  "familySetupPreferencesConfirmed","familySetupProfileSkipped",
