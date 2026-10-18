@@ -15,14 +15,13 @@ export const Route=createFileRoute("/advisor")({
 export function Advisor(){
  const {lang}=useI18n(),ar=lang==="ar";
  return <AppShell title={ar?"اسأل دبّرنا":"Ask Dabberna"}>
-  <div className="page-intro overflow-hidden p-5 sm:p-7">
-   <div className="flex items-center gap-2">
-    <Sparkles className="size-6 text-brand"/>
-    <h2 className="text-2xl font-semibold">{ar?"سؤال واحد، وخطوة واضحة":"One question. One useful next step."}</h2>
+  <div className="flex items-center gap-3 rounded-[1.1rem] border border-[#DCE9D9] bg-[#F4FBF1] px-4 py-3">
+   <Sparkles className="size-6 shrink-0 text-[#348D68]"/>
+   <div><h2 className="text-sm font-black text-[#295D45]">{ar?"سؤال واحد، وخطوة واضحة":"One question. One useful next step."}</h2>
+    <p className="mt-1 text-xs leading-relaxed text-[#557464]">{ar?
+     "اسأل عن مال العيلة أو الطلعات أو المشتريات. بنستخدم المعلومات المسجّلة ونوضح الناقص.":
+     "Ask about your money, outings or purchases. Dabberna uses saved details and flags what's missing."}</p>
    </div>
-   <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#536E5D]">{ar?
-    "اسأل عن مصاريف البيت أو طلعة أو شراء. دبّرنا بيستخدم المعلومات اللي سجلتها ويطلب الناقص عند الحاجة.":
-    "Ask about your household budget, an outing or a purchase. Dabberna reuses saved details and tells you when information is missing."}</p>
   </div>
   <GuidedFamilyAdvisor/>
   {LIVE_AI_UI_ENABLED&&<LiveFamilyAdvisor/>}
