@@ -153,7 +153,7 @@ export function itemIllustrativeReference(category:Category,item:BudgetItem,refe
  let weight=shares?.[item.name];
  // Legacy food template was a single combined vegetables and fruit item.
  if(weight===undefined&&categoryKind(category)==="food"&&item.name==="Vegetables & fruit"){
-  weight=(shares?.Vegetables??0)+(shares?.Fruit??0);
+  weight=(shares?.["Vegetables"]??0)+(shares?.["Fruit"]??0);
  }
  return weight===undefined?null:r2(reference.amountJod*weight);
 }
