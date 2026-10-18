@@ -72,4 +72,19 @@ describe("guided first-run Money setup for Plans",()=>{
   expect(applyStarterBudget(blank,{income:1200,spending:-2,savings:50})).toBe(blank);
   expect(applyStarterBudget(blank,{income:1200,spending:400,savings:Infinity})).toBe(blank);
  });
+ it("keeps an existing savings target and cash untouched when a parent skips optional savings",()=>{
+  const old={...emptyRealMoney(),savingsPct:10,savingsTargetAmount:180,cashOnHand:75};
+  const next=applyStarterBudget(old,{income:1500,spending:900,essential:700,other:200});
+  expect(next.savingsTargetAmount).toBe(180);
+  expect(next.savingsPct).toBe(10);
+  expect(next.cashOnHand).toBe(75);
+  expect(next.categories.map(c=>c.priority)).toEqual(["essential","flexible"]);
+  expect(computeMoney(next,when).savingsTarget).toBe(180);
+ });
+ it("does not force a savings answer during first real household setup",()=>{
+  const next=applyStarterBudget(emptyRealMoney(),{income:0,zeroIncomeConfirmed:true,
+   spending:250,essential:250,other:0});
+  expect(next.incomeKnown).toBe(true);
+  expect(computeMoney(next,when).savingsTarget).toBe(0);
+ });
 });

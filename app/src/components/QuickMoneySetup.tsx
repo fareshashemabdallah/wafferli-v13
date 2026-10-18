@@ -21,6 +21,7 @@ export function QuickMoneySetup({money,setMoney,compact=false}:Props){
  const [approximate,setApproximate]=useState(true);
  const [zeroIncome,setZeroIncome]=useState(false);
  const [savingsMode,setSavingsMode]=useState<"later"|"set">("later");
+ const existingSavings=!money.demo&&(money.savingsTargetAmount!==undefined||money.savingsPct>0);
  const [savings,setSavings]=useState("0");
  const [error,setError]=useState("");
  if(!needsStarterBudget(money))return null;
@@ -29,18 +30,18 @@ export function QuickMoneySetup({money,setMoney,compact=false}:Props){
   const amount=hasIncomeSources?figures.monthlyIncome:moneyAmount(income);
   const a=hasCategories?null:moneyAmount(essential),b=hasCategories?null:moneyAmount(other);
   const spending=hasCategories?figures.planned:(a??0)+(b??0);
-  const saving=savingsMode==="set"?moneyAmount(savings):0;
+  const saving=savingsMode==="set"?moneyAmount(savings):undefined;
   if(!Number.isFinite(amount)||amount<0||amount>100000||
    amount===0&&!zeroIncome||!Number.isFinite(spending)||spending<0||spending>100000||
    !hasCategories&&(!Number.isFinite(a)||!Number.isFinite(b)||a!<0||b!<0||a!>100000||b!>100000)||
-   !Number.isFinite(saving)||saving<0||saving>100000){
+   (saving!==undefined&&(!Number.isFinite(saving)||saving<0||saving>100000))){
     setError(tr("Enter valid JOD estimates. If income is zero, confirm that explicitly.","أدخل تقديرات صحيحة بالدينار، وأكّد إذا كان الدخل صفراً."));return;
   }
   if(money.demo&&!window.confirm(tr(
    "Replace sample Money with your estimates? Family profiles, occasions and existing plans will stay unchanged.",
    "هل تستبدل أرقام المالية التجريبية بتقديراتك؟ ستبقى بيانات العيلة والمناسبات والخطط كما هي.")))return;
   const next=applyStarterBudget(money,{
-   income:amount,spending,savings:saving,
+   income:amount,spending,...(saving===undefined?{}:{savings:saving}),
    ...(!hasCategories?{essential:a!,other:b!}:{}),
    approximateIncome:approximate,zeroIncomeConfirmed:zeroIncome
   });
@@ -82,7 +83,7 @@ export function QuickMoneySetup({money,setMoney,compact=false}:Props){
    <fieldset className="rounded-xl border border-[#D2E3D2] bg-white p-3">
     <legend className="px-1 text-sm font-semibold">{tr("4. Would you like to plan any savings now?","٤. هل ترغب بالتخطيط لادخار حالياً؟")}</legend>
     <label className="mt-2 flex items-center gap-2 text-sm"><input type="radio" name="starter-savings" checked={savingsMode==="later"} onChange={()=>setSavingsMode("later")}/>
-     {tr("Not right now — that's okay","ليس الآن، وهذا طبيعي")}</label>
+     {existingSavings?tr("Keep my existing savings plan unchanged","احتفظ بخطة الادخار الحالية دون تغيير"):tr("Not right now — that's okay","ليس الآن، وهذا طبيعي")}</label>
     <label className="mt-2 flex items-center gap-2 text-sm"><input type="radio" name="starter-savings" checked={savingsMode==="set"} onChange={()=>setSavingsMode("set")}/>
      {tr("Yes, set a monthly savings intention","نعم، حدد مبلغاً أنوي توفيره شهرياً")}</label>
     {savingsMode==="set"&&<label className="mt-2 block text-xs font-semibold">{tr("Optional monthly savings amount (JOD)","مبلغ الادخار الشهري الاختياري (د.أ)")}

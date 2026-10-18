@@ -96,4 +96,25 @@ describe("Dabberna financial reality and respectful data collection",()=>{
   expect(b[0]?.annual).toBe(true);
   expect(person.birthday).toBeUndefined();
  });
+ it("does not call an unreviewed zero-estimate category safe to cut",()=>{
+  const m={...real(1500,100,100),categories:[
+   {id:"unknown",name:"Unreviewed cost",type:"variable" as const,planned:0}
+  ]};
+  const assessment=assessFinancialReality(m,[],today);
+  expect(assessment.kind).toBe("unknown");
+  expect(assessment.unclassifiedJod).toBe(0);
+  expect(assessment.unclassifiedCategoryCount).toBe(1);
+  expect(assessment.essentialJod).toBeNull();
+ });
+ it("flags preparation needed for known family occasions without adding duplicate expenses",()=>{
+  const m=real(1000,700,250);
+  const assessment=assessFinancialReality(m,[occasion],today);
+  expect(assessment.kind).toBe("room");
+  expect(assessment.familyUpcomingJod).toBe(230);
+  expect(assessment.familyMonthlyPreparationJod).toBe(215);
+  expect(assessment.titleEn).toContain("occasions");
+  expect(assessment.messageEn).toContain("categories already include");
+  expect(assessment.plannedGapJod).toBe(50);
+  expect(m.expenses).toHaveLength(0);
+ });
 });
