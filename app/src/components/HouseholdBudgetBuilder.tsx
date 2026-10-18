@@ -133,7 +133,7 @@ function CategoryDetails({category,money,setMoney,members,presence,month,autoOpe
   setMoney(s=>({...s,categories:s.categories.map(c=>c.id===category.id?{...c,planned:n,amountConfidence:"confirmed"}:c)}));
   setError("");
  };
- return <details defaultOpen={autoOpen} className="rounded-xl border border-[#DEE8DB] bg-white p-3" data-budget-category={category.id}>
+ return <details open={autoOpen} className="rounded-xl border border-[#DEE8DB] bg-white p-3" data-budget-category={category.id}>
   <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2">
    <span className="min-w-0 flex-1"><strong className="block text-sm">{category.name}</strong>
     <span className="text-xs text-muted-foreground">{ar?"مخطط شهري ":"Monthly plan "}{fmtJOD(category.planned)} · {ar?"مدفوع ":"Paid "}{fmtJOD(spent)}</span>
