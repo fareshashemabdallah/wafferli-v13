@@ -86,7 +86,7 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
    foodDaily:smallMoney,utilitiesDaily:smallMoney,otherDaily:smallMoney
   }).refine(g=>g.pattern!=="one-off"||
     (!!g.startDate&&!!g.endDate&&g.startDate<=g.endDate),
-    "A dated visit must have valid arrival and departure dates")),100)
+    "A dated visit must have valid arrival and departure dates"),100)
  }),
  money:opts({
   income:maxNumber,savingsPct:maxNumber,categories:many(opts({
