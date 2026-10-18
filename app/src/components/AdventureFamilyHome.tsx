@@ -12,6 +12,7 @@ import {FAMILY_WISHLIST_KEY,type WishlistItem} from "@/lib/familyWishlist";
 import {homeSnapshot} from "@/lib/homeSnapshot";
 import {RobotBuddy,WorldScene,type AdventurePlace} from "./AdventureArtwork";
 import {TodayFamilyBrief} from "./TodayFamilyBrief";
+import "./adventureFamilyHero.css";
 
 const destinations=[
  {id:"home",en:"Our Money",ar:"مال العيلة",summaryEn:"Understand & plan our family costs",summaryAr:"نفهم مصاريف البيت ونخطط لها",to:"/money",accent:"#E5F5E8"},
@@ -49,17 +50,22 @@ export function AdventureFamilyHome(){
     className="grid size-12 shrink-0 place-items-center rounded-2xl border border-[#C5E3D8] bg-[#F2FCF4] text-2xl shadow-sm">🏡</Link>
   </header>
 
-  <section className="relative isolate min-h-[260px] overflow-hidden rounded-[2rem] border border-[#CFE8DD] bg-[linear-gradient(165deg,#B8E6F5_0%,#E1F5F4_40%,#FFF2D8_77%,#F4E4C9_100%)] shadow-[0_22px_48px_-37px_rgba(22,76,67,.55)] sm:min-h-[320px]" aria-label={t("Welcome to your family adventure","أهلاً بمغامرة العيلة")}>
-   <WorldScene place="home" className="absolute inset-x-0 bottom-0 h-[87%] w-full opacity-90" />
-   <div className="pointer-events-none absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[#F1E7D2] to-transparent"/>
-   <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"}
-    alt={t("Cartoon family with two parents and children","عيلة كرتونية فيها أم وأب وأطفال")}
-    loading="eager" className="absolute bottom-0 start-[-5%] z-10 h-[80%] w-[70%] object-contain object-bottom drop-shadow-[0_7px_8px_rgba(50,65,39,.15)] sm:start-[0%] sm:h-[93%] sm:w-[53%]"/>
-   <div className="absolute end-3 top-4 z-20 max-w-[53%] rounded-[1.4rem] border border-white/90 bg-white/95 px-4 py-3 shadow-lg sm:end-9 sm:top-9 sm:max-w-[42%]">
-    <p className="text-sm font-extrabold leading-snug sm:text-lg">{t("Hello! What shall we explore today?","مرحبا! شو بدنا نكتشف اليوم؟")}</p>
-    <p className="mt-1 text-xs leading-relaxed text-[#56726A]">{t("Discover, plan and enjoy life together.","نكتشف ونخطط ونستمتع سوا.")}</p>
+  <section className="adventure-family-hero rounded-[2rem] border border-[#CFE8DD] bg-[linear-gradient(165deg,#B8E6F5_0%,#E1F5F4_40%,#FFF2D8_77%,#F4E4C9_100%)] shadow-[0_22px_48px_-37px_rgba(22,76,67,.55)]" aria-label={t("Welcome to your family adventure","أهلاً بمغامرة العيلة")}>
+   <div className="adventure-family-hero__scene" aria-hidden="true">
+    <WorldScene place="home" className="adventure-family-hero__world"/>
    </div>
-   <RobotBuddy className="absolute bottom-2 end-3 z-20 h-[85px] w-[80px] drop-shadow-xl sm:bottom-0 sm:end-7 sm:h-[139px] sm:w-[132px]"/>
+   {/* Mobile greeting has its own row above the portraits, never over faces.
+       Desktop uses the empty right portion of the scene. */}
+   <div className="adventure-family-hero__greeting" data-testid="adventure-family-greeting">
+    <p className="text-sm font-extrabold leading-snug text-[#183F38] sm:text-lg">{t("Hello! What shall we explore today?","مرحبا! شو بدنا نكتشف اليوم؟")}</p>
+    <p className="mt-1 text-xs leading-relaxed text-[#4D6B62]">{t("Discover, plan and enjoy life together.","نكتشف ونخطط ونستمتع سوا.")}</p>
+   </div>
+   <div className="adventure-family-hero__art" data-testid="adventure-family-portrait-area">
+    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"}
+     alt={t("Cartoon family with two parents and children","عيلة كرتونية فيها أم وأب وأطفال")}
+     loading="eager" className="adventure-family-hero__family"/>
+    <RobotBuddy className="adventure-family-hero__robot"/>
+   </div>
   </section>
 
   <section aria-label={t("Explore the family world","اكتشف عالم العيلة")}>
