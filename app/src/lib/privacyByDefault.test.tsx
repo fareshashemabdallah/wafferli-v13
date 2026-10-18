@@ -30,7 +30,7 @@ describe("new financial records are private by default",()=>{
  });
  it("prevents source-code regression in five distinct record-creation paths",()=>{
   expect(source("routes/money.tsx")).toContain('amount: 0, shared: false');
-  expect(source("routes/money.tsx")).toContain('amount,shared:false,status:quickMode');
+  expect(source("routes/money.tsx")).toContain('amount,shared:false,status:"paid"');
   expect(source("routes/plans.tsx")).toContain('status:"paid",shared:false,note:plan.title');
   expect(source("routes/explore.shopping.tsx")).toContain('recordBasketExpense(');
   expect(source("lib/basketRecording.ts")).toContain('note:"Shopping basket",shared:false,status:"paid"');
