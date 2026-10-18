@@ -11,7 +11,8 @@ import {MoneyReadinessCard} from "@/components/MoneyReadinessCard";
 import {FinancialRealityPanel} from "@/components/FinancialRealityPanel";
 import {SavingsGoalsPanel} from "@/components/SavingsGoalsPanel";
 import {FamilyCommitmentsPanel} from "@/components/FamilyCommitmentsPanel";
-import {QuickMoneySetup} from "@/components/QuickMoneySetup";
+import {AdventureMoneyJourney} from "@/components/AdventureMoneyJourney";
+import {WorldScene} from "@/components/AdventureArtwork";
 import {HouseholdBudgetBuilder} from "@/components/HouseholdBudgetBuilder";
 import {sampleMembers,type Member} from "@/lib/money";
 import {useState,type ReactNode} from "react";
@@ -24,6 +25,7 @@ type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo
 export function MoneyOverviewPanel({state,setState,goTo,onManageCategories,budgetManagement,householdPanel,onEditIncome}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
  const [view,setView]=useState<"home"|"budget"|"insights">("home");
+ const [focusedCategory,setFocusedCategory]=useState<string|null>(null);
  const openBudget=()=>setView("budget");
  const manageCategories=()=>{setView("budget");onManageCategories?.();};
  const [familyPlans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
@@ -41,85 +43,56 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories,budge
    const message=ar?"هذا سيستبدل بيانات المالية التجريبية أو المسجلة على هذا الجهاز بصفحة مالية فارغة. لن تتغير معلومات العائلة أو التقويم. هل تريد المتابعة؟":"Start your own finances? This will replace the saved Money sample and any financial entries on this device with a blank Money plan. Family profiles and calendar will stay unchanged.";
    if(window.confirm(message))setState(()=>emptyRealMoney());
  };
- if(needsStarterBudget(state))return <div className="space-y-4">
-   <QuickMoneySetup money={state} setMoney={setState}/>
-   <FamilyCommitmentsPanel money={state}/>
-   <p className="px-2 text-xs leading-relaxed text-muted-foreground">{ar?
-   "يمكنك العودة إلى خططنا أو اكتشف في أي وقت. لا تحتاج إلى ربط بنكك.":
-   "You can explore Plans and Discover at any time. No bank connection is needed."}</p>
-   <Link to="/plans" className="inline-flex min-h-11 items-center rounded-full border border-[#D3E0D3] px-4 text-sm font-semibold text-brand">{ar?"ارجع إلى خططنا":"Return to Plans"} →</Link>
-  </div>;
- const knownIncome=state.demo||state.incomeKnown===true||c.monthlyIncome>0;
- const billSnapshot=v.hasBillSchedule?fmtJOD(f.upcomingBills):(ar?"غير مسجّلة":"Not entered");
- const backButton=<button type="button" onClick={()=>setView("home")}
-   className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand">
-   <ArrowRight className="size-4 rotate-180 rtl:rotate-0"/>{ar?"رجوع إلى ملخص مال العيلة":"Back to Our Money"}
+ const setupNeeded=needsStarterBudget(state);
+ const backButton=<button type="button" onClick={()=>{setView("home");setFocusedCategory(null);}}
+   className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand">
+   <ArrowRight className="size-4 rotate-180 rtl:rotate-0"/>{ar?"رجوع إلى المغامرة":"Back to the adventure"}
   </button>;
+ if(view==="home"||setupNeeded)return <AdventureMoneyJourney money={state} setMoney={setState}
+  setupNeeded={setupNeeded} onBudget={()=>{setFocusedCategory(null);setView("budget");}}
+  onSpending={()=>goTo("spending")} onBills={()=>goTo("planning")}
+  onInsights={()=>setView("insights")}/>;
 
- // The default visit is a short decision-oriented summary. Detailed editing
- // and forecasts are separate views, not a long chain of open panels.
- if(view==="home")return <div className="space-y-4" data-money-view="home">
-  <FinancialRealityPanel money={state} plans={familyPlans} compact/>
-  <section aria-label={ar?"ملخص الشهر":"Monthly money snapshot"} className="rounded-2xl border border-[#DBE6DA] bg-white p-4 sm:p-5">
-   <div className="flex items-center justify-between gap-2">
-    <div><p className="text-xs font-semibold tracking-wide text-brand">{ar?"بلمحة واحدة":"AT A GLANCE"}</p>
-     <h2 className="mt-1 text-lg font-semibold">{ar?"مال العيلة هذا الشهر":"Your family money this month"}</h2>
-    </div>
-   </div>
-   <div className="mt-3 grid grid-cols-2 gap-2">
-    {[
-     {id:"income",en:"Monthly income",ar:"دخل الشهر",value:knownIncome?fmtJOD(c.monthlyIncome):(ar?"غير محدد":"Not entered")},
-     {id:"plan",en:"Monthly plan",ar:"المخصص للشهر",value:fmtJOD(c.planned)},
-     {id:"spent",en:"Recorded paid",ar:"مصروف مدفوع ومسجّل",value:fmtJOD(c.spent)},
-     {id:"bills",en:"Unpaid bills (30 days)",ar:"فواتير قادمة (٣٠ يوم)",value:billSnapshot}
-    ].map(x=><div key={x.id} className="min-w-0 rounded-xl bg-[#F5F8F4] p-3">
-     <p className="text-xs leading-tight text-muted-foreground">{ar?x.ar:x.en}</p>
-     <strong className="mt-1 block break-words text-lg font-semibold tabular-nums">{x.value}</strong>
-    </div>)}
-   </div>
-   <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{ar?
-    "المخطط غير المدفوع، والمصروف المسجّل، والفواتير القادمة أرقام مختلفة وليست مبالغ تُجمع مع بعض. هذا ليس رصيدك البنكي أو مبلغاً مضموناً للصرف.":
-    "Your plan, recorded payments and upcoming bills are different views of the same finances—not amounts to add together. This is not your bank balance or money confirmed safe to spend."}</p>
-  </section>
-  <section className="rounded-2xl border border-[#D6E4D6] bg-[#F6FAF4] p-4">
-   <h2 className="text-base font-semibold">{ar?"شو بدك تعمل هلق؟":"What would you like to do?"}</h2>
-   <button type="button" onClick={openBudget}
-    className="mt-3 flex min-h-12 w-full items-center justify-between gap-3 rounded-xl bg-brand px-4 text-start text-sm font-semibold text-white">
-    <span>{ar?"شوف ميزانية بيتك وقارن البنود":"Explore & adjust my household budget"}</span>
-    <ArrowRight className="size-4 shrink-0 rtl:rotate-180"/>
-   </button>
-   <div className="mt-2 grid grid-cols-2 gap-2">
-    <button type="button" onClick={()=>goTo("spending")} className="min-h-11 rounded-xl border border-[#CBDBCD] bg-white px-3 text-sm font-semibold text-brand">
-     {ar?"سجّل مصروف":"Record spending"}
-    </button>
-    <button type="button" onClick={()=>goTo("planning")} className="min-h-11 rounded-xl border border-[#CBDBCD] bg-white px-3 text-sm font-semibold text-brand">
-     {ar?"الفواتير والدفعات":"Review bills"}
-    </button>
-   </div>
-  </section>
-  <button type="button" onClick={()=>setView("insights")} className="min-h-10 text-sm font-semibold text-brand underline underline-offset-2">
-   {ar?"تفاصيل مالية وتحليلات إضافية (اختياري)":"More financial insights (optional)"} →
-  </button>
-  <p className="text-xs leading-relaxed text-muted-foreground">{ar?
-   "البيانات محفوظة على هذا الجهاز. المرجع المعيشي تقديري فقط؛ وتفاصيل المقارنة موجودة داخل الميزانية.":
-   "Saved on this device. Household spending references are illustrative; item comparisons are inside the budget."}</p>
- </div>;
-
- if(view==="budget")return <div className="space-y-4" data-money-view="budget">
+ if(view==="budget")return <div className="mx-auto max-w-[850px] space-y-4 text-[#153B33]" data-money-view="budget">
   {backButton}
-  <div className="px-1"><h2 className="text-xl font-semibold">{ar?"ميزانية بيتك":"Your household budget"}</h2>
-   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{ar?
-    "اختَر الفئة اللي بتهمك. بتشوف المرجع التوضيحي، خطتك، والمدفوع لكل بند. ما في حاجة تفتح كل الفئات.":
-    "Choose one category to see its item-by-item reference, your plan and recorded spending. Open only what matters."}</p>
-  </div>
+  <section className="relative isolate min-h-[155px] overflow-hidden rounded-[1.6rem] border border-[#DCE6D8] bg-[#C7E9E3]" aria-label={ar?"عالم ميزانية العيلة":"Family budget adventure"}>
+   <WorldScene place={focusedCategory&&/groc|food|veg/i.test(focusedCategory)?"market":"home"} className="absolute inset-0 size-full opacity-85"/>
+   <div className="relative m-4 max-w-[70%] rounded-2xl bg-white/95 p-4 shadow-md">
+    <p className="text-xs font-black tracking-wide text-[#378D73]">{ar?"اكتشف خطوة خطوة":"EXPLORE ONE STEP AT A TIME"}</p>
+    <h2 className="mt-1 text-lg font-black">{ar?"اكتشف مصاريف بيتك":"Explore your household costs"}</h2>
+    <p className="mt-1 text-xs leading-relaxed text-[#667C71]">{ar?"اختَر فئة واحدة، وقارن التفاصيل على راحتك.":"Pick one category, and uncover its details at your own pace."}</p>
+   </div>
+  </section>
+  {!focusedCategory?<section className="rounded-2xl border border-[#DEEADD] bg-white p-4">
+    <h3 className="text-base font-black">{ar?"وين بدك تبلّش؟":"Where shall we explore?"}</h3>
+    <p className="mt-1 text-xs text-[#687A71]">{ar?"اختَر فئة. كل الأرقام قابلة للتعديل من دون فرض توفير.":"Choose a category. Your choices remain yours, with no forced savings target."}</p>
+    <div className="mt-3 grid grid-cols-2 gap-2">
+     {state.categories.map(cat=><button type="button" key={cat.id} onClick={()=>setFocusedCategory(cat.id)}
+      className="min-h-[90px] rounded-[1.1rem] border border-[#DFE8DC] bg-[#F4FAF5] p-3 text-start transition hover:bg-[#ECF5EC] active:scale-[.99]">
+      <span className="block text-xl" aria-hidden="true">{/groc|food/i.test(cat.id+" "+cat.name)?"🥕":/school|educ/i.test(cat.name)?"📚":/rent|hous/i.test(cat.name)?"🏡":/fuel|transport/i.test(cat.name)?"🚗":/health|medic/i.test(cat.name)?"💚":/outing|restaurant/i.test(cat.name)?"🎡":"✨"}</span>
+      <strong className="mt-1 block break-words text-sm">{cat.name}</strong>
+      <span className="mt-1 block text-xs text-[#5B7769]">{fmtJOD(cat.planned)} {ar?"مخطط بالشهر":"planned monthly"}</span>
+     </button>)}
+     {state.categories.length===0&&<p className="col-span-2 text-sm text-[#6D7C73]">{ar?"ما في فئات بعد. فيك تضيف أول فئة من الخيارات تحت.":"No categories yet. Add your first one below."}</p>}
+    </div>
+   </section>:<>
+    <button type="button" onClick={()=>setFocusedCategory(null)} className="min-h-10 text-sm font-bold text-[#31856B] underline">
+     ← {ar?"اختَر فئة تانية":"Explore another category"}
+    </button>
+    <HouseholdBudgetBuilder key={focusedCategory} money={state} setMoney={setState}
+     members={members} onManageCategories={manageCategories} focusedCategoryId={focusedCategory} compact/>
+   </>}
   {householdPanel&&<details className="rounded-2xl border border-[#DDE7DB] bg-white p-4">
-   <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
-    {ar?"عدد أفراد البيت والمساعدين والضيوف":"Household members, helpers & visitors"}
+   <summary className="min-h-11 cursor-pointer text-sm font-bold text-brand">
+    {ar?"أفراد البيت والمساعدون والضيوف":"Household members, helpers & visitors"}
    </summary>
    <div className="mt-3">{householdPanel}</div>
   </details>}
-  {budgetManagement}
-  <HouseholdBudgetBuilder money={state} setMoney={setState} members={members} onManageCategories={manageCategories}/>
+  <details className="rounded-2xl border border-[#DDE7DB] bg-white p-4">
+   <summary className="min-h-11 cursor-pointer text-sm font-bold text-brand">{ar?"إدارة الفئات والدخل (اختياري)":"Manage categories & income (optional)"}</summary>
+   <div className="mt-3 space-y-3">{budgetManagement}</div>
+  </details>
+  <p className="text-xs leading-relaxed text-[#75877A]">{ar?"الأرقام المرجعية ضمن البنود توضيحية وليست متوسطات أسعار سوق مؤكدة في عمّان.":"Item references are illustrative, not verified Amman market spending averages."}</p>
  </div>;
 
  return <div className="space-y-4" data-money-view="insights">
