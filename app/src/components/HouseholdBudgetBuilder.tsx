@@ -37,7 +37,7 @@ function ItemEditor({item,onSave,onRemove}:{item:BudgetItem;onSave:(i:BudgetItem
   const n=amount(cost),q=qty.trim()===""?null:amount(qty),p=price.trim()===""?null:amount(price);
   if(!draft.name.trim()||draft.name.length>90||n===null||
    (qty.trim()!==""&&q===null)||(price.trim()!==""&&p===null)||
-   (qty.trim()!==(price.trim()===""))){setError(ar?"راجع المبالغ والكمية والسعر.":"Check the amount, quantity and unit price.");return;}
+   ((qty.trim()==="")!==(price.trim()===""))){setError(ar?"راجع المبالغ والكمية والسعر.":"Check the amount, quantity and unit price.");return;}
   const copy:BudgetItem={...draft,name:draft.name.trim(),amountJod:n};
   if(q!==null&&p!==null){copy.quantity=q;copy.unitPriceJod=p;}else{
    delete copy.quantity;delete copy.unitPriceJod;delete copy.unitLabel;
