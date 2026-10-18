@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { useI18n } from "@/lib/i18n";
 import { computeMoney, sampleMembers, sampleMoney, type CatType, type Category, type Expense, type Member } from "@/lib/money";
 import { fmtJOD, parseAmount, uid, useLocalState } from "@/lib/storage";
+import type {BudgetItem} from "@/lib/householdBudgetBuilder";
 
 export const Route = createFileRoute("/money")({
   head: () => ({
@@ -135,6 +136,7 @@ function MoneyPage() {
       <Expenses
         cats={s.categories}
         members={members}
+        budgetItems={s.budgetItems??[]}
         expenses={s.expenses}
         onChange={(expenses) => upd({ expenses })}
         cashBalance={s.cashOnHand??null}
@@ -313,8 +315,8 @@ function CategoryForm({ initial, onSave, onCancel }: { initial: Category; onSave
   );
 }
 
-function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanned, cashBalance }: {
-  cats: Category[]; members: Member[]; expenses: Expense[];
+function Expenses({ cats, members, budgetItems, expenses, onChange, onDelete, onConfirmPlanned, cashBalance }: {
+  cats: Category[]; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];
   onChange: (e: Expense[]) => void; onDelete: (e:Expense)=>void;
   onConfirmPlanned:(id:string,actual:number,mode:"already"|"deduct"|"untracked")=>void;
   cashBalance:number|null;
@@ -330,17 +332,20 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
   const [confirming,setConfirming]=useState<string|null>(null);
   const [actualValue,setActualValue]=useState("");
   const [quickCategory, setQuickCategory] = useState(cats[0]?.id ?? "");
+  const [quickItem,setQuickItem]=useState("");
   const [quickError, setQuickError] = useState("");
   const selectedCategory=cats.some(x=>x.id===quickCategory)?quickCategory:(cats[0]?.id??"");
+  const matchingItems=budgetItems.filter(i=>i.categoryId===selectedCategory);
+  const selectedItem=matchingItems.some(i=>i.id===quickItem)?quickItem:"";
   const recordQuick=(ev:FormEvent)=>{
     ev.preventDefault();
     const amount=parseAmount(quickAmount,50000);
     if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
     if(quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":"Enter a valid expected amount.");
     if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
-    const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:false,status:"paid",...(quickNote.trim()?{note:quickNote.trim().slice(0,60)}:{}),...(quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
+    const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:false,status:"paid",...(selectedItem?{budgetItemId:selectedItem}:{}),...(quickNote.trim()?{note:quickNote.trim().slice(0,60)}:{}),...(quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
     onChange([entry,...expenses]);
-    setQuickAmount("");setQuickExpected("");setQuickNote("");setQuickError("");
+    setQuickAmount("");setQuickExpected("");setQuickNote("");setQuickItem("");setQuickError("");
     toast.success(ar?"تم تسجيل المصروف المدفوع.":"Paid expense recorded.");
   };
   const month=today().slice(0,7);
@@ -361,11 +366,17 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
             placeholder={tr("e.g. 12.50")} onChange={e=>setQuickAmount(e.target.value)} />
         </Field>
         <Field label={tr("Category")}>
-          <NativeSelect value={selectedCategory} onChange={e=>setQuickCategory(e.target.value)}>
+          <NativeSelect value={selectedCategory} onChange={e=>{setQuickCategory(e.target.value);setQuickItem("");}}>
             {cats.length===0&&<option value="">{tr("Add category first")}</option>}
             {cats.map(cat=><option key={cat.id} value={cat.id}>{tr(cat.name)}</option>)}
           </NativeSelect>
         </Field>
+        {matchingItems.length>0&&<Field label={ar?"أي بند؟ (اختياري)":"Which item? (optional)"}>
+          <NativeSelect value={selectedItem} onChange={e=>setQuickItem(e.target.value)}>
+           <option value="">{ar?"بدون تحديد بند":"Category only"}</option>
+           {matchingItems.map(i=><option key={i.id} value={i.id}>{i.name}</option>)}
+          </NativeSelect>
+         </Field>}
         <Field label={ar?"على شو صرفت؟ (اختياري)":"What was it for? (optional)"}>
           <Input className={inputCls} maxLength={60} value={quickNote} onChange={e=>setQuickNote(e.target.value)} placeholder={ar?"مثلاً: تسوّق أسبوعي":"e.g. weekly groceries"}/>
         </Field>
@@ -385,6 +396,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
           initial={editing}
           cats={cats}
           members={members}
+          budgetItems={budgetItems}
           onCancel={() => setEditing(null)}
           onSave={(x) => {
             onChange(x.id ? expenses.map((e) => (e.id === x.id ? x : e)) : [{ ...x, id: uid() }, ...expenses]);
@@ -430,6 +442,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
                     <Button size="sm" type="button" variant="ghost" onClick={()=>setConfirming(null)}>{ar?"إلغاء":"Cancel"}</Button>
                   </div>
                 </div>}
+                {e.budgetItemId&&budgetItems.some(i=>i.id===e.budgetItemId&&i.categoryId===e.categoryId)&&<p className="text-xs text-brand">{ar?"البند: ":"Item: "}{budgetItems.find(i=>i.id===e.budgetItemId)?.name}</p>}
                 <p className="text-xs text-muted-foreground">
                   {e.status==="planned"?(ar?"بانتظار الدفع · ":"Planned, not paid · "):""}{e.date} · {tr(catName(e.categoryId))} {e.owner ? `· ${e.owner}` : ""} · {e.shared?(ar?"عائلي محلي":"Household label"):(ar?"خاص على الجهاز":"Private on device")}
                 </p>
@@ -450,7 +463,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
   );
 }
 
-function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Expense; cats: Category[]; members: Member[]; onSave: (e: Expense) => void; onCancel: () => void }) {
+function ExpenseForm({ initial, cats, members, budgetItems, onSave, onCancel }: { initial: Expense; cats: Category[]; members: Member[]; budgetItems:BudgetItem[]; onSave: (e: Expense) => void; onCancel: () => void }) {
   const { tr,lang } = useI18n();
   const ar=lang==="ar";
   const [f, setF] = useState({ ...initial, amountStr: initial.amount ? String(initial.amount) : "" });
@@ -470,10 +483,17 @@ function ExpenseForm({ initial, cats, members, onSave, onCancel }: { initial: Ex
       <Field label={tr("Amount (JOD)")}><Input className={inputCls} inputMode="decimal" autoFocus value={f.amountStr} onChange={(e) => setF({ ...f, amountStr: e.target.value })} /></Field>
       <Field label={tr("Date")}><Input className={inputCls} type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
       <Field label={tr("Category")}>
-        <NativeSelect value={f.categoryId} onChange={(e) => setF({ ...f, categoryId: e.target.value })}>
+        <NativeSelect value={f.categoryId} onChange={(e) => setF({ ...f, categoryId: e.target.value, budgetItemId: undefined })}>
           {cats.map((c) => <option key={c.id} value={c.id}>{tr(c.name)}</option>)}
         </NativeSelect>
       </Field>
+      {budgetItems.some(i=>i.categoryId===f.categoryId)&&<Field label={ar?"البند (اختياري)":"Item (optional)"}>
+        <NativeSelect value={budgetItems.some(i=>i.id===f.budgetItemId&&i.categoryId===f.categoryId)?f.budgetItemId??"":""}
+         onChange={(e)=>setF({...f,budgetItemId:e.target.value||undefined})}>
+         <option value="">{ar?"الفئة فقط":"Category only"}</option>
+         {budgetItems.filter(i=>i.categoryId===f.categoryId).map(i=><option key={i.id} value={i.id}>{i.name}</option>)}
+        </NativeSelect>
+       </Field>}
       <Field label={tr("Owner (optional)")}>
         <NativeSelect value={f.owner ?? ""} onChange={(e) => setF((previous) => { const { owner: _owner, ...withoutOwner } = previous; return e.target.value ? { ...withoutOwner, owner: e.target.value } : withoutOwner; })}>
           <option value="">—</option>
