@@ -13,6 +13,23 @@ beforeEach(()=>window.localStorage.clear());
 afterEach(()=>{cleanup();vi.restoreAllMocks();window.localStorage.clear()});
 const renderWorld=()=>render(<I18nProvider><AdventureFamilyHome/></I18nProvider>);
 describe("The Dabberna family adventure world",()=>{
+ it("keeps the entire family portrait in its own mobile area below the greeting",()=>{
+  renderWorld();
+  const hero=screen.getByRole("region",{name:"Welcome to your family adventure"});
+  const greeting=screen.getByTestId("adventure-family-greeting");
+  const portraits=screen.getByTestId("adventure-family-portrait-area");
+  const image=screen.getByRole("img",{name:"Cartoon family with two parents and children"});
+  expect(hero).toHaveClass("adventure-family-hero");
+  expect(greeting.parentElement).toBe(hero);
+  expect(portraits.parentElement).toBe(hero);
+  expect(greeting).toHaveClass("adventure-family-hero__greeting");
+  expect(portraits).toHaveClass("adventure-family-hero__art");
+  expect(portraits).toContainElement(image);
+  expect(greeting).not.toContainElement(image);
+  expect(greeting.compareDocumentPosition(portraits)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(screen.getByText("Hello! What shall we explore today?")).toBeInTheDocument();
+  expect(screen.getByText("Discover, plan and enjoy life together.")).toBeInTheDocument();
+ });
  it("opens four real places rather than decorative non-working game buttons",()=>{
   renderWorld();
   expect(screen.getByRole("heading",{name:/Dabberna/})).toBeInTheDocument();
