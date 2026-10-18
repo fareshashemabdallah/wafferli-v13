@@ -5,6 +5,8 @@ import {useI18n} from "@/lib/i18n";
 import {areaFromRoute,currentRoutePath,familyDestinations,type FamilyArea} from "@/lib/familyNavigation";
 import {Logo} from "./Logo";
 import {ConnectivityNotice} from "./ConnectivityNotice";
+import {AdventurePageHeader} from "./AdventurePageHeader";
+import "./adventureWorldSkin.css";
 import {LocalSaveNotice} from "./LocalSaveNotice";
 
 // Exactly four main destinations for all families.
@@ -32,28 +34,28 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
  const navName=text("Main","التنقل الرئيسي");
  const mobileName=text("Main","التنقل الرئيسي");
  return <div dir={ar?"rtl":"ltr"} style={colors}
-  className="dabberna-app min-h-dvh bg-[#FFF9F8] text-[#25354B] lg:flex">
+  className="dabberna-app dabberna-adventure-skin min-h-dvh bg-[#F7FBF4] text-[#234338] lg:flex">
   <a href="#dabberna-main-content"
    className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-[100] focus:rounded-xl focus:bg-white focus:p-3">
    {text("Skip to main content","انتقل إلى المحتوى الرئيسي")}
   </a>
-  <aside className="sticky top-0 hidden h-dvh w-[228px] shrink-0 flex-col border-e border-[#F0E5E9] bg-white/95 px-4 pb-5 pt-7 lg:flex">
+  <aside className="sticky top-0 hidden h-dvh w-[228px] shrink-0 flex-col border-e border-[#D6E9DA] bg-[linear-gradient(175deg,#F4FFF5,#FFFFFF_45%,#F8FBF1)] px-4 pb-5 pt-7 lg:flex">
    <Link to="/" aria-label={text("Dabberna home","الصفحة الرئيسية لدبّرنا")}
     className="mb-3 inline-flex items-center rounded-lg px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]"><Logo/></Link>
-   <p className="mb-7 px-2 text-xs font-medium leading-relaxed text-[#777F8E]">{text("Our family, happier together.","عيلتنا أحلى سوا.")}</p>
+   <p className="mb-7 px-2 text-xs font-medium leading-relaxed text-[#6A8276]">{text("Our family, happier together.","عيلتنا أحلى سوا.")}</p>
    <nav aria-label={navName} className="space-y-1.5">
     {familyDestinations.map(item=>{
      const Icon=item.icon,active=!secondaryShopping&&item.id===area;
      return <Link key={item.id} to={item.to} aria-current={active?"page":undefined}
-      className="group flex min-h-12 items-center gap-3 rounded-2xl px-3 text-[13px] font-semibold text-[#586477] transition hover:bg-[#FAF1F5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B] focus-visible:ring-offset-2"
-      style={active?{background:"#FBEFF3",color:"#25354B"}:{}}>
+      className="group flex min-h-12 items-center gap-3 rounded-2xl px-3 text-[13px] font-semibold text-[#4E6A60] transition hover:bg-[#E4F4E9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#469F80] focus-visible:ring-offset-2"
+      style={active?{background:"#DDF2E2",color:"#185D42",boxShadow:"inset 0 0 0 1px #B9D9C4"}:{}}>
       <Icon className="size-5 shrink-0" style={{color:active?item.accent:"#6D7788"}}/>
       <span className="flex-1">{ar?item.ar:item.en}</span>
       {active&&<span aria-hidden="true" className="size-1.5 rounded-full" style={{background:item.accent}}/>}
      </Link>;
     })}
    </nav>
-   <details className="group mt-5 border-t border-[#F2E9EC] pt-3">
+   <details className="group mt-5 border-t border-[#DAECDF] pt-3">
     <summary className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-xs font-semibold text-[#637084] hover:bg-[#F9F2F5]">
      {text("Other tools","أدوات أخرى")}<ChevronDown className="ms-auto size-4 transition group-open:rotate-180"/>
     </summary>
@@ -63,15 +65,15 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
       {ar?x.ar:x.en}</Link>)}
     </div>
    </details>
-   <Link to="/space" className="mt-auto flex min-h-12 items-center gap-2 rounded-2xl border border-[#F1E5EA] px-3 text-xs font-semibold text-[#536277] focus-visible:ring-2">
-    <UsersRound className="size-[18px] text-[#C95882]"/>{text("Family & settings","العائلة والإعدادات")}
+   <Link to="/space" className="mt-auto flex min-h-12 items-center gap-2 rounded-2xl border border-[#DCEADF] bg-white/80 px-3 text-xs font-semibold text-[#386E57] focus-visible:ring-2">
+    <UsersRound className="size-[18px] text-[#288966]"/>{text("Family & settings","العائلة والإعدادات")}
    </Link>
   </aside>
   <div className="flex min-w-0 flex-1 flex-col">
-   <header className="pt-safe sticky top-0 z-30 flex h-[68px] shrink-0 items-center justify-between gap-3 border-b border-[#F2E8EB] bg-[#FFFCFD]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+   <header className="pt-safe sticky top-0 z-30 flex h-[68px] shrink-0 items-center justify-between gap-3 border-b border-[#DAEBDF] bg-[#FAFEF9]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
     <Link to="/" aria-label={text("Dabberna home","الصفحة الرئيسية لدبّرنا")}
      className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B] lg:hidden"><Logo/></Link>
-    <span className="hidden text-xs font-bold tracking-wide text-[#798194] lg:block">
+    <span className="hidden text-xs font-bold tracking-wide text-[#648373] lg:block">
      {text("Our family, one place","عائلتنا في مكان واحد")}
     </span>
     <div className="ms-auto flex items-center gap-2">
@@ -89,7 +91,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
       <Languages className="size-4"/>{ar?"English":"العربية"}
      </button>
      <Link to="/space" aria-label={text("Family settings","العائلة والإعدادات")}
-      className="grid size-11 place-items-center rounded-full bg-[#FCEBF0] text-[#B94376] focus-visible:ring-2 lg:hidden">
+      className="grid size-11 place-items-center rounded-full bg-[#E2F3E7] text-[#288565] focus-visible:ring-2 lg:hidden">
       <Settings2 className="size-[19px]"/>
      </Link>
     </div>
@@ -97,20 +99,18 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
    <main id="dabberna-main-content" tabIndex={-1}
     className={"dabberna-page mx-auto w-full min-w-0 flex-1 px-3 pb-28 pt-4 sm:px-5 sm:pt-6 lg:px-7 lg:pb-12 "+(homeLayout||shopping?"max-w-[1430px]":"max-w-[1120px]")}>
     <ConnectivityNotice/><LocalSaveNotice/>
-    {title&&<header className="dabberna-section-heading mb-5 px-1 pb-1 sm:px-2">
-     <h1 className="text-[1.75rem] font-extrabold leading-tight tracking-tight text-[#25354B] sm:text-[2.1rem]">{title}</h1>
-     <span className="mt-3 block h-1 w-12 rounded-full" style={{background:accent.accent}} aria-hidden="true"/>
-    </header>}
+    {!homeLayout&&location!=="/money"&&<AdventurePageHeader path={location} {...(title?{title}:{})}/>}
+    {homeLayout&&title&&<h1 className="sr-only">{title}</h1>}
     {children}
    </main>
   </div>
   <nav aria-label={mobileName}
-   className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#F1E4E9] bg-white/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,29,46,.20)] backdrop-blur-xl lg:hidden">
+   className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#D1E9D8] bg-[#F9FFF9]/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,91,60,.16)] backdrop-blur-xl lg:hidden">
    {familyDestinations.map(item=>{
     const Icon=item.icon,active=!secondaryShopping&&item.id===area;
     return <Link key={item.id} to={item.to} aria-current={active?"page":undefined}
      className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-xs font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]"
-     style={active?{color:item.accent,background:"#FFF2F6"}:{color:"#697488"}}>
+     style={active?{color:"#185D42",background:"#DDF2E2"}:{color:"#678072"}}>
      <Icon className="size-[19px]" aria-hidden="true"/>
      <span className="text-[10px]">{ar?item.shortAr:item.shortEn}</span>
     </Link>;

@@ -1,0 +1,46 @@
+/* The adventure skin follows the parent across the existing pages, while
+   their underlying money, privacy and household flows stay unchanged. */
+.dabberna-adventure-skin {
+ --adventure-ink:#214A39;
+ --adventure-leaf:#278466;
+ --adventure-line:#DCEADF;
+ --adventure-paper:#FBFFF9;
+ background:linear-gradient(158deg,#F5FBF2 0%,#FFFBF5 48%,#F5FAF6 100%);
+ color:var(--adventure-ink);
+}
+.dabberna-adventure-skin .dabberna-page :where(.editorial-card,.card-soft) {
+ border-color:var(--adventure-line);
+ border-radius:1.4rem;
+ box-shadow:0 14px 29px -28px rgba(29,99,66,.32);
+}
+.dabberna-adventure-skin .dabberna-page :where(.page-intro,.hero-surface){
+ background:linear-gradient(130deg,#E6F6E9,#F6F9E7 58%,#FFEFD8);
+ border:1px solid #D4E8D4;
+ border-radius:1.4rem;
+ color:#285743;
+}
+.dabberna-adventure-skin .dabberna-page :where(input,textarea,select):not([type="checkbox"]):not([type="radio"]){
+ border-radius:.8rem;
+}
+.dabberna-adventure-skin .dabberna-page :where(button,a):focus-visible{
+ outline:3px solid #3F9F78;
+ outline-offset:3px;
+}
+.dabberna-adventure-skin .dabberna-page :where(button,summary){
+ touch-action:manipulation;
+}
+.dabberna-adventure-skin .dabberna-page :where(.section-eyebrow){
+ color:#287B59;
+}
+.dabberna-adventure-skin .dabberna-page :where(.text-brand){
+ color:#246D52;
+}
+.dabberna-adventure-stage svg[role="img"] {
+ filter:saturate(.95);
+}
+@media(prefers-reduced-motion:reduce){
+ .dabberna-adventure-skin *, .dabberna-adventure-skin *::before,.dabberna-adventure-skin *::after {
+  transition-duration:.01ms !important;
+  animation-duration:.01ms !important;
+ }
+}

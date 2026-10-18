@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check, Languages } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
+import {WorldScene} from "@/components/AdventureArtwork";
 import { Tally } from "@/components/Tally";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,7 +40,7 @@ function VotePage() {
   useEffect(() => { if (mine && pick === null) setPick(mine); }, [mine, pick]);
 
   const shell = (c: React.ReactNode) => (
-    <div className="mx-auto min-h-dvh max-w-lg px-4 pb-safe pt-safe">
+    <div className="mx-auto min-h-dvh max-w-lg bg-[linear-gradient(145deg,#F2FAF0,#FFF9F0)] px-4 pb-safe pt-safe text-[#244D3B]">
       <header className="flex h-16 items-center justify-between">
         <Logo />
         <button onClick={() => setLang(lang === "en" ? "ar" : "en")} className="inline-flex h-10 items-center gap-1 rounded-full border bg-card px-3 text-sm"><Languages className="size-4" />{lang === "en" ? "العربية" : "English"}</button>
@@ -67,10 +68,15 @@ function VotePage() {
 
   return shell(
     <>
-      <section className="hero-surface rounded-3xl p-5">
-        <h1 className="text-2xl font-semibold">{d.title}</h1>
-        <p className="mt-1 text-sm opacity-85">{[d.event_at?.replace("T", " · "), d.neighborhood].filter(Boolean).join(" · ")}</p>
-        {d.organizer_name && <p className="mt-1 text-sm opacity-85">{t("organizer")}: {d.organizer_name}</p>}
+      <section className="relative isolate overflow-hidden rounded-[1.45rem] border border-[#CFE7D6] bg-[#E5F5E7] p-5 shadow-sm">
+        <WorldScene place="park" className="pointer-events-none absolute inset-y-0 end-0 h-full w-[60%] opacity-35"/>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#ECF7EA] via-[#ECF7EA]/90 to-transparent rtl:bg-gradient-to-l"/>
+        <div className="relative">
+         <p className="mb-1 text-xs font-black tracking-wider text-[#2D8864]">{lang==="ar"?"مغامرة مع الأصحاب":"FRIENDS' ADVENTURE"}</p>
+         <h1 className="text-2xl font-black leading-tight">{d.title}</h1>
+         <p className="mt-1 text-sm opacity-85">{[d.event_at?.replace("T", " · "), d.neighborhood].filter(Boolean).join(" · ")}</p>
+         {d.organizer_name && <p className="mt-1 text-sm opacity-85">{t("organizer")}: {d.organizer_name}</p>}
+        </div>
       </section>
       <h2 className="mt-5 text-lg font-semibold">{t("voteFor")}</h2>
       <div role="radiogroup" className="mt-2 space-y-2">

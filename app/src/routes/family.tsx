@@ -2,6 +2,7 @@ import {createFileRoute,Link} from "@tanstack/react-router";
 import {useState} from "react";
 import {CalendarDays,CalendarHeart,ClipboardList,HeartHandshake,UsersRound,CheckCircle2,ChevronRight,MapPinned} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
+import {WorldScene,type AdventurePlace} from "@/components/AdventureArtwork";
 import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {PlansWorkspace} from "@/routes/plans";
 import {FamilyCalendarWorkspace} from "@/routes/calendar";
@@ -19,10 +20,10 @@ export const Route=createFileRoute("/family")({
 });
 type View="overview"|"calendar"|"plans"|"tasks";
 const views=[
- {id:"overview" as const,en:"Overview",ar:"نظرة عامة",icon:HeartHandshake},
- {id:"calendar" as const,en:"Calendar",ar:"التقويم",icon:CalendarDays},
- {id:"plans" as const,en:"Plans & activities",ar:"الخطط والأنشطة",icon:CalendarHeart},
- {id:"tasks" as const,en:"Responsibilities",ar:"المسؤوليات",icon:ClipboardList}
+ {id:"overview" as const,en:"Our Family",ar:"عيلتنا",icon:HeartHandshake,scene:"home" as AdventurePlace,emoji:"🏡"},
+ {id:"calendar" as const,en:"Special Moments",ar:"مناسباتنا",icon:CalendarDays,scene:"moments" as AdventurePlace,emoji:"🎂"},
+ {id:"plans" as const,en:"Our Plans",ar:"خططنا",icon:CalendarHeart,scene:"park" as AdventurePlace,emoji:"🎡"},
+ {id:"tasks" as const,en:"Family Tasks",ar:"مهام العيلة",icon:ClipboardList,scene:"market" as AdventurePlace,emoji:"✨"}
 ];
 export function FamilyLifePage(){
  const {lang}=useI18n(),ar=lang==="ar";
@@ -39,24 +40,31 @@ export function FamilyLifePage(){
  const upcoming=upcomingMoments(allFamilyMoments(moments,realMembers,ar),new Date(),180);
  const activePlans=upcomingFamilyPlans(plans.filter(p=>p.status!=="completed"),new Date(),5);
  const activeTasks=taskSummary(tasks);
- const card="rounded-[1.55rem] border border-[#F0E4E9] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,40,64,.20)] sm:p-5";
+ const card="rounded-[1.55rem] border border-[#DDEBDD] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,82,64,.18)] sm:p-5";
  return <AppShell title={label("Family Life","حياة العيلة")}>
   <div className="space-y-4">
    <p className="px-1 text-sm leading-relaxed text-[#657185]">
     {label("Your family's time, plans and responsibilities — organized together.",
      "مواعيد العيلة وخططها ومسؤولياتها — كلها بمكان واحد.")}
    </p>
-   <nav aria-label={label("Family Life sections","أقسام حياة العيلة")}
-    className="grid grid-cols-2 gap-2 rounded-[1.25rem] border border-[#F0E4E9] bg-white p-2 sm:grid-cols-4">
-    {views.map(item=>{
-     const Icon=item.icon,selected=view===item.id;
-     return <button key={item.id} type="button" aria-current={selected?"page":undefined}
-      aria-pressed={selected} onClick={()=>setView(item.id)}
-      className={"inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-bold leading-snug transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B66C95] "+
-       (selected?"bg-[#FCECF2] text-[#9B4072]":"text-[#647084] hover:bg-[#FFF8FA]")}>
-      <Icon className="size-4 shrink-0"/><span>{ar?item.ar:item.en}</span>
-     </button>;
-    })}
+   <nav aria-label={label("Family Life sections","أقسام حياة العيلة")}>
+    <p className="mb-2 text-sm font-extrabold text-[#337C60]">{label("Choose where to explore","وين بتحب تكتشف؟")}</p>
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+     {views.map(item=>{
+      const selected=view===item.id;
+      return <button key={item.id} type="button" aria-current={selected?"page":undefined}
+       aria-pressed={selected} onClick={()=>setView(item.id)}
+       className={"relative isolate min-h-[115px] overflow-hidden rounded-[1.25rem] border p-2.5 text-start transition active:scale-[.99] focus-visible:outline-4 focus-visible:outline-[#479F7E] "+
+       (selected?"border-[#69B78F] bg-[#E6F5EA] shadow-[0_3px_0_#8DC7A5]":"border-[#DCEADE] bg-white hover:border-[#B1D5C1]")}>
+       <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 block h-[80px] w-full opacity-55"><WorldScene place={item.scene} className="h-full w-full"/></span>
+       <span className="absolute inset-0 bg-gradient-to-t from-white via-white/95 to-transparent"/>
+       <span className="relative flex h-full min-h-[90px] flex-col justify-end">
+        <span className="text-xl" aria-hidden="true">{item.emoji}</span>
+        <span className="mt-1 text-xs font-extrabold leading-tight text-[#286448] sm:text-sm">{ar?item.ar:item.en}</span>
+       </span>
+      </button>;
+     })}
+    </div>
    </nav>
    {view==="overview"&&<div className="space-y-4">
     <section className={card}>

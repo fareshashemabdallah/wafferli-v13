@@ -62,11 +62,9 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
  };
  const kindColor=(kind:MomentKind)=>kind==="birthday"?"bg-[#FBE9E7] text-[#A66760]":kind==="holiday"?"bg-[#FCF0DC] text-[#98754A]":kind==="school"?"bg-[#E8EEF8] text-[#5C789B]":"bg-mint text-brand";
  const content=<>
-  <section className="hero-surface rounded-3xl p-5 sm:p-6">
-   <div className="flex items-center gap-3"><span className="grid size-12 place-items-center rounded-2xl bg-white/80 text-brand"><CalendarDays className="size-6"/></span>
-   <div><h2 className="text-xl font-semibold">{ar?"أيام صغيرة، ذكريات جميلة":"A little planning, more moments together"}</h2>
-   <p className="mt-1 text-sm text-muted-foreground">{ar?"تظهر أعياد الميلاد تلقائياً من عائلتي، مع ذكرى الزواج والعطلات والمناسبات الخاصة.":"Birthdays from My Family appear automatically, alongside anniversaries, holidays and other moments."}</p></div></div>
-  </section>
+  <div className="flex min-h-11 items-center gap-2 rounded-xl bg-[#F0FAEC] px-3 py-2 text-xs font-semibold text-[#4E8066]">
+   <CalendarDays className="size-4 shrink-0"/>{ar?"اختَر يوماً في التقويم لاكتشاف المناسبات أو إضافة ذكرى جديدة.":"Pick a date to discover family moments or add a new one."}
+  </div>
   <div className="card-soft mt-4 p-4 sm:p-5">
    <div className="flex items-center justify-between gap-2">
     <Button variant="outline" size="icon" aria-label={ar?"الشهر السابق":"Previous month"} onClick={()=>move(-1)}><ChevronLeft className="size-5 rtl:rotate-180"/></Button>
@@ -84,7 +82,7 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
         (chosenDay?"border-brand bg-mint text-brand":current?"border-[#DABAA4] bg-[#FFF5EC] text-ink":"border-transparent "+(cell.weekend&&cell.inMonth?"bg-[#FCF5EC]":"hover:bg-muted/70"))+
         (!cell.inMonth?" opacity-40":"")}>
        <span className={current?"font-bold":""}>{Number(cell.date.slice(-2))}</span>
-       <span className={"size-1.5 rounded-full "+(has?"bg-[#C68A70]":"bg-transparent")}/>
+       {has?<span aria-hidden="true" className="text-[11px] leading-none text-[#C87F54]">✦</span>:<span className="h-[11px]"/>}
       </button>;
     })}
    </div>
