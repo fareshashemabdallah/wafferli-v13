@@ -32,12 +32,12 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
   expect(screen.getByRole("heading",{level:1,name:"Family Life"})).toBeInTheDocument();
   const nav=screen.getByRole("navigation",{name:"Family Life sections"});
   expect(nav.querySelectorAll("button")).toHaveLength(4);
-  fireEvent.click(screen.getByRole("button",{name:"Calendar"}));
+  fireEvent.click(screen.getByRole("button",{name:"Special Moments"}));
   expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-embedded","true");
   expect(screen.queryByTestId("embedded-plans")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Plans & activities"}));
+  fireEvent.click(screen.getByRole("button",{name:"Our Plans"}));
   expect(screen.getByTestId("embedded-plans")).toHaveAttribute("data-embedded","true");
-  fireEvent.click(screen.getByRole("button",{name:"Responsibilities"}));
+  fireEvent.click(screen.getByRole("button",{name:"Family Tasks"}));
   expect(screen.getByTestId("embedded-tasks")).toBeInTheDocument();
   expect(localStorage.getItem("wafferli.v13.familyCalendar")).toBeNull();
   expect(localStorage.getItem("wafferli.v13.familyPlans")).toBeNull();
