@@ -71,7 +71,7 @@ function MoneyPage() {
 
   return (
     <AppShell title={tr("Our Finances")}>
-      <section className="page-intro relative mb-5 overflow-hidden">
+      {section!=="overview"&&<section className="page-intro relative mb-5 overflow-hidden">
         <div className="pointer-events-none absolute -end-10 -top-16 size-44 rounded-full border-[22px] border-white/30" aria-hidden="true"/>
         <div className="relative flex items-center gap-3">
           <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/85 text-brand"><ShieldCheck className="size-6"/></span>
@@ -80,13 +80,13 @@ function MoneyPage() {
             <p className="mt-1 text-sm leading-relaxed text-[#4B6758]">{ar?"خطة بسيطة تساعدك تعيش براحة، مش بس توفّر.":"A clearer plan for living well—not simply spending less."}</p>
           </div>
         </div>
-      </section>
-      <div role="tablist" aria-label={ar?"أقسام المالية":"Money sections"} className="mb-5 grid grid-cols-3 gap-1 rounded-2xl border border-[#E1E8DF] bg-[#EEF2EB] p-1.5">
+      </section>}
+      <div role="tablist" aria-label={ar?"أقسام المالية":"Money sections"} className="mb-3 grid grid-cols-3 gap-1 rounded-2xl border border-[#CFE4D8] bg-[#E8F4ED] p-1.5">
         {([{id:"overview",en:"Our Money",ar:"مال العيلة"},{id:"spending",en:"Spending",ar:"المصاريف"},{id:"planning",en:"Bills",ar:"الفواتير"}] as const)
           .map(v=><button role="tab" aria-selected={section===v.id} key={v.id} type="button" onClick={()=>setSection(v.id)}
             className={"min-h-11 rounded-xl px-2 text-xs font-semibold transition sm:text-sm "+(section===v.id?"bg-white text-brand shadow-sm":"text-[#64796C] hover:bg-white/60")}>{ar?v.ar:v.en}</button>)}
       </div>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
         <span className="text-xs text-muted-foreground">{tr("Saved on this device only. Use fictional figures during the pilot.")}</span>
         <details className="ms-auto"><summary className="cursor-pointer text-xs font-medium text-muted-foreground">Settings / إعدادات</summary>
