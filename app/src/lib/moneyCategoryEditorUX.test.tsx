@@ -31,7 +31,7 @@ describe("Adventure Money overview and category exploration",()=>{
   expect(screen.getByRole("region",{name:"Build household budget"})).toBeInTheDocument();
   expect(screen.getByText("Reference unavailable")).toBeInTheDocument();
   expect(screen.getByTestId("expense-category-editor")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Explore another category"}));
+  fireEvent.click(screen.getByRole("button",{name:/Explore another category/}));
   expect(screen.queryByRole("region",{name:"Build household budget"})).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"Back to the adventure"}));
   expect(screen.getByRole("region",{name:"Your monthly picture"})).toBeInTheDocument();
