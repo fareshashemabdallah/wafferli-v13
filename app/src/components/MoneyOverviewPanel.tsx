@@ -88,10 +88,7 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories,budge
    </summary>
    <div className="mt-3">{householdPanel}</div>
   </details>}
-  <details className="rounded-2xl border border-[#DDE7DB] bg-white p-4">
-   <summary className="min-h-11 cursor-pointer text-sm font-bold text-brand">{ar?"إدارة الفئات والدخل (اختياري)":"Manage categories & income (optional)"}</summary>
-   <div className="mt-3 space-y-3">{budgetManagement}</div>
-  </details>
+  {budgetManagement}
   <p className="text-xs leading-relaxed text-[#75877A]">{ar?"الأرقام المرجعية ضمن البنود توضيحية وليست متوسطات أسعار سوق مؤكدة في عمّان.":"Item references are illustrative, not verified Amman market spending averages."}</p>
  </div>;
 
