@@ -1,6 +1,5 @@
 import {useState} from "react";
-import {ArrowRight,Check,ChevronRight,CircleHelp,Coins,Compass,CalendarClock,Wallet,ShoppingBasket,ShieldCheck} from "lucide-react";
-import {Link} from "@tanstack/react-router";
+import {ArrowRight,Check,ChevronRight,CircleHelp,Coins,Compass,CalendarClock,Wallet,ShieldCheck} from "lucide-react";
 import {fmtJOD,useLocalState} from "@/lib/storage";
 import {useI18n} from "@/lib/i18n";
 import {computeMoney,sampleMembers,type Member,type MoneyState} from "@/lib/money";
