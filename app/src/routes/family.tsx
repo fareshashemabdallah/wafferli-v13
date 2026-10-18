@@ -39,7 +39,7 @@ export function FamilyLifePage(){
  const upcoming=upcomingMoments(allFamilyMoments(moments,realMembers,ar),new Date(),180);
  const activePlans=upcomingFamilyPlans(plans.filter(p=>p.status!=="completed"),new Date(),5);
  const activeTasks=taskSummary(tasks);
- const card="rounded-[1.55rem] border border-[#F0E4E9] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,40,64,.20)] sm:p-5";
+ const card="rounded-[1.55rem] border border-[#DDEBDD] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,82,64,.18)] sm:p-5";
  return <AppShell title={label("Family Life","حياة العيلة")}>
   <div className="space-y-4">
    <p className="px-1 text-sm leading-relaxed text-[#657185]">
