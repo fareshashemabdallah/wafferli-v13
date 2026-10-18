@@ -118,6 +118,12 @@ function MoneyPage() {
        <p className="mt-1 text-sm text-muted-foreground">{ar?"سجّل المصروف اليومي مرة واحدة. الفواتير المتكررة ومواعيد الدفع تجدها بقسم الفواتير.":"Add everyday purchases here. For rent, tuition or other payments with due dates, use Bills instead."}</p>
        <button type="button" className="mt-2 text-sm font-semibold text-brand underline underline-offset-2" onClick={()=>setSection("planning")}>{ar?"عندي فاتورة أو دفعة قادمة":"I have an upcoming bill or payment"} →</button>
       </div>
+      {s.categories.length===0&&<div className="mb-4 rounded-xl border border-[#DBE5D8] bg-[#F2F7EF] p-4">
+        <p className="text-sm font-semibold">{ar?"لحتى تسجّل مصروف، بدك فئة واحدة على الأقل":"Choose your first spending category"}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{ar?"مثل الطعام أو المواصلات. ما في حاجة تدخل ميزانية كاملة.":"For example groceries or transport. You can start with one category; a complete budget can wait."}</p>
+        <button type="button" className="mt-2 min-h-10 rounded-full bg-brand px-4 text-sm font-semibold text-white"
+          onClick={()=>setCategoryEditorOpen(true)}>{ar?"أضف فئة مصروف":"Add a spending category"}</button>
+      </div>}
       <Expenses
         cats={s.categories}
         members={members}
