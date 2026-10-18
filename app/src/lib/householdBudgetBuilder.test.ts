@@ -3,7 +3,7 @@ import {sampleMoney,type MoneyState,type Member} from "./money";
 import {emptyHouseholdPresence,exampleHelper,exampleGuest} from "./householdPresence";
 import {
  BUDGET_TEMPLATES,PUBLIC_JORDAN_UNIT_PRICES,
- categoryItemTotal,categoryUnallocated,householdCategoryReference,
+ categoryItemTotal,categoryUnallocated,householdCategoryReference,itemIllustrativeReference,recordedItemSpending,ILLUSTRATIVE_ITEM_SHARES,
  monthlyItemCost,removeBudgetItem,setCategoryPlanFromItems,upsertBudgetItem,
  type BudgetItem
 } from "./householdBudgetBuilder";
@@ -100,5 +100,40 @@ describe("Household reference transparency",()=>{
   expect(PUBLIC_JORDAN_UNIT_PRICES.find(x=>x.key==="cookinggas")?.priceJod).toBe(7);
   expect(PUBLIC_JORDAN_UNIT_PRICES.every(x=>x.source.includes("memr.gov.jo"))).toBe(true);
   expect(BUDGET_TEMPLATES.food).toContain("Dairy & eggs");
+ });
+});
+
+describe("Item-by-item comparison",()=>{
+ it("shows transparent reference shares only for supported items, including a legacy combined item",()=>{
+  const cat=base().categories[0]!;
+  const reference=householdCategoryReference(cat,people,emptyHouseholdPresence(),"2026-10");
+  expect(reference?.amountJod).toBe(190);
+  const vegetable={...item("veg",90),name:"Vegetables"};
+  expect(itemIllustrativeReference(cat,vegetable,reference)).toBe(28.5);
+  expect(itemIllustrativeReference(cat,{...vegetable,name:"Fruit"},reference)).toBe(19);
+  expect(itemIllustrativeReference(cat,{...vegetable,name:"Vegetables & fruit"},reference)).toBe(47.5);
+  expect(itemIllustrativeReference(cat,{...vegetable,name:"Custom organic boxes"},reference)).toBeNull();
+  expect(itemIllustrativeReference(cat,{...vegetable,categoryId:"fuel"},reference)).toBeNull();
+  expect(BUDGET_TEMPLATES.food).toContain("Vegetables");
+  expect(BUDGET_TEMPLATES.food).toContain("Fruit");
+  for(const shares of Object.values(ILLUSTRATIVE_ITEM_SHARES)){
+   expect(Object.values(shares).reduce((a,b)=>a+b,0)).toBeCloseTo(1,8);
+  }
+ });
+ it("counts only paid entries for the chosen month, leaving old/unlinked amounts visible",()=>{
+  const state=upsertBudgetItem(base(),{...item("veg",90),name:"Vegetables"});
+  state.expenses=[
+   {id:"a",date:"2026-10-01",categoryId:"groc",budgetItemId:"veg",amount:32,shared:false,status:"paid"},
+   {id:"b",date:"2026-10-02",categoryId:"groc",budgetItemId:"veg",amount:12,shared:false},
+   {id:"c",date:"2026-10-02",categoryId:"groc",amount:15,shared:false},
+   {id:"d",date:"2026-10-03",categoryId:"groc",budgetItemId:"deleted",amount:7,shared:false},
+   {id:"e",date:"2026-10-04",categoryId:"groc",budgetItemId:"veg",amount:100,shared:false,status:"planned"},
+   {id:"f",date:"2026-11-01",categoryId:"groc",budgetItemId:"veg",amount:25,shared:false,status:"paid"},
+   {id:"g",date:"2026-10-03",categoryId:"fuel",budgetItemId:"veg",amount:4,shared:false}
+  ];
+  expect(recordedItemSpending(state,"groc","2026-10")).toEqual({total:66,byItem:{veg:44},unassigned:22});
+  expect(recordedItemSpending(state,"groc","2026-11")).toEqual({total:25,byItem:{veg:25},unassigned:0});
+  expect(recordedItemSpending(state,"groc","2026-13")).toEqual({total:0,byItem:{},unassigned:0});
+  expect(state.categories[0]?.planned).toBe(350);
  });
 });

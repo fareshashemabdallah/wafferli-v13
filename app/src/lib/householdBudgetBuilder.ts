@@ -77,7 +77,7 @@ export function categoryKind(c:Category):BudgetKind{
 }
 export const BUDGET_TEMPLATES:Record<BudgetKind,readonly string[]>={
  housing:["Rent or mortgage","Building fees","Repairs & maintenance","Home insurance"],
- food:["Bread, rice & cereals","Meat, poultry & fish","Dairy & eggs","Vegetables & fruit","Pantry basics","Drinks & snacks"],
+ food:["Bread, rice & cereals","Meat, poultry & fish","Dairy & eggs","Vegetables","Fruit","Pantry basics","Drinks & snacks"],
  utilities:["Electricity","Water","Home internet","Mobile plans","Cooking gas (12.5 kg cylinder)"],
  transport:["Petrol 90","Car maintenance","Car insurance & registration","Taxi or public transport","School transport"],
  health:["Medicines","Doctor visits","Health insurance","Dental & optical","Personal care"],
@@ -124,4 +124,54 @@ export function householdCategoryReference(
   explanation:"Illustrative quantity assumptions; NOT a verified public-data spending average. Includes any separately entered helper/visitor food or utilities; beware of overlap with existing category plans.",
   officialUnits:PUBLIC_JORDAN_UNIT_PRICES.filter(x=>x.category===kind)
  };
+}
+
+/** Transparent illustrative proportions of each category-level household model.
+ * They are design assumptions, NOT measured Amman item averages.
+ * No reference is invented for custom items or unsupported categories.
+ * The percentages sum to 100% within each supported category. */
+export const ILLUSTRATIVE_ITEM_SHARES:Partial<Record<BudgetKind,Readonly<Record<string,number>>>>={
+ food:{"Bread, rice & cereals":.15,"Meat, poultry & fish":.27,"Dairy & eggs":.16,
+  "Vegetables":.15,"Fruit":.10,"Pantry basics":.10,"Drinks & snacks":.07},
+ utilities:{"Electricity":.45,"Water":.16,"Home internet":.19,"Mobile plans":.12,
+  "Cooking gas (12.5 kg cylinder)":.08},
+ transport:{"Petrol 90":.48,"Car maintenance":.19,"Car insurance & registration":.11,
+  "Taxi or public transport":.12,"School transport":.10},
+ health:{"Medicines":.28,"Doctor visits":.26,"Health insurance":.23,"Dental & optical":.13,"Personal care":.10},
+ education:{"Tuition":.68,"School transport":.08,"Books & stationery":.08,
+  "School uniforms":.06,"Activities & tutoring":.10},
+ outings:{"Restaurants & takeaway":.53,"Children's activities":.28,
+  "Entertainment":.14,"Occasional treats":.05},
+ clothing:{"Adult clothing":.33,"Children's clothing":.45,"Shoes":.22},
+ household:{"Cleaning products":.36,"Laundry":.22,"Paper products":.27,"Small replacements":.15}
+};
+/** An item reference is an illustrative portion of the existing category reference.
+ * Never add these item amounts to the category reference or to the budget. */
+export function itemIllustrativeReference(category:Category,item:BudgetItem,reference:ReferenceEstimate|null):number|null{
+ if(!reference||item.categoryId!==category.id)return null;
+ const shares=ILLUSTRATIVE_ITEM_SHARES[categoryKind(category)];
+ let weight=shares?.[item.name];
+ // Legacy food template was a single combined vegetables and fruit item.
+ if(weight===undefined&&categoryKind(category)==="food"&&item.name==="Vegetables & fruit"){
+  weight=(shares?.["Vegetables"]??0)+(shares?.["Fruit"]??0);
+ }
+ return weight===undefined?null:r2(reference.amountJod*weight);
+}
+export type RecordedItemSpending={total:number;byItem:Record<string,number>;unassigned:number};
+/** Only paid entries within the selected month count as actual spending.
+ * Old records and invalid/deleted item links stay visible as unassigned. */
+export function recordedItemSpending(state:MoneyState,categoryId:string,month:string):RecordedItemSpending{
+ const empty:RecordedItemSpending={total:0,byItem:{},unassigned:0};
+ if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))return empty;
+ const ids=new Set((state.budgetItems??[]).filter(i=>i.categoryId===categoryId).map(i=>i.id));
+ for(const expense of state.expenses){
+  if(expense.categoryId!==categoryId||!expense.date.startsWith(month+"-")||expense.status==="planned"||
+   !Number.isFinite(expense.amount)||expense.amount<0)continue;
+  empty.total=r2(empty.total+expense.amount);
+  const itemId=expense.budgetItemId;
+  if(itemId&&ids.has(itemId)){
+   empty.byItem[itemId]=r2((empty.byItem[itemId]??0)+expense.amount);
+  }else empty.unassigned=r2(empty.unassigned+expense.amount);
+ }
+ return empty;
 }
