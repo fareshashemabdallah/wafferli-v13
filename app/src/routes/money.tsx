@@ -373,7 +373,7 @@ function Expenses({ cats, members, expenses, onChange, onDelete, onConfirmPlanne
             <Input type="number" step=".01" min={0} max={50000} className="mt-1 max-w-44" value={quickExpected} onChange={e=>setQuickExpected(e.target.value)}/>
           </label>
           <p className="mt-2 text-xs text-muted-foreground">{ar?"إذا في فرق، يظهر اقتراح تعديل مخصصاتك بعد التسجيل، وتؤكده أنت.":"If actual differs, you'll be offered a budget adjustment to approve."}</p>
-        </details>}
+        </details>
         {quickError&&<p role="alert" className="text-sm text-destructive sm:col-span-3">{quickError}</p>}
         <p className="text-xs text-muted-foreground sm:col-span-3">{ar?"التسجيل يضيف المصروف للتاريخ، ولا يخصم من رصيدك اليدوي تلقائياً.":"Recording adds the payment to your spending history. It does not automatically deduct it from your manually entered cash balance."}</p>
       </form>
