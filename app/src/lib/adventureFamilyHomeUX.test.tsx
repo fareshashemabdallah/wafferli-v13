@@ -21,7 +21,7 @@ describe("The Dabberna family adventure world",()=>{
    ["Our Money","/money"],["Smart Shopping","/explore/smartbuy"],
    ["Adventure Park","/explore/weekend"],["Family Moments","/calendar"],
    ["Ask Dabberna","/advisor"]
-  ])expect(screen.getByRole("link",{name})).toHaveAttribute("href",route);
+  ] as const)expect(screen.getByRole("link",{name})).toHaveAttribute("href",route);
   expect(screen.getByRole("img",{name:"Cartoon family with two parents and children"})).toHaveAttribute("src",expect.stringContaining("landing-family-characters.avif"));
   expect(screen.queryByText("1,200 JOD")).not.toBeInTheDocument();
  });
