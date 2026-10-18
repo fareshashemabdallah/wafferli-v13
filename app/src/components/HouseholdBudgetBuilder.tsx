@@ -119,7 +119,13 @@ function CategoryDetails({category,money,setMoney,members,presence,month,autoOpe
  const ref=householdCategoryReference(category,members,presence,month);
  const recorded=recordedItemSpending(money,category.id,month);
  const spent=recorded.total;
- const templates=BUDGET_TEMPLATES[categoryKind(category)].filter(name=>!items.some(i=>i.name===name));
+ const legacyProduce=items.some(i=>i.name==="Vegetables & fruit");
+ const templates=BUDGET_TEMPLATES[categoryKind(category)].filter(name=>
+  !items.some(i=>i.name===name)&&!(legacyProduce&&(name==="Vegetables"||name==="Fruit")));
+ const emojiFor=(name:string)=>/vegetable/i.test(name)?"🥕":/fruit/i.test(name)?"🍎":/dairy|egg/i.test(name)?"🥛":
+  /meat|poultry|fish/i.test(name)?"🍗":/bread|rice|cereal/i.test(name)?"🥖":
+  /electric|water|gas/i.test(name)?"💡":/petrol|fuel|transport/i.test(name)?"🚗":
+  /school|tuition|book/i.test(name)?"📚":/children/i.test(name)?"🧸":"✨";
  const add=(name:string)=>{
   if(!name.trim())return;
   const item=blank(category.id,name.trim());
@@ -173,11 +179,14 @@ function CategoryDetails({category,money,setMoney,members,presence,month,autoOpe
    {items.length>0&&<p className="text-xs leading-relaxed text-muted-foreground">{ar?
     "كل بند: خطتك الشهرية، مرجع توضيحي إذا متاح، والمدفوع المرتبط به في الشهر المختار. المرجع ليس سعر سوق مؤكداً.":
     "Each item shows your monthly plan, an illustrative reference where available, and paid spending linked to it in the selected month. References are not verified market prices."}</p>}
-   {items.map(item=>{
+   {items.length>0&&<h3 className="text-sm font-extrabold text-[#205F4A]">{ar?"اكتشف البنود في هذه الفئة":"Explore inside this category"}</h3>}
+  {items.map(item=>{
     const itemRef=itemIllustrativeReference(category,item,ref);
     return <div key={item.id} className="border-t border-[#E7EEE5] pt-2">
-     <button type="button" className="w-full text-start text-sm font-semibold text-brand underline underline-offset-2" onClick={()=>setSelected(v=>v===item.id?null:item.id)}>
-      {item.name}{!item.enabled?(ar?" (مستبعد من الخطة)":" (excluded from plan)"):""}
+     <button type="button" className="flex min-h-10 w-full items-center gap-2 text-start text-sm font-semibold text-brand" onClick={()=>setSelected(v=>v===item.id?null:item.id)}>
+      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[#E9F2E6] text-lg" aria-hidden="true">{emojiFor(item.name)}</span>
+      <span className="flex-1 underline underline-offset-2">{item.name}{!item.enabled?(ar?" (مستبعد من الخطة)":" (excluded from plan)"):""}</span>
+      <ChevronDown className={"size-4 shrink-0 "+(selected===item.id?"rotate-180":"")}/>
      </button>
      <div className="mt-2 grid grid-cols-3 gap-2 rounded-lg bg-[#F6F9F4] p-2 text-xs">
       <div><span className="block text-muted-foreground">{ar?"خطتك":"Your plan"}</span>
@@ -187,6 +196,11 @@ function CategoryDetails({category,money,setMoney,members,presence,month,autoOpe
       <div><span className="block text-muted-foreground">{ar?"دفعت":"Paid"}</span>
        <strong className="mt-1 block tabular-nums">{fmtJOD(recorded.byItem[item.id]??0)}</strong></div>
      </div>
+     {monthlyItemCost(item)>0&&<div className="mt-2 h-2 overflow-hidden rounded-full bg-[#E3EADD]" role="progressbar"
+      aria-label={ar?"المصروف المسجل من خطة "+item.name:"Recorded spending versus "+item.name+" plan"}
+      aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(100,Math.round((recorded.byItem[item.id]??0)/monthlyItemCost(item)*100))}>
+      <div className="h-full rounded-full bg-[#41A97C] transition-all" style={{width:Math.min(100,(recorded.byItem[item.id]??0)/monthlyItemCost(item)*100)+"%"}}/>
+     </div>}
      {selected===item.id&&<ItemEditor item={item} onSave={v=>{setMoney(s=>upsertBudgetItem(s,v));setSelected(null);}}
       onRemove={()=>{if(window.confirm(ar?"حذف هذا البند من التفصيل؟":"Remove this item from the breakdown?")){setMoney(s=>removeBudgetItem(s,item.id));setSelected(null);}}}/>}
     </div>;
@@ -199,7 +213,25 @@ function CategoryDetails({category,money,setMoney,members,presence,month,autoOpe
      "Older or category-only spending counts toward the category total without guessing which item it belongs to."}</p>
    </div>}
    {!money.demo&&<>
-    {templates.length>0&&<div className="flex flex-wrap items-end gap-2">
+    {templates.length>0&&<div className="rounded-xl border border-[#D8E7D8] bg-[#FFFCF6] p-3">
+     <h3 className="text-sm font-black text-[#285F4A]">{ar?"اكتشف بنوداً إضافية":"Discover more inside this category"}</h3>
+     <p className="mt-1 text-xs text-[#6B8072]">{ar?"بنود جاهزة لإضافتها إلى خطتك. المرجع التوضيحي مش مبلغ مطلوب منك تدفعه.":"Suggested items to add to your plan. An illustrative reference isn't a target you must match."}</p>
+     <div className="mt-2 divide-y divide-[#E8E9DD]">
+      {templates.slice(0,6).map(name=>{
+       const preview:BudgetItem={id:"suggested-preview",categoryId:category.id,name,enabled:true,amountJod:0,frequency:"monthly",behaviour:"variable",priority:"essential"};
+       const estimate=itemIllustrativeReference(category,preview,ref);
+       return <div key={name} className="flex min-h-12 items-center gap-2 py-2">
+        <span className="text-xl" aria-hidden="true">{emojiFor(name)}</span>
+        <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{name}</span>
+         <span className="block text-xs text-[#728376]">{estimate===null?(ar?"لا يوجد مرجع موثّق":"No reference available"):((ar?"مرجع توضيحي: ":"Illustrative ref.: ")+fmtJOD(estimate))}</span>
+        </span>
+        <button type="button" onClick={()=>add(name)}
+         className="min-h-10 rounded-full border border-[#CCE4D1] bg-white px-3 text-xs font-bold text-[#277C5E]">{ar?"أضف":"Add"} +</button>
+       </div>;
+      })}
+     </div>
+    </div>}
+    {templates.length>6&&<div className="flex flex-wrap items-end gap-2">
      <label className="min-w-32 flex-1 text-xs">{ar?"اختر بنداً جاهزاً":"Add a suggested item"}
       <select className={input} value={newItem} onChange={e=>setNewItem(e.target.value)}>
        <option value="">{ar?"اختر...":"Choose..."}</option>
