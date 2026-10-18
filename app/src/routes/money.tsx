@@ -108,6 +108,7 @@ function MoneyPage() {
       {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}
         onManageCategories={openCategoryEditor}
         onEditIncome={()=>{setIncomeEditorOpen(true);setSection("overview");}}
+        householdPanel={<HouseholdPresencePanel members={members} money={s} setMoney={setS}/>}
         budgetManagement={<div id="money-budget-controls">
           <details ref={categoryEditorRef} open={categoryEditorOpen} onToggle={event=>setCategoryEditorOpen(event.currentTarget.open)} className="editorial-card scroll-mt-4 px-4 py-3">
             <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"أضف وعدّل فئات ميزانيتك":"Add or edit budget categories"}</summary>
@@ -121,7 +122,6 @@ function MoneyPage() {
           </details>
         </div>}/>}
 
-      {section==="overview"&&<HouseholdPresencePanel members={members} money={s} setMoney={setS}/>}
       {section==="overview"&&<details className="editorial-card mb-4 px-4 py-3">
        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
         {ar?"أدوات إضافية: تاريخ المصاريف وتجربة خطط مستقبلية":"Optional: spending history and future budget experiments"} +
