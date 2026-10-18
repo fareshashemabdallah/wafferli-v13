@@ -11,7 +11,7 @@ import {
  type BudgetItem,type ItemFrequency
 } from "@/lib/householdBudgetBuilder";
 
-type Props={money:MoneyState;setMoney:(fn:(s:MoneyState)=>MoneyState)=>void;members:Member[];onManageCategories:()=>void};
+type Props={money:MoneyState;setMoney:(fn:(s:MoneyState)=>MoneyState)=>void;members:Member[];onManageCategories:()=>void;focusedCategoryId?:string;compact?:boolean};
 const input="mt-1 min-h-10 w-full rounded-lg border border-[#D7E3D3] bg-white px-3 text-sm";
 const amount=(s:string)=>/^\d{1,6}(\.\d{1,2})?$/.test(s.trim())&&Number(s)<=100000?Number(s):null;
 const ym=()=>{const n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")};
@@ -105,7 +105,7 @@ function ItemEditor({item,onSave,onRemove}:{item:BudgetItem;onSave:(i:BudgetItem
   <button className="min-h-10 rounded-full bg-brand px-4 text-sm font-semibold text-white" type="submit">{ar?"احفظ البند":"Save item"}</button>
  </form>;
 }
-function CategoryDetails({category,money,setMoney,members,presence,month}:{category:Category;money:MoneyState;setMoney:Props["setMoney"];members:Member[];presence:HouseholdPresence;month:string}){
+function CategoryDetails({category,money,setMoney,members,presence,month,autoOpen=false}:{category:Category;money:MoneyState;setMoney:Props["setMoney"];members:Member[];presence:HouseholdPresence;month:string;autoOpen?:boolean}){
  const {lang}=useI18n(),ar=lang==="ar";
  const [newItem,setNewItem]=useState("");
  const [custom,setCustom]=useState("");
@@ -133,7 +133,7 @@ function CategoryDetails({category,money,setMoney,members,presence,month}:{categ
   setMoney(s=>({...s,categories:s.categories.map(c=>c.id===category.id?{...c,planned:n,amountConfidence:"confirmed"}:c)}));
   setError("");
  };
- return <details className="rounded-xl border border-[#DEE8DB] bg-white p-3" data-budget-category={category.id}>
+ return <details defaultOpen={autoOpen} className="rounded-xl border border-[#DEE8DB] bg-white p-3" data-budget-category={category.id}>
   <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2">
    <span className="min-w-0 flex-1"><strong className="block text-sm">{category.name}</strong>
     <span className="text-xs text-muted-foreground">{ar?"مخطط شهري ":"Monthly plan "}{fmtJOD(category.planned)} · {ar?"مدفوع ":"Paid "}{fmtJOD(spent)}</span>
@@ -225,12 +225,13 @@ function CategoryDetails({category,money,setMoney,members,presence,month}:{categ
   </div>
  </details>;
 }
-export function HouseholdBudgetBuilder({money,setMoney,members,onManageCategories}:Props){
+export function HouseholdBudgetBuilder({money,setMoney,members,onManageCategories,focusedCategoryId,compact=false}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
  const [presence]=useLocalState<HouseholdPresence>(HOUSEHOLD_PRESENCE_KEY,emptyHouseholdPresence());
  const [month,setMonth]=useState(ym);
+ const categories=focusedCategoryId?money.categories.filter(c=>c.id===focusedCategoryId):money.categories;
  return <section className="rounded-2xl border border-[#DAE5D9] bg-[#F8FBF7] p-4 sm:p-5" aria-label={ar?"بناء ميزانية البيت":"Build household budget"}>
-  <div className="flex items-start gap-3">
+  {!compact&&<div className="flex items-start gap-3">
    <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#E4F0E3] text-brand"><ReceiptText className="size-5"/></div>
    <div className="min-w-0 flex-1">
     <p className="text-xs font-semibold tracking-wide text-brand">{ar?"خطة بيتك":"YOUR HOUSEHOLD BUDGET"}</p>
@@ -239,7 +240,7 @@ export function HouseholdBudgetBuilder({money,setMoney,members,onManageCategorie
      "افتح الفئة لتشوف خطتك الشهرية والمصاريف المدفوعة والمرجع التوضيحي لكل بند. التفاصيل اختيارية.":
      "Open a category to compare each item’s current monthly plan, paid spending and illustrative reference. All item details remain optional."}</p>
    </div>
-  </div>
+  </div>}
   <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
    <label className="text-xs">{ar?"شهر مقارنة المصروف":"Spending comparison month"}
     <input className={input} type="month" value={month} onChange={e=>setMonth(e.target.value||ym())}/>
@@ -247,21 +248,21 @@ export function HouseholdBudgetBuilder({money,setMoney,members,onManageCategorie
    <button type="button" className="min-h-10 text-xs font-semibold text-brand underline" onClick={onManageCategories}>{ar?"أضف أو عدّل فئة":"Manage categories"}</button>
   </div>
   <div className="mt-3 space-y-2">
-   {money.categories.map(category=><CategoryDetails key={category.id} category={category} money={money}
-    setMoney={setMoney} members={members} presence={presence} month={month}/>)}
+   {categories.map(category=><CategoryDetails key={category.id} category={category} money={money}
+    setMoney={setMoney} members={members} presence={presence} month={month} autoOpen={!!focusedCategoryId}/>)}
    {money.categories.length===0&&<p className="rounded-lg bg-white p-4 text-sm text-muted-foreground">{ar?
     "ما في فئات بعد. أضف أول فئة للبدء، ويمكن ترك الميزانية الإجمالية لوقت لاحق.":
     "No spending categories yet. Add one category to begin; detailed allocations can wait."}</p>}
   </div>
-  <p className="mt-3 text-xs text-muted-foreground">{ar?"الخطة هي المخصص الحالي؛ أما المدفوع فهو للشهر المختار.":"Plan figures are current monthly allocations; paid amounts are filtered to the chosen month."}</p>
+  {!compact&&<p className="mt-3 text-xs text-muted-foreground">{ar?"الخطة هي المخصص الحالي؛ أما المدفوع فهو للشهر المختار.":"Plan figures are current monthly allocations; paid amounts are filtered to the chosen month."}</p>}
    <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
    {ar?"الأرقام المرجعية العامة هنا نموذج توضيحي وليست إحصاءات سوق رسمية؛ فقط سعر البنزين والغاز مرتبط بمصدر حكومي لشهر تشرين الأول ٢٠٢٦. ما بنغيّر أي ميزانية حسب المرجع من دون قرارك.":
     "Household reference totals are illustrative assumptions, not current public spending statistics. Only Petrol 90 and domestic LPG have verified government unit prices (October 2026). References never overwrite your plan automatically."}
   </p>
-  <p className="mt-1 text-xs text-muted-foreground">{ar?
+  {!compact&&<p className="mt-1 text-xs text-muted-foreground">{ar?
    "المصدر العام لمسح إنفاق الأسرة الأردنية هو دائرة الإحصاءات العامة (2017–2018)؛ الأرقام القديمة ليست تقديرات شهرية حالية لعمّان.":
    "Jordan's Department of Statistics publishes historical household spending data (2017–18), but that survey is not presented as a current 2026 Amman benchmark."}{" "}
    <a className="underline" href="https://dosweb.dos.gov.jo/expenditures-income-tables2017/" target="_blank" rel="noopener noreferrer">{ar?"اطّلع على المصدر":"View survey source"}</a>.
-  </p>
+  </p>}
  </section>;
 }
