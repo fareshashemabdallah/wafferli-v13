@@ -62,4 +62,15 @@ describe("explicit local backup and reset",()=>{
   expect(eraseLocalAppData(s)).toBe(1);
   expect(s.getItem("wafferli.v13.futureAuthToken")).toBe('"never export me"');
  });
+ it("exports and erases a recorded helper or visitor without touching unrelated keys",()=>{
+  const s=mockStorage();
+  const presence={adults:2,children:2,helpers:[{id:"helper-1",label:"Helper"}],guests:[{id:"visitor-1",label:"Relative"}]};
+  s.setItem("wafferli.v13.householdPresence",JSON.stringify(presence));
+  s.setItem("sb-example-auth-token",'"keep"');
+  const data=buildLocalBackup(s);
+  expect(data.entries["householdPresence"]).toEqual(presence);
+  expect(eraseLocalAppData(s)).toBe(1);
+  expect(s.has("wafferli.v13.householdPresence")).toBe(false);
+  expect(s.has("sb-example-auth-token")).toBe(true);
+ });
 });
