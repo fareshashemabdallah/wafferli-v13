@@ -89,8 +89,8 @@ function MoneyPage() {
         </div></details>
       </div>
 
-      {section==="overview"&&<HouseholdPresencePanel members={members} money={s} setMoney={setS}/>}
       {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection} onManageCategories={()=>{setCategoryEditorOpen(true);setSection("spending");}}/>}
+      {section==="overview"&&<HouseholdPresencePanel members={members} money={s} setMoney={setS}/>}
       {section==="overview"&&<details className="editorial-card mb-4 px-4 py-3">
        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
         {ar?"أدوات إضافية: تاريخ المصاريف وتجربة خطط مستقبلية":"Optional: spending history and future budget experiments"} +
