@@ -1,5 +1,6 @@
 import type { IncomeSource, Commitment } from "./cashflow";
 import type {SavingsGoal} from "./savingsGoals";
+import type {BudgetItem} from "./householdBudgetBuilder";
 import { monthlyTotal } from "./cashflow";
 import { monthCarryover } from "./monthlyCarryover";
 export type CatType = "fixed" | "variable" | "periodic";
@@ -9,6 +10,8 @@ export type Expense = { id: string; date: string; categoryId: string; amount: nu
 export type MoneyState = {
   /** Legacy monthly income: retained to preserve users' existing saved budgets. */
   income:number; savingsPct:number; categories:Category[]; expenses:Expense[]; demo:boolean;
+  /** Optional item detail. Category planned totals remain canonical; never sum both. */
+  budgetItems?:BudgetItem[];
   /** Explicitly distinguishes a parent-entered zero income from unknown income. */
   incomeKnown?:boolean; incomeConfidence?:"estimate"|"confirmed";
   /** Declared priorities for family life, not automatically deducted or shared. */

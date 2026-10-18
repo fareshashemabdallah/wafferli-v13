@@ -39,6 +39,7 @@ function MoneyPage() {
   const ar=lang==="ar";
   const [section,setSection]=useState<"overview"|"spending"|"planning">("overview");
   const [categoryEditorOpen,setCategoryEditorOpen]=useState(false);
+  const [incomeEditorOpen,setIncomeEditorOpen]=useState(false);
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
   const c = useMemo(() => computeMoney(s), [s]);
@@ -89,7 +90,22 @@ function MoneyPage() {
         </div></details>
       </div>
 
-      {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection} onManageCategories={()=>{setCategoryEditorOpen(true);setSection("spending");}}/>}
+      {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}
+        onManageCategories={()=>{setCategoryEditorOpen(true);setSection("overview");}}
+        onEditIncome={()=>{setIncomeEditorOpen(true);setSection("overview");}}
+        budgetManagement={<div id="money-budget-controls">
+          <details open={categoryEditorOpen} onToggle={event=>setCategoryEditorOpen(event.currentTarget.open)} className="editorial-card px-4 py-3">
+            <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"أضف وعدّل فئات ميزانيتك":"Add or edit budget categories"}</summary>
+            <p className="mt-2 text-xs text-muted-foreground">{ar?"المخصصات الشهرية ليست مصاريف مدفوعة ولا مواعيد فواتير.":"Category allocations are monthly plans, not paid transactions or dated bills."}</p>
+            <Categories cats={s.categories} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={categories=>upd({categories,budgetItems:(s.budgetItems??[]).filter(item=>categories.some(cat=>cat.id===item.categoryId))})}/>
+          </details>
+          <details open={incomeEditorOpen} onToggle={event=>setIncomeEditorOpen(event.currentTarget.open)} className="editorial-card mt-3 px-4 py-3">
+            <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"الدخل الشهري وهدف الادخار (اختياري)":"Monthly income & savings goal (optional)"}</summary>
+            <Settings key={`${c.monthlyIncome}:${recurringSavingsGoal}`} income={c.monthlyIncome} target={recurringSavingsGoal} hasSources={s.incomeSources!==undefined}
+              onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
+          </details>
+        </div>}/>}
+
       {section==="overview"&&<HouseholdPresencePanel members={members} money={s} setMoney={setS}/>}
       {section==="overview"&&<details className="editorial-card mb-4 px-4 py-3">
        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
@@ -103,14 +119,6 @@ function MoneyPage() {
       {section==="planning"&&<>
       <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"الفواتير والدفعات":"Your bills & payments"}</h2>
        <p className="mt-1 text-sm text-muted-foreground">{ar?"سجّل موعد الاستحقاق مرة واحدة، وبعد الدفع أكّد المبلغ الحقيقي. لإدخال مشترياتك اليومية، استخدم المصاريف.":"Add each bill once with its due date, then confirm the payment when it happens. Use Spending for everyday purchases."}</p></div>
-      <details className="editorial-card mb-4 px-4 py-3">
-        <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"تعديل الدخل الشهري وهدف الادخار (اختياري)":"Edit monthly income & savings goal (optional)"}</summary>
-        <div className="mt-3">
-        <h2 className="text-base font-semibold">{ar?"الدخل والادخار":"Income & savings"}</h2>
-        <Settings key={`${c.monthlyIncome}:${recurringSavingsGoal}`} income={c.monthlyIncome} target={recurringSavingsGoal} hasSources={s.incomeSources!==undefined}
-         onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
-        </div>
-      </details>
       <CashFlowPlanner state={s} members={members} update={setS} />
       </>}
       {section==="spending"&&<>
@@ -122,7 +130,7 @@ function MoneyPage() {
         <p className="text-sm font-semibold">{ar?"لحتى تسجّل مصروف، بدك فئة واحدة على الأقل":"Choose your first spending category"}</p>
         <p className="mt-1 text-xs text-muted-foreground">{ar?"مثل الطعام أو المواصلات. ما في حاجة تدخل ميزانية كاملة.":"For example groceries or transport. You can start with one category; a complete budget can wait."}</p>
         <button type="button" className="mt-2 min-h-10 rounded-full bg-brand px-4 text-sm font-semibold text-white"
-          onClick={()=>setCategoryEditorOpen(true)}>{ar?"أضف فئة مصروف":"Add a spending category"}</button>
+          onClick={()=>{setSection("overview");setCategoryEditorOpen(true);}}>{ar?"أضف فئة مصروف":"Add a spending category"}</button>
       </div>}
       <Expenses
         cats={s.categories}
@@ -151,11 +159,6 @@ function MoneyPage() {
         });
         }}
       />
-      <details open={categoryEditorOpen} onToggle={event=>setCategoryEditorOpen(event.currentTarget.open)} className="editorial-card mt-4 px-4 py-3">
-        <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"تعديل مخصصات الميزانية والفئات":"Edit category budgets and allocations"}</summary>
-        <p className="mt-2 text-xs text-muted-foreground">{ar?"الفئة هي المبلغ اللي خططت تصرفه بالشهر، مش مصروف مدفوع.":"A category allocation is your monthly plan—not a payment or transaction."}</p>
-        <Categories cats={s.categories} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={(categories) => upd({categories})}/>
-      </details>
       <details className="editorial-card mt-4 px-4 py-3">
         <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"راجع الفروقات بين المخطط والمدفوع (اختياري)":"Review budget differences (optional)"}</summary>
         <MoneyGuidance scope="variance" state={s} setState={setS}/>

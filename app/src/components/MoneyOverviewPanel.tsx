@@ -13,15 +13,19 @@ import {FinancialRealityPanel} from "@/components/FinancialRealityPanel";
 import {SavingsGoalsPanel} from "@/components/SavingsGoalsPanel";
 import {FamilyCommitmentsPanel} from "@/components/FamilyCommitmentsPanel";
 import {QuickMoneySetup} from "@/components/QuickMoneySetup";
+import {HouseholdBudgetBuilder} from "@/components/HouseholdBudgetBuilder";
+import {sampleMembers,type Member} from "@/lib/money";
+import type {ReactNode} from "react";
 import {needsStarterBudget} from "@/lib/starterBudget";
 import {monthCarryover,nextMonthKey} from "@/lib/monthlyCarryover";
 import {useI18n} from "@/lib/i18n";
 
 type Section="overview"|"spending"|"planning";
-type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(s:Section)=>void;onManageCategories?:()=>void};
-export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Props){
+type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(s:Section)=>void;onManageCategories?:()=>void;budgetManagement?:ReactNode;onEditIncome?:()=>void};
+export function MoneyOverviewPanel({state,setState,goTo,onManageCategories,budgetManagement,onEditIncome}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
  const [familyPlans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [members]=useLocalState<Member[]>("members",sampleMembers());
  const plannedItems=upcomingFamilyPlans(familyPlans.filter(p=>!p.occasionPreparation));
  const v=getMoneyOverview(state,new Date(),familyPlans);
  const f=v.forecast,c=v.month;
@@ -46,6 +50,8 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Prop
  return <div className="space-y-4">
    <FinancialRealityPanel money={state} plans={familyPlans} update={setState} goTo={goTo}/>
    <SpendingBreakdownCard state={state} onChange={next=>setState(()=>next)} {...(onManageCategories?{onEdit:onManageCategories}:{})}/>
+   <HouseholdBudgetBuilder money={state} setMoney={setState} members={members} onManageCategories={onManageCategories??(()=>{})}/>
+   {budgetManagement}
    {!state.demo&&<MoneyReadinessCard state={state} setState={setState} goTo={goTo} plans={familyPlans}/>}
 
    {state.demo&&!needsStarterBudget(state)&&<section className="rounded-2xl border border-[#EBDCC9] bg-[#FFF6E9] px-4 py-4">
@@ -59,13 +65,13 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories}:Prop
      <div className="flex flex-wrap items-center justify-between gap-2">
        <div><p className="section-eyebrow">{ar?"التخطيط الشهري":"YOUR MONTHLY PLAN"}</p>
        <h2 className="mt-1 text-xl font-semibold">{ar?"شو بتعني الأرقام اللي دخلتها؟":"What do your numbers tell you?"}</h2></div>
-       <button type="button" onClick={()=>goTo("planning")} className="text-xs font-semibold text-brand underline underline-offset-2">{ar?"عدّل الدخل والادخار":"Edit income & savings"}</button>
+       <button type="button" onClick={()=>onEditIncome?onEditIncome():goTo("planning")} className="text-xs font-semibold text-brand underline underline-offset-2">{ar?"عدّل الدخل والادخار":"Edit income & savings"}</button>
      </div>
      <div role="status" className={"mt-4 rounded-xl border p-4 "+(plain.state==="deficit"?
       "border-[#E8D0C4] bg-[#FFF8F1]":"border-[#D9E5D8] bg-[#F4F9F1]")}>
        <h3 className="text-base font-semibold">{ar?plain.titleAr:plain.titleEn}</h3>
        <p className="mt-2 text-sm leading-relaxed">{ar?plain.messageAr:plain.messageEn}</p>
-       {plain.state==="deficit"&&<button type="button" onClick={()=>goTo("planning")}
+       {plain.state==="deficit"&&<button type="button" onClick={()=>onManageCategories?onManageCategories():goTo("planning")}
         className="mt-3 min-h-11 text-sm font-semibold text-brand underline">
         {ar?"عدّل الخطة":"Adjust your plan"} →
        </button>}
