@@ -12,38 +12,45 @@ vi.mock("@tanstack/react-router",()=>({
 beforeEach(()=>window.localStorage.clear());
 afterEach(()=>{cleanup();vi.restoreAllMocks();window.localStorage.clear();});
 
-describe("Money page keeps its first screen light",()=>{
- it("shows a concise snapshot, leaving detailed category comparisons closed until requested",async()=>{
-  const manage=vi.fn(), go=vi.fn();
+describe("Adventure Money overview and category exploration",()=>{
+ it("shows the money journey first, with real category forms only after selecting one",()=>{
+  const go=vi.fn();
   render(<I18nProvider>
    <MoneyOverviewPanel state={{...sampleMoney(),demo:false}} setState={vi.fn()} goTo={go}
-    onManageCategories={manage}
-    householdPanel={<div data-testid="household-people">People & visitors</div>}
+    householdPanel={<p data-testid="household-personnel">Your people</p>}
     budgetManagement={<section data-testid="expense-category-editor">Category controls</section>}/>
   </I18nProvider>);
-  expect(screen.getByRole("region",{name:"Monthly money snapshot"})).toBeInTheDocument();
-  expect(screen.getByText("Your family money this month")).toBeInTheDocument();
-  expect(screen.getByText("Your plan, recorded payments and upcoming bills are different views of the same finances—not amounts to add together. This is not your bank balance or money confirmed safe to spend.")).toBeInTheDocument();
+  expect(screen.getByRole("region",{name:"Your monthly picture"})).toBeInTheDocument();
+  expect(screen.getByRole("region",{name:"Family exploration steps"})).toBeInTheDocument();
   expect(screen.queryByRole("region",{name:"Build household budget"})).not.toBeInTheDocument();
-  expect(screen.queryByTestId("expense-category-editor")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Explore & adjust my household budget"}));
-  const editor=screen.getByTestId("expense-category-editor");
-  const builder=screen.getByRole("region",{name:"Build household budget"});
-  expect(screen.queryByRole("region",{name:"Monthly money snapshot"})).not.toBeInTheDocument();
-  expect(editor.compareDocumentPosition(builder)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  expect(screen.getByText("Household members, helpers & visitors")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Manage categories"}));
-  expect(manage).toHaveBeenCalledOnce();
-  fireEvent.click(screen.getByRole("button",{name:"Back to Our Money"}));
-  expect(screen.getByRole("region",{name:"Monthly money snapshot"})).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:/Discover cost of living/}));
+  expect(screen.getByRole("region",{name:"Family budget adventure"})).toBeInTheDocument();
+  expect(screen.getByRole("heading",{name:"Where shall we explore?"})).toBeInTheDocument();
+  expect(screen.queryByRole("region",{name:"Build household budget"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:/Groceries/}));
+  expect(screen.getByRole("region",{name:"Build household budget"})).toBeInTheDocument();
+  expect(screen.getByText("Illustrative reference", {exact:false})).toBeInTheDocument();
+  expect(screen.getByTestId("expense-category-editor")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Explore another category"}));
+  expect(screen.queryByRole("region",{name:"Build household budget"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Back to the adventure"}));
+  expect(screen.getByRole("region",{name:"Your monthly picture"})).toBeInTheDocument();
  });
- it("keeps advanced analysis optional rather than appending it to the home scroll",()=>{
+ it("keeps the deeper analytical view optional",()=>{
   render(<I18nProvider>
    <MoneyOverviewPanel state={{...sampleMoney(),demo:false}} setState={vi.fn()} goTo={vi.fn()}/>
   </I18nProvider>);
   expect(screen.queryByRole("heading",{name:"Financial insights & details"})).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:/More financial insights/}));
+  fireEvent.click(screen.getByRole("button",{name:/Detailed financial insights/}));
   expect(screen.getByRole("heading",{name:"Financial insights & details"})).toBeInTheDocument();
   expect(screen.queryByRole("region",{name:"Build household budget"})).not.toBeInTheDocument();
+ });
+ it("does not pass sample budgets off as household finances",()=>{
+  render(<I18nProvider>
+   <MoneyOverviewPanel state={sampleMoney()} setState={vi.fn()} goTo={vi.fn()}/>
+  </I18nProvider>);
+  expect(screen.getByText("Not entered", {exact:true})).toBeInTheDocument();
+  expect(screen.queryByText("1,200 JOD")).not.toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"Start my family plan"})).toBeInTheDocument();
  });
 });
