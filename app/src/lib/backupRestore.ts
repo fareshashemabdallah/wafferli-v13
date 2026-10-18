@@ -89,7 +89,17 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
     "A dated visit must have valid arrival and departure dates"),100)
  }),
  money:opts({
-  income:maxNumber,savingsPct:maxNumber,categories:many(opts({
+  income:maxNumber,savingsPct:maxNumber,
+  budgetItems:many(z.object({
+   id,name:z.string().min(1).max(90),categoryId:id,enabled:z.boolean(),
+   amountJod:smallMoney,frequency:z.enum(["monthly","weekly","quarterly","yearly"]),
+   behaviour:z.enum(["fixed","variable"]),
+   priority:z.enum(["essential","protected","flexible"]),
+   quantity:smallMoney.optional(),unitPriceJod:smallMoney.optional(),
+   unitLabel:z.string().max(40).optional(),priceSource:url.optional(),
+   priceCheckedMonth:z.string().regex(/^\\d{4}-\\d{2}$/).optional()
+  }).strict(),500).optional(),
+  categories:many(opts({
    id,name:text,type:z.enum(["fixed","variable","periodic"]),planned:maxNumber
   })),expenses:many(expense),demo:z.boolean(),
   incomeSources:many(incomeSource).optional(),commitments:many(commitment).optional(),
@@ -279,6 +289,9 @@ export function inspectLocalBackup(
   const payload=entries[key];
   if(["members","familyCalendar","familyPlans","shopping","privateQuoteRequests","privateServiceShortlist","familyTasks","familyWishlist","privateOutingOptions"].includes(typed)&&!uniqueIds(payload))
    throw new Error("Duplicate item IDs in "+typed+"; no changes were made");
+  if(typed==="money"&&record(payload)&&payload["budgetItems"]!==undefined&&
+    !uniqueIds(payload["budgetItems"]))
+    throw new Error("Duplicate budget item IDs; no changes were made");
   if(typed==="householdPresence"&&record(payload)&&
    (!uniqueIds(payload["helpers"])||!uniqueIds(payload["guests"])))
    throw new Error("Duplicate helper or visitor IDs; no changes were made");
