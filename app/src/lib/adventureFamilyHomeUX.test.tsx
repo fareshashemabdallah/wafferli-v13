@@ -31,8 +31,8 @@ describe("The Dabberna family adventure world",()=>{
    expenses:[{id:"actual",date:new Date().toISOString().slice(0,7)+"-02",categoryId:"groc",amount:15,shared:false,status:"paid"}]
   }));
   renderWorld();
-  expect(screen.queryByText(/15 JOD in paid entries/)).not.toBeInTheDocument();
+  expect(screen.getByText(/15 JOD in paid entries/).closest("details")).not.toHaveAttribute("open");
   fireEvent.click(screen.getByText("A little update from your family world (optional)"));
-  expect(screen.getByText(/paid entries this month/)).toBeInTheDocument();
+  expect(screen.getByText(/paid entries this month/).closest("details")).toHaveAttribute("open");
  });
 });
