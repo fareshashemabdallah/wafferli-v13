@@ -84,8 +84,8 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
    endDate:z.union([isoDate,z.literal("")]),
    daysMonthly:z.number().int().min(0).max(31),
    foodDaily:smallMoney,utilitiesDaily:smallMoney,otherDaily:smallMoney
-  }).refine(g=>g.pattern!=="one-off"||
-    (!!g.startDate&&!!g.endDate&&g.startDate<=g.endDate),
+  }).refine(g=>g["pattern"]!=="one-off"||
+    (!!g["startDate"]&&!!g["endDate"]&&g["startDate"]<=g["endDate"]),
     "A dated visit must have valid arrival and departure dates"),100)
  }),
  money:opts({
