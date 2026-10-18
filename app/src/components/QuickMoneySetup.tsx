@@ -41,7 +41,7 @@ export function QuickMoneySetup({money,setMoney,compact=false}:Props){
    "Replace sample Money with your estimates? Family profiles, occasions and existing plans will stay unchanged.",
    "هل تستبدل أرقام المالية التجريبية بتقديراتك؟ ستبقى بيانات العيلة والمناسبات والخطط كما هي.")))return;
   const next=applyStarterBudget(money,{
-   income:amount,spending,savings:saving,
+   income:amount,spending,...(saving===undefined?{}:{savings:saving}),
    ...(!hasCategories?{essential:a!,other:b!}:{}),
    approximateIncome:approximate,zeroIncomeConfirmed:zeroIncome
   });
