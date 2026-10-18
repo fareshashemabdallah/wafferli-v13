@@ -1,3 +1,4 @@
+import { HouseholdPresencePanel } from "@/components/HouseholdPresencePanel";
 import { createFileRoute } from "@tanstack/react-router";
 import { CashFlowPlanner } from "@/components/CashFlowPlanner";
 import { MoneyGuidance } from "@/components/MoneyGuidance";
@@ -88,6 +89,7 @@ function MoneyPage() {
         </div></details>
       </div>
 
+      {section==="overview"&&<HouseholdPresencePanel members={members} money={s} setMoney={setS}/>}
       {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection} onManageCategories={()=>{setCategoryEditorOpen(true);setSection("spending");}}/>}
       {section==="overview"&&<details className="editorial-card mb-4 px-4 py-3">
        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
