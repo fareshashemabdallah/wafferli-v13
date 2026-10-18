@@ -27,7 +27,7 @@ export function AdventureMoneyJourney({money,setMoney,onBudget,onSpending,onBill
  const confirmedPlan=!money.demo&&money.categories.some(c=>c.planned>0);
  const tracked=!money.demo&&money.expenses.some(e=>e.status!=="planned");
  const progress=[enteredPeople,costExplored,confirmedPlan,tracked].filter(Boolean).length;
- const goCost=()=>{setCostExplored(true);if(setupNeeded)setSetupOpen(true);else onBudget();};
+ const goCost=()=>{if(setupNeeded)setSetupOpen(true);else{setCostExplored(true);onBudget();}};
  const goPlan=()=>{if(setupNeeded)setSetupOpen(true);else onBudget();};
  const highlights=[
   {key:"income",label:t("Income","الدخل"),value:money.demo?t("Not entered","غير مدخل"):(!money.incomeKnown&&figures.monthlyIncome===0?t("Not entered","غير مدخل"):fmtJOD(figures.monthlyIncome)),icon:<Coins className="size-5 text-[#2C9D74]"/>,bg:"#DDF5E7"},
@@ -108,7 +108,7 @@ export function AdventureMoneyJourney({money,setMoney,onBudget,onSpending,onBill
    <button type="button" onClick={onSpending} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#D6E7DA] bg-white px-3 text-sm font-bold"><Wallet className="size-4 text-[#3C936D]"/>{t("Record spending","سجّل مصروف")}</button>
    <button type="button" onClick={onBills} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#D6E7DA] bg-white px-3 text-sm font-bold"><CalendarClock className="size-4 text-[#AB7C4E]"/>{t("Review bills","راجع الفواتير")}</button>
   </div>}
-  <button type="button" onClick={onInsights} className="flex min-h-10 w-full items-center justify-center gap-2 text-xs font-bold text-[#4E826B] underline">{t("Detailed financial insights (optional)","التحليلات المالية التفصيلية (اختياري)")} <CircleHelp className="size-4"/></button>
+  {!setupNeeded&&<button type="button" onClick={onInsights} className="flex min-h-10 w-full items-center justify-center gap-2 text-xs font-bold text-[#4E826B] underline">{t("Detailed financial insights (optional)","التحليلات المالية التفصيلية (اختياري)")} <CircleHelp className="size-4"/></button>}
   <div className="flex gap-2 text-[11px] leading-relaxed text-[#73857D]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>{t(
    "Your figures remain on this device during the pilot. References in detailed categories are illustrative, not verified Amman market averages.",
    "الأرقام محفوظة على الجهاز خلال التجربة؛ الأرقام المرجعية التوضيحية مش متوسط أسعار سوق مؤكدة بعمّان.")}</div>
