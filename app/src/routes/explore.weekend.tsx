@@ -1,9 +1,9 @@
 import {createFileRoute} from "@tanstack/react-router";
-import {WeekendOutingExperience} from "@/components/WeekendOutingExperience";
+import {FamilyActivityExplorer} from "@/components/FamilyActivityExplorer";
 export const Route=createFileRoute("/explore/weekend")({
  head:()=>({meta:[
-  {title:"Can we afford a family outing this weekend? — Dabberna"},
-  {name:"description",content:"Review a cautious family outing limit from your own saved figures, then find publicly mapped activities with source links."}
+  {title:"Explore Family Activities — Dabberna"},
+  {name:"description",content:"Explore children's activity ideas and real mapped places first, with optional family planning and finances."}
  ]}),
- component:WeekendOutingExperience
+ component:FamilyActivityExplorer
 });
