@@ -122,7 +122,7 @@ function Space() {
             <details className="sm:col-span-2 rounded-xl border border-border bg-white p-3"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"معلومات إضافية (اختياري)":"More about this person (optional)"}</summary><div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Field label={ar?"العمر بالسنوات (اختياري)":"Age in whole years (optional)"}><Input type="number" min={0} max={120} className={inputCls}
               value={edit.ageYears??""} onChange={e=>setEdit({...edit,ageYears:e.target.value===""?undefined:Number(e.target.value)})}/></Field>
-            <Field label={tr("Age group")}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
+            {edit.ageYears===undefined&&<Field label={tr("Age group (if exact age is unknown)")}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
               <option value="">{ar?"أفضل عدم الإجابة":"Not provided"}</option>
               {ages.map(a=><option key={a}>{a}</option>)}
             </NativeSelect></Field>
