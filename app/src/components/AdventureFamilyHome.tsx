@@ -12,13 +12,13 @@ import {FAMILY_WISHLIST_KEY,type WishlistItem} from "@/lib/familyWishlist";
 import {homeSnapshot} from "@/lib/homeSnapshot";
 import {RobotBuddy,WorldScene,type AdventurePlace} from "./AdventureArtwork";
 import {TodayFamilyBrief} from "./TodayFamilyBrief";
+import {FamilyDiscoveryPanel} from "./FamilyDiscoveryPanel";
 import "./adventureFamilyHero.css";
 
 const destinations=[
- {id:"home",en:"Our Money",ar:"مال العيلة",summaryEn:"Understand & plan our family costs",summaryAr:"نفهم مصاريف البيت ونخطط لها",to:"/money",accent:"#E5F5E8"},
- {id:"market",en:"Smart Shopping",ar:"تسوّق بذكاء",summaryEn:"Explore purchases and better choices",summaryAr:"نقارن الخيارات والمشتريات",to:"/explore/smartbuy",accent:"#FFF1E1"},
- {id:"park",en:"Adventure Park",ar:"حديقة المغامرات",summaryEn:"Family outings & children's activities",summaryAr:"طلعات وأنشطة للأطفال",to:"/explore/weekend",accent:"#E5F4F2"},
- {id:"moments",en:"Family Moments",ar:"لحظات العيلة",summaryEn:"Birthdays, gifts and celebrations",summaryAr:"مناسبات وهدايا وأيام حلوة",to:"/calendar",accent:"#FFEDF0"}
+ {id:"park",en:"What can we enjoy?",ar:"شو ممكن نعمل سوا؟",summaryEn:"Find family outings and children's activities",summaryAr:"أنشطة للأطفال وطلعات للعيلة",to:"/explore/weekend",accent:"#E5F4F2"},
+ {id:"home",en:"How are we doing?",ar:"كيف وضع عيلتنا؟",summaryEn:"Our Money: budgets, spending and bills",summaryAr:"مال العيلة والمصاريف والفواتير",to:"/money",accent:"#E5F5E8"},
+ {id:"market",en:"What should we buy?",ar:"شو بدنا نشتري؟",summaryEn:"Compare options and plan purchases",summaryAr:"نقارن الخيارات ونخطط للمشتريات",to:"/explore/smartbuy",accent:"#FFF1E1"}
 ] as const;
 
 /** An illustrated navigation world backed by actual existing feature routes.
@@ -69,8 +69,8 @@ export function AdventureFamilyHome(){
   </section>
 
   <section aria-label={t("Explore the family world","اكتشف عالم العيلة")}>
-   <h2 className="mb-3 flex items-center gap-2 text-base font-extrabold"><Compass className="size-5 text-[#368C73]"/>{t("Choose an adventure","اختَر مغامرتك")}</h2>
-   <div className="grid grid-cols-2 gap-3 sm:gap-4">
+   <h2 className="mb-3 flex items-center gap-2 text-base font-extrabold"><Compass className="size-5 text-[#368C73]"/>{t("What would help your family today?","شو بيساعد عيلتك اليوم؟")}</h2>
+   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
     {destinations.map(p=><Link to={p.to} key={p.id} aria-label={ar?p.ar:p.en}
      className="group overflow-hidden rounded-[1.45rem] border border-[#DEE8D9] bg-white p-2 shadow-[0_12px_28px_-23px_rgba(26,69,57,.35)] transition-transform duration-200 hover:-translate-y-1 focus-visible:outline-4 focus-visible:outline-[#57A78E] active:scale-[.985] sm:p-3">
       <div style={{backgroundColor:p.accent}} className="overflow-hidden rounded-[1.1rem]">
@@ -85,6 +85,12 @@ export function AdventureFamilyHome(){
     </Link>)}
    </div>
   </section>
+
+  <FamilyDiscoveryPanel/>
+  <Link to="/calendar" className="flex min-h-12 items-center justify-between gap-2 rounded-2xl border border-[#F1DDE5] bg-[#FFF1F4] px-4 text-sm font-bold text-[#94536A]">
+    <span>🎁 {t("Family Moments — birthdays, gifts & calendar","لحظات العيلة — الأعياد والهدايا والتقويم")}</span>
+    <ArrowRight className="size-4 rtl:rotate-180"/>
+  </Link>
 
   <section className="rounded-[1.4rem] border border-[#C6E7D9] bg-gradient-to-r from-[#C9EFE8] via-[#E3F8EB] to-[#E9F5DC] p-3.5 sm:p-4">
    <Link to="/advisor" className="flex min-h-12 items-center gap-3" aria-label={t("Ask Dabberna","اسأل دبرنا")}>
