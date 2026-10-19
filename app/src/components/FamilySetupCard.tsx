@@ -4,18 +4,20 @@ import {useI18n} from "@/lib/i18n";
 import {sampleMembers,sampleMoney,type Member,type MoneyState} from "@/lib/money";
 import {familySetupState,FAMILY_SETUP_PREFERENCES_KEY,FAMILY_SETUP_PROFILE_SKIP_KEY,FAMILY_SETUP_MONEY_SKIP_KEY} from "@/lib/familySetup";
 import {useLocalState} from "@/lib/storage";
+import {HOUSEHOLD_PRESENCE_KEY,emptyHouseholdPresence,type HouseholdPresence} from "@/lib/householdPresence";
 
 /** Existing family, finance and preference editors remain the only source of truth.
  * This checklist links to them; it never overwrites a parent's previous entries. */
 export function FamilySetupCard(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
+ const [presence,,presenceReady]=useLocalState<HouseholdPresence>(HOUSEHOLD_PRESENCE_KEY,emptyHouseholdPresence());
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [preferencesConfirmed,,preferencesReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
  const [profileSkipped,setProfileSkipped,skipReady]=useLocalState(FAMILY_SETUP_PROFILE_SKIP_KEY,false);
  const [moneySkipped,setMoneySkipped,moneySkipReady]=useLocalState(FAMILY_SETUP_MONEY_SKIP_KEY,false);
- if(!membersReady||!moneyReady||!preferencesReady||!skipReady||!moneySkipReady)return null;
- const setup=familySetupState(members,money,preferencesConfirmed,profileSkipped,moneySkipped);
+ if(!membersReady||!moneyReady||!preferencesReady||!skipReady||!moneySkipReady||!presenceReady)return null;
+ const setup=familySetupState(members,money,preferencesConfirmed,profileSkipped,moneySkipped,presence.adults!==null||presence.children!==null);
  if(setup.next===null)return null;
  const items=[
   {id:"family",en:"Tell us who you're planning for",ar:"مين الأشخاص اللي عم نخطط لإلن؟",link:"/space" as const,
