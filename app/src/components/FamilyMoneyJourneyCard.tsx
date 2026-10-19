@@ -2,7 +2,9 @@ import {useState} from "react";
 import {Link} from "@tanstack/react-router";
 import {ArrowRight,CalendarClock,ChevronDown,Eye,EyeOff,HeartHandshake,ShieldCheck,Sprout,Wallet} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
-import {useLocalState} from "@/lib/storage";
+import {useLocalState,writeLocal} from "@/lib/storage";
+import {ACTIVE_PLAN_KEY} from "@/lib/familyPlans";
+import {rememberCalendarDate} from "@/lib/rhythmHandoff";
 import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
@@ -79,7 +81,12 @@ export function FamilyMoneyJourneyCard(){
     <section className="rounded-xl border border-[#DFE7DF] p-3">
      <h3 className="flex items-center gap-2 text-sm font-bold"><CalendarClock className="size-4 text-brand"/>{t("What to expect next","شو جاي بعدين")}</h3>
      {journey.nextMilestones.length?<div className="mt-2 space-y-2">
-      {journey.nextMilestones.map((m,i)=><p key={i} className="text-xs leading-relaxed text-[#51675A]"><strong>{m.date}</strong> · {m.title}</p>)}
+      {journey.nextMilestones.map((m,i)=><Link key={i} to={m.kind==="plan"?"/plans":m.kind==="bill"?"/money":"/calendar"}
+      onClick={()=>{if(m.kind==="plan"&&m.planId)writeLocal(ACTIVE_PLAN_KEY,m.planId);
+       if(m.kind==="occasion")rememberCalendarDate(m.date);}}
+      className="flex min-h-10 items-center justify-between gap-2 rounded-lg bg-[#F6FAF5] px-3 py-2 text-xs leading-relaxed text-[#346E54] hover:bg-[#EDF5EB]">
+      <span><strong>{m.date}</strong> · {m.title}</span><ArrowRight className="size-4 shrink-0 rtl:rotate-180"/>
+     </Link>)}
      </div>:<p className="mt-2 text-xs text-[#6C7D6C]">{t("No dated events found in the next 45 days; this may mean your records aren't complete.","ما لقينا مناسبات أو دفعات محفوظة خلال ٤٥ يوم؛ ممكن بياناتك بعدها ناقصة.")}</p>}
      <p className="mt-2 text-[11px] text-[#768579]">{t("Dates are taken from your entries; provider status is not verified.","المواعيد من بياناتك، وما تأكدنا منها عند الجهات.")}</p>
     </section>
@@ -99,7 +106,9 @@ export function FamilyMoneyJourneyCard(){
     <p className="text-xs font-extrabold uppercase tracking-wide text-[#417B56]">{t("ONE NEXT BEST ACTION","خطوة واحدة أهم")}</p>
     <h3 className="mt-1 text-base font-black text-[#24583C]">{ar?journey.next.titleAr:journey.next.titleEn}</h3>
     <p className="mt-1 text-xs leading-relaxed text-[#486753]">{ar?journey.next.detailAr:journey.next.detailEn}</p>
-    <Link to={journey.next.route} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#2D7857] px-4 text-xs font-bold text-white">{t("Take this step","اعمل هالخطوة")}<ArrowRight className="size-4 rtl:rotate-180"/></Link>
+    <Link to={journey.next.route} onClick={()=>{if(journey.next.planId)writeLocal(ACTIVE_PLAN_KEY,journey.next.planId);
+       if(journey.next.focusDate&&journey.next.route==="/calendar")rememberCalendarDate(journey.next.focusDate);}}
+      className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#2D7857] px-4 text-xs font-bold text-white">{t("Take this step","اعمل هالخطوة")}<ArrowRight className="size-4 rtl:rotate-180"/></Link>
    </div>
    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#E1EAE2] pt-3">
     <p className="max-w-[560px] text-[11px] leading-relaxed text-[#788777]">{t("Marking this check-in as read never confirms a bill was paid, a commitment was covered, or an expense happened.","قراءة الملخّص لا تعني دفع الفواتير أو تغطية التزام أو حدوث مصروف.")}</p>
