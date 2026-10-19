@@ -2,7 +2,6 @@ import {createFileRoute,Link} from "@tanstack/react-router";
 import {useState} from "react";
 import {CalendarDays,CalendarHeart,ClipboardList,HeartHandshake,UsersRound,CheckCircle2,ChevronRight,MapPinned} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
-import {WorldScene,type AdventurePlace} from "@/components/AdventureArtwork";
 import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {PlansWorkspace} from "@/routes/plans";
 import {FamilyCalendarWorkspace} from "@/routes/calendar";
@@ -20,10 +19,10 @@ export const Route=createFileRoute("/family")({
 });
 type View="overview"|"calendar"|"plans"|"tasks";
 const views=[
- {id:"overview" as const,en:"Our Family",ar:"عيلتنا",icon:HeartHandshake,scene:"home" as AdventurePlace,emoji:"🏡"},
- {id:"calendar" as const,en:"Special Moments",ar:"مناسباتنا",icon:CalendarDays,scene:"moments" as AdventurePlace,emoji:"🎂"},
- {id:"plans" as const,en:"Our Plans",ar:"خططنا",icon:CalendarHeart,scene:"park" as AdventurePlace,emoji:"🎡"},
- {id:"tasks" as const,en:"Family Tasks",ar:"مهام العيلة",icon:ClipboardList,scene:"market" as AdventurePlace,emoji:"✨"}
+ {id:"overview" as const,en:"Our Family",ar:"عيلتنا",icon:HeartHandshake},
+ {id:"calendar" as const,en:"Special Moments",ar:"مناسباتنا",icon:CalendarDays},
+ {id:"plans" as const,en:"Our Plans",ar:"خططنا",icon:CalendarHeart},
+ {id:"tasks" as const,en:"Family Tasks",ar:"مهام العيلة",icon:ClipboardList}
 ];
 export function FamilyLifePage(){
  const {lang}=useI18n(),ar=lang==="ar";
@@ -47,21 +46,16 @@ export function FamilyLifePage(){
     {label("Your family's time, plans and responsibilities — organized together.",
      "مواعيد العيلة وخططها ومسؤولياتها — كلها بمكان واحد.")}
    </p>
-   <nav aria-label={label("Family Life sections","أقسام حياة العيلة")}>
-    <p className="mb-2 text-sm font-extrabold text-[#337C60]">{label("Choose where to explore","وين بتحب تكتشف؟")}</p>
+   <nav aria-label={label("Family Life sections","أقسام حياة العيلة")} className="rounded-2xl border border-[#DCE9DF] bg-white p-2">
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
      {views.map(item=>{
       const selected=view===item.id;
+      const Icon=item.icon;
       return <button key={item.id} type="button" aria-current={selected?"page":undefined}
        aria-pressed={selected} onClick={()=>setView(item.id)}
-       className={"relative isolate min-h-[115px] overflow-hidden rounded-[1.25rem] border p-2.5 text-start transition active:scale-[.99] focus-visible:outline-4 focus-visible:outline-[#479F7E] "+
-       (selected?"border-[#69B78F] bg-[#E6F5EA] shadow-[0_3px_0_#8DC7A5]":"border-[#DCEADE] bg-white hover:border-[#B1D5C1]")}>
-       <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 block h-[80px] w-full opacity-55"><WorldScene place={item.scene} className="h-full w-full"/></span>
-       <span className="absolute inset-0 bg-gradient-to-t from-white via-white/95 to-transparent"/>
-       <span className="relative flex h-full min-h-[90px] flex-col justify-end">
-        <span className="text-xl" aria-hidden="true">{item.emoji}</span>
-        <span className="mt-1 text-xs font-extrabold leading-tight text-[#286448] sm:text-sm">{ar?item.ar:item.en}</span>
-       </span>
+       className={"flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-[#479F7E] "+
+       (selected?"bg-[#E4F4E8] text-[#226C4D]":"text-[#657B6D] hover:bg-[#F3F8F2]")}>
+       <Icon className="size-4 shrink-0"/>{ar?item.ar:item.en}
       </button>;
      })}
     </div>
