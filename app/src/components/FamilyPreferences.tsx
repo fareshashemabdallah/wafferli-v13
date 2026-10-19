@@ -44,6 +44,46 @@ export function FamilyPreferences() {
        </select>
       </label>
     </div>
+    <div className="mt-4 rounded-xl border border-[#DCE8DB] bg-[#F6FAF5] p-3">
+      <h3 className="text-sm font-semibold">{ar?"تفضيلات الأنشطة (اختيارية)":"Activity discovery preferences (optional)"}</h3>
+      <p className="mt-1 text-xs text-muted-foreground">{ar?"أنت تختار، بلا تصنيف لعائلتك حسب الدخل أو المعتقد. لا يمكننا تأكيد ملاءمة نشاط قبل التحقق من الجهة.":"Choose what matters to your family; no income or cultural labels. Provider claims require direct verification."}</p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+       <label className="text-sm font-medium">{ar?"شو الأهم؟":"What matters most?"}
+        <select className="mt-1 min-h-11 w-full rounded-lg border bg-white p-2" value={preferences.discoveryPriority??"balance"}
+         onChange={e=>set("discoveryPriority",e.target.value as NonNullable<FamilyPreferences["discoveryPriority"]>)}>
+         <option value="quality">{ar?"الراحة والجودة":"Convenience and quality"}</option>
+         <option value="balance">{ar?"توازن السعر والجودة":"Best value overall"}</option>
+         <option value="affordable">{ar?"الخيارات الأقل تكلفة":"Affordable options first"}</option>
+        </select>
+       </label>
+       <label className="text-sm font-medium">{ar?"بيئة المجموعة المفضّلة":"Preferred class composition"}
+        <select className="mt-1 min-h-11 w-full rounded-lg border bg-white p-2" value={preferences.activityGroupPreference??"any"}
+         onChange={e=>set("activityGroupPreference",e.target.value as NonNullable<FamilyPreferences["activityGroupPreference"]>)}>
+         <option value="any">{ar?"أي مجموعة مناسبة":"No preference"}</option>
+         <option value="girls">{ar?"مجموعات بنات فقط":"Girls-only sessions"}</option>
+         <option value="boys">{ar?"مجموعات أولاد فقط":"Boys-only sessions"}</option>
+         <option value="separate">{ar?"مجموعات منفصلة":"Separate groups"}</option>
+        </select>
+       </label>
+       <label className="text-sm font-medium">{ar?"المدرّب أو المدرّبة":"Instructor preference"}
+        <select className="mt-1 min-h-11 w-full rounded-lg border bg-white p-2" value={preferences.instructorPreference??"any"}
+         onChange={e=>set("instructorPreference",e.target.value as NonNullable<FamilyPreferences["instructorPreference"]>)}>
+         <option value="any">{ar?"بدون تفضيل":"No preference"}</option>
+         <option value="female">{ar?"مدرّبة":"Female instructor"}</option>
+         <option value="male">{ar?"مدرّب":"Male instructor"}</option>
+        </select>
+       </label>
+       <div className="flex flex-col gap-2 pt-2">
+        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" className="size-4"
+         checked={preferences.freeActivitiesFirst??false} onChange={e=>set("freeActivitiesFirst",e.target.checked)}/>
+         {ar?"ابحث عن المجاني أولاً":"Search free options first"}</label>
+        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" className="size-4"
+         checked={preferences.parentCanObservePreferred??false} onChange={e=>set("parentCanObservePreferred",e.target.checked)}/>
+         {ar?"أفضل أن أتمكّن من مشاهدة الجلسة":"Prefer that parents can observe"}</label>
+       </div>
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">{ar?"هذه أسئلة تسألها للجهة قبل التسجيل، وليست فلاتر تضمن دقّة أي إعلان.":"Use these to guide questions to a provider; the app does not assume a listing satisfies them."}</p>
+    </div>
     <div className="mt-4 space-y-2">
       {interests.map(({key,en,ar:arabic,Icon})=><label key={key} className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-muted/40 p-3">
         <span className="flex items-center gap-3 text-sm font-medium"><Icon className="size-5 shrink-0 text-brand"/>{ar?arabic:en}</span>
