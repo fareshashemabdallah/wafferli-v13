@@ -106,6 +106,18 @@ function MoneyPage() {
             <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"أضف وعدّل فئات ميزانيتك":"Add or edit budget categories"}</summary>
             <p className="mt-2 text-xs text-muted-foreground">{ar?"المخصصات الشهرية ليست مصاريف مدفوعة ولا مواعيد فواتير.":"Category allocations are monthly plans, not paid transactions or dated bills."}</p>
             <Categories cats={s.categories} budgetItems={s.budgetItems??[]} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={categories=>upd({categories,budgetItems:(s.budgetItems??[]).filter(item=>categories.some(cat=>cat.id===item.categoryId))})}/>
+            {!s.demo&&s.financialInputsPartial===true&&<div className="mt-4 rounded-xl border border-[#D5E4D2] bg-[#F6FAF5] p-3">
+             <p className="text-sm font-semibold">{ar?"هل هذه الفئات تغطي مصاريف البيت المعتادة؟":"Do these categories cover your regular household costs?"}</p>
+             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
+              "أدخلت أرقاماً جزئية. لن تعرض دبّرنا مبلغاً متاحاً من الميزانية حتى تراجع كافة المصاريف الأساسية والمهمة. إذا ناقص شيء أضفه أولاً.":
+              "You started with partial figures. Dabberna will not suggest that the remaining budget is available until you've reviewed essential and important costs. Add missing categories first."}</p>
+             <button type="button" className="mt-3 min-h-11 rounded-full border border-[#B8DAC2] bg-white px-4 text-xs font-bold text-brand"
+              onClick={()=>{if(window.confirm(ar?
+               "هل راجعت المصاريف الشهرية المعتادة وتؤكد أن الفئات تغطيها قدر الإمكان؟ لا يتأكد رصيد البنك بهذه الخطوة.":
+               "Have you reviewed regular monthly household costs and believe the categories cover them? This does not verify your bank balance."))setS(old=>({...old,financialInputsPartial:false}));}}>
+              {ar?"راجعت المصاريف المعتادة":"I've reviewed our regular costs"}
+             </button>
+            </div>}
           </details>
           <details open={incomeEditorOpen} onToggle={event=>setIncomeEditorOpen(event.currentTarget.open)} className="editorial-card mt-3 px-4 py-3">
             <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"الدخل الشهري وهدف الادخار (اختياري)":"Monthly income & savings goal (optional)"}</summary>
