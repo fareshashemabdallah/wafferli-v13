@@ -30,14 +30,13 @@ describe("The Dabberna family adventure world",()=>{
   expect(screen.getByText("Hello! What shall we explore today?")).toBeInTheDocument();
   expect(screen.getByText("Discover, plan and enjoy life together.")).toBeInTheDocument();
  });
- it("opens four real places rather than decorative non-working game buttons",()=>{
+ it("opens the three parent questions and retains calendar and advisor links",()=>{
   renderWorld();
   expect(screen.getByRole("heading",{name:/Dabberna/})).toBeInTheDocument();
   expect(screen.getByRole("region",{name:"Welcome to your family adventure"})).toBeInTheDocument();
   for(const [name,route] of [
-   ["Our Money","/money"],["Smart Shopping","/explore/smartbuy"],
-   ["Adventure Park","/explore/weekend"],["Family Moments","/calendar"],
-   ["Ask Dabberna","/advisor"]
+   ["How are we doing?","/money"],["What should we buy?","/explore/smartbuy"],
+   ["What can we enjoy?","/explore/weekend"],["Ask Dabberna","/advisor"]
   ] as const)expect(screen.getByRole("link",{name})).toHaveAttribute("href",route);
   expect(screen.getByRole("img",{name:"Cartoon family with two parents and children"})).toHaveAttribute("src",expect.stringContaining("landing-family-characters.avif"));
   expect(screen.queryByText("1,200 JOD")).not.toBeInTheDocument();
