@@ -59,6 +59,7 @@ describe("the family money journey",()=>{
   ];
   const s=buildFamilyMoneyJourney({...base(),members:children,money:realMoney()});
   expect(s.childCount).toBe(1);
-  expect(s.dimensions[1]!.detailEn).toContain("not proof");
+  expect(s.dimensions[1]!.detailEn).toContain("Essential spending");
+  expect(s.dimensions[1]!.detailEn).not.toContain("is covered");
  });
 });
