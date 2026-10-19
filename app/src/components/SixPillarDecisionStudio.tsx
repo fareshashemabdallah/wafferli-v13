@@ -6,7 +6,7 @@ import {readLocal,writeLocal,useLocalState,uid} from "@/lib/storage";
 import {sampleMoney,sampleMembers,type Member,type MoneyState} from "@/lib/money";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan} from "@/lib/familyPlans";
-import {FAMILY_VALUES,DECISION_SCENARIOS,decideFamilyNextSteps,publicDecisionInvitation,planFromDecision,futureFamilyMilestones,
+import {FAMILY_VALUES,DECISION_SCENARIOS,scenarioFromQuestion,decideFamilyNextSteps,publicDecisionInvitation,planFromDecision,futureFamilyMilestones,
  type DecisionScenario,type DecisionApproach,type DecisionBrief,type FamilyValue} from "@/lib/sixPillarDecisionEngine";
 import type {FamilyMoment} from "@/lib/familyCalendar";
 
@@ -21,6 +21,7 @@ export function SixPillarDecisionStudio(){
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [prefs,setPrefs,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
  const [scenario,setScenario]=useState<DecisionScenario>("outing");
+ const [scenarioChosen,setScenarioChosen]=useState(false);
  const [amount,setAmount]=useState("");
  const [date,setDate]=useState("");
  const [question,setQuestion]=useState("");
@@ -41,7 +42,9 @@ export function SixPillarDecisionStudio(){
   event.preventDefault();setMessage("");setError("");
   const cost=costValue(amount);
   if(cost===null){setError(t("Use a valid JOD estimate or leave it blank.","أدخل تكلفة تقريبية صحيحة بالدينار أو اتركها فارغة."));return;}
-  const next=decideFamilyNextSteps(scenario,{...ctx,...(cost!==undefined?{estimatedJod:cost}:{})});
+  const selectedScenario=!scenarioChosen?(scenarioFromQuestion(question)??scenario):scenario;
+  setScenario(selectedScenario);
+  const next=decideFamilyNextSteps(selectedScenario,{...ctx,...(cost!==undefined?{estimatedJod:cost}:{})});
   setBrief(next);setChosen(next.options[0]?.id??"compare");
  };
  const save=()=>{
@@ -113,7 +116,7 @@ export function SixPillarDecisionStudio(){
   </div>}
   <form onSubmit={submit} className="mt-4 space-y-3">
    <label className="block text-sm font-semibold">{t("What's the family decision?","شو قرار العيلة؟")}
-    <select className={field} value={scenario} onChange={e=>{setScenario(e.target.value as DecisionScenario);setBrief(null);}} disabled={!ready}>
+    <select className={field} value={scenario} onChange={e=>{setScenario(e.target.value as DecisionScenario);setScenarioChosen(true);setBrief(null);}} disabled={!ready}>
      {DECISION_SCENARIOS.map(item=><option key={item.id} value={item.id}>{ar?item.ar:item.en}</option>)}
     </select>
    </label>
@@ -121,8 +124,8 @@ export function SixPillarDecisionStudio(){
     <input className={field} maxLength={250} value={question} onChange={e=>setQuestion(e.target.value)}
      placeholder={t("e.g. How should we balance activities and school fees?","مثلاً كيف نوازن نشاط الأولاد مع أقساط المدرسة؟")}/>
    </label>
-   <p className="text-[11px] text-muted-foreground">{t("Select the decision type above; the local engine does not pretend to understand or send your free-text question. It uses the selected type and data you've entered.",
-    "اختَر نوع القرار أعلاه؛ النظام المحلي لا يدّعي فهم السؤال الحر ولا يرسله. يعتمد على نوع القرار والبيانات المدخلة.")}</p>
+   <p className="text-[11px] text-muted-foreground">{t("Common keywords can suggest a topic unless you choose one yourself. The local engine never saves or sends your question or claims to understand its full meaning.",
+    "الكلمات المعتادة قد تقترح نوع القرار ما لم تختره بنفسك. النظام لا يحفظ السؤال ولا يرسله ولا يدّعي فهم كل معناه.")}</p>
    <div className="grid gap-3 sm:grid-cols-2">
     <label className="text-sm font-semibold">{t("Estimated full family cost (optional, JOD)","تكلفة العيلة التقديرية (اختياري، دينار)")}
      <input className={field} type="number" min="0" max="100000" step=".01" value={amount} onChange={e=>{setAmount(e.target.value);setBrief(null);}} placeholder={t("Unknown","غير معروف")}/>
