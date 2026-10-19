@@ -27,8 +27,8 @@ describe("The Dabberna family adventure world",()=>{
   expect(portraits).toContainElement(image);
   expect(greeting).not.toContainElement(image);
   expect(greeting.compareDocumentPosition(portraits)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  expect(screen.getByText("Hello! What shall we explore today?")).toBeInTheDocument();
-  expect(screen.getByText("Discover, plan and enjoy life together.")).toBeInTheDocument();
+  expect(screen.getByText("How can our money care for our family?")).toBeInTheDocument();
+  expect(screen.getByText("Understand, protect and prepare—so we can live well together.")).toBeInTheDocument();
  });
  it("opens the three parent questions and retains calendar and advisor links",()=>{
   renderWorld();
@@ -40,6 +40,7 @@ describe("The Dabberna family adventure world",()=>{
   ] as const)expect(screen.getByRole("link",{name})).toHaveAttribute("href",route);
   expect(screen.getByRole("img",{name:"Cartoon family with two parents and children"})).toHaveAttribute("src",expect.stringContaining("landing-family-characters.avif"));
   expect(screen.queryByText("1,200 JOD")).not.toBeInTheDocument();
+  expect(screen.getByRole("region",{name:"Your family\u0027s money story"})).toBeInTheDocument();
  });
  it("shows recorded family data only in its optional private update area",()=>{
   localStorage.setItem("wafferli.v13.money",JSON.stringify({
