@@ -19,7 +19,7 @@ export function QuickMoneySetup({money,setMoney,compact=false}:Props){
  const tr=(en:string,arabic:string)=>ar?arabic:en;
  const figures=computeMoney(money);
  const hasIncomeSources=!money.demo&&!!money.incomeSources?.length;
- const hasIncome=!money.demo&&(money.incomeKnown===true||hasIncomeSources);
+ const hasIncome=!money.demo&&(money.incomeKnown===true||hasIncomeSources||figures.monthlyIncome>0);
  const categories=money.demo?[]:money.categories;
  const hasCustomCategories=categories.some(c=>c.id!=="household-essential"&&c.id!=="household-flexible");
  const canEnterCosts=!hasCustomCategories;
