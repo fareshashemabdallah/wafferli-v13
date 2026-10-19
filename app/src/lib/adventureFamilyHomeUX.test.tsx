@@ -35,12 +35,15 @@ describe("The Dabberna family adventure world",()=>{
   expect(screen.getByRole("heading",{name:/Dabberna/})).toBeInTheDocument();
   expect(screen.getByRole("region",{name:"Welcome to your family adventure"})).toBeInTheDocument();
   for(const [name,route] of [
-   ["How are we doing?","/money"],["What should we buy?","/explore/smartbuy"],
-   ["What can we enjoy?","/explore/weekend"],["Ask Dabberna","/advisor"]
-  ] as const)expect(screen.getByRole("link",{name})).toHaveAttribute("href",route);
+   ["Find something to enjoy","/explore/weekend"],
+   ["Choose what to buy","/explore/smartbuy"],
+   ["Prepare a family moment","/calendar"]
+  ] as const)expect(screen.getByRole("link",{name:new RegExp(name)})).toHaveAttribute("href",route);
+  expect(screen.queryByRole("link",{name:"Ask Dabberna"})).not.toBeInTheDocument();
   expect(screen.getByRole("img",{name:"Cartoon family with two parents and children"})).toHaveAttribute("src",expect.stringContaining("landing-family-characters.avif"));
   expect(screen.queryByText("1,200 JOD")).not.toBeInTheDocument();
   expect(screen.getByRole("region",{name:"Your family\u0027s money story"})).toBeInTheDocument();
+  expect(screen.queryByText("FAMILY ACTIVITY IDEAS")).not.toBeInTheDocument();
  });
  it("shows recorded family data only in its optional private update area",()=>{
   localStorage.setItem("wafferli.v13.money",JSON.stringify({
