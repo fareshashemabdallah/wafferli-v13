@@ -11,6 +11,8 @@ import { sampleMembers,sampleMoney,type MoneyState } from "@/lib/money";
 import { useI18n } from "@/lib/i18n";
 import { uid,useLocalState } from "@/lib/storage";
 import {realFamilyMembers} from "@/lib/familySetup";
+import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
+import {plannedOutingMoments,PLANNED_OUTING_MOMENT_PREFIX} from "@/lib/activityPlanBridge";
 
 export const Route=createFileRoute("/calendar")({
  head:()=>({meta:[{title:"Family Calendar — Dabberna"},{name:"description",content:"A private family calendar for birthdays, holidays and meaningful occasions. Saved on this device."}]}),
@@ -26,8 +28,9 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
  const [events,setEvents,eventsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [members,,membersReady]=useLocalState("members",sampleMembers());
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
- const ready=eventsReady&&membersReady;
- const combined=useMemo(()=>allFamilyMoments(events,realFamilyMembers(members),ar),[events,members,ar]);
+ const [familyPlans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const ready=eventsReady&&membersReady&&plansReady;
+ const combined=useMemo(()=>allFamilyMoments([...events,...plannedOutingMoments(familyPlans,events)],realFamilyMembers(members),ar),[events,members,ar,familyPlans]);
  const initiallyFocused=focusDate?parseCalendarDate(focusDate):null;
  const [month,setMonth]=useState(()=>new Date((initiallyFocused??today).getFullYear(),(initiallyFocused??today).getMonth(),1,12));
  const [selected,setSelected]=useState(()=>initiallyFocused?dateKey(initiallyFocused):todayKey);
@@ -99,13 +102,13 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
    <div className="mt-3 space-y-2">{chosen.length===0?<p className="rounded-xl bg-muted/40 p-3 text-sm text-muted-foreground">{ar?"لا توجد مناسبات مسجّلة لهذا اليوم.":"No occasions saved for this day yet."}</p>:chosen.map(item=><div key={item.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
     <span className={"grid size-9 shrink-0 place-items-center rounded-xl "+kindColor(item.kind)}>{item.kind==="birthday"?<Cake className="size-4"/>:item.kind==="celebration"?<Heart className="size-4"/>:<CalendarDays className="size-4"/>}</span>
     <div className="min-w-0 flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">{kindNames[item.kind][ar?"ar":"en"]}{item.time?" · "+item.time:""}{item.annual?" · "+(ar?"سنوي":"Yearly"):""}</p>{item.note&&<p className="mt-1 break-words text-xs text-muted-foreground">{item.note}</p>}</div>
-    {isMemberBirthday(item)?<Link to="/space" aria-label={ar?"تعديل تاريخ الميلاد في عائلتي":"Edit birthday in My Family"} className="rounded-lg p-2 text-xs font-semibold text-brand hover:bg-mint">{ar?"عدّل في عائلتي":"Edit in My Family"}</Link>:<>
+    {item.id.startsWith(PLANNED_OUTING_MOMENT_PREFIX)?<Link to="/plans" aria-label={ar?"راجع الخطة":"Review tentative family plan"} className="rounded-lg p-2 text-xs font-semibold text-brand underline">{ar?"راجع الخطة":"Review plan"}</Link>:isMemberBirthday(item)?<Link to="/space" aria-label={ar?"تعديل تاريخ الميلاد في عائلتي":"Edit birthday in My Family"} className="rounded-lg p-2 text-xs font-semibold text-brand hover:bg-mint">{ar?"عدّل في عائلتي":"Edit in My Family"}</Link>:<>
      <button type="button" onClick={()=>startEdit(item)} aria-label={ar?"تعديل":"Edit"} className="rounded-lg p-2 text-brand hover:bg-mint"><Pencil className="size-4"/></button>
      <button type="button" onClick={()=>remove(item)} aria-label={ar?"حذف":"Delete"} className="rounded-lg p-2 text-destructive hover:bg-muted"><Trash2 className="size-4"/></button>
     </>}
    </div>)}</div>
    {chosen.length>0&&<div className="mt-4 space-y-3">
-     {chosen.map(item=><OccasionPreparationSection key={item.id+"@"+item.occursOn} event={item}/>)}
+     {chosen.filter(item=>!item.id.startsWith(PLANNED_OUTING_MOMENT_PREFIX)).map(item=><OccasionPreparationSection key={item.id+"@"+item.occursOn} event={item}/>)}
    </div>}
   </section>
   {editing&&<form onSubmit={save} className="card-soft mt-4 space-y-3 p-4 sm:p-5">
@@ -141,7 +144,7 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
    {!ready?<p className="mt-2 text-sm text-muted-foreground">{ar?"جارٍ تحميل المناسبات...":"Loading saved occasions…"}</p>:upcoming.length===0?<p className="mt-2 rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{ar?"عندما تضيف مناسبات، ستظهر هنا وعلى الصفحة الرئيسية.":"When you add birthdays in My Family or occasions here, they will appear on My Day."}</p>
    :<div className="mt-3 space-y-2">{upcoming.map(item=><div key={item.id+item.occursOn} className="card-soft flex items-center gap-3 p-3">
     <Gift className="size-5 shrink-0 text-brand"/><div className="flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">{formatMomentDate(item.occursOn,ar)} · {kindNames[item.kind][ar?"ar":"en"]}</p></div>
-    <button type="button" onClick={()=>{
+    {item.id.startsWith(PLANNED_OUTING_MOMENT_PREFIX)?<Link to="/plans" className="inline-flex min-h-11 items-center rounded-xl border border-[#D7E6DA] px-3 text-xs font-semibold text-brand underline">{ar?"راجع الفكرة":"Review idea"}</Link>:<button type="button" onClick={()=>{
        setSelected(item.occursOn);
        const day=parseCalendarDate(item.occursOn);
        if(day)setMonth(new Date(day.getFullYear(),day.getMonth(),1,12));
@@ -149,7 +152,7 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
       }}
      className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-[#D7E6DA] px-3 text-xs font-semibold text-brand">
      <Gift className="size-4"/>{ar?"حضّر":"Prepare"} →
-    </button>
+    </button>}
    </div>)}</div>}
   </section>
   {ready&&moneyReady&&<CalendarReminderExport money={money} members={members} moments={events}/>}
