@@ -4,6 +4,7 @@ import { Cake, CalendarHeart, Heart, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AppShell, Notice, PilotBadge } from "@/components/AppShell";
 import { FamilyPreferences } from "@/components/FamilyPreferences";
+import {FamilyBasicsQuickInput} from "@/components/FamilyBasicsQuickInput";
 import {LocalExpensePrivacyReview} from "@/components/LocalExpensePrivacyReview";
 import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {isSampleFamilyMember} from "@/lib/familySetup";
@@ -95,6 +96,7 @@ function Space() {
         <p className="relative mt-2 max-w-lg text-sm leading-relaxed text-[#4E6B5A]">{ar?"تفاصيل العائلة وأيامها المهمة، محفوظة بمكان واحد.":"Your people, birthdays and meaningful dates, thoughtfully kept together."}</p>
       </section>
 
+      <FamilyBasicsQuickInput/>
       <section className="mt-7 scroll-mt-24" id="household-members">
         {samples.length>0&&<div className="mb-4 rounded-2xl border border-[#E6D7C5] bg-[#FFF8F0] p-4">
           <p className="text-sm font-semibold">{ar?"أسماء تجريبية، ليست عيلتك":"Example profiles, not your family"}</p>
