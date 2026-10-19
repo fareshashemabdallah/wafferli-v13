@@ -8,7 +8,6 @@ vi.mock("@tanstack/react-router",()=>({
  Link:({to,children,...props}:{to:string;children?:ReactNode}&AnchorHTMLAttributes<HTMLAnchorElement>)=>
   <a href={to} {...props}>{children}</a>
 }));
-vi.mock("@/components/TodayFamilyBrief",()=>({TodayFamilyBrief:()=> <span>Family brief</span>}));
 beforeEach(()=>window.localStorage.clear());
 afterEach(()=>{cleanup();vi.restoreAllMocks();window.localStorage.clear()});
 const renderWorld=()=>render(<I18nProvider><AdventureFamilyHome/></I18nProvider>);
@@ -45,14 +44,19 @@ describe("The Dabberna family adventure world",()=>{
   expect(screen.getByRole("region",{name:"Your family\u0027s money story"})).toBeInTheDocument();
   expect(screen.queryByText("FAMILY ACTIVITY IDEAS")).not.toBeInTheDocument();
  });
- it("shows recorded family data only in its optional private update area",()=>{
+ it("keeps the single money story private by default without another summary or next-step card",()=>{
   localStorage.setItem("wafferli.v13.money",JSON.stringify({
-   demo:false,income:1700,savingsPct:0,categories:[{id:"groc",name:"Groceries",type:"variable",planned:280}],
-   expenses:[{id:"actual",date:new Date().toISOString().slice(0,7)+"-02",categoryId:"groc",amount:15,shared:false,status:"paid"}]
+   demo:false,income:1700,incomeKnown:true,savingsPct:0,
+   categories:[{id:"groc",name:"Sensitive household category",type:"variable",planned:280,priority:"essential"}],
+   expenses:[]
   }));
   renderWorld();
-  expect(screen.getByText(/15 JOD in paid entries/).closest("details")).not.toHaveAttribute("open");
-  fireEvent.click(screen.getByText("A little update from your family world (optional)"));
-  expect(screen.getByText(/paid entries this month/).closest("details")).toHaveAttribute("open");
+  expect(screen.queryByTestId("family-money-journey-details")).not.toBeInTheDocument();
+  expect(screen.queryByText(/Your entered monthly plan/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Something worth preparing for/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/One helpful next step/)).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:/Open my private weekly money story/}));
+  expect(screen.getByTestId("family-money-journey-details")).toBeInTheDocument();
+
  });
 });
