@@ -25,10 +25,10 @@ export type FamilySetupState={
 /** Reads existing local modules without altering money, relatives or plans. */
 export function familySetupState(
  members:readonly Member[],money:MoneyState,
- _preferencesConfirmed:boolean,profileSkipped=false,moneySkipped=false
+ _preferencesConfirmed:boolean,profileSkipped=false,moneySkipped=false,hasAnonymousCounts=false
 ):FamilySetupState {
  const actual=realFamilyMembers(members);
- const family=actual.length>0||profileSkipped;
+ const family=actual.length>0||profileSkipped||hasAnonymousCounts;
  // A single genuine saved fact counts as having started; incomplete information
  // remains incomplete in financial guidance and does not trigger repeated setup.
  const moneyDone=!money.demo&&(money.incomeKnown===true||money.categories.length>0||
