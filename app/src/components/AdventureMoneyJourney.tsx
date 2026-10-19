@@ -19,7 +19,7 @@ export function AdventureMoneyJourney({money,setMoney,onBudget,onSpending,onBill
  const figures=computeMoney(money),overview=getMoneyOverview(money);
  const values=[
   {key:"income",label:t("Monthly income entered","الدخل الشهري المسجّل"),value:money.demo||(!money.incomeKnown&&figures.monthlyIncome===0)?t("Not entered","غير مدخل"):fmtJOD(figures.monthlyIncome),icon:Coins},
-  {key:"plan",label:t("Planned household costs","مصاريف البيت المخططة"),value:money.demo?t("Not entered","غير مدخل"):fmtJOD(figures.planned),icon:Wallet},
+  {key:"plan",label:t("Planned household costs","مصاريف البيت المخططة"),value:money.demo||money.categories.length===0?t("Not entered","غير مدخل"):fmtJOD(figures.planned),icon:Wallet},
   {key:"paid",label:t("Recorded paid spending","مصاريف مدفوعة مسجّلة"),value:money.demo?t("Not entered","غير مدخل"):fmtJOD(figures.spent),icon:Wallet},
   {key:"bills",label:t("Upcoming recorded bills","فواتير مسجّلة قادمة"),value:money.demo||!overview.hasBillSchedule?t("Not entered","غير مدخل"):fmtJOD(overview.forecast.upcomingBills),icon:CalendarClock}
  ];
