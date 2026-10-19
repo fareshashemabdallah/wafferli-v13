@@ -5,7 +5,6 @@ import { MoneyGuidance } from "@/components/MoneyGuidance";
 import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
 import {FinancialIntelligencePanel} from "@/components/FinancialIntelligencePanel";
-import {WorldScene} from "@/components/AdventureArtwork";
 import { localToday } from "@/lib/cashflow";
 import { Pencil, Plus, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -72,16 +71,7 @@ function MoneyPage() {
 
   return (
     <AppShell title={tr("Our Finances")}>
-      {section==="overview"&&<h1 className="sr-only">{ar?"مغامرة مال العيلة":"Our Money Adventure"}</h1>}
-      {section!=="overview"&&<section className="relative isolate mb-4 min-h-[130px] overflow-hidden rounded-[1.55rem] border border-[#CDE8D3] bg-gradient-to-r from-[#E3F7E9] to-[#D8F0EA]" aria-label={ar?"مغامرة مصاريف العيلة":"Family money adventure"}>
-        <WorldScene place={section==="spending"?"market":"home"} className="pointer-events-none absolute inset-y-0 end-0 h-full w-[53%] opacity-85"/>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#EAF8ED] via-[#EAF8ED]/95 to-transparent rtl:bg-gradient-to-l"/>
-        <div className="relative z-10 flex min-h-[130px] w-[74%] flex-col justify-center px-4 py-3">
-          <p className="text-[11px] font-extrabold tracking-wider text-[#2B8363]">{ar?"خطوة في مغامرة المالية":"YOUR MONEY JOURNEY"}</p>
-          <h1 className="mt-1 text-lg font-black text-[#1F553C]">{section==="spending"?(ar?"شو دفعنا اليوم؟":"What did we spend?"):(ar?"شو في دفعات جاية؟":"What's coming up?")}</h1>
-          <p className="mt-1 text-xs leading-relaxed text-[#567466]">{section==="spending"?(ar?"سجّل مصروف واحد وشوف الصورة تتوضح.":"Record one purchase. See your picture become clearer."):(ar?"اكتشف الفواتير الجاية، وراجعها على راحتك.":"Discover upcoming bills and take them one at a time.")}</p>
-        </div>
-      </section>}
+      
       <div role="tablist" aria-label={ar?"أقسام المالية":"Money sections"} className="mb-3 grid grid-cols-3 gap-1 rounded-[1.25rem] border border-[#CFE4D8] bg-[#E5F3E6] p-1.5">
         {([{id:"overview",en:"Our Money",ar:"مال العيلة",icon:"🏡"},{id:"spending",en:"Spending",ar:"المصاريف",icon:"🛍️"},{id:"planning",en:"Bills",ar:"الفواتير",icon:"📅"}] as const)
           .map(v=><button role="tab" aria-selected={section===v.id} key={v.id} type="button" onClick={()=>setSection(v.id)}
