@@ -35,7 +35,7 @@ export function evaluatePlan(plan:FamilyPlan,money:MoneyState,all:FamilyPlan[]=[
  // Monthly income without a receipt date cannot be included as expected cash,
  // but it must not make a separately recorded cash-after-bills check unusable.
  const invalidBillDates=(money.commitments??[]).filter(b=>scheduleDates(b.dueDate,"once",b.dueDate,b.dueDate).length!==1).length;
- const canCheckCash=cost!==null&&!money.demo&&overview.cashSet&&overview.hasBillSchedule&&invalidBillDates===0&&overview.cashAfterBills!==null;
+ const canCheckCash=cost!==null&&!money.demo&&money.financialInputsPartial!==true&&overview.cashSet&&overview.hasBillSchedule&&invalidBillDates===0&&overview.cashAfterBills!==null;
  const today=localDay(now);
  // 30-day forecast covers only a dated horizon; never imply the current balance is future cash.
  const withinCashWindow=day>=today&&day<=futureDate(today,30);
