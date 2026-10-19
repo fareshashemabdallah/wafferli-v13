@@ -17,7 +17,7 @@ const goodNumber=(v:string)=>v.trim()===""?undefined:(/^\d{1,6}(?:\.\d{1,2})?$/.
 const selectCls="mt-1 min-h-11 w-full rounded-xl border border-[#D0DED4] bg-white px-3 text-sm";
 const panelCls="rounded-[1.4rem] border border-[#D7E6DA] bg-white p-4 sm:p-5";
 
-export function FamilyActivityExplorer(){
+export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordability:()=>void}){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,arabic:string)=>ar?arabic:en;
  const [prefs,setPrefs,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
@@ -204,7 +204,7 @@ export function FamilyActivityExplorer(){
    <details className={panelCls}>
     <summary className="flex min-h-11 cursor-pointer items-center gap-2 font-bold text-brand"><Wallet className="size-5"/>{t("Optional: Check an outing against my finances","اختياري: قارن الطلعة مع مالية العيلة")}</summary>
     <p className="mt-2 text-sm text-muted-foreground">{t("This is separate from browsing. A cautious assessment needs real balances and scheduled commitments, and may be incomplete.","هذه خطوة منفصلة عن الاستكشاف. التقييم الحذر يحتاج بيانات مالية حقيقية وقد يكون غير مكتمل.")}</p>
-    <Link to="/explore/affordability" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-bold text-white">{t("Open the optional affordability review","افتح المراجعة المالية الاختيارية")}<ArrowRight className="size-4"/></Link>
+    <button type="button" onClick={onShowAffordability} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-bold text-white">{t("Open the optional affordability review","افتح المراجعة المالية الاختيارية")}<ArrowRight className="size-4"/></button>
    </details>
 
    <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>{t("No personal child profiles, banking data or precise phone location are sent to map sources. No payments, club accounts or live reservations are offered here.","لا نرسل ملفات الأطفال أو البيانات البنكية أو موقع الهاتف الدقيق لمصادر الخرائط. لا توجد دفعات أو حسابات أندية أو حجوزات فورية هنا.")}</p>
