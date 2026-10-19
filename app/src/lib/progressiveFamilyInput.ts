@@ -32,7 +32,7 @@ export function applyProgressiveMoneyFacts(before:MoneyState,input:ProgressiveMo
  const upsert=(id:string,name:string,type:Category["type"],priority:Category["priority"],v:number)=>{
   const original=categories.find(c=>c.id===id);
   const next:Category=original?{...original,planned:rounded(v),amountConfidence:"estimate"}:
-   {id,name,type,priority,planned:rounded(v),amountConfidence:"estimate"};
+   {id,name,type,...(priority?{priority}:{}),planned:rounded(v),amountConfidence:"estimate"};
   const idx=categories.findIndex(c=>c.id===id);
   if(idx<0)categories.push(next);else categories[idx]=next;
  };
