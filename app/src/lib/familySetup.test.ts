@@ -35,7 +35,7 @@ describe("genuine household setup",()=>{
   expect(familySetupState([adult],money,false).next).toBeNull();
  });
  it("accepts one useful estimate without treating missing data as zero or nagging for setup",()=>{
-  const partial={...sampleMoney(),demo:false,income:0,incomeKnown:undefined,categories:[{id:"household-essential",name:"Essential",type:"fixed" as const,planned:350}],expenses:[]};
+  const partial={...sampleMoney(),demo:false,income:0,categories:[{id:"household-essential",name:"Essential",type:"fixed" as const,planned:350}],expenses:[]};
   expect(familySetupState([adult],partial,false).next).toBeNull();
  });
 });
