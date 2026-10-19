@@ -3,8 +3,9 @@ import {areaFromRoute,familyDestinations} from "@/lib/familyNavigation";
 
 describe("single Dabberna family navigation",()=>{
  it("has four unique connected pillars in both languages",()=>{
-  expect(familyDestinations.map(x=>x.id)).toEqual(["today","money","family","ask"]);
+  expect(familyDestinations.map(x=>x.id)).toEqual(["today","money","ask","family"]);
   expect(new Set(familyDestinations.map(x=>x.to)).size).toBe(4);
+  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Decide","Plans"]);
   for(const x of familyDestinations){
    expect(x.en.length).toBeGreaterThan(0);
    expect(x.ar.length).toBeGreaterThan(0);
