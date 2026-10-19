@@ -30,7 +30,7 @@ export type MoneyState = {
   /** User attested there are no scheduled bills this calendar month. */
   noBillsConfirmedMonth?:string;
 };
-export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string; /** Legacy full date of birth, not required for new profiles. */ birthday?: string | undefined; /** MM-DD only: permits birthday reminders without retaining birth year. */ birthdayMonthDay?:string|undefined };
+export type Member = { id: string; name: string; role: "adult" | "child"; ageGroup: string; prefs: string; /** Legacy full date of birth, not required for new profiles. */ birthday?: string | undefined; /** MM-DD only: permits birthday reminders without retaining birth year. */ birthdayMonthDay?:string|undefined; /** Optional whole-year age; no birth year needed. */ ageYears?:number|undefined };
 
 const today = new Date();
 const d = (day: number) => {
