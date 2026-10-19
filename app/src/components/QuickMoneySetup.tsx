@@ -37,7 +37,7 @@ export function QuickMoneySetup({money,setMoney,compact=false}:Props){
   event.preventDefault();setError("");
   const i=hasIncome?undefined:parse(income),a=showEssential?parse(essential):undefined,
    b=showOther?parse(other):undefined,s=parse(savings);
-  if([i,a,b,s].includes(null) || i===0&&!zeroIncome){
+  if(i===null||a===null||b===null||s===null || i===0&&!zeroIncome){
    setError(tr("Enter a valid amount. To record zero income, confirm that explicitly.","أدخل مبلغاً صحيحاً. إذا كان الدخل صفراً، أكّد ذلك بشكل واضح."));return;
   }
   const values:ProgressiveMoneyFacts={
