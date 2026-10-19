@@ -57,4 +57,29 @@ describe("family discovery before financial entry",()=>{
   expect(localStorage.getItem("wafferli.v13.money")).toBeNull();
   expect(screen.getByText(/No payment, bill or confirmed booking was created/)).toBeInTheDocument();
  });
+ it("continues an existing outing without making a second plan or losing its occasion link",async()=>{
+  const original={id:"family-1",title:"Birthday family outing",kind:"outing",status:"planning",
+   date:"2026-10-24",budgetJod:40,sourceRef:"occasion:party@2026",
+   createdAt:"2026-10-19T00:00:00.000Z",updatedAt:"2026-10-19T00:00:00.000Z"};
+  localStorage.setItem("wafferli.v13.familyPlans",JSON.stringify([original]));
+  localStorage.setItem("wafferli.v13.activeFamilyPlanId",JSON.stringify(original.id));
+  renderExplorer();
+  fireEvent.click(screen.getByRole("button",{name:"Show mapped places"}));
+  expect(await screen.findByText("Children's Museum")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Consider this place"}));
+  const checkbox=await screen.findByRole("checkbox",{name:/Continue my existing outing plan/});
+  expect(checkbox).not.toBeChecked();
+  fireEvent.click(checkbox);
+  fireEvent.click(screen.getByRole("button",{name:"Update my existing plan"}));
+  await waitFor(()=>{
+   const plans=JSON.parse(localStorage.getItem("wafferli.v13.familyPlans")!) as Array<Record<string,unknown>>;
+   expect(plans).toHaveLength(1);
+   expect(plans[0]).toMatchObject({id:"family-1",kind:"outing",status:"planning",
+    date:"2026-10-24",budgetJod:40,sourceRef:"occasion:party@2026",
+    choice:{label:"Children's Museum",verified:false}});
+  });
+  expect(localStorage.getItem("wafferli.v13.money")).toBeNull();
+  expect(screen.getByRole("link",{name:"Review my plan"})).toHaveAttribute("href","/plans");
+ });
+
 });
