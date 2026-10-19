@@ -19,6 +19,10 @@ export type FamilyPreferences = {
   activityGroupPreference?:"any"|"girls"|"boys"|"separate";
   instructorPreference?:"any"|"female"|"male";
   parentCanObservePreferred?:boolean;
+  /** Selected care dimension, not a grade or income/social class. */
+  moneyJourneyFocus?:"understand"|"protect"|"prepare"|"live";
+  /** A reading acknowledgment only: never confirms a payment, cash position or completed task. */
+  moneyJourneyLastReviewedWeek?:string;
   /** Parents opt in to priorities; no inference from salary, religion or age. */
   protectedFamilyValues?:FamilyValue[];
   /** Local-only positive preference counts; not prompts, expenses or profiles. */
@@ -43,6 +47,7 @@ export const defaultFamilyPreferences: FamilyPreferences = {
   activityGroupPreference:"any",
   instructorPreference:"any",
   parentCanObservePreferred:false,
+  moneyJourneyFocus:"prepare",
   protectedFamilyValues:[],
   decisionLearningEnabled:false,
 };
