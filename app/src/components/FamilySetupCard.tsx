@@ -20,10 +20,9 @@ export function FamilySetupCard(){
  const items=[
   {id:"family",en:"Tell us who you're planning for",ar:"مين الأشخاص اللي عم نخطط لإلن؟",link:"/space" as const,
    detailEn:"Add people if you wish. Child details are optional.",detailAr:"أضف أفراد العائلة إذا بتحب. معلومات الأطفال اختيارية."},
-  {id:"money",en:"Build your monthly money picture",ar:"رتّب صورة ميزانيتك الشهرية",link:"/money" as const,
-   detailEn:"Start with income and essential expenses. Savings can wait.",detailAr:"ابدأ بالدخل والمصاريف الأساسية. الادخار ممكن ينتظر."},
-  {id:"preferences",en:"Choose how Dabberna helps",ar:"اختَر شو نصائح دبّرنا بتفيدك",link:"/space" as const,
-   detailEn:"Confirm advice, outings and privacy preferences.",detailAr:"أكّد تفضيلات النصائح والطلعات والخصوصية."}
+  {id:"money",en:"Add one money fact you know",ar:"أضف معلومة مالية واحدة",link:"/money" as const,
+   detailEn:"A single known cost or an optional income estimate is enough to begin.",
+   detailAr:"مبلغ مصروف أو تقدير دخل اختياري كافي للبداية."},
  ];
  const current=items.find(item=>item.id===setup.next)!;
  return <section className="mt-5 rounded-2xl border border-[#D7E4D6] bg-[#F2F7EE] p-4 sm:p-5" aria-label={ar?"تحضير مساحة العائلة":"Set up your family space"}>
@@ -45,7 +44,7 @@ export function FamilySetupCard(){
     <h3 className="text-sm font-semibold">{ar?current.ar:current.en}</h3>
     <p className="mt-1 text-xs text-muted-foreground">{ar?current.detailAr:current.detailEn}</p>
    </div>
-   <Link to={current.link} hash={setup.next==="preferences"?"family-preferences":setup.next==="family"?"household-members":""} className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-brand px-3 text-xs font-semibold text-white">
+   <Link to={current.link} hash={setup.next==="family"?"household-members":""} className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-brand px-3 text-xs font-semibold text-white">
     {ar?"تابع":"Continue"} <ArrowRight className="size-3.5 rtl:rotate-180"/>
    </Link>
   </div>
