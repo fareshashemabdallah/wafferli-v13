@@ -1,9 +1,11 @@
+import {isDuplicateFamilyMoment} from "@/lib/canonicalFamilyInput";
 import { useI18n } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Cake, CalendarHeart, Heart, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AppShell, Notice, PilotBadge } from "@/components/AppShell";
 import { FamilyPreferences } from "@/components/FamilyPreferences";
+import {FamilyBasicsQuickInput} from "@/components/FamilyBasicsQuickInput";
 import {LocalExpensePrivacyReview} from "@/components/LocalExpensePrivacyReview";
 import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {isSampleFamilyMember} from "@/lib/familySetup";
@@ -61,7 +63,7 @@ function Space() {
       if(!date||date.getTime()>new Date().getTime())return setErr(ar?"تاريخ الميلاد غير صالح أو في المستقبل.":"Please enter a valid birth date that is not in the future.");
     }
     if(edit.birthdayMonthDay&&(!/^\d{2}-\d{2}$/.test(edit.birthdayMonthDay)||!parseCalendarDate("2000-"+edit.birthdayMonthDay)))return setErr(ar?"أدخل شهراً ويوماً صحيحين بصيغة MM-DD.":"Enter a valid birthday month and day as MM-DD.");
-    const m:Member={...edit,name:edit.name.trim().slice(0,30),prefs:edit.prefs.slice(0,120),birthday:edit.birthday||undefined,birthdayMonthDay:edit.birthdayMonthDay||undefined};
+    const m:Member={...edit,name:edit.name.trim().slice(0,30),prefs:edit.prefs.slice(0,120),ageGroup:edit.ageYears!==undefined?"":edit.ageGroup,birthday:edit.birthday||undefined,birthdayMonthDay:edit.birthdayMonthDay||undefined};
     setMembers(old=>m.id?old.map(x=>x.id===m.id?m:x):[...old,{...m,id:uid()}]);
     setEdit(null);setErr("");
   };
@@ -75,6 +77,7 @@ function Space() {
       id:occasion.id||uid(),title,date:occasion.date,kind:occasion.kind,
       annual:occasion.annual,note:occasion.note.trim().slice(0,240),
     };
+    if(isDuplicateFamilyMoment(events,record)){setOccasionError(ar?"هذه المناسبة موجودة مسبقاً في تقويم العيلة.":"This family occasion is already on your calendar.");return;}
     setEvents(old=>occasion.id?old.map(x=>x.id===occasion.id?record:x):[...old,record]);
     setOccasion(null);setOccasionError("");
   };
@@ -95,6 +98,7 @@ function Space() {
         <p className="relative mt-2 max-w-lg text-sm leading-relaxed text-[#4E6B5A]">{ar?"تفاصيل العائلة وأيامها المهمة، محفوظة بمكان واحد.":"Your people, birthdays and meaningful dates, thoughtfully kept together."}</p>
       </section>
 
+      <FamilyBasicsQuickInput/>
       <section className="mt-7 scroll-mt-24" id="household-members">
         {samples.length>0&&<div className="mb-4 rounded-2xl border border-[#E6D7C5] bg-[#FFF8F0] p-4">
           <p className="text-sm font-semibold">{ar?"أسماء تجريبية، ليست عيلتك":"Example profiles, not your family"}</p>
@@ -122,10 +126,10 @@ function Space() {
             <details className="sm:col-span-2 rounded-xl border border-border bg-white p-3"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"معلومات إضافية (اختياري)":"More about this person (optional)"}</summary><div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Field label={ar?"العمر بالسنوات (اختياري)":"Age in whole years (optional)"}><Input type="number" min={0} max={120} className={inputCls}
               value={edit.ageYears??""} onChange={e=>setEdit({...edit,ageYears:e.target.value===""?undefined:Number(e.target.value)})}/></Field>
-            <Field label={tr("Age group")}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
+            {edit.ageYears===undefined&&<Field label={ar?"الفئة العمرية (إذا العمر الدقيق غير معروف)":"Age group (if exact age is unknown)"}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
               <option value="">{ar?"أفضل عدم الإجابة":"Not provided"}</option>
               {ages.map(a=><option key={a}>{a}</option>)}
-            </NativeSelect></Field>
+            </NativeSelect></Field>}
             <Field label={tr("Preferences")}><Input className={inputCls} maxLength={120} value={edit.prefs} onChange={e=>setEdit({...edit,prefs:e.target.value})}/></Field>
             </div></details>
             <label className="block text-sm font-medium sm:col-span-2">

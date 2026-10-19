@@ -1,3 +1,4 @@
+import {isDuplicateFamilyMoment} from "@/lib/canonicalFamilyInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Cake, CalendarDays, Check, ChevronLeft, ChevronRight, Gift, Heart, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
@@ -52,6 +53,7 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
   if(title.length<2||title.length>80||!date){setError(ar?"أدخل عنوانًا صحيحًا (٢–٨٠ حرفًا) وتاريخًا صالحًا.":"Enter a title (2–80 characters) and valid date.");return;}
   if(form.time&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(form.time)){setError(ar?"الوقت غير صالح.":"Please enter a valid time.");return;}
   const record:FamilyMoment={id:form.id||uid(),title,date:form.date,kind:form.kind,annual:form.annual,...(form.time?{time:form.time}:{}),...(form.note.trim()?{note:form.note.trim().slice(0,240)}:{})};
+  if(isDuplicateFamilyMoment(events,record)){setError(ar?"هذه المناسبة محفوظة مسبقاً. عدّل الموجودة بدلاً من تكرارها.":"This occasion is already saved. Edit the existing one instead.");return;}
   setEvents(old=>form.id?old.map(x=>x.id===form.id?record:x):[...old,record]);
   setEditing(false);setError("");setSelected(form.date);
   setMonth(new Date(date.getFullYear(),date.getMonth(),1,12));

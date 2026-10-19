@@ -1,5 +1,4 @@
-import {computeMoney,type Member,type MoneyState} from "./money";
-import {needsStarterBudget} from "./starterBudget";
+import type {Member,MoneyState} from "./money";
 
 export const FAMILY_SETUP_PREFERENCES_KEY="familySetupPreferencesConfirmed";
 export const FAMILY_SETUP_PROFILE_SKIP_KEY="familySetupProfileSkipped";
@@ -16,27 +15,28 @@ export const realFamilyMembers=(members:readonly Member[]):Member[]=>
  members.filter(member=>!isSampleFamilyMember(member));
 
 export type FamilySetupState={
- steps:Array<{id:"family"|"money"|"preferences";complete:boolean;optional:boolean}>;
+ steps:Array<{id:"family"|"money";complete:boolean;optional:boolean}>;
  completed:number;
  total:number;
- next:"family"|"money"|"preferences"|null;
+ next:"family"|"money"|null;
  hasRealFamily:boolean;
  sampleProfiles:number;
 };
 /** Reads existing local modules without altering money, relatives or plans. */
 export function familySetupState(
  members:readonly Member[],money:MoneyState,
- preferencesConfirmed:boolean,profileSkipped=false,moneySkipped=false
+ _preferencesConfirmed:boolean,profileSkipped=false,moneySkipped=false,hasAnonymousCounts=false
 ):FamilySetupState {
  const actual=realFamilyMembers(members);
- const family=actual.length>0||profileSkipped;
- const c=computeMoney(money);
- const moneyDone=!needsStarterBudget(money)&&!money.demo&&(c.monthlyIncome>0||money.incomeKnown)&&
-  c.savingsTarget>=0;
+ const family=actual.length>0||profileSkipped||hasAnonymousCounts;
+ // A single genuine saved fact counts as having started; incomplete information
+ // remains incomplete in financial guidance and does not trigger repeated setup.
+ const moneyDone=!money.demo&&(money.incomeKnown===true||money.income>0||money.categories.length>0||
+  money.expenses.length>0||(money.commitments?.length??0)>0||
+  typeof money.cashOnHand==="number"||(money.incomeSources?.length??0)>0);
  const steps=[
   {id:"family" as const,complete:family,optional:true},
-  {id:"money" as const,complete:moneyDone||moneySkipped,optional:true},
-  {id:"preferences" as const,complete:preferencesConfirmed,optional:true}
+  {id:"money" as const,complete:moneyDone||moneySkipped,optional:true}
  ];
  const next=steps.find(step=>!step.complete)?.id??null;
  return {

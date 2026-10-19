@@ -22,6 +22,9 @@ const draw=()=>render(<I18nProvider><SmartBuy/></I18nProvider>);
 describe("simple buying journey",()=>{
  it("answers which entered store costs less, without making purchases",async()=>{
   draw();
+  expect(screen.queryByRole("textbox",{name:"Store"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Add a seller quote when ready"}));
+  fireEvent.click(screen.getByRole("button",{name:"Add a seller quote when ready"}));
   const stores=screen.getAllByRole("textbox",{name:"Store"});
   const prices=screen.getAllByRole("textbox",{name:"Price"});
   const delivery=screen.getAllByRole("textbox",{name:"Delivery or travel"});
@@ -47,6 +50,8 @@ describe("simple buying journey",()=>{
   expect(screen.queryByText("Advanced: quote drafts, offers & photos (optional)")).not.toBeInTheDocument();
   expect(screen.queryByText("Preview only · AI extraction not connected")).not.toBeInTheDocument();
   expect(screen.getByText(/Prices are entered by you/)).toBeInTheDocument();
+  expect(screen.queryByRole("textbox",{name:"Store"})).not.toBeInTheDocument();
+  expect(screen.getByText("Spending limit for this purchase (optional)").closest("details")).toHaveProperty("open",false);
  });
  it("reuses only the parent's basket product name, never the entered price",async()=>{
   window.localStorage.setItem("wafferli.v13.shopping",JSON.stringify([
@@ -80,7 +85,7 @@ describe("simple buying journey",()=>{
    };
    expect(data.product).toBe("");
    expect(data.budget).toBe("");
-   expect(data.alts).toHaveLength(2);
+   expect(data.alts).toHaveLength(0);
   });
   expect(window.localStorage.getItem("wafferli.v13.shopping")).toContain("Desk");
  });

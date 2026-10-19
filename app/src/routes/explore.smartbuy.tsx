@@ -41,10 +41,7 @@ export function SmartBuy() {
   const [s, setS] = useLocalState("smartbuy", {
     product: "",
     budget: "",
-    alts: [
-      { id: "a1", store: "", price: "", extra: "", verified: false },
-      { id: "a2", store: "", price: "", extra: "", verified: false },
-    ] as Alt[],
+    alts: [] as Alt[],
   });
   const [basket] = useLocalState<BasketEntry[]>("shopping",[]);
   // Reuse names the parent already entered; never pretend a manual basket
@@ -102,7 +99,10 @@ export function SmartBuy() {
       </div>
       <div className="card-soft mt-4 grid gap-3 p-4 sm:grid-cols-2">
         <Field label={tr("What are you buying?")}><Input className={inputCls} maxLength={60} value={s.product} onChange={(e) => setS({ ...s, product: e.target.value })} /></Field>
-        <Field label={tr("Your budget (JOD)")}><Input className={inputCls} inputMode="decimal" value={s.budget} onChange={(e) => setS({ ...s, budget: e.target.value })} /></Field>
+        <details className="sm:col-span-2 rounded-lg border border-[#DDE9DF] bg-white p-3">
+        <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"حدّ مالي للشراء (اختياري)":"Spending limit for this purchase (optional)"}</summary>
+        <div className="mt-2"><Field label={tr("Your budget (JOD)")}><Input className={inputCls} inputMode="decimal" value={s.budget} onChange={(e) => setS({ ...s, budget: e.target.value })} /></Field></div>
+       </details>
         {availableBasketItems.length>0&&<label className="text-xs font-semibold sm:col-span-2">
           {ar?"أو استخدم منتجاً من سلّتك المحفوظة":"Or reuse an item from My Basket"}
           <select className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
@@ -122,16 +122,17 @@ export function SmartBuy() {
            onClick={()=>{
              if(!window.confirm(ar?"ابدأ مقارنة جديدة؟ سيُستبدل جدول المقارنة المحفوظ فقط، ولن تُحذف السلّة أو الخطط.":
               "Start a new comparison? This replaces only your saved comparison; your basket and family plans remain unchanged."))return;
-             setS({product:"",budget:"",alts:[
-              {id:uid(),store:"",price:"",extra:"",verified:false},
-              {id:uid(),store:"",price:"",extra:"",verified:false}
-             ]});
+             setS({product:"",budget:"",alts:[]});
            }}><RotateCcw className="size-4"/>
            {ar?"ابدأ مقارنة جديدة":"Start another comparison"}
           </button>
         </div>
       </div>
       <div className="mt-4 space-y-3">
+       {s.alts.length===0&&<div className="rounded-xl border border-[#DDE7DC] bg-[#F5F9F3] p-4 text-sm">
+        <p className="font-semibold">{ar?"ابحث عن المنتج أولاً، وبعدين ضيف السعر إذا صار عندك عرض فعلي.":"Start with the product. Add a seller quote only when you have a real price."}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{ar?"دبّرنا لا تختلق عروض أو أسعار مباشرة، وما في داعي تدخل متاجر الآن.":"Dabberna doesn't invent live retailer offers. You don't have to enter stores before discovering options."}</p>
+       </div>}
         {rows.map((a) => (
           <div key={a.id} className="card-soft p-4">
             <div className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
@@ -198,7 +199,7 @@ export function SmartBuy() {
             </details>
           </div>
         ))}
-        <Button variant="secondary" disabled={s.alts.length >= 8} onClick={() => setS({ ...s, alts: [...s.alts, { id: uid(), store: "", price: "", extra: "", verified: false }] })}><Plus className="size-4" /> {tr("Add alternative")}</Button>
+        <Button variant="secondary" disabled={s.alts.length >= 8} onClick={() => setS({ ...s, alts: [...s.alts, { id: uid(), store: "", price: "", extra: "", verified: false }] })}><Plus className="size-4" /> {ar?"أضف سعر متجر بعد التحقق":"Add a seller quote when ready"}</Button>
       </div>
       <details className="group mt-5 rounded-2xl border border-[#DDE9DB] bg-[#FAFCF8] p-4">
         <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">

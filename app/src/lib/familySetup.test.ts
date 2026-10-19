@@ -20,18 +20,22 @@ describe("genuine household setup",()=>{
  it("tracks each existing setup step and never edits financial records",()=>{
   const money=applyStarterBudget(sampleMoney(),{income:2000,spending:1200,savings:250});
   const s=familySetupState([adult],money,true);
-  expect(s).toMatchObject({completed:3,next:null,sampleProfiles:0});
+  expect(s).toMatchObject({completed:2,next:null,sampleProfiles:0});
   expect(money.categories[0]?.planned).toBe(1200);
-  expect(s.steps.map(x=>x.complete)).toEqual([true,true,true]);
+  expect(s.steps.map(x=>x.complete)).toEqual([true,true]);
  });
  it("lets parents explicitly skip family profiles without fabricating members",()=>{
   const money=applyStarterBudget(sampleMoney(),{income:1400,spending:900,savings:100});
   const s=familySetupState([],money,true,true);
-  expect(s).toMatchObject({completed:3,next:null,hasRealFamily:false});
+  expect(s).toMatchObject({completed:2,next:null,hasRealFamily:false});
   expect(realFamilyMembers([])).toEqual([]);
  });
- it("treats default preferences as unconfirmed",()=>{
+ it("does not demand a second confirmation just because preferences were left at default",()=>{
   const money=applyStarterBudget(sampleMoney(),{income:1400,spending:900,savings:100});
-  expect(familySetupState([adult],money,false).next).toBe("preferences");
+  expect(familySetupState([adult],money,false).next).toBeNull();
+ });
+ it("accepts one useful estimate without treating missing data as zero or nagging for setup",()=>{
+  const partial={...sampleMoney(),demo:false,income:0,categories:[{id:"household-essential",name:"Essential",type:"fixed" as const,planned:350}],expenses:[]};
+  expect(familySetupState([adult],partial,false).next).toBeNull();
  });
 });

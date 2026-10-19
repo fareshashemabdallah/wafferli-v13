@@ -3,6 +3,7 @@ import {CalendarDays,ChevronDown,HousePlus,Plus,Trash2,Users} from "lucide-react
 import {useI18n} from "@/lib/i18n";
 import {fmtJOD,uid,useLocalState} from "@/lib/storage";
 import {realFamilyMembers} from "@/lib/familySetup";
+import {householdCountSource} from "@/lib/progressiveFamilyInput";
 import type {Member,MoneyState} from "@/lib/money";
 import {
  HOUSEHOLD_PRESENCE_KEY,emptyHouseholdPresence,exampleHelper,exampleGuest,
@@ -28,6 +29,7 @@ export function HouseholdPresencePanel({members,money,setMoney}:Props){
  const [open,setOpen]=useState(false);
  const real=realFamilyMembers(members);
  const computed=estimateHouseholdPresence(presence,members,month);
+ const countSource=householdCountSource(members,presence);
  const update=(patch:Partial<HouseholdPresence>)=>setPresence(old=>({...old,...patch}));
  const addHelper=(event:FormEvent)=>{
   event.preventDefault();if(!helperDraft)return;
@@ -101,7 +103,7 @@ export function HouseholdPresencePanel({members,money,setMoney}:Props){
     </p>:<p className="mt-1 text-xs text-muted-foreground">{t("Using counts you entered here rather than your family profiles.","نعتمد الأعداد التي أدخلتها هنا بدلاً من ملفات العائلة.")}</p>}
     <button className="mt-2 text-xs font-semibold text-brand underline" type="button"
      onClick={()=>update(presence.adults===null&&presence.children===null?
-      {adults:real.filter(x=>x.role==="adult").length||2,children:real.filter(x=>x.role==="child").length}:
+      {adults:real.filter(x=>x.role==="adult").length,children:real.filter(x=>x.role==="child").length}:
       {adults:null,children:null})}>
      {presence.adults===null&&presence.children===null?t("Enter counts manually","أدخل الأعداد يدوياً"):t("Use Family profiles","استخدم ملفات العائلة")}
     </button>

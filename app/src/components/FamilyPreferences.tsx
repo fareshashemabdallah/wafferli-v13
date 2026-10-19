@@ -14,8 +14,8 @@ export function FamilyPreferences() {
   const {lang}=useI18n();
   const ar=lang==="ar";
   const [preferences,setPreferences,ready]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
-  const [confirmed,setConfirmed,confirmedReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
-  const set=<K extends keyof FamilyPreferences>(key:K,value:FamilyPreferences[K])=>{setPreferences(old=>({...old,[key]:value}));setConfirmed(false);};
+  const [,setConfirmed,confirmedReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
+  const set=<K extends keyof FamilyPreferences>(key:K,value:FamilyPreferences[K])=>{setPreferences(old=>({...old,[key]:value}));setConfirmed(true);};
   if(!ready||!confirmedReady)return null;
   return <section className="card-soft mt-6 p-4" id="family-preferences">
     <h2 className="text-lg font-semibold">{ar?"تفضيلات العائلة":"Family preferences"}</h2>
@@ -112,9 +112,7 @@ export function FamilyPreferences() {
     </div>
     <div className="mt-4 rounded-xl bg-[#EDF5EA] p-3">
       <p className="text-xs text-muted-foreground">{ar?"لن نشارك هذه الخيارات مع المطاعم أو المجموعات تلقائياً. ما في تتبع للموقع ولا إشعارات خارج التطبيق.":"These choices are local. They are not automatically shared with merchants or groups, and there is no passive location tracking or push notification."}</p>
-      <button type="button" onClick={()=>setConfirmed(true)} className="mt-3 min-h-11 rounded-full bg-brand px-4 text-sm font-semibold text-white">
-        {confirmed?(ar?"✓ التفضيلات مؤكدة":"✓ Preferences confirmed"):(ar?"أكّد تفضيلاتي":"Confirm my preferences")}
-      </button>
+      <p className="mt-2 text-xs font-semibold text-brand">{ar?"✓ التغييرات بتنحفظ تلقائياً، بلا تأكيد إضافي.":"✓ Changes save automatically; no extra confirmation required."}</p>
     </div>
   </section>;
 }
