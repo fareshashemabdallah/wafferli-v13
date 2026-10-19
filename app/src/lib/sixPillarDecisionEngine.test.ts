@@ -44,7 +44,7 @@ describe("six-pillar family decisions",()=>{
   expect(result.protectedEn).toContain("Education");
   expect(result.options[0]?.id).toBe("stage");
   expect(result.verifiedProviders).toBe(false);
-  expect(result.unknownsEn.join(" ")).toContain("verify");
+  expect(result.unknownsEn.join(" ")).toContain("verified");
  });
  it("never uses sample finances to approve affordability, with or without a proposed cost",()=>{
   const c=context();
