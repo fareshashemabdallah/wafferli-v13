@@ -62,8 +62,8 @@ export function AdventureFamilyHome(){
    {/* Mobile greeting has its own row above the portraits, never over faces.
        Desktop uses the empty right portion of the scene. */}
    <div className="adventure-family-hero__greeting" data-testid="adventure-family-greeting">
-    <p className="text-sm font-extrabold leading-snug text-[#183F38] sm:text-lg">{t("Hello! What shall we explore today?","مرحبا! شو بدنا نكتشف اليوم؟")}</p>
-    <p className="mt-1 text-xs leading-relaxed text-[#4D6B62]">{t("Discover, plan and enjoy life together.","نكتشف ونخطط ونستمتع سوا.")}</p>
+    <p className="text-sm font-extrabold leading-snug text-[#183F38] sm:text-lg">{t("How can our money care for our family?","كيف في مالنا يساعد عيلتنا؟")}</p>
+    <p className="mt-1 text-xs leading-relaxed text-[#4D6B62]">{t("Understand, protect and prepare—so we can live well together.","نفهم ونحمي ونتحضّر، لنعيش منيح سوا.")}</p>
    </div>
    <div className="adventure-family-hero__art" data-testid="adventure-family-portrait-area">
     <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"}
