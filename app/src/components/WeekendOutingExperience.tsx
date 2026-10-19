@@ -16,7 +16,7 @@ import {WEEKEND_HANDOFF_KEY,type WeekendPlanDraft} from "@/lib/weekendOutingHand
 const googlePlaces=(city:string,category:string)=>
  "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(category+" "+city+" Jordan");
 
-export function WeekendOutingExperience(){
+export function WeekendOutingExperience({onBack}:{onBack?:()=>void}={}){
  const {lang}=useI18n(),ar=lang==="ar";
  const [money,setMoney,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [prefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
@@ -72,6 +72,7 @@ export function WeekendOutingExperience(){
   }))setHandOffError(ar?"تعذّر حفظ خطة الطلعة على هذا الجهاز.":"Could not save the outing plan on this device.");
  };
  return <AppShell title={ar?"فينا نطلع هالويكند؟":"Can we afford a family outing this weekend?"}>
+  {onBack&&<button type="button" onClick={onBack} className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-[#D7E6D5] bg-white px-4 text-sm font-semibold text-brand">{ar?"← رجوع لاكتشاف الأنشطة":"← Back to activity discovery"}</button>}
   {!ready?<p className="text-sm text-muted-foreground">{ar?"عم نراجع المعلومات اللي اخترت تحفظها…":"Reading the details you chose to save…"}</p>:<>
    <section className="rounded-[1.6rem] border border-[#DAE6D5] bg-gradient-to-br from-[#EDF6EB] via-white to-[#FEF4E7] p-5 sm:p-7"
     aria-label={ar?"نتيجة تقييم الطلعة":"Your outing assessment"}>
