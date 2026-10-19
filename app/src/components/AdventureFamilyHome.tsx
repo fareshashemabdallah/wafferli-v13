@@ -13,6 +13,7 @@ import {homeSnapshot} from "@/lib/homeSnapshot";
 import {RobotBuddy,WorldScene,type AdventurePlace} from "./AdventureArtwork";
 import {TodayFamilyBrief} from "./TodayFamilyBrief";
 import {FamilyDiscoveryPanel} from "./FamilyDiscoveryPanel";
+import {FamilyMoneyJourneyCard} from "./FamilyMoneyJourneyCard";
 import {futureFamilyMilestones} from "@/lib/sixPillarDecisionEngine";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import "./adventureFamilyHero.css";
@@ -48,7 +49,7 @@ export function AdventureFamilyHome(){
    <div>
     <p className="text-xs font-extrabold tracking-[.13em] text-[#458778]">{t("WELCOME TO YOUR FAMILY WORLD","أهلاً بعالم عيلتك")}</p>
     <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Dabberna <span className="text-[#448979]">✦</span></h1>
-    <p className="mt-1 text-sm text-[#5F746D]">{t("Your family adventure starts here","مغامرة عيلتك بتبدأ هون")}</p>
+    <p className="mt-1 text-sm text-[#5F746D]">{t("Your family money and life, cared for together","مال عيلتك وحياتها، منعتني فيهم سوا")}</p>
    </div>
    <Link to="/space" aria-label={t("Your family","عيلتك")}
     className="grid size-12 shrink-0 place-items-center rounded-2xl border border-[#C5E3D8] bg-[#F2FCF4] text-2xl shadow-sm">🏡</Link>
@@ -72,8 +73,10 @@ export function AdventureFamilyHome(){
    </div>
   </section>
 
+  <FamilyMoneyJourneyCard/>
+
   <section aria-label={t("Explore the family world","اكتشف عالم العيلة")}>
-   <h2 className="mb-3 flex items-center gap-2 text-base font-extrabold"><Compass className="size-5 text-[#368C73]"/>{t("What would help your family today?","شو بيساعد عيلتك اليوم؟")}</h2>
+   <h2 className="mb-3 flex items-center gap-2 text-base font-extrabold"><Compass className="size-5 text-[#368C73]"/>{t("More ways to enjoy, plan and spend wisely","طرق إضافية لنعيش ونخطط ونصرف بذكاء")}</h2>
    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
     {destinations.map(p=><Link to={p.to} key={p.id} aria-label={ar?p.ar:p.en}
      className="group overflow-hidden rounded-[1.45rem] border border-[#DEE8D9] bg-white p-2 shadow-[0_12px_28px_-23px_rgba(26,69,57,.35)] transition-transform duration-200 hover:-translate-y-1 focus-visible:outline-4 focus-visible:outline-[#57A78E] active:scale-[.985] sm:p-3">
