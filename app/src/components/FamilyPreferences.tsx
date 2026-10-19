@@ -2,7 +2,6 @@ import { Bell, Compass, CloudSun, ShieldCheck, ShoppingBag } from "lucide-react"
 import { defaultFamilyPreferences, type FamilyPreferences } from "@/lib/familyPreferences";
 import { useLocalState } from "@/lib/storage";
 import { useI18n } from "@/lib/i18n";
-import {FAMILY_SETUP_PREFERENCES_KEY} from "@/lib/familySetup";
 const interests: Array<{key:keyof FamilyPreferences;en:string;ar:string;Icon:typeof Bell}>=[
   {key:"weather",en:"Show weather and clothing guidance",ar:"عرض الطقس واقتراح الملابس",Icon:CloudSun},
   {key:"lifestyle",en:"Suggest family activities",ar:"اقتراح أنشطة عائلية",Icon:Compass},
@@ -14,9 +13,8 @@ export function FamilyPreferences() {
   const {lang}=useI18n();
   const ar=lang==="ar";
   const [preferences,setPreferences,ready]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
-  const [,setConfirmed,confirmedReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
-  const set=<K extends keyof FamilyPreferences>(key:K,value:FamilyPreferences[K])=>{setPreferences(old=>({...old,[key]:value}));setConfirmed(true);};
-  if(!ready||!confirmedReady)return null;
+  const set=<K extends keyof FamilyPreferences>(key:K,value:FamilyPreferences[K])=>{setPreferences(old=>({...old,[key]:value}));};
+  if(!ready)return null;
   return <section className="card-soft mt-6 p-4" id="family-preferences">
     <h2 className="text-lg font-semibold">{ar?"تفضيلات العائلة":"Family preferences"}</h2>
     <p className="mt-1 text-sm text-muted-foreground">{ar?"اختاروا النصائح التي تظهر في الصفحة الرئيسية. هذه الإعدادات محفوظة على الجهاز فقط، ولا ترسل إشعارات هاتف حالياً.":"Choose what appears on your home screen. Preferences stay on this device; push notifications are not active."}</p>
@@ -44,8 +42,9 @@ export function FamilyPreferences() {
        </select>
       </label>
     </div>
-    <div className="mt-4 rounded-xl border border-[#DCE8DB] bg-[#F6FAF5] p-3">
-      <h3 className="text-sm font-semibold">{ar?"تفضيلات الأنشطة (اختيارية)":"Activity discovery preferences (optional)"}</h3>
+    <details className="mt-4 rounded-xl border border-[#DCE8DB] bg-[#F6FAF5] p-3">
+      <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"تفاصيل اختيارية للنشاطات":"Optional activity details"}</summary>
+      <h3 className="sr-only">{ar?"تفضيلات الأنشطة (اختيارية)":"Activity discovery preferences (optional)"}</h3>
       <p className="mt-1 text-xs text-muted-foreground">{ar?"أنت تختار، بلا تصنيف لعائلتك حسب الدخل أو المعتقد. لا يمكننا تأكيد ملاءمة نشاط قبل التحقق من الجهة.":"Choose what matters to your family; no income or cultural labels. Provider claims require direct verification."}</p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
        <label className="text-sm font-medium">{ar?"شو الأهم؟":"What matters most?"}
@@ -83,13 +82,15 @@ export function FamilyPreferences() {
        </div>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">{ar?"هذه أسئلة تسألها للجهة قبل التسجيل، وليست فلاتر تضمن دقّة أي إعلان.":"Use these to guide questions to a provider; the app does not assume a listing satisfies them."}</p>
-    </div>
-    <div className="mt-4 space-y-2">
+    </details>
+    <details className="mt-4 rounded-xl border border-[#DCE8DB] bg-white p-3"><summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"ما هي النصائح التي تظهر لي؟":"What guidance should appear?"}</summary>
+    <div className="mt-3 space-y-2">
       {interests.map(({key,en,ar:arabic,Icon})=><label key={key} className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-muted/40 p-3">
         <span className="flex items-center gap-3 text-sm font-medium"><Icon className="size-5 shrink-0 text-brand"/>{ar?arabic:en}</span>
         <input type="checkbox" className="size-5 accent-[#426958]" checked={Boolean(preferences[key])} onChange={e=>set(key,e.target.checked)} />
       </label>)}
     </div>
+    </details>
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
       <label className="text-sm font-medium">{ar?"مدينتك (اختياري)":"Your city (optional)"}
         <input className="mt-1 w-full rounded-xl border border-border bg-card p-3" maxLength={80} placeholder={ar?"مثل عمّان":"e.g. Amman"} value={preferences.city??""} onChange={e=>set("city",e.target.value.slice(0,80))}/>

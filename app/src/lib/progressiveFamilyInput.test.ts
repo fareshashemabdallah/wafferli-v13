@@ -5,6 +5,9 @@ import {emptyRealMoney} from "./moneyOverview";
 import {computeMoney} from "./money";
 import {emptyHouseholdPresence} from "./householdPresence";
 import {assessFinancialReality} from "./financialReality";
+import {makeFamilyPlan} from "./familyPlans";
+import {evaluatePlan} from "./planDecision";
+import {estimateHouseholdPresence} from "./householdPresence";
 const now=new Date(2026,9,19,12);
 describe("progressive one-fact input and one source of truth",()=>{
  it("accepts only essential spending without inventing income or unrelated category totals",()=>{
@@ -67,6 +70,23 @@ describe("progressive one-fact input and one source of truth",()=>{
   expect(householdCountSource([dad],{...emptyHouseholdPresence(),adults:2,children:3})).toEqual({
    source:"anonymous",adults:2,children:3
   });
+ });
+ it("does not turn one known cost into imaginary spending room or a false plan approval",()=>{
+  const partial=applyProgressiveMoneyFacts(sampleMoney(),{income:3000,essential:600});
+  expect(partial.financialInputsPartial).toBe(true);
+  expect(assessFinancialReality(partial,[],now).kind).toBe("unknown");
+  const plan=makeFamilyPlan({id:"outing",title:"Family day",kind:"outing",budgetJod:100},now)!;
+  expect(evaluatePlan(plan,partial,[],now).monthlyAssessment).toBe("missing");
+  expect(evaluatePlan(plan,partial,[],now).suggestedCeiling).toBeNull();
+  const reviewed={...partial,financialInputsPartial:false};
+  expect(assessFinancialReality(reviewed,[],now).kind).toBe("room");
+ });
+ it("does not silently mix incomplete anonymous household counts with named profiles",()=>{
+  const person:Member={id:"dad",name:"Dad",role:"adult",ageGroup:"30–44",prefs:""};
+  const source={...emptyHouseholdPresence(),adults:2,children:null};
+  expect(householdCountSource([person],source)).toEqual({source:"anonymous",adults:2,children:null});
+  expect(estimateHouseholdPresence(source,[person],"2026-10").adults).toBe(2);
+  expect(estimateHouseholdPresence(source,[person],"2026-10").children).toBeNull();
  });
  it("uses the specific age once, with a legacy band only as fallback",()=>{
   const p:Member={id:"c",name:"Child",role:"child",ageGroup:"6–12",prefs:"",ageYears:8};

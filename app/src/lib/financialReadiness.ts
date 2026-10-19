@@ -10,7 +10,7 @@ export type FinancialReadiness={
 export const monthOf=(at=new Date())=>at.getFullYear()+"-"+String(at.getMonth()+1).padStart(2,"0");
 export function getFinancialReadiness(state:MoneyState,now=new Date(),plans:readonly FamilyPlan[]=[]):FinancialReadiness{
  const m=computeMoney(state,now),overview=getMoneyOverview(state,now,plans);
- const budgetReady=(m.monthlyIncome>0||state.incomeKnown===true)&&state.categories.length>0&&
+ const budgetReady=state.financialInputsPartial!==true&&(m.monthlyIncome>0||state.incomeKnown===true)&&state.categories.length>0&&
   state.categories.every(c=>Number.isFinite(c.planned)&&c.planned>=0);
  // Savings are optional: zero is a valid choice, not an incomplete household.
  const savingsReady=true;
