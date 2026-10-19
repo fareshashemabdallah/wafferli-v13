@@ -22,7 +22,7 @@ describe("Dabberna advice-first parent experience",()=>{
   const navs=screen.getAllByRole("navigation",{name:"Main"});
   expect(navs).toHaveLength(2);
   for(const nav of navs){
-   expect(within(nav).getAllByRole("link").map(x=>x.getAttribute("href"))).toEqual(["/","/money","/family","/advisor"]);
+   expect(within(nav).getAllByRole("link").map(x=>x.getAttribute("href"))).toEqual(["/","/money","/advisor","/family"]);
   }
   expect(screen.getAllByRole("link",{name:/Family & settings/}).length).toBeGreaterThan(0);
   expect(screen.getByText("Family briefing")).toBeInTheDocument();

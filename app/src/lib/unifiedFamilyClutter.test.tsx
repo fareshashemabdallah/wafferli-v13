@@ -41,7 +41,7 @@ describe("one Dabberna navigation, no automatic link clutter",()=>{
   const [desktop,mobile]=screen.getAllByRole("navigation",{name:"Main"}) as [HTMLElement,HTMLElement];
   const paths=(node:HTMLElement)=>Array.from(node.querySelectorAll("a")).map(a=>a.getAttribute("href"));
   expect(paths(desktop)).toEqual(paths(mobile));
-  expect(paths(desktop)).toEqual(["/","/money","/family","/advisor"]);
+  expect(paths(desktop)).toEqual(["/","/money","/advisor","/family"]);
   expect(screen.queryByRole("navigation",{name:"Related family actions"})).not.toBeInTheDocument();
  });
 });

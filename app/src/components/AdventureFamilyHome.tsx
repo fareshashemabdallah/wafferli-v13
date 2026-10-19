@@ -1,53 +1,30 @@
 import {Link} from "@tanstack/react-router";
-import {ArrowRight,Compass,Heart,MessageCircle,ShieldCheck} from "lucide-react";
+import {ArrowRight,Compass,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
-import {useLocalState,fmtJOD} from "@/lib/storage";
-import {sampleMoney,sampleMembers,computeMoney,type MoneyState,type Member} from "@/lib/money";
-import {realFamilyMembers} from "@/lib/familySetup";
-import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
-import {type FamilyMoment} from "@/lib/familyCalendar";
-import {FAMILY_TASKS_KEY,type FamilyTask} from "@/lib/familyTasks";
-import {type BasketEntry} from "@/lib/basketRecording";
-import {FAMILY_WISHLIST_KEY,type WishlistItem} from "@/lib/familyWishlist";
-import {homeSnapshot} from "@/lib/homeSnapshot";
-import {RobotBuddy,WorldScene,type AdventurePlace} from "./AdventureArtwork";
-import {TodayFamilyBrief} from "./TodayFamilyBrief";
-import {FamilyDiscoveryPanel} from "./FamilyDiscoveryPanel";
+import {RobotBuddy,WorldScene} from "./AdventureArtwork";
 import {FamilyMoneyJourneyCard} from "./FamilyMoneyJourneyCard";
-import {futureFamilyMilestones} from "@/lib/sixPillarDecisionEngine";
-import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import "./adventureFamilyHero.css";
 
-const destinations=[
- {id:"park",en:"What can we enjoy?",ar:"شو ممكن نعمل سوا؟",summaryEn:"Find family outings and children's activities",summaryAr:"أنشطة للأطفال وطلعات للعيلة",to:"/explore/weekend",accent:"#E5F4F2"},
- {id:"home",en:"How are we doing?",ar:"كيف وضع عيلتنا؟",summaryEn:"Our Money: budgets, spending and bills",summaryAr:"مال العيلة والمصاريف والفواتير",to:"/money",accent:"#E5F5E8"},
- {id:"market",en:"What should we buy?",ar:"شو بدنا نشتري؟",summaryEn:"Compare options and plan purchases",summaryAr:"نقارن الخيارات ونخطط للمشتريات",to:"/explore/smartbuy",accent:"#FFF1E1"}
-] as const;
-
-/** An illustrated navigation world backed by actual existing feature routes.
- * Artwork is decorative, while optional summaries use ONLY saved data. */
+/** The ONE family story at the centre of the app.
+ * Detailed money and planning are owned by their workspaces, not repeated here.
+ * The old optional summary, a second 'next step', activity catalogue and
+ * four extra navigation panels were intentionally removed from Home.
+ */
 export function AdventureFamilyHome(){
  const {lang}=useI18n(),ar=lang==="ar";
  const t=(en:string,arabic:string)=>ar?arabic:en;
- const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
- const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
- const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
- const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
- const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
- const [basket,,basketReady]=useLocalState<BasketEntry[]>("shopping",[]);
- const [wishlist,,wishlistReady]=useLocalState<WishlistItem[]>(FAMILY_WISHLIST_KEY,[]);
- const [prefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
- const ready=moneyReady&&membersReady&&momentsReady&&plansReady&&tasksReady&&basketReady&&wishlistReady&&prefsReady;
- const snapshot=homeSnapshot({money,members,moments,plans,tasks,basket,wishlist,arabic:ar});
- const next=snapshot.agenda[0];
- const decisionMoments=ready?futureFamilyMilestones({money,members,moments,plans,preferences:prefs}):[];
- const realMembers=realFamilyMembers(members);
- const month=!money.demo?computeMoney(money):null;
- const enteredCount=money.demo?0:money.categories.length;
- return <main className="mx-auto max-w-[1090px] space-y-4 pb-6 text-[#153A37]" data-adventure-home>
+ const ideas=[
+  {to:"/explore/weekend" as const,icon:"🌳",en:"Find something to enjoy",ar:"دور على نشاط تستمتعوا فيه",
+   descriptionEn:"Real mapped places and family activity ideas",descriptionAr:"أماكن على الخريطة وأفكار تناسب العيلة"},
+  {to:"/explore/smartbuy" as const,icon:"🛍️",en:"Choose what to buy",ar:"اختار شو لازم تشتري",
+   descriptionEn:"Compare options before committing",descriptionAr:"قارن الخيارات قبل ما تلتزم"},
+  {to:"/calendar" as const,icon:"🎂",en:"Prepare a family moment",ar:"حضّر مناسبة للعيلة",
+   descriptionEn:"Occasions and dates, connected to your plans",descriptionAr:"المناسبات والمواعيد مرتبطة بخطط العيلة"}
+ ];
+ return <main className="mx-auto max-w-[1040px] space-y-4 pb-6 text-[#153A37]" data-adventure-home>
   <header className="flex items-center justify-between gap-3 px-1">
    <div>
-    <p className="text-xs font-extrabold tracking-[.13em] text-[#458778]">{t("WELCOME TO YOUR FAMILY WORLD","أهلاً بعالم عيلتك")}</p>
+    <p className="text-xs font-extrabold tracking-[.13em] text-[#458778]">{t("ONE FAMILY, ONE RHYTHM","عيلة واحدة، وإيقاع واحد")}</p>
     <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Dabberna <span className="text-[#448979]">✦</span></h1>
     <p className="mt-1 text-sm text-[#5F746D]">{t("Your family money and life, cared for together","مال عيلتك وحياتها، منعتني فيهم سوا")}</p>
    </div>
@@ -59,8 +36,6 @@ export function AdventureFamilyHome(){
    <div className="adventure-family-hero__scene" aria-hidden="true">
     <WorldScene place="home" className="adventure-family-hero__world"/>
    </div>
-   {/* Mobile greeting has its own row above the portraits, never over faces.
-       Desktop uses the empty right portion of the scene. */}
    <div className="adventure-family-hero__greeting" data-testid="adventure-family-greeting">
     <p className="text-sm font-extrabold leading-snug text-[#183F38] sm:text-lg">{t("How can our money care for our family?","كيف في مالنا يساعد عيلتنا؟")}</p>
     <p className="mt-1 text-xs leading-relaxed text-[#4D6B62]">{t("Understand, protect and prepare—so we can live well together.","نفهم ونحمي ونتحضّر، لنعيش منيح سوا.")}</p>
@@ -75,59 +50,28 @@ export function AdventureFamilyHome(){
 
   <FamilyMoneyJourneyCard/>
 
-  <section aria-label={t("Explore the family world","اكتشف عالم العيلة")}>
-   <h2 className="mb-3 flex items-center gap-2 text-base font-extrabold"><Compass className="size-5 text-[#368C73]"/>{t("More ways to enjoy, plan and spend wisely","طرق إضافية لنعيش ونخطط ونصرف بذكاء")}</h2>
-   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-    {destinations.map(p=><Link to={p.to} key={p.id} aria-label={ar?p.ar:p.en}
-     className="group overflow-hidden rounded-[1.45rem] border border-[#DEE8D9] bg-white p-2 shadow-[0_12px_28px_-23px_rgba(26,69,57,.35)] transition-transform duration-200 hover:-translate-y-1 focus-visible:outline-4 focus-visible:outline-[#57A78E] active:scale-[.985] sm:p-3">
-      <div style={{backgroundColor:p.accent}} className="overflow-hidden rounded-[1.1rem]">
-       <WorldScene place={p.id as AdventurePlace} className="aspect-[1.6] w-full"/>
-      </div>
-      <div className="flex min-h-[100px] items-start justify-between gap-2 px-1 pb-1 pt-3 sm:min-h-[91px]">
-       <div className="min-w-0"><h3 className="text-base font-black leading-tight sm:text-lg">{ar?p.ar:p.en}</h3>
-        <p className="mt-1 text-xs leading-snug text-[#63756E]">{ar?p.summaryAr:p.summaryEn}</p>
-       </div>
-       <ArrowRight className="mt-1 size-4 shrink-0 text-[#337D64] rtl:rotate-180"/>
-      </div>
-    </Link>)}
+  <section className="rounded-[1.4rem] border border-[#DDE9DF] bg-[#F9FCF8] p-4 sm:p-5" aria-label={t("Explore family possibilities","اكتشف فرص لعيلتك")}>
+   <div className="mb-3 flex items-start gap-2">
+    <Compass className="mt-0.5 size-5 shrink-0 text-[#348269]"/>
+    <div>
+     <h2 className="text-base font-extrabold">{t("When you're ready, explore possibilities","وقت تكون جاهز، اكتشف الخيارات")}</h2>
+     <p className="mt-1 text-xs leading-relaxed text-[#668174]">{t("Family experiences and purchases support the journey; they're not another money dashboard.","الطلعات والمشتريات جزء من الحياة، مش شاشة مالية ثانية.")}</p>
+    </div>
+   </div>
+   <div className="grid gap-2 sm:grid-cols-3">
+    {ideas.map(item=><Link key={item.to} to={item.to}
+     className="flex min-h-24 items-center gap-3 rounded-xl border border-[#DEEADF] bg-white p-3 transition hover:bg-[#F0F8EE]">
+      <span className="text-2xl" aria-hidden="true">{item.icon}</span>
+      <span className="min-w-0 flex-1">
+       <strong className="block text-sm text-[#244D3D]">{ar?item.ar:item.en}</strong>
+       <span className="mt-1 block text-xs leading-snug text-[#718378]">{ar?item.descriptionAr:item.descriptionEn}</span>
+      </span>
+      <ArrowRight className="size-4 shrink-0 text-[#44886F] rtl:rotate-180"/>
+     </Link>)}
    </div>
   </section>
-
-  <FamilyDiscoveryPanel/>
-  <Link to="/calendar" className="flex min-h-12 items-center justify-between gap-2 rounded-2xl border border-[#F1DDE5] bg-[#FFF1F4] px-4 text-sm font-bold text-[#94536A]">
-    <span>🎁 {t("Family Moments — birthdays, gifts & calendar","لحظات العيلة — الأعياد والهدايا والتقويم")}</span>
-    <ArrowRight className="size-4 rtl:rotate-180"/>
-  </Link>
-
-  <section className="rounded-[1.4rem] border border-[#C6E7D9] bg-gradient-to-r from-[#C9EFE8] via-[#E3F8EB] to-[#E9F5DC] p-3.5 sm:p-4">
-   <Link to="/advisor" className="flex min-h-12 items-center gap-3" aria-label={t("Ask Dabberna","اسأل دبرنا")}>
-    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/80 text-[#318A70]"><MessageCircle className="size-6"/></span>
-    <span className="min-w-0 flex-1"><strong className="block text-sm">{t("Ask Dabberna","اسأل دبرنا")}</strong>
-     <span className="mt-0.5 block text-xs text-[#4A7164]">{t("Need help with a family choice?","بدك مساعدة بقرار للعيلة؟")}</span>
-    </span>
-    <ArrowRight className="size-5 text-[#27846E] rtl:rotate-180"/>
-   </Link>
-  </section>
-
-  {ready&&<details className="rounded-2xl border border-[#DAE7DE] bg-white p-4">
-   <summary className="min-h-10 cursor-pointer text-sm font-bold text-[#286E59]">{t("A little update from your family world (optional)","آخر أخبار عالم عيلتك (اختياري)")}</summary>
-   <div className="mt-3 space-y-3 border-t border-[#E5EEE7] pt-3">
-    <p className="text-sm leading-relaxed text-[#516C60]">{realMembers.length?
-     t(`${realMembers.length} family members are saved in your profile.`,`أضفت ${realMembers.length} أفراد من العيلة.`):
-     t("Add your family when you feel ready.","أضف أفراد عيلتك وقت تكون جاهز.")}</p>
-    <p className="text-sm leading-relaxed text-[#516C60]">{month?
-     t(`You have ${enteredCount} spending categories and ${fmtJOD(month.spent)} in paid entries this month. These are recorded amounts, not bank balances.`,
-       `عندك ${enteredCount} فئات مصاريف و${fmtJOD(month.spent)} مدفوع ومسجّل هالشهر، مش رصيد بنك.`):
-     t("No real household finances added yet; example amounts are hidden.","ما دخلت مالية العيلة الفعلية بعد؛ ما رح نعرض أرقام تجريبية.")}</p>
-    {next&&<p className="text-sm leading-relaxed text-[#516C60]"><Heart className="me-1 inline size-4 text-[#DB8B79]"/>{next.title} · {next.date}</p>}
-    {decisionMoments.length>0&&<div className="rounded-xl border border-[#D6E8DA] bg-[#F2FAF0] p-3">
-     <p className="text-sm font-bold text-[#286E59]">{t("Something worth preparing for","في شغلة تستاهل نتحضّر إلها")}</p>
-     <p className="mt-1 text-xs leading-relaxed text-[#587565]">{decisionMoments[0]!.date} · {decisionMoments[0]!.title}. {t("This comes from your saved calendar and plans, not provider-confirmed dates. Review possible options without recording a new expense.","من التقويم والخطط اللي حفظتها، مش موعد مؤكد من جهة خارجية. راجع خياراتك بدون تسجيل مصروف جديد.")}</p>
-     <Link to="/advisor" className="mt-2 inline-flex min-h-10 items-center gap-1 text-xs font-bold text-brand underline">{t("Explore a family decision","جرّب قرار عائلي")}<ArrowRight className="size-4 rtl:rotate-180"/></Link>
-    </div>}
-    <TodayFamilyBrief compact/>
-   </div>
-  </details>}
-  <p className="flex items-start gap-2 px-1 text-[11px] leading-relaxed text-[#70837B]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>{t("Your private family details stay on this device during the pilot. Exploring is not a financial score.","بيانات العيلة محفوظة على الجهاز خلال التجربة. استكشاف المغامرات مش تقييم مالي.")}</p>
+  <p className="flex items-start gap-2 px-1 text-[11px] leading-relaxed text-[#70837B]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>
+   {t("Your private family financial details remain on this device during the pilot. Plans, dates and costs are recorded in their original workspaces—never duplicated by this home.",
+      "تفاصيل مالية العيلة خاصة ومحفوظة على هالجهاز خلال التجربة. الخطط والمواعيد والمصاريف بتبقى بسجلاتها الأصلية، مش نسخ مكررة هون.")}</p>
  </main>;
 }
