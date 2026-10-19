@@ -134,7 +134,10 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   freeActivitiesFirst:z.boolean().optional(),
   activityGroupPreference:z.enum(["any","girls","boys","separate"]).optional(),
   instructorPreference:z.enum(["any","female","male"]).optional(),
-  parentCanObservePreferred:z.boolean().optional()
+  parentCanObservePreferred:z.boolean().optional(),
+  protectedFamilyValues:many(z.enum(["education","development","family-time","health","traditions","security","experiences"]),7).optional(),
+  decisionLearningEnabled:z.boolean().optional(),
+  decisionFeedback:z.record(z.record(z.number().int().min(0).max(1000))).optional()
  }),
  familyPlans:many(opts({
   id,title:z.string().min(1).max(300),
