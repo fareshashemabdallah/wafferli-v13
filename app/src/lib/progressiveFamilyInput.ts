@@ -12,7 +12,6 @@ export type ProgressiveMoneyFacts={
 };
 const money=(v:unknown):v is number=>typeof v==="number"&&Number.isFinite(v)&&v>=0&&v<=100000;
 const rounded=(v:number)=>Math.round(v*100)/100;
-const GENERAL_IDS=["household-essential","household-flexible"] as const;
 export function canSaveProgressiveFacts(before:MoneyState,input:ProgressiveMoneyFacts):boolean{
  const keys=["income","essential","other","savings"] as const;
  if(!keys.some(key=>input[key]!==undefined))return false;
