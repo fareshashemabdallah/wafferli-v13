@@ -8,7 +8,7 @@ import type {FamilyPreferences} from "./familyPreferences";
 
 export type MoneyJourneyFocus="understand"|"protect"|"prepare"|"live";
 export type JourneyRoute="/money"|"/calendar"|"/plans"|"/advisor"|"/explore/weekend";
-export type MoneyJourneyAction={titleEn:string;titleAr:string;detailEn:string;detailAr:string;route:JourneyRoute};
+export type MoneyJourneyAction={titleEn:string;titleAr:string;detailEn:string;detailAr:string;route:JourneyRoute;planId?:string;focusDate?:string};
 export type MoneyJourneyDimension={id:MoneyJourneyFocus;labelEn:string;labelAr:string;detailEn:string;detailAr:string};
 export type MoneyJourneyInput={money:MoneyState;members:readonly Member[];moments:readonly FamilyMoment[];
  plans:readonly FamilyPlan[];preferences:FamilyPreferences;now?:Date};
@@ -17,7 +17,7 @@ export type FamilyMoneyJourney={
  knownFinances:boolean; reality:FinancialReality;
  storyEn:string;storyAr:string;statusEn:string;statusAr:string;
  next:MoneyJourneyAction;dimensions:MoneyJourneyDimension[];
- nextMilestones:Array<{title:string;date:string;kind:"bill"|"plan"|"occasion"}>;
+ nextMilestones:Array<{title:string;date:string;kind:"bill"|"plan"|"occasion";planId?:string}>;
  reviewedCategories:number;unclassifiedCategories:number;hasActualCash:boolean;
  childCount:number; protectedCount:number;
 };
@@ -43,7 +43,7 @@ export function buildFamilyMoneyJourney(input:MoneyJourneyInput):FamilyMoneyJour
  const unclassifiedCategories=money.demo?0:money.categories.filter(x=>!x.priority).length;
  const milestones=futureFamilyMilestones({money,members,moments,plans,preferences,now})
   .filter(x=>x.kind==="bill"||preferences.lifestyle)
-  .map(x=>({title:x.title,date:x.date,kind:x.kind}));
+  .map(x=>({...x}));
  const first=milestones[0];
  const statusEn=!knownFinances?"Still getting to know your household":reality.kind==="essentials-gap"?
   "Essentials need careful attention":reality.kind==="plan-gap"?"The monthly plan needs a realistic choice":
@@ -87,7 +87,7 @@ export function buildFamilyMoneyJourney(input:MoneyJourneyInput):FamilyMoneyJour
  }else if(first){
   next={titleEn:"Prepare for what's approaching",titleAr:"حضّر للي جاي",
    detailEn:first.title+" · "+first.date+". Check its timing and costs in your own records; this is not verified with a provider.",
-   detailAr:first.title+" · "+first.date+". راجع المواعيد والتكاليف المدخلة؛ المعلومات ليست مؤكدة من الجهة.",route:routeFor(first.kind)};
+   detailAr:first.title+" · "+first.date+". راجع المواعيد والتكاليف المدخلة؛ المعلومات ليست مؤكدة من الجهة.",route:routeFor(first.kind),...(first.kind==="plan"?{planId:first.planId}:{focusDate:first.date})};
  }else if(!knownFinances){
   next={titleEn:"Start with one thing you know",titleAr:"ابدأ بشغلة واحدة بتعرفها",
    detailEn:"Add an essential cost or an upcoming bill whenever you're ready. You can skip income and continue exploring.",
