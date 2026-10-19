@@ -53,6 +53,8 @@ describe("progressive one-fact input and one source of truth",()=>{
   const incomeSources={...existing,incomeSources:[{id:"job",name:"Job",amount:1500,
    frequency:"monthly" as const,nextDate:"2026-10-25",shared:true}]};
   expect(applyProgressiveMoneyFacts(incomeSources,{income:900})).toBe(incomeSources);
+  const legacy={...emptyRealMoney(),income:1800};
+  expect(applyProgressiveMoneyFacts(legacy,{income:900})).toBe(legacy);
  });
  it("never counts sample family members and allows anonymous counts only when specifically entered",()=>{
   expect(householdCountSource(sampleMembers(),emptyHouseholdPresence())).toEqual({
