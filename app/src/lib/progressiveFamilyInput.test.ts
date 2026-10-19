@@ -75,7 +75,7 @@ describe("progressive one-fact input and one source of truth",()=>{
   const partial=applyProgressiveMoneyFacts(sampleMoney(),{income:3000,essential:600});
   expect(partial.financialInputsPartial).toBe(true);
   expect(assessFinancialReality(partial,[],now).kind).toBe("unknown");
-  const plan=makeFamilyPlan({id:"outing",title:"Family day",kind:"outing",budgetJod:100},now);
+  const plan=makeFamilyPlan({id:"outing",title:"Family day",kind:"outing",budgetJod:100},now)!;
   expect(evaluatePlan(plan,partial,[],now).monthlyAssessment).toBe("missing");
   expect(evaluatePlan(plan,partial,[],now).suggestedCeiling).toBeNull();
   const reviewed={...partial,financialInputsPartial:false};
