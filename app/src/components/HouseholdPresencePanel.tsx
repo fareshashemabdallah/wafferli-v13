@@ -3,6 +3,7 @@ import {CalendarDays,ChevronDown,HousePlus,Plus,Trash2,Users} from "lucide-react
 import {useI18n} from "@/lib/i18n";
 import {fmtJOD,uid,useLocalState} from "@/lib/storage";
 import {realFamilyMembers} from "@/lib/familySetup";
+import {householdCountSource} from "@/lib/progressiveFamilyInput";
 import type {Member,MoneyState} from "@/lib/money";
 import {
  HOUSEHOLD_PRESENCE_KEY,emptyHouseholdPresence,exampleHelper,exampleGuest,
@@ -28,6 +29,7 @@ export function HouseholdPresencePanel({members,money,setMoney}:Props){
  const [open,setOpen]=useState(false);
  const real=realFamilyMembers(members);
  const computed=estimateHouseholdPresence(presence,members,month);
+ const countSource=householdCountSource(members,presence);
  const update=(patch:Partial<HouseholdPresence>)=>setPresence(old=>({...old,...patch}));
  const addHelper=(event:FormEvent)=>{
   event.preventDefault();if(!helperDraft)return;
