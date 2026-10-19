@@ -42,8 +42,8 @@ export const PLANNED_OUTING_MOMENT_PREFIX="outing-plan:";
  */
 export function plannedOutingMoments(plans:readonly FamilyPlan[],authored:readonly FamilyMoment[]=[]):FamilyMoment[]{
  const own=new Set(authored.filter(x=>x.kind==="activity").map(x=>x.date+"|"+x.title.trim().toLowerCase()));
- return plans.filter(x=>x.kind==="outing"&&x.status!=="completed"&&!!x.date&&!!parseCalendarDate(x.date))
+ return plans.filter(x=>(x.kind==="outing"||x.note?.startsWith("Decision idea:"))&&x.status!=="completed"&&!!x.date&&!!parseCalendarDate(x.date))
   .filter(x=>!own.has(x.date+"|"+x.title.trim().toLowerCase()))
-  .map(x=>({id:PLANNED_OUTING_MOMENT_PREFIX+x.id,title:x.title,date:x.date!,kind:"activity",annual:false,
+  .map(x=>({id:PLANNED_OUTING_MOMENT_PREFIX+x.id,title:x.title,date:x.date!,kind:(x.kind==="occasion"?"celebration":x.kind==="purchase"?"other":"activity") as FamilyMoment["kind"],annual:false,
    note:"Saved family idea — not a confirmed booking or payment."}));
 }
