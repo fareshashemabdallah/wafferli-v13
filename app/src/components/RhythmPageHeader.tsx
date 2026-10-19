@@ -24,7 +24,7 @@ export function rhythmChapter(path:string){
  if(path.startsWith("/explore"))return {en:"Compare",ar:"قارن",
   sentenceEn:"Look at relevant alternatives and independently verify seller prices before choosing.",
   sentenceAr:"قارن البدائل وتأكد من أسعار المتاجر من مصدرها قبل ما تختار."};
- if(path.startsWith("/community")||path.startsWith("/experience")||path.startsWith("/together/")||path.startsWith("/vote/"))
+ if(path.startsWith("/explore/together")||path.startsWith("/community")||path.startsWith("/experience")||path.startsWith("/together/")||path.startsWith("/vote/"))
   return {en:"Share carefully",ar:"شارك بخصوصية",
    sentenceEn:"Share only the choices and details you approve—not private family finances.",
    sentenceAr:"شارك بس الخيارات والتفاصيل اللي بتوافق عليها، مش مالية العيلة الخاصة."};
