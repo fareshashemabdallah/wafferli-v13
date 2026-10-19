@@ -14,7 +14,7 @@ export function FamilyPreferences() {
   const {lang}=useI18n();
   const ar=lang==="ar";
   const [preferences,setPreferences,ready]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
-  const [confirmed,setConfirmed,confirmedReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
+  const [,setConfirmed,confirmedReady]=useLocalState(FAMILY_SETUP_PREFERENCES_KEY,false);
   const set=<K extends keyof FamilyPreferences>(key:K,value:FamilyPreferences[K])=>{setPreferences(old=>({...old,[key]:value}));setConfirmed(true);};
   if(!ready||!confirmedReady)return null;
   return <section className="card-soft mt-6 p-4" id="family-preferences">
