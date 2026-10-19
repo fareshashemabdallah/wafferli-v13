@@ -6,8 +6,8 @@ import {AdventureFamilyHome} from "@/components/AdventureFamilyHome";
 
 export const Route=createFileRoute("/")({
  head:()=>({meta:[
-  {title:"Dabberna — Your family, made simpler"},
-  {name:"description",content:"Your family's Today, Ask Dabberna, Our Plans, detailed finances, shopping and calendar—thoughtfully connected."},
+  {title:"Dabberna — Care for your family money. Live well together."},
+  {name:"description",content:"Your family money journey: understand essentials, protect what matters, prepare for upcoming commitments and live well together."},
   {property:"og:title",content:"Dabberna | دبّرنا — Family Life, Planned Better"}
  ]}),
  component:Index
