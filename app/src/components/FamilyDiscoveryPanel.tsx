@@ -22,12 +22,12 @@ export function FamilyDiscoveryPanel(){
  const location=prefs.city.trim()||"Amman";
  const update=<K extends keyof FamilyPreferences>(key:K,value:FamilyPreferences[K])=>setPrefs(old=>({...old,[key]:value}));
  return <section className="rounded-[1.6rem] border border-[#CFDFD5] bg-white p-4 shadow-sm sm:p-5"
-  aria-label={t("This week for your family","هذا الأسبوع لعيلتك")}>
+  aria-label={t("Family activity ideas","أفكار أنشطة عائلية")}>
   <div className="flex items-start gap-3">
    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#E6F4E8] text-2xl" aria-hidden="true">🌿</span>
    <div className="min-w-0 flex-1">
-    <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#348267]">{t("THIS WEEK FOR YOUR FAMILY","هذا الأسبوع لعيلتك")}</p>
-    <h2 className="mt-1 text-lg font-black text-[#213F38]">{t("Find something your children might enjoy","خلينا نلاقي شي يحبه أولادك")}</h2>
+    <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#348267]">{t("FAMILY ACTIVITY IDEAS","أفكار أنشطة للعيلة")}</p>
+    <h2 className="mt-1 text-lg font-black text-[#213F38]">{t("Explore ideas for your children","اكتشف أفكار تناسب أولادك")}</h2>
     <p className="mt-1 text-xs leading-relaxed text-[#65776E]">{t("Explore by age without income, accounts or a long form.","اكتشف بحسب العمر، بلا إدخال دخل أو نموذج طويل.")}</p>
    </div>
   </div>
