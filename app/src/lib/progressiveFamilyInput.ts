@@ -38,11 +38,15 @@ export function applyProgressiveMoneyFacts(before:MoneyState,input:ProgressiveMo
  };
  if(input.essential!==undefined)upsert("household-essential","Essential household costs (estimate)","fixed","essential",input.essential);
  if(input.other!==undefined)upsert("household-flexible","Other household spending (estimate)","variable","flexible",input.other);
- return {...base,demo:false,categories,
+ const result:MoneyState={...base,demo:false,categories,
   ...(input.income!==undefined?{income:rounded(input.income),incomeKnown:true,
    incomeConfidence:input.incomeConfidence??"estimate"}:{}),
   ...(input.savings!==undefined?{savingsTargetAmount:rounded(input.savings)}:{})
  };
+ // Legacy monthly income must be visible to the cashflow forecast when no
+ // dated income sources exist. An empty incomeSources array would hide it.
+ if(!result.incomeSources?.length)delete result.incomeSources;
+ return result;
 }
 /** Named family profiles are canonical. Anonymous counts are the privacy-first
  * alternative, never a second tally to sum with family members.
