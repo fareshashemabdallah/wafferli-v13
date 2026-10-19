@@ -5,15 +5,38 @@ import {areaFromRoute} from "@/lib/familyNavigation";
 
 /** A single understated chapter heading. Main nav already contains the routes,
  * so no duplicate hero, carousel, progress, next-page CTA, or phantom journey steps. */
-export function RhythmPageHeader({path,title}:{path:string;title?:string}){
- const {lang}=useI18n(),ar=lang==="ar",area=areaFromRoute(path);
- const t=(en:string,arabic:string)=>ar?arabic:en;
- const chapter={
+export function rhythmChapter(path:string){
+ const chapters={
   today:{en:"Today",ar:"اليوم",sentenceEn:"One clear view of your family journey.",sentenceAr:"صورة واضحة لرحلة عيلتك."},
-  money:{en:"Understand",ar:"افهم",sentenceEn:"Your actual money records, without a second journey to complete.",sentenceAr:"بيانات المال الفعلية، بدون رحلة ثانية لازم تكمّلها."},
-  ask:{en:"Decide",ar:"قرّر",sentenceEn:"Understand your options, protect priorities and choose one next action.",sentenceAr:"افهم الخيارات، احمِ أولوياتك، واختَر خطوة واحدة."},
-  family:{en:"Act & prepare",ar:"نفّذ وتحضّر",sentenceEn:"Keep plans, dates and responsibilities together—recorded once.",sentenceAr:"خطط ومواعيد ومسؤوليات العيلة مع بعض، بلا تسجيل مكرر."}
- }[area];
+  money:{en:"Understand",ar:"افهم",sentenceEn:"Edit the real figures behind your story. Plans, bills and recorded spending are different things.",sentenceAr:"عدّل الأرقام الأساسية لحكايتكم؛ الخطة والفاتورة والمصروف المدفوع أشياء مختلفة."},
+  ask:{en:"Decide",ar:"قرّر",sentenceEn:"Compare realistic choices. Only you decide what becomes a saved family plan.",sentenceAr:"قارن خيارات واقعية؛ أنت وحدك بتقرر شو يتحوّل لخطة محفوظة."},
+  family:{en:"Prepare & act",ar:"تحضّر ونفّذ",sentenceEn:"Your saved dates and plans stay connected as one source of truth.",sentenceAr:"المواعيد والخطط المحفوظة بتبقى مترابطة بدون نسخ ثانية."}
+ } as const;
+ if(path==="/space"||path.startsWith("/household"))return {en:"Know our family",ar:"تعرّف على عيلتنا",
+  sentenceEn:"Add only details that improve guidance. Profiles and birthdays are optional; manage them once here.",
+  sentenceAr:"ضيف بس المعلومات المفيدة للنصيحة؛ الملفات وأعياد الميلاد اختيارية ومن مكان واحد."};
+ if(path.startsWith("/explore/weekend")||path.startsWith("/explore/restaurants")||path.startsWith("/explore/services"))
+  return {en:"Discover",ar:"اكتشف",sentenceEn:"Explore first, check suitability and sources, then choose whether to attach a place to a plan.",
+   sentenceAr:"استكشف أولاً، تحقّق من المناسبة والمصادر، وبعدها اختَر إذا بدك تربط المكان بخطة."};
+ if(path.startsWith("/explore/shopping"))return {en:"Record",ar:"سجّل",
+  sentenceEn:"A shopping list is not a paid expense. Record the actual cost only when you confirm.",
+  sentenceAr:"قائمة المشتريات مش مصروف مدفوع؛ سجّل التكلفة الفعلية بس وقت تأكّد."};
+ if(path.startsWith("/explore"))return {en:"Compare",ar:"قارن",
+  sentenceEn:"Look at relevant alternatives and independently verify seller prices before choosing.",
+  sentenceAr:"قارن البدائل وتأكد من أسعار المتاجر من مصدرها قبل ما تختار."};
+ if(path.startsWith("/explore/together")||path.startsWith("/community")||path.startsWith("/experience")||path.startsWith("/together/")||path.startsWith("/vote/"))
+  return {en:"Share carefully",ar:"شارك بخصوصية",
+   sentenceEn:"Share only the choices and details you approve—not private family finances.",
+   sentenceAr:"شارك بس الخيارات والتفاصيل اللي بتوافق عليها، مش مالية العيلة الخاصة."};
+ if(path==="/about")return {en:"Trust",ar:"الثقة",
+  sentenceEn:"Understand what Dabberna can verify, what remains optional and who controls your information.",
+  sentenceAr:"اعرف شو دبّرنا بتقدر تتأكد منه، وشو اختياري، وكيف تتحكّم بمعلوماتك."};
+ return chapters[areaFromRoute(path)];
+}
+export function RhythmPageHeader({path,title}:{path:string;title?:string}){
+ const {lang}=useI18n(),ar=lang==="ar";
+ const t=(en:string,arabic:string)=>ar?arabic:en;
+ const chapter=rhythmChapter(path);
  return <header className="mb-4 rounded-[1.2rem] border border-[#DDE9DF] bg-white px-4 py-3 sm:px-5" aria-label={t("Family rhythm chapter","مرحلة رحلة العيلة")}>
   <div className="flex flex-wrap items-center justify-between gap-3">
    <div className="min-w-0">

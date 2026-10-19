@@ -57,7 +57,7 @@ export function futureFamilyMilestones(context:DecisionContext){
   .filter(x=>x.occursOn>=today).slice(0,3).map(x=>({title:x.title,date:x.occursOn,kind:"occasion" as const}));
  const plans=context.plans.filter(x=>x.status!=="completed"&&x.date&&x.date>=today&&x.date<=dateKey(new Date(now.getFullYear(),now.getMonth(),now.getDate()+45,12)))
  .slice().sort((a,b)=>(a.date??"").localeCompare(b.date??"")).slice(0,3)
- .map(x=>({title:x.title,date:x.date!,kind:"plan" as const}));
+ .map(x=>({title:x.title,date:x.date!,kind:"plan" as const,planId:x.id}));
  const bills=context.money.demo?[]:getMoneyOverview(context.money,now,context.plans).forecast.events
   .filter(x=>x.kind==="bill"&&x.displayDate>=today)
   .slice(0,3).map(x=>({title:x.name,date:x.displayDate,kind:"bill" as const}));

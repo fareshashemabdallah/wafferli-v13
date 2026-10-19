@@ -10,7 +10,7 @@ import {useLocalState} from "@/lib/storage";
 import {sampleMembers,type Member} from "@/lib/money";
 import {realFamilyMembers} from "@/lib/familySetup";
 import {FAMILY_TASKS_KEY,type FamilyTask,taskSummary} from "@/lib/familyTasks";
-import {FAMILY_PLANS_KEY,type FamilyPlan,upcomingFamilyPlans} from "@/lib/familyPlans";
+import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan,upcomingFamilyPlans} from "@/lib/familyPlans";
 import {allFamilyMoments,upcomingMoments,formatMomentDate,type FamilyMoment} from "@/lib/familyCalendar";
 
 export const Route=createFileRoute("/family")({
@@ -33,6 +33,7 @@ export function FamilyLifePage(){
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [,setActivePlan]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
  const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
  const ready=membersReady&&momentsReady&&plansReady&&tasksReady;
  const realMembers=realFamilyMembers(members);
@@ -111,7 +112,7 @@ export function FamilyLifePage(){
        :activePlans.length===0?<p className="mt-3 text-sm text-[#727C91]">{label("No active plans recorded yet.","ما في خطط نشطة مسجّلة بعد.")}</p>
        :<ol className="mt-3 space-y-2">{activePlans.slice(0,3).map(item=><li key={item.id}
         className="flex min-h-12 items-center gap-2 rounded-xl bg-[#FFF8FB] px-3 py-2">
-         <span className="min-w-0 flex-1 truncate text-sm font-semibold">{item.title}</span>
+         <button type="button" onClick={()=>{setActivePlan(item.id);setView("plans");}} className="min-h-11 min-w-0 flex-1 truncate text-start text-sm font-semibold text-[#356B51] underline-offset-2 hover:underline" aria-label={label("Continue plan: "+item.title,"تابع خطة: "+item.title)}>{item.title}</button>
          {item.status==="completed"&&<CheckCircle2 className="size-4 text-[#408C71]"/>}
         </li>)}</ol>}
       <button onClick={()=>setView("plans")} type="button" className="mt-3 inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#B95484] underline">

@@ -11,7 +11,6 @@ import {sampleMoney,type MoneyState,type Expense} from "@/lib/money";
 import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,makeFamilyPlan,markPlanComplete,moneyAmount,setPlanChoice,upcomingFamilyPlans,type FamilyPlan,type PlanKind} from "@/lib/familyPlans";
 import {PlanDecisionPanel} from "@/components/PlanDecisionPanel";
 import {checkFamilyPlan,postponeFlexiblePlan,markPlanDoneWithoutCost,addPlanActualCost} from "@/lib/familyPlanCheckIn";
-import {FamilyNextActions} from "@/components/FamilyNextActions";
 import {OccasionPreparationSection} from "@/components/OccasionPreparationSection";
 import {localToday} from "@/lib/cashflow";
 export const Route=createFileRoute("/plans")({
@@ -97,11 +96,11 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
   toast.success(ar?"تم الربط بالمالية دون تعديل رصيد البنك.":"Recorded in Money without deducting cash.");
  };
  const content=<>
-   <div className="mb-5"><FamilyNextActions/></div>
+   
    <section className="page-intro">
      <p className="section-eyebrow">{ar?"خطّة واحدة، خطوات مترابطة":"ONE PLAN · CONNECTED CHOICES"}</p>
      <h2 className="mt-2 text-xl font-semibold text-ink">{ar?"قرارات عيلتنا وخططنا القادمة":"Decisions we made, and what comes next"}</h2>
-     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ar?"التواريخ اللي حفظتها بتصير خطط جاهزة للمراجعة بموافقتك. أنشئ خطة يدوياً فقط إذا بتحب.":"Upcoming dates can become ready-to-review plans with one approval. You only need to create one manually if you want."}</p>
+     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ar?"الأفكار اللي حفظتها بتبقى خطة واحدة لكل قرار. راجع الخطوة القادمة وحدّثها بدون تكرار مناسبة أو فاتورة أو مصروف.":"Your approved ideas stay here as one record each. Review or update the next action without recreating events, bills or expenses."}</p>
      <Button className="mt-4 min-h-11" onClick={()=>setNewOpen(v=>!v)}><Plus className="size-4"/>{ar?"أنشئ خطة بنفسي (اختياري)":"Create a plan myself (optional)"}</Button>
    </section>
    {newOpen&&<form onSubmit={submit} className="editorial-card mt-4 grid gap-3 p-4 sm:grid-cols-2">

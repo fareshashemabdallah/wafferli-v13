@@ -9,7 +9,9 @@ import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPrefe
 import {activitySearchUrl,suggestedActivityThemes,type DiscoveryPriority} from "@/lib/familyActivityDiscovery";
 import {familyThemeMatches,planFromDiscoveredPlace,placeAsOutingDraft} from "@/lib/activityPlanBridge";
 import {realFamilyMembers} from "@/lib/familySetup";
-import {FAMILY_PLANS_KEY,reviewPlanCost,type FamilyPlan} from "@/lib/familyPlans";
+import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,reviewPlanCost,type FamilyPlan} from "@/lib/familyPlans";
+import {attachVenueToOuting} from "@/lib/familyPlanContinuity";
+import {rememberCalendarDate} from "@/lib/rhythmHandoff";
 import {outingCity,weekendCityName,findWeekendPlaces,weekendPlaceSearchUrl,
  type WeekendPlace,type WeekendCity} from "@/lib/weekendPlaceSearch";
 
@@ -23,6 +25,8 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [activePlanId,,activeReady]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
+ const [reuseExisting,setReuseExisting]=useState(false);
  const [mode,setMode]=useState<"family"|"one"|"explore">("family");
  const [age,setAge]=useState("8");
  const [cityChoice,setCityChoice]=useState<WeekendCity|null>(null);
@@ -48,7 +52,8 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
   prefs.instructorPreference&&prefs.instructorPreference!=="any"?t("Instructor: ","المدرّب/ة: ")+prefs.instructorPreference:null,
   prefs.parentCanObservePreferred?t("Can parents observe?","هل يمكن للأهل مشاهدة النشاط؟"):null
  ].filter((x):x is string=>!!x);
- const ready=prefsReady&&membersReady&&plansReady&&moneyReady;
+ const ready=prefsReady&&membersReady&&plansReady&&moneyReady&&activeReady;
+ const availableOuting=plans.find(p=>p.id===activePlanId&&p.kind==="outing"&&p.status!=="completed");
  const update=<K extends keyof FamilyPreferences>(key:K,value:FamilyPreferences[K])=>setPrefs(p=>({...p,[key]:value}));
  const discover=async()=>{
   if(loading)return;
@@ -59,7 +64,7 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
   }catch(error){setPlaceError(error instanceof Error?error.message:t("Map source unavailable.","تعذّر الوصول للخريطة."));}
   finally{setLoading(false);}
  };
- const choose=(place:WeekendPlace)=>{setSelected(place);setDate("");setEstimate("");setSaveError("");setSavedPlan(null);};
+ const choose=(place:WeekendPlace)=>{setSelected(place);setDate("");setEstimate("");setSaveError("");setSavedPlan(null);setReuseExisting(false);};
  const save=(event:FormEvent)=>{
   event.preventDefault();setSaveError("");
   if(!selected||!ready)return;
@@ -68,12 +73,23 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
   const draft=planFromDiscoveredPlace({...placeAsOutingDraft(selected),...(date?{date}:{}),...(amount!==undefined?{estimatedTotalJod:amount}:{})},uid());
   if(!draft){setSaveError(t("Check the date, map source and estimated amount.","تأكد من التاريخ ورابط الخريطة والتكلفة."));return;}
   const latest=readLocal<FamilyPlan[]>(FAMILY_PLANS_KEY,plans);
+  if(reuseExisting&&availableOuting){
+   const current=latest.find(p=>p.id===availableOuting.id&&p.kind==="outing"&&p.status!=="completed");
+   const updated=current?attachVenueToOuting(current,draft):null;
+   if(!updated){setSaveError(t("The original plan is no longer available. Review your Family Plans.","الخطة الأصلية لم تعد متاحة. راجع خطط العيلة."));return;}
+   if(!writeLocal(FAMILY_PLANS_KEY,latest.map(p=>p.id===updated.id?updated:p))){
+    setSaveError(t("Could not update the existing plan on this device.","تعذّر تحديث الخطة المحفوظة على الجهاز."));return;
+   }
+   writeLocal(ACTIVE_PLAN_KEY,updated.id);setSavedPlan(updated);
+   return;
+  }
   const duplicate=latest.find(p=>p.kind==="outing"&&p.status!=="completed"&&p.sourceRef===draft.sourceRef&&(p.date??"")===(draft.date??""));
-  if(duplicate){setSavedPlan(duplicate);setSaveError(t("This place and date are already in your Family Plans. Open the existing plan instead.","هذا المكان والتاريخ محفوظان مسبقاً في خطط العيلة. افتح الخطة المحفوظة."));return;}
+  if(duplicate){writeLocal(ACTIVE_PLAN_KEY,duplicate.id);setSavedPlan(duplicate);setSaveError(t("This place and date are already in your Family Plans. Open the existing plan instead.","هذا المكان والتاريخ محفوظان مسبقاً في خطط العيلة. افتح الخطة المحفوظة."));return;}
   if(!writeLocal(FAMILY_PLANS_KEY,[draft,...latest])){
    setSaveError(t("Could not save the plan on this device. Check browser storage and retry.","تعذّر حفظ الخطة على هذا الجهاز. تحقق من التخزين وأعد المحاولة."));
    return;
   }
+  writeLocal(ACTIVE_PLAN_KEY,draft.id);
   setSavedPlan(draft);
  };
  const planReview=savedPlan&&moneyReady?reviewPlanCost(savedPlan,money):null;
@@ -171,6 +187,12 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
     {selected&&<form onSubmit={save} className="mt-4 space-y-3 rounded-xl border border-[#CAE2D3] bg-[#F1F9F0] p-4">
      <h3 className="font-bold">{t("Plan an idea: ","خطّط لفكرة: ")}{selected.name}</h3>
      <p className="text-xs text-muted-foreground">{t("Saving is not a booking or a paid expense. Date and full-family total are optional and entered by you.","الحفظ ليس حجزاً ولا مصروفاً مدفوعاً. التاريخ والتكلفة الإجمالية للعيلة اختياريان ومن إدخالك.")}</p>
+     {availableOuting&&<label className="flex min-h-11 items-start gap-3 rounded-xl border border-[#BDD9C7] bg-white p-3 text-sm">
+      <input type="checkbox" className="mt-1 size-4" checked={reuseExisting} onChange={e=>setReuseExisting(e.target.checked)}/>
+      <span><strong>{t("Continue my existing outing plan","كمّل خطة الطلعة الموجودة")}: {availableOuting.title}</strong>
+       <span className="mt-1 block text-xs text-muted-foreground">{t("Save this venue in that plan instead of creating another. Any previous preferred venue will be replaced; your original occasion link and recorded expenses stay unchanged.","احفظ المكان بنفس الخطة بدل إنشاء خطة ثانية. سيتم استبدال المكان المفضّل السابق، مع الحفاظ على رابط المناسبة وأي مصروف مسجّل.")}</span>
+      </span>
+     </label>}
      <div className="grid gap-3 sm:grid-cols-2">
       <label className="text-sm font-semibold">{t("Tentative date (optional)","موعد مقترح (اختياري)")}
        <input type="date" className={selectCls} value={date} onChange={e=>{setDate(e.target.value);setSavedPlan(null);}}/>
@@ -180,13 +202,13 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
       </label>
      </div>
      {saveError&&<p className="text-xs text-[#995C46]" role="alert">{saveError}</p>}
-     <button type="submit" disabled={!ready} className="min-h-11 rounded-full bg-brand px-4 text-sm font-bold text-white disabled:opacity-50">{t("Save to Family Plans","احفظ في خطط العيلة")}</button>
+     <button type="submit" disabled={!ready} className="min-h-11 rounded-full bg-brand px-4 text-sm font-bold text-white disabled:opacity-50">{reuseExisting&&availableOuting?t("Update my existing plan","حدّث خطتي الحالية"):t("Save to Family Plans","احفظ في خطط العيلة")}</button>
      {savedPlan&&<div role="status" className="rounded-xl border border-[#BFDCC8] bg-white p-3">
        <p className="flex items-center gap-2 text-sm font-bold text-[#287454]"><CheckCircle2 className="size-4"/>{t("Plan available in your family space","الخطة متاحة في مساحة العيلة")}</p>
        <p className="mt-1 text-xs text-muted-foreground">{savedPlan.date?t("Tentative date: ","التاريخ المقترح: ")+savedPlan.date+". ":""}{t("No payment, bill or confirmed booking was created.","لم ننشئ دفعة أو فاتورة أو حجزاً مؤكداً.")}</p>
        <div className="mt-2 flex flex-wrap gap-4 text-sm font-semibold text-brand">
         <Link to="/plans" className="underline">{t("Review my plan","راجع خطتي")}</Link>
-        {savedPlan.date&&<Link to="/calendar" className="underline">{t("See in Family Calendar","شوفها في تقويم العيلة")}</Link>}
+        {savedPlan.date&&<Link to="/calendar" onClick={()=>rememberCalendarDate(savedPlan.date!)} className="underline">{t("See in Family Calendar","شوفها في تقويم العيلة")}</Link>}
        </div>
       </div>}
      {savedPlan&&savedPlan.budgetJod!==undefined&&<details className="rounded-xl border border-[#D1E2D7] bg-white p-3">
