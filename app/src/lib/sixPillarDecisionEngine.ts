@@ -98,7 +98,7 @@ export function decideFamilyNextSteps(scenario:DecisionScenario,ctx:DecisionCont
  const protectedAr=(priority.length?"من أولويات عيلتك: "+localizedValues(priority,true).join("، ")+". ":"")+
   (protectedCats.length?"مصاريف اخترت تحميها: "+protectedCats.join("، ")+". ":"")+
   "ما منفترض خفض مصاريف مهمة؛ الأساسيات أولاً والقرار للأهل.";
- const financialPressure=!known||reality.kind==="essentials-gap"||reality.kind==="plan-gap"||reality.kind==="tight"||reality.forecastCashRisk||costReview?.status==="review";
+ const financialPressure=!known||reality.kind==="unknown"||reality.kind==="essentials-gap"||reality.kind==="plan-gap"||reality.kind==="tight"||reality.forecastCashRisk||costReview?.status==="review";
  const titles={
   outing:["Find a family experience that works","ابحث عن طلعة مناسبة للعيلة"],
   activity:["Give your child a chance without rushing a commitment","نشاط للأولاد بدون تسرّع بالتزام"],
