@@ -127,7 +127,7 @@ function Space() {
             {edit.ageYears===undefined&&<Field label={tr("Age group (if exact age is unknown)")}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
               <option value="">{ar?"أفضل عدم الإجابة":"Not provided"}</option>
               {ages.map(a=><option key={a}>{a}</option>)}
-            </NativeSelect></Field>
+            </NativeSelect></Field>}
             <Field label={tr("Preferences")}><Input className={inputCls} maxLength={120} value={edit.prefs} onChange={e=>setEdit({...edit,prefs:e.target.value})}/></Field>
             </div></details>
             <label className="block text-sm font-medium sm:col-span-2">
