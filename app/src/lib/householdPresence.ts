@@ -64,9 +64,10 @@ export function estimateHouseholdPresence(
  p:HouseholdPresence,members:readonly Member[],month:string
 ):PresenceEstimate{
  const genuine=realFamilyMembers(members);
- const adults=p.adults===null?(genuine.length?genuine.filter(m=>m.role==="adult").length:null):
+ const anonymousCounts=p.adults!==null||p.children!==null;
+ const adults=p.adults===null?(!anonymousCounts&&genuine.length?genuine.filter(m=>m.role==="adult").length:null):
   Math.floor(safe(p.adults,50));
- const children=p.children===null?(genuine.length?genuine.filter(m=>m.role==="child").length:null):
+ const children=p.children===null?(!anonymousCounts&&genuine.length?genuine.filter(m=>m.role==="child").length:null):
   Math.floor(safe(p.children,50));
  let helperSalary=0,helperFood=0,helperUtilities=0,helperSupplies=0;
  let liveIn=0,helperCount=0;
