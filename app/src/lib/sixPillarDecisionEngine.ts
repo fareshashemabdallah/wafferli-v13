@@ -1,5 +1,5 @@
 import {assessFinancialReality} from "./financialReality";
-import {allFamilyMoments,dateKey,upcomingMoments} from "./familyCalendar";
+import {allFamilyMoments,dateKey,upcomingMoments,parseCalendarDate} from "./familyCalendar";
 import {realFamilyMembers} from "./familySetup";
 import {makeFamilyPlan,reviewPlanCost,type FamilyPlan,type PlanKind} from "./familyPlans";
 import type {Member,MoneyState} from "./money";
@@ -8,6 +8,16 @@ import type {FamilyPreferences} from "./familyPreferences";
 
 export type DecisionScenario="outing"|"activity"|"occasion"|"purchase";
 export type DecisionApproach="compare"|"stage"|"affordable";
+/** Keyword guidance is deterministic and intentionally limited; no AI is implied. */
+export function scenarioFromQuestion(value:string):DecisionScenario|null{
+ const text=value.toLocaleLowerCase().slice(0,250);
+ if(!text.trim())return null;
+ if(/birthday|anniversary|celebrat|gift|عيد ميلاد|مناسبة|هدية|هدايا/.test(text))return "occasion";
+ if(/shop|buy|purchase|product|grocer|price|شراء|اشتري|مشتريات|منتج|بقالة|سعر/.test(text))return "purchase";
+ if(/lesson|course|class|swim|football|sport|training|club|تدريب|دروس|سباحة|كرة قدم|نادي|رياضة/.test(text))return "activity";
+ if(/weekend|outing|park|trip|play|family time|طلعة|ويكند|حديقة|مشوار|نزهة|رحلة/.test(text))return "outing";
+ return null;
+}
 export type FamilyValue="education"|"development"|"family-time"|"health"|"traditions"|"security"|"experiences";
 export const FAMILY_VALUES:readonly {id:FamilyValue;en:string;ar:string}[]=[
  {id:"education",en:"Education",ar:"التعليم"},
@@ -118,7 +128,7 @@ export function decideFamilyNextSteps(scenario:DecisionScenario,ctx:DecisionCont
  if(priority.includes("family-time")||priority.includes("development"))scores.compare+=1;
  if(ctx.preferences.decisionLearningEnabled){
   const feedback=ctx.preferences.decisionFeedback?.[scenario];
-  for(const id of ["compare","stage","affordable"] as const)scores[id]+=Math.min(3,Math.max(0,feedback?.[id]??0));
+  for(const id of ["compare","stage","affordable"] as const)scores[id]+=Math.min(3,Math.max(-3,feedback?.[id]??0));
  }
  const arranged=options.slice().sort((a,b)=>scores[b.id]-scores[a.id]||options.indexOf(a)-options.indexOf(b));
  const unknownsEn=[subject[2],
@@ -144,6 +154,7 @@ export function publicDecisionInvitation(scenario:DecisionScenario,approach:Deci
   "Dabberna | We're considering: "+topic.en+". We're "+option+". Share your ideas, suitable dates and publicly available information. No private family or financial details are included.";
 }
 export function planFromDecision(input:{scenario:DecisionScenario;approach:DecisionApproach;amount?:number;date?:string},id:string,now=new Date()):FamilyPlan|null{
+ if(input.date&&!parseCalendarDate(input.date))return null;
  const topic=DECISION_SCENARIOS.find(x=>x.id===input.scenario)!;
  const mode=input.approach==="compare"?"Compare options":input.approach==="stage"?"Review timing":"Check affordable alternatives";
  return makeFamilyPlan({id,title:topic.en,
