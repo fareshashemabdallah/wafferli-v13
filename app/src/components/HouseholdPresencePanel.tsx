@@ -103,7 +103,7 @@ export function HouseholdPresencePanel({members,money,setMoney}:Props){
     </p>:<p className="mt-1 text-xs text-muted-foreground">{t("Using counts you entered here rather than your family profiles.","نعتمد الأعداد التي أدخلتها هنا بدلاً من ملفات العائلة.")}</p>}
     <button className="mt-2 text-xs font-semibold text-brand underline" type="button"
      onClick={()=>update(presence.adults===null&&presence.children===null?
-      {adults:real.filter(x=>x.role==="adult").length||2,children:real.filter(x=>x.role==="child").length}:
+      {adults:real.filter(x=>x.role==="adult").length,children:real.filter(x=>x.role==="child").length}:
       {adults:null,children:null})}>
      {presence.adults===null&&presence.children===null?t("Enter counts manually","أدخل الأعداد يدوياً"):t("Use Family profiles","استخدم ملفات العائلة")}
     </button>
