@@ -14,6 +14,8 @@ export type MoneyState = {
   budgetItems?:BudgetItem[];
   /** Explicitly distinguishes a parent-entered zero income from unknown income. */
   incomeKnown?:boolean; incomeConfidence?:"estimate"|"confirmed";
+  /** A one-fact-at-a-time estimate does NOT describe the entire household budget. */
+  financialInputsPartial?:boolean;
   /** Declared priorities for family life, not automatically deducted or shared. */
   protectedLifestyle?:("children"|"education"|"family-time"|"health"|"travel"|"buffer")[];
   incomeSources?:IncomeSource[]; commitments?:Commitment[];
