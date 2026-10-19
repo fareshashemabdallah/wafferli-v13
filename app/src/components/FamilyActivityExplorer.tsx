@@ -9,7 +9,7 @@ import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPrefe
 import {activitySearchUrl,suggestedActivityThemes,type DiscoveryPriority} from "@/lib/familyActivityDiscovery";
 import {familyThemeMatches,planFromDiscoveredPlace,placeAsOutingDraft} from "@/lib/activityPlanBridge";
 import {realFamilyMembers} from "@/lib/familySetup";
-import {FAMILY_PLANS_KEY,reviewPlanCost,type FamilyPlan} from "@/lib/familyPlans";
+import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,reviewPlanCost,type FamilyPlan} from "@/lib/familyPlans";
 import {outingCity,weekendCityName,findWeekendPlaces,weekendPlaceSearchUrl,
  type WeekendPlace,type WeekendCity} from "@/lib/weekendPlaceSearch";
 
@@ -69,11 +69,12 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
   if(!draft){setSaveError(t("Check the date, map source and estimated amount.","تأكد من التاريخ ورابط الخريطة والتكلفة."));return;}
   const latest=readLocal<FamilyPlan[]>(FAMILY_PLANS_KEY,plans);
   const duplicate=latest.find(p=>p.kind==="outing"&&p.status!=="completed"&&p.sourceRef===draft.sourceRef&&(p.date??"")===(draft.date??""));
-  if(duplicate){setSavedPlan(duplicate);setSaveError(t("This place and date are already in your Family Plans. Open the existing plan instead.","هذا المكان والتاريخ محفوظان مسبقاً في خطط العيلة. افتح الخطة المحفوظة."));return;}
+  if(duplicate){writeLocal(ACTIVE_PLAN_KEY,duplicate.id);setSavedPlan(duplicate);setSaveError(t("This place and date are already in your Family Plans. Open the existing plan instead.","هذا المكان والتاريخ محفوظان مسبقاً في خطط العيلة. افتح الخطة المحفوظة."));return;}
   if(!writeLocal(FAMILY_PLANS_KEY,[draft,...latest])){
    setSaveError(t("Could not save the plan on this device. Check browser storage and retry.","تعذّر حفظ الخطة على هذا الجهاز. تحقق من التخزين وأعد المحاولة."));
    return;
   }
+  writeLocal(ACTIVE_PLAN_KEY,draft.id);
   setSavedPlan(draft);
  };
  const planReview=savedPlan&&moneyReady?reviewPlanCost(savedPlan,money):null;
