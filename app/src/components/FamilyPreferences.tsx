@@ -90,7 +90,7 @@ export function FamilyPreferences() {
         <input type="checkbox" className="size-5 accent-[#426958]" checked={Boolean(preferences[key])} onChange={e=>set(key,e.target.checked)} />
       </label>)}
     </div>
-    </div></details>
+    </details>
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
       <label className="text-sm font-medium">{ar?"مدينتك (اختياري)":"Your city (optional)"}
         <input className="mt-1 w-full rounded-xl border border-border bg-card p-3" maxLength={80} placeholder={ar?"مثل عمّان":"e.g. Amman"} value={preferences.city??""} onChange={e=>set("city",e.target.value.slice(0,80))}/>
