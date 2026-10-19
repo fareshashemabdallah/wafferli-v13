@@ -5,7 +5,7 @@ import {useI18n} from "@/lib/i18n";
 import {areaFromRoute,currentRoutePath,familyDestinations,type FamilyArea} from "@/lib/familyNavigation";
 import {Logo} from "./Logo";
 import {ConnectivityNotice} from "./ConnectivityNotice";
-import {AdventurePageHeader} from "./AdventurePageHeader";
+import {RhythmPageHeader} from "./RhythmPageHeader";
 import "./adventureWorldSkin.css";
 import {LocalSaveNotice} from "./LocalSaveNotice";
 
@@ -42,7 +42,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
   <aside className="sticky top-0 hidden h-dvh w-[228px] shrink-0 flex-col border-e border-[#D6E9DA] bg-[linear-gradient(175deg,#F4FFF5,#FFFFFF_45%,#F8FBF1)] px-4 pb-5 pt-7 lg:flex">
    <Link to="/" aria-label={text("Dabberna home","الصفحة الرئيسية لدبّرنا")}
     className="mb-3 inline-flex items-center rounded-lg px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]"><Logo/></Link>
-   <p className="mb-7 px-2 text-xs font-medium leading-relaxed text-[#6A8276]">{text("Our family, happier together.","عيلتنا أحلى سوا.")}</p>
+   <p className="mb-7 px-2 text-xs font-medium leading-relaxed text-[#6A8276]">{text("One family. One rhythm.","عيلة واحدة، وإيقاع واحد.")}</p>
    <nav aria-label={navName} className="space-y-1.5">
     {familyDestinations.map(item=>{
      const Icon=item.icon,active=!secondaryShopping&&item.id===area;
@@ -74,7 +74,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
     <Link to="/" aria-label={text("Dabberna home","الصفحة الرئيسية لدبّرنا")}
      className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B] lg:hidden"><Logo/></Link>
     <span className="hidden text-xs font-bold tracking-wide text-[#648373] lg:block">
-     {text("Our family, one place","عائلتنا في مكان واحد")}
+     {text("Understand · Prepare · Decide · Live","نفهم · نتحضّر · نقرّر · نعيش")}
     </span>
     <div className="ms-auto flex items-center gap-2">
      <details className="group relative lg:hidden">
@@ -99,7 +99,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
    <main id="dabberna-main-content" tabIndex={-1}
     className={"dabberna-page mx-auto w-full min-w-0 flex-1 px-3 pb-28 pt-4 sm:px-5 sm:pt-6 lg:px-7 lg:pb-12 "+(homeLayout||shopping?"max-w-[1430px]":"max-w-[1120px]")}>
     <ConnectivityNotice/><LocalSaveNotice/>
-    {!homeLayout&&location!=="/money"&&<AdventurePageHeader path={location} {...(title?{title}:{})}/>}
+    {!homeLayout&&<RhythmPageHeader path={location} {...(title?{title}:{})}/>}
     {homeLayout&&title&&<h1 className="sr-only">{title}</h1>}
     {children}
    </main>
