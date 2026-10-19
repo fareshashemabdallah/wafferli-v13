@@ -83,6 +83,11 @@ export function assessFinancialReality(money:MoneyState,plans:readonly FamilyPla
   messageEn:"Your recorded payment dates and cash estimate suggest possible pressure even if the monthly plan balances. Check cash, essentials and upcoming due dates; this is not a verified bank forecast.",
   messageAr:"مواعيد الدفعات والرصيد المدخل تشير لاحتمال ضغط، حتى لو كانت الميزانية الشهرية متوازنة. راجع السيولة والاحتياجات والمواعيد؛ هذا ليس توقعاً بنكياً مؤكداً.",
   actionEn:"Review due dates",actionAr:"راجع مواعيد الدفع"};
+ if(money.financialInputsPartial===true)return {...base,kind:"unknown",
+  titleEn:"This is only part of your family's money picture",titleAr:"هذه بس جزء من الصورة المالية للعيلة",
+  messageEn:"You've entered some useful figures, but other household costs may still be missing. We won't treat the difference as money available to spend. Add another fact when you know it, or review the complete budget in Money.",
+  messageAr:"أدخلت بعض الأرقام المفيدة، لكن قد تكون مصاريف أخرى ناقصة. ما رح نعتبر الفرق مبلغ متاح للصرف. أضف معلومة جديدة لما تعرفها أو راجع كامل الميزانية بصفحة المال.",
+  actionEn:"Review the known costs",actionAr:"راجع المصاريف المعروفة"};
  if(unclassifiedCategories.length>0)return {...base,kind:"unknown",
   titleEn:"One detail would improve this picture",titleAr:"تفصيل واحد يحسّن الصورة",
   messageEn:"Your budget is recorded, but "+unclassifiedCategories.length+" categories ("+unclassified.toFixed(2)+" JOD estimated) aren't marked essential, protected or adjustable. Classify them when useful; until then we can't say which spending can realistically change.",
