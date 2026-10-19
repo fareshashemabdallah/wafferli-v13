@@ -4,6 +4,7 @@ import { CashFlowPlanner } from "@/components/CashFlowPlanner";
 import { MoneyGuidance } from "@/components/MoneyGuidance";
 import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
+import {emptyRealMoney} from "@/lib/moneyOverview";
 import {FinancialIntelligencePanel} from "@/components/FinancialIntelligencePanel";
 import { localToday } from "@/lib/cashflow";
 import { Pencil, Plus, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
@@ -108,7 +109,7 @@ function MoneyPage() {
           </details>
           <details open={incomeEditorOpen} onToggle={event=>setIncomeEditorOpen(event.currentTarget.open)} className="editorial-card mt-3 px-4 py-3">
             <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"الدخل الشهري وهدف الادخار (اختياري)":"Monthly income & savings goal (optional)"}</summary>
-            <Settings key={`${c.monthlyIncome}:${recurringSavingsGoal}`} income={c.monthlyIncome} target={recurringSavingsGoal} hasSources={s.incomeSources!==undefined}
+            <Settings key={`${c.monthlyIncome}:${recurringSavingsGoal}`} income={c.monthlyIncome} target={recurringSavingsGoal} hasSources={!!s.incomeSources?.length}
               onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
           </details>
         </div>}/>}
@@ -132,13 +133,28 @@ function MoneyPage() {
        <p className="mt-1 text-sm text-muted-foreground">{ar?"سجّل المصروف اليومي مرة واحدة. الفواتير المتكررة ومواعيد الدفع تجدها بقسم الفواتير.":"Add everyday purchases here. For rent, tuition or other payments with due dates, use Bills instead."}</p>
        <button type="button" className="mt-2 text-sm font-semibold text-brand underline underline-offset-2" onClick={()=>setSection("planning")}>{ar?"عندي فاتورة أو دفعة قادمة":"I have an upcoming bill or payment"} →</button>
       </div>
-      {s.categories.length===0&&<div className="mb-4 rounded-xl border border-[#DBE5D8] bg-[#F2F7EF] p-4">
-        <p className="text-sm font-semibold">{ar?"لحتى تسجّل مصروف، بدك فئة واحدة على الأقل":"Choose your first spending category"}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{ar?"مثل الطعام أو المواصلات. ما في حاجة تدخل ميزانية كاملة.":"For example groceries or transport. You can start with one category; a complete budget can wait."}</p>
-        <button type="button" className="mt-2 min-h-10 rounded-full bg-brand px-4 text-sm font-semibold text-white"
-          onClick={openCategoryEditor}>{ar?"أضف فئة مصروف":"Add a spending category"}</button>
-      </div>}
-      <Expenses
+      {(s.demo||s.categories.length===0)&&<div className="mb-4 rounded-xl border border-[#DBE5D8] bg-[#F2F7EF] p-4">
+        <p className="text-sm font-semibold">{ar?"سجّل أول مصروف حقيقي بخطوة واحدة":"Start real spending with one category"}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{ar?
+         "اختَر وين بدك تسجّل المصروف. المبلغ بتدخله بعدين؛ ما بدك تكمّل ميزانية ولا تدخل دخل. الأرقام التجريبية رح تختفي فقط بعد موافقتك.":
+         "Choose what you spent on, then enter the amount. No full budget or income needed. Demo Money is replaced only with your permission."}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+         {([{id:"groceries",en:"Groceries",ar:"البقالة"},{id:"transport",en:"Transport",ar:"المواصلات"},
+           {id:"education",en:"Education",ar:"التعليم"},{id:"health",en:"Healthcare",ar:"الصحة"},
+           {id:"household",en:"Household",ar:"البيت"},{id:"other",en:"Other",ar:"أخرى"}] as const)
+          .map(item=><button type="button" key={item.id} className="min-h-11 rounded-full border border-[#BFD9C6] bg-white px-3 text-xs font-semibold text-brand"
+           onClick={()=>{
+            if(s.demo&&!window.confirm(ar?"تبدأ سجلات مصاريف العيلة؟ سنزيل أرقام المالية التجريبية فقط، ونحافظ على العيلة والخطط.":"Start real Money records? Only example Money figures will be removed; your family profiles and plans remain."))return;
+            setS(previous=>{
+             const base=previous.demo?emptyRealMoney():previous;
+             const id="quick-"+item.id;
+             if(base.categories.some(cat=>cat.id===id))return base;
+             return {...base,categories:[...base.categories,{id,name:item.en,type:"variable",planned:0,amountConfidence:"estimate"}]};
+            });
+           }}>{ar?item.ar:item.en}</button>)}
+        </div>
+       </div>}
+            <Expenses
         cats={s.categories}
         members={members}
         budgetItems={s.budgetItems??[]}
