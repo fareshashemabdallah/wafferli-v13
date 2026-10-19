@@ -2,6 +2,7 @@ import {createFileRoute,Link} from "@tanstack/react-router";
 import {ArrowRight,Sparkles} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {GuidedFamilyAdvisor} from "@/components/GuidedFamilyAdvisor";
+import {SixPillarDecisionStudio} from "@/components/SixPillarDecisionStudio";
 import {LiveFamilyAdvisor} from "@/components/LiveFamilyAdvisor";
 import {LIVE_AI_UI_ENABLED} from "@/lib/liveAiClient";
 import {useI18n} from "@/lib/i18n";
@@ -23,6 +24,7 @@ export function Advisor(){
      "Ask about your money, outings or purchases. Dabberna uses saved details and flags what's missing."}</p>
    </div>
   </div>
+  <SixPillarDecisionStudio/>
   <GuidedFamilyAdvisor/>
   {LIVE_AI_UI_ENABLED&&<LiveFamilyAdvisor/>}
   <section className="mt-5 rounded-2xl border border-[#DCE8DB] bg-white p-4">

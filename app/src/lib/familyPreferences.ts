@@ -1,3 +1,4 @@
+import type {DecisionScenario,DecisionApproach,FamilyValue} from "./sixPillarDecisionEngine";
 export type FamilyPreferences = {
   weather: boolean;
   lifestyle: boolean;
@@ -18,6 +19,11 @@ export type FamilyPreferences = {
   activityGroupPreference?:"any"|"girls"|"boys"|"separate";
   instructorPreference?:"any"|"female"|"male";
   parentCanObservePreferred?:boolean;
+  /** Parents opt in to priorities; no inference from salary, religion or age. */
+  protectedFamilyValues?:FamilyValue[];
+  /** Local-only positive preference counts; not prompts, expenses or profiles. */
+  decisionLearningEnabled?:boolean;
+  decisionFeedback?:Partial<Record<DecisionScenario,Partial<Record<DecisionApproach,number>>>>;
 };
 export const defaultFamilyPreferences: FamilyPreferences = {
   weather: true,
@@ -37,4 +43,6 @@ export const defaultFamilyPreferences: FamilyPreferences = {
   activityGroupPreference:"any",
   instructorPreference:"any",
   parentCanObservePreferred:false,
+  protectedFamilyValues:[],
+  decisionLearningEnabled:false,
 };
