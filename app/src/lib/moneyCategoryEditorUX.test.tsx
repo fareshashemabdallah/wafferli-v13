@@ -21,9 +21,10 @@ describe("Adventure Money overview and category exploration",()=>{
     budgetManagement={<section data-testid="expense-category-editor">Category controls</section>}/>
   </I18nProvider>);
   expect(screen.getByRole("region",{name:"Your monthly picture"})).toBeInTheDocument();
-  expect(screen.getByRole("region",{name:"Family exploration steps"})).toBeInTheDocument();
+  expect(screen.getByRole("region",{name:"Money workspace"})).toBeInTheDocument();
+  expect(screen.queryByRole("region",{name:"Family exploration steps"})).not.toBeInTheDocument();
   expect(screen.queryByRole("region",{name:"Build household budget"})).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:/Discover cost of living/}));
+  fireEvent.click(screen.getByRole("button",{name:/Explore household categories/}));
   expect(screen.getByRole("region",{name:"Family budget adventure"})).toBeInTheDocument();
   expect(screen.getByRole("heading",{name:"Where shall we explore?"})).toBeInTheDocument();
   expect(screen.queryByRole("region",{name:"Build household budget"})).not.toBeInTheDocument();
@@ -51,6 +52,6 @@ describe("Adventure Money overview and category exploration",()=>{
   </I18nProvider>);
   expect(screen.getAllByText("Not entered", {exact:true}).length).toBe(4);
   expect(screen.queryByText("1,200 JOD")).not.toBeInTheDocument();
-  expect(screen.getByRole("button",{name:"Start my family plan"})).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"Explore household categories"})).toBeInTheDocument();
  });
 });
