@@ -3,7 +3,7 @@ import {Link} from "@tanstack/react-router";
 import {ArrowRight,CheckCircle2,ExternalLink,MapPin,ShieldCheck,SlidersHorizontal,UsersRound,Wallet} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {useI18n} from "@/lib/i18n";
-import {useLocalState,uid} from "@/lib/storage";
+import {useLocalState,uid,writeLocal,readLocal} from "@/lib/storage";
 import {sampleMembers,sampleMoney,type Member,type MoneyState} from "@/lib/money";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {activitySearchUrl,suggestedActivityThemes,type DiscoveryPriority} from "@/lib/familyActivityDiscovery";
@@ -22,7 +22,7 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
  const [prefs,setPrefs,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
- const [plans,setPlans,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [mode,setMode]=useState<"family"|"one"|"explore">("family");
  const [age,setAge]=useState("8");
  const [cityChoice,setCityChoice]=useState<WeekendCity|null>(null);
@@ -67,9 +67,14 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
   if(amount===null){setSaveError(t("Enter a valid family-total estimate in JOD, or leave it blank.","أدخل تكلفة إجمالية صحيحة بالدينار أو اتركها فارغة."));return;}
   const draft=planFromDiscoveredPlace({...placeAsOutingDraft(selected),...(date?{date}:{}),...(amount!==undefined?{estimatedTotalJod:amount}:{})},uid());
   if(!draft){setSaveError(t("Check the date, map source and estimated amount.","تأكد من التاريخ ورابط الخريطة والتكلفة."));return;}
-  const duplicate=plans.find(p=>p.kind==="outing"&&p.status!=="completed"&&p.sourceRef===draft.sourceRef&&(p.date??"")===(draft.date??""));
+  const latest=readLocal<FamilyPlan[]>(FAMILY_PLANS_KEY,plans);
+  const duplicate=latest.find(p=>p.kind==="outing"&&p.status!=="completed"&&p.sourceRef===draft.sourceRef&&(p.date??"")===(draft.date??""));
   if(duplicate){setSavedPlan(duplicate);setSaveError(t("This place and date are already in your Family Plans. Open the existing plan instead.","هذا المكان والتاريخ محفوظان مسبقاً في خطط العيلة. افتح الخطة المحفوظة."));return;}
-  setPlans(old=>[draft,...old]);setSavedPlan(draft);
+  if(!writeLocal(FAMILY_PLANS_KEY,[draft,...latest])){
+   setSaveError(t("Could not save the plan on this device. Check browser storage and retry.","تعذّر حفظ الخطة على هذا الجهاز. تحقق من التخزين وأعد المحاولة."));
+   return;
+  }
+  setSavedPlan(draft);
  };
  const planReview=savedPlan&&moneyReady?reviewPlanCost(savedPlan,money):null;
  return <AppShell title={t("Explore family activities","اكتشف أنشطة العيلة")}>
