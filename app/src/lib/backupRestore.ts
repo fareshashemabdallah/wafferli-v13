@@ -113,7 +113,9 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
  }),
  members:many(opts({
   id,name:z.string().min(1).max(200),role:z.enum(["adult","child"]),
-  ageGroup:z.string().max(80),prefs:text,birthday:isoDate.optional()
+  ageGroup:z.string().max(80),prefs:text,birthday:isoDate.optional(),
+  birthdayMonthDay:z.string().regex(/^\\d{2}-\\d{2}$/).optional(),
+  ageYears:z.number().int().min(0).max(120).optional()
  }),100),
  familyCalendar:many(opts({
   id,title:z.string().min(1).max(300),date:isoDate,
@@ -127,7 +129,12 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   experienceMode:z.enum(["auto","individual","family"]).optional(),
   typicalChildrenAttendance:z.enum(["ask","yes","no"]).optional(),
   typicalOutingFocus:z.enum(["children","mixed","adults"]).optional(),
-  city:z.string().max(100),distanceKm:maxNumber,outingLimit:maxNumber
+  city:z.string().max(100),distanceKm:maxNumber,outingLimit:maxNumber,
+  discoveryPriority:z.enum(["quality","balance","affordable"]).optional(),
+  freeActivitiesFirst:z.boolean().optional(),
+  activityGroupPreference:z.enum(["any","girls","boys","separate"]).optional(),
+  instructorPreference:z.enum(["any","female","male"]).optional(),
+  parentCanObservePreferred:z.boolean().optional()
  }),
  familyPlans:many(opts({
   id,title:z.string().min(1).max(300),
