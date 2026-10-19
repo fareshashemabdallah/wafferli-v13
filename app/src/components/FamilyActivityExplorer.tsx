@@ -1,12 +1,12 @@
 import {useState,type FormEvent} from "react";
 import {Link} from "@tanstack/react-router";
-import {ArrowRight,CalendarDays,CheckCircle2,ExternalLink,MapPin,ShieldCheck,SlidersHorizontal,UsersRound,Wallet} from "lucide-react";
+import {ArrowRight,CheckCircle2,ExternalLink,MapPin,ShieldCheck,SlidersHorizontal,UsersRound,Wallet} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {useI18n} from "@/lib/i18n";
-import {useLocalState,uid,fmtJOD} from "@/lib/storage";
+import {useLocalState,uid} from "@/lib/storage";
 import {sampleMembers,sampleMoney,type Member,type MoneyState} from "@/lib/money";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
-import {ACTIVITY_THEMES,activitySearchUrl,suggestedActivityThemes,type DiscoveryPriority} from "@/lib/familyActivityDiscovery";
+import {activitySearchUrl,suggestedActivityThemes,type DiscoveryPriority} from "@/lib/familyActivityDiscovery";
 import {familyThemeMatches,planFromDiscoveredPlace,placeAsOutingDraft} from "@/lib/activityPlanBridge";
 import {realFamilyMembers} from "@/lib/familySetup";
 import {FAMILY_PLANS_KEY,reviewPlanCost,type FamilyPlan} from "@/lib/familyPlans";
