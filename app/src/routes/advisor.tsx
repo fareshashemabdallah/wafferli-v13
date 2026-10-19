@@ -1,5 +1,5 @@
-import {createFileRoute,Link} from "@tanstack/react-router";
-import {ArrowRight,Sparkles} from "lucide-react";
+import {createFileRoute} from "@tanstack/react-router";
+import {useState} from "react";
 import {AppShell} from "@/components/AppShell";
 import {GuidedFamilyAdvisor} from "@/components/GuidedFamilyAdvisor";
 import {SixPillarDecisionStudio} from "@/components/SixPillarDecisionStudio";
@@ -9,37 +9,44 @@ import {useI18n} from "@/lib/i18n";
 
 export const Route=createFileRoute("/advisor")({
  head:()=>({meta:[
-  {title:"Ask Dabberna — Family Decisions"},
-  {name:"description",content:"Ask about your family's money, outings and shopping. Get a grounded next step from your saved context."}
+  {title:"Decide with Dabberna — Family Money Journey"},
+  {name:"description",content:"One decision at a time: compare realistic options, ask about saved family records or use optional consented AI when available."}
  ]}),component:Advisor
 });
+/** No three assistants rendered as parallel primary forms. Pick ONE way to
+ * decide; existing local guided, six-pillar and consent-gated connected AI
+ * are preserved but disclosed honestly and shown one at a time.
+ */
 export function Advisor(){
  const {lang}=useI18n(),ar=lang==="ar";
- return <AppShell title={ar?"اسأل دبّرنا":"Ask Dabberna"}>
-  <div className="flex items-center gap-3 rounded-[1.1rem] border border-[#DCE9D9] bg-[#F4FBF1] px-4 py-3">
-   <Sparkles className="size-6 shrink-0 text-[#348D68]"/>
-   <div><h2 className="text-sm font-black text-[#295D45]">{ar?"سؤال واحد، وخطوة واضحة":"One question. One useful next step."}</h2>
-    <p className="mt-1 text-xs leading-relaxed text-[#557464]">{ar?
-     "اسأل عن مال العيلة أو الطلعات أو المشتريات. بنستخدم المعلومات المسجّلة ونوضح الناقص.":
-     "Ask about your money, outings or purchases. Dabberna uses saved details and flags what's missing."}</p>
+ const [mode,setMode]=useState<"decision"|"question"|"connected">("decision");
+ const modes=[
+  {id:"decision" as const,en:"Compare ways forward",ar:"قارن طرق مناسبة"},
+  {id:"question" as const,en:"Ask about my records",ar:"اسأل عن بياناتي"},
+  ...(LIVE_AI_UI_ENABLED?[{id:"connected" as const,en:"Connected AI (consent)",ar:"الذكاء المتصل (بموافقتك)"}]:[])
+ ];
+ return <AppShell title={ar?"قرّر مع دبّرنا":"Decide with Dabberna"}>
+  <div className="mx-auto max-w-[960px] space-y-4">
+   <div className="rounded-2xl border border-[#DAE9DC] bg-[#F4FAF1] p-4">
+    <p className="text-xs font-extrabold text-[#3C8768]">{ar?"القرار · خطوة واحدة":"DECIDE · ONE STEP AT A TIME"}</p>
+    <h2 className="mt-1 text-lg font-black text-[#244D3B]">{ar?"كيف بدك نساعدك بالقرار؟":"What decision are we helping with?"}</h2>
+    <p className="mt-1 text-xs leading-relaxed text-[#65796B]">{ar?
+     "اختَر طريقة واحدة. دبّرنا بتستخدم سجلات العيلة نفسها، وما بتكرر الأسئلة أو الخطط بدون اختيارك.":
+     "Choose one approach. All options use the same saved family records; no separate budget or duplicated plan is created."}</p>
+    <div role="group" aria-label={ar?"طريقة اتخاذ القرار":"Decision approach"} className="mt-3 flex flex-wrap gap-2">
+     {modes.map(item=><button key={item.id} type="button" aria-pressed={mode===item.id} onClick={()=>setMode(item.id)}
+      className={"min-h-11 rounded-full border px-4 text-xs font-bold "+(mode===item.id?
+       "border-[#3A956E] bg-[#E2F3E8] text-[#236C4D]":"border-[#DAE7DD] bg-white text-[#5E7468]")}>
+      {ar?item.ar:item.en}
+     </button>)}
+    </div>
    </div>
+   {mode==="decision"&&<SixPillarDecisionStudio/>}
+   {mode==="question"&&<GuidedFamilyAdvisor/>}
+   {mode==="connected"&&LIVE_AI_UI_ENABLED&&<LiveFamilyAdvisor/>}
+   <p className="text-xs leading-relaxed text-[#758479]">{ar?
+    "الإرشادات المحلية تحسب من بياناتك المحفوظة، مش ذكاء توليدي. المساعد المتصل، إذا توفر، يحتاج موافقة مستقلة. لا أسعار أو حجوزات مؤكدة بدون مصادر.":
+    "Local comparisons use deterministic rules based on your saved records, not generative AI. Connected AI, if available, requires separate consent. Provider prices and availability remain unverified without a source."}</p>
   </div>
-  <SixPillarDecisionStudio/>
-  <GuidedFamilyAdvisor/>
-  {LIVE_AI_UI_ENABLED&&<LiveFamilyAdvisor/>}
-  <section className="mt-5 rounded-2xl border border-[#DCE8DB] bg-white p-4">
-   <h2 className="text-sm font-semibold">{ar?"بدك نتيجة محددة؟":"A specific decision you can make today"}</h2>
-   <div className="mt-3 grid gap-2 sm:grid-cols-2">
-    <Link to="/explore/weekend" className="flex min-h-12 items-center justify-between gap-2 rounded-xl bg-[#F1F7EF] px-4 text-sm font-semibold text-brand">
-     {ar?"هل الطلعة مناسبة لميزانيتنا؟":"Does a family outing fit our plan?"}<ArrowRight className="size-4 rtl:rotate-180"/>
-    </Link>
-    <Link to="/explore/market" className="flex min-h-12 items-center justify-between gap-2 rounded-xl bg-[#F1F7EF] px-4 text-sm font-semibold text-brand">
-     {ar?"وين ألاقي منتج من متاجر الأردن؟":"Find an item from Jordan sellers"}<ArrowRight className="size-4 rtl:rotate-180"/>
-    </Link>
-   </div>
-   <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{ar?
-    "حسابات دبّرنا تستند إلى معلوماتك المسجّلة، والأسعار والعروض لا تكون مؤكدة بدون مصدر مباشر.":
-    "Advice uses entered records; real retailer prices and availability are not verified unless a connected source provides them."}</p>
-  </section>
  </AppShell>;
 }
