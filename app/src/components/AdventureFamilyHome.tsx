@@ -13,6 +13,8 @@ import {homeSnapshot} from "@/lib/homeSnapshot";
 import {RobotBuddy,WorldScene,type AdventurePlace} from "./AdventureArtwork";
 import {TodayFamilyBrief} from "./TodayFamilyBrief";
 import {FamilyDiscoveryPanel} from "./FamilyDiscoveryPanel";
+import {futureFamilyMilestones} from "@/lib/sixPillarDecisionEngine";
+import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import "./adventureFamilyHero.css";
 
 const destinations=[
@@ -33,9 +35,11 @@ export function AdventureFamilyHome(){
  const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
  const [basket,,basketReady]=useLocalState<BasketEntry[]>("shopping",[]);
  const [wishlist,,wishlistReady]=useLocalState<WishlistItem[]>(FAMILY_WISHLIST_KEY,[]);
- const ready=moneyReady&&membersReady&&momentsReady&&plansReady&&tasksReady&&basketReady&&wishlistReady;
+ const [prefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
+ const ready=moneyReady&&membersReady&&momentsReady&&plansReady&&tasksReady&&basketReady&&wishlistReady&&prefsReady;
  const snapshot=homeSnapshot({money,members,moments,plans,tasks,basket,wishlist,arabic:ar});
  const next=snapshot.agenda[0];
+ const decisionMoments=ready?futureFamilyMilestones({money,members,moments,plans,preferences:prefs}):[];
  const realMembers=realFamilyMembers(members);
  const month=!money.demo?computeMoney(money):null;
  const enteredCount=money.demo?0:money.categories.length;
@@ -113,6 +117,11 @@ export function AdventureFamilyHome(){
        `عندك ${enteredCount} فئات مصاريف و${fmtJOD(month.spent)} مدفوع ومسجّل هالشهر، مش رصيد بنك.`):
      t("No real household finances added yet; example amounts are hidden.","ما دخلت مالية العيلة الفعلية بعد؛ ما رح نعرض أرقام تجريبية.")}</p>
     {next&&<p className="text-sm leading-relaxed text-[#516C60]"><Heart className="me-1 inline size-4 text-[#DB8B79]"/>{next.title} · {next.date}</p>}
+    {decisionMoments.length>0&&<div className="rounded-xl border border-[#D6E8DA] bg-[#F2FAF0] p-3">
+     <p className="text-sm font-bold text-[#286E59]">{t("Something worth preparing for","في شغلة تستاهل نتحضّر إلها")}</p>
+     <p className="mt-1 text-xs leading-relaxed text-[#587565]">{decisionMoments[0]!.date} · {decisionMoments[0]!.title}. {t("This comes from your saved calendar and plans, not provider-confirmed dates. Review possible options without recording a new expense.","من التقويم والخطط اللي حفظتها، مش موعد مؤكد من جهة خارجية. راجع خياراتك بدون تسجيل مصروف جديد.")}</p>
+     <Link to="/advisor" className="mt-2 inline-flex min-h-10 items-center gap-1 text-xs font-bold text-brand underline">{t("Explore a family decision","جرّب قرار عائلي")}<ArrowRight className="size-4 rtl:rotate-180"/></Link>
+    </div>}
     <TodayFamilyBrief compact/>
    </div>
   </details>}
