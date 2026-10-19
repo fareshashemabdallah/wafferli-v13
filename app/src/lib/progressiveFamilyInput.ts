@@ -19,7 +19,7 @@ export function canSaveProgressiveFacts(before:MoneyState,input:ProgressiveMoney
  if(keys.some(key=>input[key]!==undefined&&!money(input[key])))return false;
  if(input.income===0&&!input.zeroIncomeConfirmed)return false;
  if(input.income!==undefined&&!before.demo&&(
-  (before.incomeSources?.length??0)>0 || before.incomeKnown===true
+  (before.incomeSources?.length??0)>0 || before.incomeKnown===true || before.income>0
  ))return false;
  if((input.essential!==undefined||input.other!==undefined)&&!before.demo&&before.categories.some(
   c=>c.id!=="household-essential"&&c.id!=="household-flexible"))return false;
