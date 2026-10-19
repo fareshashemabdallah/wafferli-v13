@@ -31,7 +31,7 @@ export function familySetupState(
  const family=actual.length>0||profileSkipped||hasAnonymousCounts;
  // A single genuine saved fact counts as having started; incomplete information
  // remains incomplete in financial guidance and does not trigger repeated setup.
- const moneyDone=!money.demo&&(money.incomeKnown===true||money.categories.length>0||
+ const moneyDone=!money.demo&&(money.incomeKnown===true||money.income>0||money.categories.length>0||
   money.expenses.length>0||(money.commitments?.length??0)>0||
   typeof money.cashOnHand==="number"||(money.incomeSources?.length??0)>0);
  const steps=[
