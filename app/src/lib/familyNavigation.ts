@@ -3,11 +3,12 @@ import {Home,HeartHandshake,Sparkles,Wallet} from "lucide-react";
 /** Only four primary experiences. Existing specialist routes retain their URLs
  * and data, but belong to the appropriate pillar instead of becoming new tabs.
  */
+/** Consistent movement through one family journey. Tools remain available at their existing URLs. */
 export const familyDestinations=[
- {id:"today",to:"/" as const,en:"Family World",ar:"عالم العيلة",shortEn:"World",shortAr:"العالم",icon:Home,accent:"#E58C65",soft:"#FFF0E6"},
- {id:"money",to:"/money" as const,en:"Our Money",ar:"ماليتنا",shortEn:"Money",shortAr:"المال",icon:Wallet,accent:"#2D917C",soft:"#E9F7F2"},
- {id:"family",to:"/family" as const,en:"Family Life",ar:"حياة العيلة",shortEn:"Family",shortAr:"العيلة",icon:HeartHandshake,accent:"#CB6393",soft:"#FCECF2"},
- {id:"ask",to:"/advisor" as const,en:"Ask Dabberna",ar:"اسأل دبّرنا",shortEn:"Ask",shortAr:"اسأل",icon:Sparkles,accent:"#9372CB",soft:"#F4EEFF"}
+ {id:"today",to:"/" as const,en:"Today",ar:"اليوم",shortEn:"Today",shortAr:"اليوم",icon:Home,accent:"#338C70",soft:"#E5F4E9"},
+ {id:"money",to:"/money" as const,en:"Understand",ar:"افهم المال",shortEn:"Money",shortAr:"المال",icon:Wallet,accent:"#2D917C",soft:"#E9F7F2"},
+ {id:"ask",to:"/advisor" as const,en:"Decide",ar:"قرّر",shortEn:"Decide",shortAr:"قرّر",icon:Sparkles,accent:"#9372CB",soft:"#F4EEFF"},
+ {id:"family",to:"/family" as const,en:"Plans & Life",ar:"خطط العيلة",shortEn:"Plans",shortAr:"الخطط",icon:HeartHandshake,accent:"#CB6393",soft:"#FCECF2"}
 ] as const;
 export type FamilyArea=(typeof familyDestinations)[number]["id"];
 export function areaFromRoute(path:string):FamilyArea{
