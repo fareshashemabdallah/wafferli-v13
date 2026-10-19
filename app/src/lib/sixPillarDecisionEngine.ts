@@ -1,4 +1,5 @@
 import {assessFinancialReality} from "./financialReality";
+import {getMoneyOverview} from "./moneyOverview";
 import {allFamilyMoments,dateKey,upcomingMoments,parseCalendarDate} from "./familyCalendar";
 import {realFamilyMembers} from "./familySetup";
 import {makeFamilyPlan,reviewPlanCost,type FamilyPlan,type PlanKind} from "./familyPlans";
@@ -57,7 +58,10 @@ export function futureFamilyMilestones(context:DecisionContext){
  const plans=context.plans.filter(x=>x.status!=="completed"&&x.date&&x.date>=today&&x.date<=dateKey(new Date(now.getFullYear(),now.getMonth(),now.getDate()+45,12)))
  .slice().sort((a,b)=>(a.date??"").localeCompare(b.date??"")).slice(0,3)
  .map(x=>({title:x.title,date:x.date!,kind:"plan" as const}));
- return [...events,...plans].sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3);
+ const bills=context.money.demo?[]:getMoneyOverview(context.money,now,context.plans).forecast.events
+  .filter(x=>x.kind==="bill"&&x.displayDate>=today)
+  .slice(0,3).map(x=>({title:x.name,date:x.displayDate,kind:"bill" as const}));
+ return [...events,...plans,...bills].sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3);
 }
 export function decideFamilyNextSteps(scenario:DecisionScenario,ctx:DecisionContext):DecisionBrief{
  const now=ctx.now??new Date(),m=ctx.money;
@@ -84,7 +88,9 @@ export function decideFamilyNextSteps(scenario:DecisionScenario,ctx:DecisionCont
   reality.messageEn+" "+(costReview?"Cost review: "+costReview.reason:"No specific verified full-family cost was supplied.");
  const financeAr=!known?"البيانات المالية ناقصة أو تجريبية. فينا نقارن الخيارات لكن ما فينا نؤكد القدرة على الدفع.":
   reality.messageAr+(costReview?" مراجعة التكلفة: "+(costReview.status==="review"?"يجب مراجعة الالتزامات والسيولة قبل القرار.":costReview.status==="unknown"?"بيانات السيولة والفواتير غير مكتملة.":"الأرقام المسجلة تقديرية وليست ضماناً للدفع."):" لم يتم إدخال تكلفة مؤكدة كاملة للعيلة.");
- const priority=ctx.preferences.protectedFamilyValues??[];
+ const mapping={children:"development",education:"education","family-time":"family-time",health:"health",travel:"experiences",buffer:"security"} as const;
+ const priority=Array.from(new Set([...(ctx.preferences.protectedFamilyValues??[]),
+  ...(m.protectedLifestyle??[]).map(id=>mapping[id])])) as FamilyValue[];
  const protectedCats=!m.demo?m.categories.filter(x=>x.priority==="protected").map(x=>x.name).slice(0,4):[];
  const protectedEn=(priority.length?"What matters to you: "+localizedValues(priority,false).join(", ")+". ":"")+
   (protectedCats.length?"Spending marked protected: "+protectedCats.join(", ")+". ":"")+
@@ -92,7 +98,7 @@ export function decideFamilyNextSteps(scenario:DecisionScenario,ctx:DecisionCont
  const protectedAr=(priority.length?"من أولويات عيلتك: "+localizedValues(priority,true).join("، ")+". ":"")+
   (protectedCats.length?"مصاريف اخترت تحميها: "+protectedCats.join("، ")+". ":"")+
   "ما منفترض خفض مصاريف مهمة؛ الأساسيات أولاً والقرار للأهل.";
- const financialPressure=!known||reality.kind==="essentials-gap"||reality.kind==="plan-gap"||reality.kind==="tight"||reality.forecastCashRisk;
+ const financialPressure=!known||reality.kind==="essentials-gap"||reality.kind==="plan-gap"||reality.kind==="tight"||reality.forecastCashRisk||costReview?.status==="review";
  const titles={
   outing:["Find a family experience that works","ابحث عن طلعة مناسبة للعيلة"],
   activity:["Give your child a chance without rushing a commitment","نشاط للأولاد بدون تسرّع بالتزام"],
@@ -122,6 +128,7 @@ export function decideFamilyNextSteps(scenario:DecisionScenario,ctx:DecisionCont
  ];
  const scores:Record<DecisionApproach,number>={compare:1,stage:0,affordable:0};
  if(financialPressure){scores.stage+=4;scores.affordable+=2;}
+ if(reality.kind==="essentials-gap"||reality.kind==="plan-gap"){scores.stage+=7;scores.affordable+=4;}
  if(ctx.preferences.discoveryPriority==="quality")scores.compare+=4;
  if(ctx.preferences.discoveryPriority==="affordable"||ctx.preferences.freeActivitiesFirst)scores.affordable+=4;
  if(priority.includes("security"))scores.stage+=2;
