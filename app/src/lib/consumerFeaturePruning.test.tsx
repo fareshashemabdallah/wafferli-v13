@@ -1,5 +1,5 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from "vitest";
-import {cleanup,render,screen} from "@testing-library/react";
+import {cleanup,render,screen,fireEvent} from "@testing-library/react";
 import type {ReactNode,AnchorHTMLAttributes} from "react";
 import {I18nProvider} from "@/lib/i18n";
 import {About} from "@/routes/about";
@@ -49,10 +49,13 @@ describe("remove distractions, not parent decision support",()=>{
  });
  it("Advisor has just one amount checker in the guided experience, not a second full form",()=>{
   draw(<Advisor/>);
-  expect(screen.getByText("Ask one family question")).toBeInTheDocument();
+  expect(screen.queryByText("Ask one family question")).not.toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"Compare ways forward"})).toHaveAttribute("aria-pressed","true");
   expect(screen.queryByText("Check a specific purchase amount (optional)")).not.toBeInTheDocument();
   expect(screen.queryByText("Ask people you trust (optional)")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Ask about my records"}));
+  expect(screen.getByText("Ask one family question")).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"Ask about my records"})).toHaveAttribute("aria-pressed","true");
   expect(screen.queryByText("About live AI (not activated yet)")).not.toBeInTheDocument();
-  expect(screen.getByRole("link",{name:/Find an item from Jordan sellers/})).toHaveAttribute("href","/explore/market");
  });
 });
