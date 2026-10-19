@@ -55,6 +55,7 @@ function Space() {
   const save=()=>{
     if(!edit)return;
     if(!edit.name.trim())return setErr(tr("Name is required."));
+    if(edit.ageYears!==undefined&&(!Number.isInteger(edit.ageYears)||edit.ageYears<0||edit.ageYears>120))return setErr(ar?"أدخل عمراً صحيحاً.":"Please enter a valid age.");
     if(edit.birthday){
       const date=parseCalendarDate(edit.birthday);
       if(!date||date.getTime()>new Date().getTime())return setErr(ar?"تاريخ الميلاد غير صالح أو في المستقبل.":"Please enter a valid birth date that is not in the future.");
@@ -119,6 +120,8 @@ function Space() {
               <option value="adult">{tr("Adult")}</option><option value="child">{tr("Child")}</option>
             </NativeSelect></Field>
             <details className="sm:col-span-2 rounded-xl border border-border bg-white p-3"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"معلومات إضافية (اختياري)":"More about this person (optional)"}</summary><div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <Field label={ar?"العمر بالسنوات (اختياري)":"Age in whole years (optional)"}><Input type="number" min={0} max={120} className={inputCls}
+              value={edit.ageYears??""} onChange={e=>setEdit({...edit,ageYears:e.target.value===""?undefined:Number(e.target.value)})}/></Field>
             <Field label={tr("Age group")}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
               <option value="">{ar?"أفضل عدم الإجابة":"Not provided"}</option>
               {ages.map(a=><option key={a}>{a}</option>)}
@@ -142,7 +145,7 @@ function Space() {
             <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#E9F0E8] font-display text-lg font-semibold text-brand">{m.name[0]?.toUpperCase()}</span>
             <div className="min-w-0 flex-1">
               <p className="font-medium">{tr(m.name)}</p>
-              <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")} · {m.ageGroup}{m.prefs&&" · "+m.prefs}</p>
+              <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")}{typeof m.ageYears==="number"?" · "+m.ageYears+" "+(ar?"سنة":"years"):m.ageGroup?" · "+m.ageGroup:""}{m.prefs&&" · "+m.prefs}</p>
               {(m.birthday||m.birthdayMonthDay)&&
                 <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":"Birthday: "}{m.birthdayMonthDay??(m.birthday?formatMomentDate(m.birthday,ar):"")}</p>}
             </div>

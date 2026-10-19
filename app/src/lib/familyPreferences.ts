@@ -12,6 +12,12 @@ export type FamilyPreferences = {
   city: string;
   distanceKm: number;
   outingLimit: number;
+  /** Discovery ordering only: never infer income or replace parental choice. */
+  discoveryPriority?:"quality"|"balance"|"affordable";
+  freeActivitiesFirst?:boolean;
+  activityGroupPreference?:"any"|"girls"|"boys"|"separate";
+  instructorPreference?:"any"|"female"|"male";
+  parentCanObservePreferred?:boolean;
 };
 export const defaultFamilyPreferences: FamilyPreferences = {
   weather: true,
@@ -26,4 +32,9 @@ export const defaultFamilyPreferences: FamilyPreferences = {
   city: "",
   distanceKm: 15,
   outingLimit: 50,
+  discoveryPriority:"balance",
+  freeActivitiesFirst:false,
+  activityGroupPreference:"any",
+  instructorPreference:"any",
+  parentCanObservePreferred:false,
 };

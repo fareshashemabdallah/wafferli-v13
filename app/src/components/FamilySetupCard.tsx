@@ -34,7 +34,7 @@ export function FamilySetupCard(){
     <h2 className="mt-1 text-lg font-semibold">{ar?"خطوات بسيطة لتصير النصائح مناسبة إلك":"A little setup makes advice more useful"}</h2>
     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
      "كل خطوة بإيدك، وما منغيّر أي أرقام أو بيانات بدون موافقتك. معلوماتك المالية بتضل بهذا المتصفح.":
-     "Everything is optional except basic figures for money comparisons. Nothing is changed without your action; finances stay in this browser."}</p>
+     "You can explore Dabberna without entering income or setting up profiles. Money comparisons need figures only when you request them. Finances stay in this browser."}</p>
    </div>
   </div>
   <div className="mt-4 grid grid-cols-3 gap-1.5" aria-label={ar?"تقدّم الإعداد":"Setup progress"}>
