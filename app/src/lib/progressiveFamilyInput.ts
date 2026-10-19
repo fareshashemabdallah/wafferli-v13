@@ -54,7 +54,7 @@ export function applyProgressiveMoneyFacts(before:MoneyState,input:ProgressiveMo
 export function householdCountSource(members:readonly Member[],presence:HouseholdPresence):
  {source:"profiles"|"anonymous"|"unknown";adults:number|null;children:number|null}{
  const real=realFamilyMembers(members);
- if(presence.adults!==null&&presence.children!==null)
+ if(presence.adults!==null||presence.children!==null)
   return {source:"anonymous",adults:presence.adults,children:presence.children};
  if(real.length)return {source:"profiles",adults:real.filter(x=>x.role==="adult").length,
   children:real.filter(x=>x.role==="child").length};
