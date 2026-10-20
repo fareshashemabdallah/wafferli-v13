@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AppShell, PilotBadge } from "@/components/AppShell";
+import {ShoppingJourneyStrip} from "@/components/ShoppingJourneyStrip";
 import { inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -79,6 +80,7 @@ function Shopping() {
 
   return (
     <AppShell title={tr("My Basket")}>
+      <ShoppingJourneyStrip current="record"/>
       <p className="mb-4 text-sm text-muted-foreground">{tr("Plan what you need, see the total, and make room for what matters.")}</p>
       <p className="mb-3 flex items-center gap-2 text-sm text-muted-foreground"><PilotBadge>{tr("Device only")}</PilotBadge> {tr("Prices are what you enter — no live store prices.")}</p>
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-[#DCE7DA] bg-[#F5F9F3] p-3 text-sm">
