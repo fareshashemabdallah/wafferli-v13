@@ -5,6 +5,7 @@ import {useI18n} from "@/lib/i18n";
 import {useLocalState,fmtJOD,uid} from "@/lib/storage";
 import {sampleMoney,type MoneyState} from "@/lib/money";
 import {localToday} from "@/lib/cashflow";
+import {recordConfirmedExpense} from "@/lib/confirmedExpense";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 
@@ -18,12 +19,8 @@ export function saveQuickExpense(money:MoneyState,draft:QuickExpenseDraft,day:st
     !(draft.categoryId==="uncategorized"||money.categories.some(c=>c.id===draft.categoryId))||
     !/^\d{4}-\d{2}-\d{2}$/.test(day)||
     draft.note.length>160)return money;
- if(money.expenses.some(e=>e.id===draft.id))return money;
- return {...money,expenses:[{
-  id:draft.id,date:day,categoryId:draft.categoryId,
-  amount:Math.round(amount*100)/100,
-  note:draft.note.trim().slice(0,160),shared:false,status:"paid"
- },...money.expenses],...(money.categories.length===0?{financialInputsPartial:true}:{})};
+ return recordConfirmedExpense(money,{id:draft.id,date:day,categoryId:draft.categoryId,
+  amount,note:draft.note},"untracked");
 }
 
 /** Three fields at most; only genuine entered numbers can become Money expenses. */
