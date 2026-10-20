@@ -59,15 +59,41 @@ describe("birthday gift click continuity",()=>{
  it("does not accidentally attach another product's seller quotes to the birthday",()=>{
   put("smartbuy",{product:"Office chair",budget:"200",alts:[{id:"other",store:"Furniture",price:"150",extra:"0",verified:false}]});
   draw();
-  expect(screen.getByText(/Your current comparison belongs to another product/)).toBeInTheDocument();
+  expect(screen.getByText(/Your saved comparison is for another product/)).toBeInTheDocument();
   expect(screen.queryByRole("button",{name:"Save this seller option for the birthday gift"})).not.toBeInTheDocument();
   expect(get<FamilyPlan[]>("familyPlans")[0]!.occasionPreparation?.gift.selectedQuote).toBeUndefined();
   expect(get<{product:string}>("smartbuy").product).toBe("Office chair");
  });
+ it("changes to the birthday gift only with permission, without altering existing family data",async()=>{
+  put("smartbuy",{product:"Office chair",budget:"250",alts:[{id:"original",store:"Store",price:"140",extra:"0",verified:false}]});
+  draw();
+  expect(get<{product:string;alts:unknown[]}>("smartbuy").alts).toHaveLength(1);
+  const action=screen.getByRole("button",{name:"Switch comparison to this gift"});
+  vi.mocked(window.confirm).mockReturnValueOnce(false);
+  fireEvent.click(action);
+  expect(get<{product:string}>("smartbuy").product).toBe("Office chair");
+  fireEvent.click(action);
+  await waitFor(()=>expect(get<{product:string;budget:string;alts:unknown[]}>("smartbuy")).toMatchObject({
+   product:"Science kit",budget:"70",alts:[]
+  }));
+  expect(get<FamilyPlan[]>("familyPlans")).toEqual([occasion]);
+  expect(get<{expenses:unknown[]}>("money").expenses).toHaveLength(0);
+ });
+ it("starts with comparison, not an unrelated wishlist hero, and keeps optional shopping collapsed",async()=>{
+  put("smartbuy",{product:"",budget:"",alts:[]});
+  draw();
+  await waitFor(()=>expect(get<{product:string}>("smartbuy").product).toBe("Science kit"));
+  const comparison=screen.getByText("Compare seller prices for this gift").closest("details");
+  expect(comparison).toHaveProperty("open",true);
+  const optional=screen.getByText("Other shopping and wishlists (optional)").closest("details");
+  expect(optional).toHaveProperty("open",false);
+  const gift=screen.getByRole("region",{name:"Occasion gift purchase journey"});
+  expect(gift.compareDocumentPosition(comparison)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(screen.queryByRole("button",{name:"Use saved gift name for comparison"})).not.toBeInTheDocument();
+ });
  it("reuses saved gift name without wiping previous comparison records",async()=>{
   put("smartbuy",{product:"",budget:"",alts:[]});
   draw();
-  fireEvent.click(screen.getByRole("button",{name:"Use saved gift name for comparison"}));
   await waitFor(()=>expect(get<{product:string;alts:unknown[]}>("smartbuy")).toMatchObject({product:"Science kit",alts:[]}));
   expect(get<FamilyPlan[]>("familyPlans")).toHaveLength(1);
   expect(get<{expenses:unknown[]}>("money").expenses).toHaveLength(0);
