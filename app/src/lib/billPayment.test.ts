@@ -17,7 +17,7 @@ describe("bill payments reconcile with expenses and cash",()=>{
  });
  it("uses a linked expense even if the paid marker is missing after a restore",()=>{
   const paid=recordBillPayment(initial(),"rent","2026-10-14","2026-10-14","expense1","deduct");
-  const missingMarker={...paid,commitments:paid.commitments?.map(b=>({...b,paidDates:[]}))};
+  const missingMarker={...paid,commitments:(paid.commitments??[]).map(b=>({...b,paidDates:[]}))};
   expect(recordBillPayment(missingMarker,"rent","2026-10-14","2026-10-14","another","deduct")).toBe(missingMarker);
   expect(missingMarker.cashOnHand).toBe(350);
   expect(missingMarker.expenses).toHaveLength(1);
