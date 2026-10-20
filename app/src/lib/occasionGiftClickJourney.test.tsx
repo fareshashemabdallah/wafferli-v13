@@ -54,7 +54,7 @@ describe("birthday gift click continuity",()=>{
    .toEqual([expect.objectContaining({amount:46,sourceOccasionCost:"gift",shared:false})]));
   expect(screen.getByText("This gift payment is already in Money. It cannot be recorded twice.")).toBeInTheDocument();
   expect(get<FamilyPlan[]>("familyPlans")[0]!.occasionPreparation?.gift.selectedQuote?.totalJod).toBe(48);
-  expect(get<{cashOnHand?:number}>("money").cashOnHand).toBeUndefined();
+  expect(get<{cashOnHand:number|null}>("money").cashOnHand).toBeNull();
  });
  it("does not accidentally attach another product's seller quotes to the birthday",()=>{
   put("smartbuy",{product:"Office chair",budget:"200",alts:[{id:"other",store:"Furniture",price:"150",extra:"0",verified:false}]});
