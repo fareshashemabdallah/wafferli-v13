@@ -539,7 +539,7 @@ function ExpenseForm({ initial, cats, members, budgetItems, onSave, onCancel }: 
       <Field label={tr("Category")}>
         <NativeSelect value={f.categoryId} onChange={(e) => setF(previous=>{const {budgetItemId:_item,...rest}=previous;return {...rest,categoryId:e.target.value};})}>
           <option value="uncategorized">{ar?"غير مصنف بعد":"Uncategorized for now"}</option>
-          {cats.map((c) => <option key={c.id} value={c.id}>{tr(c.name)}</option>}
+          {cats.map((c) => <option key={c.id} value={c.id}>{tr(c.name)}</option>)}
         </NativeSelect>
       </Field>
       {budgetItems.some(i=>i.categoryId===f.categoryId)&&<Field label={ar?"البند (اختياري)":"Item (optional)"}>
