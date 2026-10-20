@@ -45,7 +45,8 @@ describe("canonical birthday gift to actual purchase",()=>{
   expect(selectOccasionGiftSeller(plan,"Science Kit","Family Shop",50.001,false,undefined,now)).toBe(plan);
   expect(selectOccasionGiftSeller(plan,"Science Kit","Family Shop",50,true,"2026-12-10",now)).toBe(plan);
   expect(selectOccasionGiftSeller(plan,"Science Kit","Family Shop",50,false,"2026-10-20",now)).toBe(plan);
-  expect(selectOccasionGiftSeller({...plan,status:"completed"},"Science Kit","Family Shop",50,true,"2026-10-20",now)).toMatchObject({status:"completed",occasionPreparation:{gift:{selectedQuote:undefined}}});
+  const completed:FamilyPlan={...plan,status:"completed"};
+  expect(selectOccasionGiftSeller(completed,"Science Kit","Family Shop",50,true,"2026-10-20",now)).toBe(completed);
  });
  it("uses selected seller as a reference only; one confirmed payment changes finance once",()=>{
   const {plan}=setup();
