@@ -32,7 +32,7 @@ describe("fast expense entry",()=>{
  });
  it("records one uncategorized real expense without inventing a zero budget",async()=>{
   const empty={...real(),categories:[],financialInputsPartial:true,cashOnHand:300,
-   income:0,incomeKnown:undefined,commitments:[{id:"rent",name:"Rent",amount:200,frequency:"monthly" as const,dueDate:"2026-11-01"}]};
+   income:0,commitments:[{id:"rent",name:"Rent",amount:200,frequency:"monthly" as const,dueDate:"2026-11-01"}]};
   const draft={id:"expense-uncat-123",amount:"36.25",categoryId:"uncategorized",note:"Family outing"};
   const recorded=saveQuickExpense(empty,draft,"2026-10-20");
   expect(recorded.categories).toEqual([]);
