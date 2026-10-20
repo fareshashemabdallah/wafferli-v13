@@ -57,7 +57,7 @@ describe("one confirmed expense ledger across family journeys",()=>{
   expect(first.created).toBe(true);
   expect(first.plans).toHaveLength(1);
   expect(upsertOccasionFamilyPlan(first.plans,event,{budgetJod:90},undefined,"another",day).created).toBe(false);
-  const linked={...first.plans[0]!,occasionPreparation:gift().occasionPreparation};
+  const linked={...first.plans[0]!,occasionPreparation:gift().occasionPreparation!};
   const before=state();
   expect(familyFinancialSummary([linked],before,day).upcomingTotalJod).toBe(45);
   expect(getMoneyOverview(before,day,[linked]).month.spent).toBe(0);
