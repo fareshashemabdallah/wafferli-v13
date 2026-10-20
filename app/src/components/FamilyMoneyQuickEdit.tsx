@@ -110,8 +110,8 @@ export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
       <label className={label}>{t("How often?","قديش بيتكرر؟")}
        <select className={frame} value={frequency} onChange={e=>setFrequency(e.target.value as Frequency)}>
         {frequencyOptions.map(v=><option key={v} value={v}>{t(
-         ({once:"Once",weekly:"Weekly",biweekly:"Every two weeks",monthly:"Monthly",quarterly:"Quarterly",yearly:"Yearly"} as Record<string,string>)[v],
-         ({once:"مرة واحدة",weekly:"أسبوعياً",biweekly:"كل أسبوعين",monthly:"شهرياً",quarterly:"كل ثلاثة أشهر",yearly:"سنوياً"} as Record<string,string>)[v])}</option>)}
+         ({once:"Once",weekly:"Weekly",biweekly:"Every two weeks",monthly:"Monthly",quarterly:"Quarterly",yearly:"Yearly"} as Record<string,string>)[v]??v,
+         ({once:"مرة واحدة",weekly:"أسبوعياً",biweekly:"كل أسبوعين",monthly:"شهرياً",quarterly:"كل ثلاثة أشهر",yearly:"سنوياً"} as Record<string,string>)[v]??v)}</option>)}
        </select>
       </label>
       {kind==="income"&&<label className="flex min-h-11 items-center gap-2 text-xs font-bold text-[#5E7764]">
