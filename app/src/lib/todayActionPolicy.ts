@@ -133,7 +133,7 @@ export function buildTodayActionPolicy(input:{
    detailEn:"Continue your saved family plan. Nothing here marks it paid or booked.",
    detailAr:"تابع خطة العيلة المحفوظة. هذه الخطوة لا تؤكد الدفع أو الحجز.",
    actionEn:"Continue this plan",actionAr:"تابع الخطة",route:"/plans",
-   date:plan.date,planId:plan.id,
+   date:plan.date!,planId:plan.id,
    whyEn:"Coming up in your saved plans",whyAr:"قريبة ضمن خطط العيلة"
   });
  }
