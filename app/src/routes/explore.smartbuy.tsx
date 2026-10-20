@@ -165,7 +165,7 @@ export function SmartBuy() {
        </div>
       </section>}
       <ShoppingReferenceDashboard/>
-      <details id="shopping-tools" defaultOpen={!!giftPlan} className="group mt-6 rounded-[1.6rem] border border-[#E2E8E1] bg-white p-4 sm:p-5">
+      <details id="shopping-tools" open={giftPlan?true:undefined} className="group mt-6 rounded-[1.6rem] border border-[#E2E8E1] bg-white p-4 sm:p-5">
        <summary className="min-h-12 cursor-pointer text-base font-bold text-brand">
         {ar?"أدوات إضافية: مقارنة الأسعار المحفوظة وسجل الرغبات":"More tools: saved price comparisons and wishlist price history"}
        </summary>
