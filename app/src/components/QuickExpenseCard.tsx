@@ -15,7 +15,7 @@ export function saveQuickExpense(money:MoneyState,draft:QuickExpenseDraft,day:st
  if(money.demo||!draft.id||!/^\w[\w-]{4,90}$/.test(draft.id)||
     !Number.isFinite(amount)||amount<=0||amount>100000||
     Math.abs(amount*100-Math.round(amount*100))>0.000001||
-    !money.categories.some(c=>c.id===draft.categoryId)||
+    !(draft.categoryId==="uncategorized"||money.categories.some(c=>c.id===draft.categoryId))||
     !/^\d{4}-\d{2}-\d{2}$/.test(day)||
     draft.note.length>160)return money;
  if(money.expenses.some(e=>e.id===draft.id))return money;
@@ -23,7 +23,7 @@ export function saveQuickExpense(money:MoneyState,draft:QuickExpenseDraft,day:st
   id:draft.id,date:day,categoryId:draft.categoryId,
   amount:Math.round(amount*100)/100,
   note:draft.note.trim().slice(0,160),shared:false,status:"paid"
- },...money.expenses]};
+ },...money.expenses],...(money.categories.length===0?{financialInputsPartial:true}:{})};
 }
 
 /** Three fields at most; only genuine entered numbers can become Money expenses. */
@@ -38,7 +38,7 @@ export function QuickExpenseCard({onClose}:{onClose:()=>void}){
  const saved=money.expenses.some(e=>e.id===id);
  // Only a genuinely recorded category may be preselected; never guess from demo data.
  const recentCategory=!money.demo?money.expenses.find(e=>e.status!=="planned"&&money.categories.some(c=>c.id===e.categoryId))?.categoryId:"";
- const selectedCategoryId=categoryId||(recentCategory??"");
+ const selectedCategoryId=categoryId||(recentCategory??"")||(money.categories.length===0?"uncategorized":"");
  const record=(e:FormEvent)=>{
   e.preventDefault();
   if(!ready||saved)return;
@@ -73,16 +73,11 @@ export function QuickExpenseCard({onClose}:{onClose:()=>void}){
     {ar?"ابدأ بميزانيتي":"Set up My Money"} →
    </Link>
   </div>:
-  money.categories.length===0?<div className="mt-4 space-y-2 rounded-xl bg-white p-4 text-sm">
-   <p>{ar?"أضف فئة للمصاريف في المالية أولاً.":"Add an expense category in Money first."}</p>
-   <Link to="/money" className="inline-flex min-h-11 items-center font-semibold text-brand underline">
-    {ar?"إدارة المالية":"Go to Money"} →
-   </Link>
-  </div>:saved?<div role="status" className="mt-4 rounded-xl bg-white p-4">
+  saved?<div role="status" className="mt-4 rounded-xl bg-white p-4">
    <div className="flex items-center gap-2 text-brand"><CheckCircle2 className="size-5"/><strong>
     {ar?"تم تسجيل المصروف مرة واحدة":"Expense recorded once"}
    </strong></div>
-   <p className="mt-2 text-sm">{fmtJOD(Number(amount))} · {tr(money.categories.find(c=>c.id===selectedCategoryId)?.name??"")}</p>
+   <p className="mt-2 text-sm">{fmtJOD(Number(amount))} · {selectedCategoryId==="uncategorized"?(ar?"بدون تصنيف بعد":"Uncategorized for now"):tr(money.categories.find(c=>c.id===selectedCategoryId)?.name??"")}</p>
    <div className="mt-3 flex flex-wrap gap-3">
     <Button onClick={()=>{setId(uid());setAmount("");setNote("");setError("");}}>
      {ar?"مصروف جديد":"Add another"}
@@ -101,8 +96,10 @@ export function QuickExpenseCard({onClose}:{onClose:()=>void}){
     <select required aria-label={ar?"فئة المصروف":"Category"} value={selectedCategoryId} onChange={e=>setCategoryId(e.target.value)}
      className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm">
      <option value="">{ar?"اختر الفئة":"Choose category"}</option>
+     <option value="uncategorized">{ar?"مش متأكد بعد (بدون تصنيف)":"Not sure yet (uncategorized)"}</option>
      {money.categories.map(cat=><option key={cat.id} value={cat.id}>{tr(cat.name)}</option>)}
     </select>
+    {money.categories.length===0&&<span className="mt-1 block text-xs text-muted-foreground">{ar?"ما رح نخترع ميزانية أو فئة. فيك تصنّف المصروف لاحقاً.":"No budget or category will be invented. Classify this purchase later if you wish."}</span>}
     {recentCategory&&<span className="mt-1 block text-[11px] text-muted-foreground">{ar?"الفئة الأخيرة محدّدة، تأكد أنها مناسبة.":"Last-used category selected. Please confirm it fits."}</span>}
    </label>
    <label className="block text-sm font-medium sm:col-span-2">{ar?"ملاحظة (اختياري)":"Note (optional)"}
