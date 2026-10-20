@@ -1,63 +1,73 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from "vitest";
-import {cleanup,render,screen,fireEvent} from "@testing-library/react";
+import {cleanup,render,screen,fireEvent,waitFor} from "@testing-library/react";
 import type {AnchorHTMLAttributes,ReactNode} from "react";
 import {I18nProvider} from "./i18n";
 import {AdventureFamilyHome} from "@/components/AdventureFamilyHome";
-
+import {emptyRealMoney} from "./moneyOverview";
+import {dateKey,shiftDays} from "./familyCalendar";
+import type {FamilyPlan} from "./familyPlans";
 vi.mock("@tanstack/react-router",()=>({
  useNavigate:()=>vi.fn(),
  Link:({to,children,...props}:{to:string;children?:ReactNode}&AnchorHTMLAttributes<HTMLAnchorElement>)=>
   <a href={to} {...props}>{children}</a>
 }));
-beforeEach(()=>window.localStorage.clear());
-afterEach(()=>{cleanup();vi.restoreAllMocks();window.localStorage.clear()});
-const renderWorld=()=>render(<I18nProvider><AdventureFamilyHome/></I18nProvider>);
-describe("The Dabberna family adventure world",()=>{
- it("keeps the entire family portrait in its own mobile area below the greeting",()=>{
-  renderWorld();
-  const hero=screen.getByRole("region",{name:"Welcome to your family adventure"});
-  const greeting=screen.getByTestId("adventure-family-greeting");
-  const portraits=screen.getByTestId("adventure-family-portrait-area");
-  const image=screen.getByRole("img",{name:"Cartoon family with two parents and children"});
-  expect(hero).toHaveClass("adventure-family-hero");
-  expect(greeting.parentElement).toBe(hero);
-  expect(portraits.parentElement).toBe(hero);
-  expect(greeting).toHaveClass("adventure-family-hero__greeting");
-  expect(portraits).toHaveClass("adventure-family-hero__art");
-  expect(portraits).toContainElement(image);
-  expect(greeting).not.toContainElement(image);
-  expect(greeting.compareDocumentPosition(portraits)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  expect(screen.getByText("How can our money care for our family?")).toBeInTheDocument();
-  expect(screen.getByText("Understand, protect and prepare—so we can live well together.")).toBeInTheDocument();
+beforeEach(()=>localStorage.clear());
+afterEach(()=>{cleanup();vi.restoreAllMocks();localStorage.clear()});
+const put=(key:string,value:unknown)=>localStorage.setItem("wafferli.v13."+key,JSON.stringify(value));
+const draw=()=>render(<I18nProvider><AdventureFamilyHome/></I18nProvider>);
+describe("Calm contextual Today redesign",()=>{
+ it("renders the family artwork and exactly one family briefing, never the four money focus modes",async()=>{
+  draw();
+  expect(screen.getByRole("img",{name:"Illustrated family together"})).toHaveAttribute("src",expect.stringContaining("landing-family-characters.avif"));
+  expect(screen.getByRole("region",{name:"Family briefing"})).toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Open my private weekly money story"})).not.toBeInTheDocument();
+  expect(screen.queryByText("Understand, protect and prepare—so we can live well together.")).not.toBeInTheDocument();
+  expect(screen.queryByText("More family options (optional)")).not.toBeInTheDocument();
+  expect(screen.getByRole("region",{name:"Quick family actions"})).toBeInTheDocument();
+  expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("••••");
  });
- it("opens the three parent questions and retains calendar and advisor links",()=>{
-  renderWorld();
-  expect(screen.getByRole("heading",{name:/Dabberna/})).toBeInTheDocument();
-  expect(screen.getByRole("region",{name:"Welcome to your family adventure"})).toBeInTheDocument();
-  for(const [name,route] of [
-   ["Find something to enjoy","/explore/weekend"],
-   ["Choose what to buy","/explore/smartbuy"],
-   ["Prepare a family moment","/calendar"]
-  ] as const)expect(screen.getByRole("link",{name:new RegExp(name)})).toHaveAttribute("href",route);
-  expect(screen.queryByRole("link",{name:"Ask Dabberna"})).not.toBeInTheDocument();
-  expect(screen.getByRole("img",{name:"Cartoon family with two parents and children"})).toHaveAttribute("src",expect.stringContaining("landing-family-characters.avif"));
-  expect(screen.queryByText("1,200 JOD")).not.toBeInTheDocument();
-  expect(screen.getByRole("region",{name:"Your family\u0027s money story"})).toBeInTheDocument();
-  expect(screen.queryByText("FAMILY ACTIVITY IDEAS")).not.toBeInTheDocument();
+ it("never presents invented sample currency or urgency without real saved records",async()=>{
+  draw();
+  await waitFor(()=>expect(screen.getByRole("region",{name:"No urgent next action"})).toBeInTheDocument());
+  expect(screen.queryByTestId("today-one-action")).not.toBeInTheDocument();
+  expect(screen.queryByText("Sophia's birthday")).not.toBeInTheDocument();
+  expect(screen.queryByText("70 JOD")).not.toBeInTheDocument();
+  expect(screen.getByRole("region",{name:"Money at a glance"})).not.toHaveTextContent("1,200 JOD");
+  expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("Only sample money is saved");
  });
- it("keeps the single money story private by default without another summary or next-step card",()=>{
-  localStorage.setItem("wafferli.v13.money",JSON.stringify({
-   demo:false,income:1700,incomeKnown:true,savingsPct:0,
-   categories:[{id:"groc",name:"Sensitive household category",type:"variable",planned:280,priority:"essential"}],
-   expenses:[]
-  }));
-  renderWorld();
-  expect(screen.queryByTestId("family-money-journey-details")).not.toBeInTheDocument();
-  expect(screen.queryByText(/Your entered monthly plan/)).not.toBeInTheDocument();
-  expect(screen.queryByText(/Something worth preparing for/)).not.toBeInTheDocument();
-  expect(screen.queryByText(/One helpful next step/)).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:/Open my private weekly money story/}));
-  expect(screen.getByTestId("family-money-journey-details")).toBeInTheDocument();
-
+ it("reuses the exact birthday gift plan with one click and only reveals private amounts on request",async()=>{
+  const date=dateKey(shiftDays(new Date(),6));
+  const sourceRef="occasion:bday@"+date.slice(0,4);
+  const plan:FamilyPlan={id:"plan1",title:"Family birthday",kind:"occasion",status:"planning",
+   createdAt:"2026-10-01T10:00:00.000Z",updatedAt:"2026-10-01T10:00:00.000Z",
+   date,sourceRef,occasionPreparation:{gift:{description:"Science kit",amountJod:70,dueDate:date},
+    celebration:{amountJod:0,dueDate:date},extras:{amountJod:0,dueDate:date}}};
+  put("money",emptyRealMoney());
+  put("familyCalendar",[{id:"bday",title:"Birthday from calendar",kind:"birthday",date,annual:false}]);
+  put("familyPlans",[plan]);
+  draw();
+  const action=await screen.findByTestId("today-one-action");
+  expect(action).toHaveTextContent("Birthday from calendar");
+  expect(action).toHaveTextContent("Planned gift: Hidden");
+  const continueLink=screen.getByRole("link",{name:/Compare gift options/});
+  expect(continueLink).toHaveAttribute("href","/explore/smartbuy");
+  fireEvent.click(continueLink);
+  expect(JSON.parse(localStorage.getItem("wafferli.v13.activeFamilyPlanId")??"null")).toBe("plan1");
+  expect(localStorage.getItem("wafferli.v13.money")).toContain('"expenses":[]');
+  fireEvent.click(screen.getByRole("button",{name:"Show private amounts"}));
+  expect(action).toHaveTextContent("70 JOD");
+  expect(screen.getByRole("button",{name:"Hide private amounts"})).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Hide private amounts"}));
+  expect(action).toHaveTextContent("Planned gift: Hidden");
+ });
+ it("presents essential shortfalls as the main task without exposing money amounts",async()=>{
+  const money={...emptyRealMoney(),income:400,incomeKnown:true,categories:[
+   {id:"rent",name:"Sensitive essential",type:"fixed" as const,planned:800,priority:"essential" as const}]};
+  put("money",money);
+  draw();
+  const action=await screen.findByTestId("today-one-action");
+  expect(action).toHaveTextContent("Review your family's money picture");
+  expect(screen.getByRole("link",{name:/Review essentials and options/})).toHaveAttribute("href","/money");
+  expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("••••");
  });
 });
