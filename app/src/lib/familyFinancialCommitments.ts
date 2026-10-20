@@ -2,7 +2,8 @@ import {roundJod,type Commitment} from "./cashflow";
 import {dateKey,parseCalendarDate} from "./familyCalendar";
 import type {FamilyPlan} from "./familyPlans";
 import {occasionKinds,type OccasionCostKind,occasionFunding} from "./occasionPreparation";
-import type {Expense,MoneyState} from "./money";
+import type {MoneyState} from "./money";
+import {recordConfirmedExpense} from "./confirmedExpense";
 
 /** The one source of truth is FamilyPlan. Derived family commitments NEVER get
  * copied into money.commitments, savingsGoals or planned Money expenses.
@@ -70,22 +71,19 @@ export function familyFinancialSummary(plans:readonly FamilyPlan[],money:MoneySt
   monthlyPreparationJod:roundJod(monthly),
   nextDeadline:pending.map(x=>x.dueDate).sort()[0]??null};
 }
-/** A parent must explicitly confirm an actual payment and choose a valid
- * category. Actual expenses are exactly once; cash isn't auto-deducted.
- */
+/** Parent confirms an actual payment once. No cash deduction unless separately
+ * chosen; uncategorized payments are allowed without inventing a budget. */
 export function recordFamilyCommitmentPayment(
  money:MoneyState,entry:FamilyFinancialCommitment,actual:number,categoryId:string,
  now=new Date()
 ):MoneyState|null{
- if(money.demo||!entry||entry.paid||!cents(actual)||actual<=0||
-  !money.categories.some(c=>c.id===categoryId))return null;
- if(money.expenses.some(e=>e.sourcePlanId===entry.planId&&e.sourceOccasionCost===entry.kind))return null;
- const expense:Expense={
+ if(money.demo||!entry||entry.paid||!cents(actual)||actual<=0)return null;
+ const next=recordConfirmedExpense(money,{
   id:"family-occasion-paid:"+entry.planId+":"+entry.kind,
-  date:dateKey(now),categoryId,amount:roundJod(actual),plannedAmount:entry.amountJod,
-  sourcePlanId:entry.planId,sourceOccasionCost:entry.kind,
-  note:entry.planTitle+" · "+entry.label,shared:true,status:"paid"
- };
- if(money.expenses.some(e=>e.id===expense.id))return null;
- return {...money,expenses:[expense,...money.expenses]};
+  date:dateKey(now),categoryId:categoryId||"uncategorized",amount:actual,
+  plannedAmount:entry.amountJod,sourcePlanId:entry.planId,
+  sourceOccasionCost:entry.kind,note:entry.planTitle+" · "+entry.label,
+  shared:true
+ },"untracked");
+ return next===money?null:next;
 }
