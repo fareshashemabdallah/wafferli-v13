@@ -11,6 +11,7 @@ import {ShoppingJourneyStrip} from "@/components/ShoppingJourneyStrip";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import {compareManuallyEnteredPrices} from "@/lib/clearShoppingResult";
 import {dateKey} from "@/lib/familyCalendar";
+import {prefillGiftComparison,startNewGiftComparison} from "@/lib/giftComparisonHandoff";
 import {familyFinancialCommitments,recordFamilyCommitmentPayment} from "@/lib/familyFinancialCommitments";
 import {matchesGiftProduct,selectOccasionGiftSeller} from "@/lib/occasionGiftPurchase";
 import {sampleMoney,type MoneyState} from "@/lib/money";
@@ -39,14 +40,14 @@ type Alt = { id: string; store: string; price: string; extra: string; verified: 
 export function SmartBuy() {
   const { tr,lang } = useI18n();
   const ar=lang==="ar";
-  const [plans,setPlans] = useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+  const [plans,setPlans,plansReady] = useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
   const [activePlan] = useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
   const selectedPlan=plans.find(p=>p.id===activePlan&&p.kind==="purchase"&&p.status!=="completed");
   const giftPlan=plans.find(p=>p.id===activePlan&&p.kind==="occasion"&&p.occasionPreparation);
   const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
   const [giftPaidAmount,setGiftPaidAmount]=useState("");
   const [giftFeedback,setGiftFeedback]=useState("");
-  const [s, setS] = useLocalState("smartbuy", {
+  const [s, setS,comparisonReady] = useLocalState("smartbuy", {
     product: "",
     budget: "",
     alts: [] as Alt[],
@@ -70,11 +71,19 @@ export function SmartBuy() {
   useEffect(()=>{
    if(chosenGift)setGiftPaidAmount(old=>old||String(chosenGift.totalJod));
   },[chosenGift?.totalJod]);
-  const startGiftComparison=()=>{
-   if(!giftName||s.product.trim()||s.alts.length)return;
-   setS(prev=>({...prev,product:giftName,
-    budget:prev.budget||String(giftPlan?.occasionPreparation?.gift.amountJod??"")}));
-   setGiftFeedback("");
+  // Pre-fill ONLY when the parent's local comparison is completely empty.
+  // Keep prior seller research and all historical family/finance data intact.
+  useEffect(()=>{
+   if(!comparisonReady||!plansReady||!giftName)return;
+   setS(prev=>prefillGiftComparison(prev,giftName,
+    giftPlan?.occasionPreparation?.gift.amountJod??0));
+  },[comparisonReady,plansReady,giftName,giftPlan?.id,setS]);
+  const switchToGift=()=>{
+   if(!giftPlan||!giftName||!window.confirm(ar?
+    "هل تريد استبدال المقارنة الحالية بمنتج هذه الهدية؟ لن تتغير الخطط أو المبالغ المدفوعة أو قائمة المشتريات.":
+    "Replace the current comparison with this birthday gift? Existing family plans, paid expenses and wishlist will not change."))return;
+   setS(prev=>startNewGiftComparison(prev,giftName,giftPlan.occasionPreparation!.gift.amountJod));
+   setGiftFeedback(ar?"بدأت مقارنة هذه الهدية. لم يتغير أي مصروف.":"Gift comparison ready. No expense was changed.");
   };
   const chooseGiftQuote=(quote:Alt&{total:number})=>{
    if(!giftPlan||!matchingGift)return;
@@ -114,7 +123,7 @@ export function SmartBuy() {
 
   return (
     <ShoppingExperienceShell>
-      <ShoppingJourneyStrip current="compare"/>
+      {!giftPlan&&<ShoppingJourneyStrip current="compare"/>}
       {giftPlan&&<section className="mb-4 rounded-2xl border border-[#E4CFDD] bg-[#FFF8FC] p-4" aria-label={ar?"رحلة شراء هدية المناسبة":"Occasion gift purchase journey"}>
        <p className="text-xs font-black uppercase tracking-wide text-[#9D4F78]">{ar?"متابعة هدية من خطط العيلة":"CONTINUE FROM FAMILY PLANS"}</p>
        <h2 className="mt-1 text-lg font-extrabold">{giftPlan.title}</h2>
@@ -122,14 +131,16 @@ export function SmartBuy() {
        <p className="mt-1 text-xs text-muted-foreground">{ar?
         "سقف الهدية المخطط لا يعني أن الشراء تم. هذه المقارنة تعتمد على أسعارك أنت.":
         "A planned gift cost is not a purchase. Seller quotes below are your own entries, not verified market prices."}</p>
-       {!!giftName&&!s.product.trim()&&s.alts.length===0&&<button type="button" onClick={startGiftComparison}
-        className="mt-3 min-h-11 rounded-xl bg-[#E8F4EB] px-4 text-xs font-bold text-brand">
-        {ar?"استخدم وصف الهدية في المقارنة":"Use saved gift name for comparison"}
-       </button>}
-       {!!giftName&&!matchingGift&&(s.product.trim()||s.alts.length>0)&&<p className="mt-2 rounded-xl border border-[#E4DABE] bg-[#FFF9E8] p-3 text-xs">
-        {ar?"المقارنة الحالية تخص منتجاً آخر. لن نربط أسعارها بهذه الهدية. بعد إنهائها يمكنك بدء مقارنة جديدة بشكل صريح.":
-        "Your current comparison belongs to another product. Its quotes will not be linked to this gift. Finish it before deliberately starting another comparison."}
-       </p>}
+
+       {!!giftName&&!matchingGift&&(s.product.trim()||s.alts.length>0)&&<div className="mt-2 rounded-xl border border-[#E4DABE] bg-[#FFF9E8] p-3">
+        <p className="text-xs">{ar?
+         "المقارنة الحالية تخص منتجاً آخر. لن نربط أسعارها بهذه الهدية أو نمسحها تلقائياً.":
+         "Your saved comparison is for another product. We will not attach its quotes to this gift or erase it automatically."}</p>
+        <button type="button" onClick={switchToGift}
+         className="mt-2 min-h-11 rounded-xl border border-[#B7D9C2] bg-white px-3 text-xs font-bold text-brand">
+         {ar?"ابدأ مقارنة هذه الهدية بدلاً منها":"Switch comparison to this gift"}
+        </button>
+       </div>}
        {chosenGift&&<div className="mt-3 rounded-xl bg-white p-3 text-sm">
         <p className="font-semibold">{ar?"الخيار المحفوظ: ":"Saved seller choice: "}{chosenGift.store} · {fmtJOD(chosenGift.totalJod)}</p>
         <p className="mt-1 text-xs text-muted-foreground">{chosenGift.checkedByParent?
@@ -164,10 +175,10 @@ export function SmartBuy() {
         <Link to="/money" className="text-brand underline">{ar?"افتح المالية":"Open Money"}</Link>
        </div>
       </section>}
-      <ShoppingReferenceDashboard/>
+      {!giftPlan&&<ShoppingReferenceDashboard/>}
       <details id="shopping-tools" open={giftPlan?true:undefined} className="group mt-6 rounded-[1.6rem] border border-[#E2E8E1] bg-white p-4 sm:p-5">
        <summary className="min-h-12 cursor-pointer text-base font-bold text-brand">
-        {ar?"أدوات إضافية: مقارنة الأسعار المحفوظة وسجل الرغبات":"More tools: saved price comparisons and wishlist price history"}
+        {giftPlan?(ar?"قارن أسعار البائعين لهذه الهدية":"Compare seller prices for this gift"):(ar?"أدوات إضافية: مقارنة الأسعار المحفوظة وسجل الرغبات":"More tools: saved price comparisons and wishlist price history")}
        </summary>
        <div className="mt-4 border-t border-[#E2E8E1] pt-4">
        <h2 className="mb-3 text-xl font-semibold">{ar?"قارن أسعار متجرين":"Which store costs less?"}</h2>
@@ -326,6 +337,12 @@ export function SmartBuy() {
       </details>
        </div>
       </details>
+      {giftPlan&&<details className="mt-4 rounded-2xl border border-[#E0E8DE] bg-white p-4">
+       <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
+        {ar?"تسوق آخر وقوائم رغبات إضافية (اختياري)":"Other shopping and wishlists (optional)"}
+       </summary>
+       <ShoppingReferenceDashboard/>
+      </details>}
     </ShoppingExperienceShell>
   );
 }
