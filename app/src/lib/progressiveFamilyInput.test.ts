@@ -34,6 +34,15 @@ describe("progressive one-fact input and one source of truth",()=>{
   expect(income.incomeSources).toBeUndefined();
   expect(computeMoney(income,now)).toMatchObject({monthlyIncome:1400,planned:850});
  });
+ it("keeps the first estimate instead of silently overwriting it on a second quick entry",()=>{
+  const first=applyProgressiveMoneyFacts(sampleMoney(),{essential:650});
+  const editAttempt=applyProgressiveMoneyFacts(first,{essential:0});
+  expect(editAttempt).toBe(first);
+  const second=applyProgressiveMoneyFacts(first,{other:240});
+  expect(second.categories).toHaveLength(2);
+  expect(second.categories.find(x=>x.id==="household-essential")?.planned).toBe(650);
+  expect(second.categories.find(x=>x.id==="household-flexible")?.planned).toBe(240);
+ });
  it("keeps unknown income distinct from explicitly confirmed zero",()=>{
   const empty=emptyRealMoney();
   expect(applyProgressiveMoneyFacts(empty,{income:0})).toBe(empty);
