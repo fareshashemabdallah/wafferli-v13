@@ -20,6 +20,12 @@ export function canSaveProgressiveFacts(before:MoneyState,input:ProgressiveMoney
  if(input.income!==undefined&&!before.demo&&(
   (before.incomeSources?.length??0)>0 || before.incomeKnown===true || before.income>0
  ))return false;
+ // The quick-entry path only adds a missing estimate. An existing estimate
+ // belongs to the canonical category editor: never silently overwrite it.
+ if(!before.demo&&(
+  input.essential!==undefined&&before.categories.some(c=>c.id==="household-essential") ||
+  input.other!==undefined&&before.categories.some(c=>c.id==="household-flexible")
+ ))return false;
  if((input.essential!==undefined||input.other!==undefined)&&!before.demo&&before.categories.some(
   c=>c.id!=="household-essential"&&c.id!=="household-flexible"))return false;
  return true;
