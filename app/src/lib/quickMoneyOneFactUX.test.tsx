@@ -38,7 +38,7 @@ describe("busy-parent one-fact financial entry",()=>{
    cashOnHand:300,expenses:[{id:"paid",date:"2026-10-19",categoryId:"groceries",amount:55,shared:true}],
    categories:[{id:"household-essential",name:"Essential household costs (estimate)",
     planned:670,type:"fixed" as const,priority:"essential" as const}],
-   commitments:[{id:"rent",name:"Rent",amount:300,frequency:"monthly" as const,nextDate:"2026-11-01",shared:true}]
+   commitments:[{id:"rent",name:"Rent",amount:300,frequency:"monthly" as const,dueDate:"2026-11-01"}]
   };
   const get=mount(original);
   expect(screen.getAllByRole("spinbutton")).toHaveLength(1);
