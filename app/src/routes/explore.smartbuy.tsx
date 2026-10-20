@@ -1,7 +1,7 @@
 import { useI18n } from "@/lib/i18n";
 import { createFileRoute,Link } from "@tanstack/react-router";
 import { CheckCircle2, Plus, RotateCcw, Trash2 } from "lucide-react";
-import {useState} from "react";
+import {useEffect,useState} from "react";
 import { Notice } from "@/components/AppShell";
 import { ShoppingExperienceShell } from "@/components/ShoppingExperienceShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
@@ -11,11 +11,14 @@ import {ShoppingJourneyStrip} from "@/components/ShoppingJourneyStrip";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import {compareManuallyEnteredPrices} from "@/lib/clearShoppingResult";
 import {dateKey} from "@/lib/familyCalendar";
+import {familyFinancialCommitments,recordFamilyCommitmentPayment} from "@/lib/familyFinancialCommitments";
+import {matchesGiftProduct,selectOccasionGiftSeller} from "@/lib/occasionGiftPurchase";
+import {sampleMoney,type MoneyState} from "@/lib/money";
 import {isSampleBasketEntry,type BasketEntry} from "@/lib/basketRecording";
 import { Field, inputCls } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fmtJOD, uid, useLocalState } from "@/lib/storage";
+import { fmtJOD, uid, useLocalState,readLocal,writeLocal } from "@/lib/storage";
 import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,setPlanChoice,type FamilyPlan} from "@/lib/familyPlans";
 import {toast} from "sonner";
 
@@ -39,6 +42,10 @@ export function SmartBuy() {
   const [plans,setPlans] = useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
   const [activePlan] = useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
   const selectedPlan=plans.find(p=>p.id===activePlan&&p.kind==="purchase"&&p.status!=="completed");
+  const giftPlan=plans.find(p=>p.id===activePlan&&p.kind==="occasion"&&p.occasionPreparation);
+  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
+  const [giftPaidAmount,setGiftPaidAmount]=useState("");
+  const [giftFeedback,setGiftFeedback]=useState("");
   const [s, setS] = useLocalState("smartbuy", {
     product: "",
     budget: "",
@@ -54,12 +61,111 @@ export function SmartBuy() {
   const valid = rows.filter((r) => r.store.trim()&&Number(r.price)>0&&Number.isFinite(r.total)&&r.total>=0);
   const lowestCost = comparison.ready?valid.find(r=>r.id===comparison.cheaper?.id)??null:null;
   const setAlt = (id: string, p: Partial<Alt>) => setS({ ...s, alts: s.alts.map((a) => (a.id === id ? { ...a, ...p } : a)) });
+  const giftName=giftPlan?.occasionPreparation?.gift.description.trim()??"";
+  const matchingGift=!!giftPlan&&matchesGiftProduct(giftName,s.product);
+  const chosenGift=giftPlan?.occasionPreparation?.gift.selectedQuote;
+  const giftEntry=giftPlan?familyFinancialCommitments([giftPlan],money).find(x=>x.kind==="gift"):undefined;
+  const giftAlreadyPaid=!!giftEntry?.paid||
+   !!giftPlan&&money.expenses.some(e=>e.sourcePlanId===giftPlan.id&&e.sourceOccasionCost==="gift"&&e.status!=="planned");
+  useEffect(()=>{
+   if(chosenGift)setGiftPaidAmount(old=>old||String(chosenGift.totalJod));
+  },[chosenGift?.totalJod]);
+  const startGiftComparison=()=>{
+   if(!giftName||s.product.trim()||s.alts.length)return;
+   setS(prev=>({...prev,product:giftName,
+    budget:prev.budget||String(giftPlan?.occasionPreparation?.gift.amountJod??"")}));
+   setGiftFeedback("");
+  };
+  const chooseGiftQuote=(quote:Alt&{total:number})=>{
+   if(!giftPlan||!matchingGift)return;
+   const next=selectOccasionGiftSeller(giftPlan,s.product,quote.store,quote.total,
+    quote.verified,quote.checkedDate);
+   if(next===giftPlan){
+    setGiftFeedback(ar?"راجع سعر البائع والمنتج وتاريخ التحقق.":"Check the gift name, price and date of your seller quote.");
+    return;
+   }
+   setPlans(old=>old.map(p=>p.id===giftPlan.id?selectOccasionGiftSeller(p,s.product,
+    quote.store,quote.total,quote.verified,quote.checkedDate):p));
+   setGiftPaidAmount(String(quote.total));
+   setGiftFeedback(ar?"تم حفظ خيار البائع في خطة المناسبة، من دون تسجيل دفعة.":"Seller choice saved in this occasion plan. Nothing was paid or recorded.");
+  };
+  const confirmGiftPaid=()=>{
+   if(!giftPlan||!giftEntry||!moneyReady)return;
+   const latest=readLocal<MoneyState>("money",money);
+   const latestPlan=readLocal<FamilyPlan[]>(FAMILY_PLANS_KEY,plans).find(p=>p.id===giftPlan.id);
+   const latestEntry=latestPlan?familyFinancialCommitments([latestPlan],latest).find(x=>x.kind==="gift"):undefined;
+   if(!latestEntry||latestEntry.paid||latest.demo){
+    setGiftFeedback(ar?"لا يمكن تسجيل الدفع؛ راجع المالية أو الدفعات السابقة.":"Cannot record payment. Review real Money and any previous payment.");return;
+   }
+   const actual=Number(giftPaidAmount);
+   if(!giftPaidAmount.trim()||!Number.isFinite(actual)||actual<=0){
+    setGiftFeedback(ar?"أدخل مبلغاً مدفوعاً صحيحاً.":"Enter the actual amount you paid.");return;
+   }
+   if(!window.confirm(ar?
+    "هل دفعت فعلاً لهذا المنتج؟ سيتم تسجيل مصروف واحد دون خصم السيولة المدخلة يدوياً.":
+    "Did you actually pay for this gift? One expense will be recorded in Money. Your manually entered cash balance will not be deducted."))return;
+   const next=recordFamilyCommitmentPayment(latest,latestEntry,actual,"");
+   if(!next||!writeLocal("money",next)){
+    setGiftFeedback(ar?"لم يُحفظ المصروف؛ لم يتم أي خصم.":"Payment was not saved; no cash balance was deducted.");return;
+   }
+   setGiftFeedback(ar?"تم تسجيل مصروف الهدية مرة واحدة، وتحديث المالية.":"Gift payment recorded once. Your Money outlook is updated.");
+  };
+
 
   return (
     <ShoppingExperienceShell>
       <ShoppingJourneyStrip current="compare"/>
+      {giftPlan&&<section className="mb-4 rounded-2xl border border-[#E4CFDD] bg-[#FFF8FC] p-4" aria-label={ar?"رحلة شراء هدية المناسبة":"Occasion gift purchase journey"}>
+       <p className="text-xs font-black uppercase tracking-wide text-[#9D4F78]">{ar?"متابعة هدية من خطط العيلة":"CONTINUE FROM FAMILY PLANS"}</p>
+       <h2 className="mt-1 text-lg font-extrabold">{giftPlan.title}</h2>
+       <p className="mt-1 text-sm">{ar?"الهدية: ":"Gift: "}<strong>{giftName|| (ar?"لم تُحدّد بعد":"Not yet described")}</strong></p>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?
+        "سقف الهدية المخطط لا يعني أن الشراء تم. هذه المقارنة تعتمد على أسعارك أنت.":
+        "A planned gift cost is not a purchase. Seller quotes below are your own entries, not verified market prices."}</p>
+       {!!giftName&&!s.product.trim()&&s.alts.length===0&&<button type="button" onClick={startGiftComparison}
+        className="mt-3 min-h-11 rounded-xl bg-[#E8F4EB] px-4 text-xs font-bold text-brand">
+        {ar?"استخدم وصف الهدية في المقارنة":"Use saved gift name for comparison"}
+       </button>}
+       {!!giftName&&!matchingGift&&(s.product.trim()||s.alts.length>0)&&<p className="mt-2 rounded-xl border border-[#E4DABE] bg-[#FFF9E8] p-3 text-xs">
+        {ar?"المقارنة الحالية تخص منتجاً آخر. لن نربط أسعارها بهذه الهدية. بعد إنهائها يمكنك بدء مقارنة جديدة بشكل صريح.":
+        "Your current comparison belongs to another product. Its quotes will not be linked to this gift. Finish it before deliberately starting another comparison."}
+       </p>}
+       {chosenGift&&<div className="mt-3 rounded-xl bg-white p-3 text-sm">
+        <p className="font-semibold">{ar?"الخيار المحفوظ: ":"Saved seller choice: "}{chosenGift.store} · {fmtJOD(chosenGift.totalJod)}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{chosenGift.checkedByParent?
+         (ar?"السعر تم التحقق منه بواسطتك، وليس من دبّرنا.":"Price marked as checked by you, not externally verified by Dabberna."):
+         (ar?"السعر مدخل من قبلك ولم يؤكد من المتجر.":"Price entered by you, not confirmed by the seller.")}</p>
+       </div>}
+       {giftAlreadyPaid?<p role="status" className="mt-3 rounded-xl bg-[#E8F5EB] p-3 text-sm font-bold text-[#286F4D]">
+        {ar?"تم تسجيل دفعة هذه الهدية في المالية. لن نكررها.":"This gift payment is already in Money. It cannot be recorded twice."}
+       </p>:!giftEntry?<p className="mt-3 text-xs text-muted-foreground">
+        {ar?"احفظ تكلفة متوقعة أكبر من صفر في خطة المناسبة أولاً.":"Save a positive planned gift amount in the occasion before recording a payment."}
+       </p>:money.demo?<p className="mt-3 text-xs">
+        {ar?"سجلات المالية الحالية تجريبية. ":"Money still contains sample records. "}
+        <Link to="/money" className="font-semibold text-brand underline">{ar?"ابدأ ببياناتي الفعلية":"Start real Money"}</Link>
+       </p>:<div className="mt-3 rounded-xl border border-[#E8DCE5] bg-white p-3">
+        <p className="text-sm font-semibold">{ar?"هل دفعت بالفعل؟":"Have you actually paid?"}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{ar?
+         "السعر المختار مجرد مرجع. أكد المبلغ الذي دفعته فعلياً. لا تُخصم السيولة اليدوية تلقائياً.":
+         "The seller quote is only a reference. Confirm the amount actually paid. Your manually entered cash will not be deducted automatically."}</p>
+        <label className="mt-3 block text-xs font-semibold">{ar?"المبلغ المدفوع فعلياً (دينار)":"Actual paid amount (JOD)"}
+         <input type="number" inputMode="decimal" min="0.01" max="100000" step="0.01"
+          className="mt-1 min-h-11 w-full max-w-48 rounded-xl border bg-white px-3 text-base"
+          value={giftPaidAmount} onChange={e=>setGiftPaidAmount(e.target.value)}/>
+        </label>
+        <button type="button" onClick={confirmGiftPaid} disabled={!giftPaidAmount.trim()}
+         className="mt-3 min-h-11 rounded-xl bg-[#2D7958] px-4 text-xs font-bold text-white disabled:opacity-50">
+         {ar?"تأكيد دفع الهدية وتحديث المالية":"Confirm paid gift and update Money"}
+        </button>
+       </div>}
+       {giftFeedback&&<p role="status" className="mt-2 text-xs font-semibold">{giftFeedback}</p>}
+       <div className="mt-3 flex flex-wrap gap-4 text-xs font-semibold">
+        <Link to="/occasions" className="text-brand underline">{ar?"ارجع لخطة المناسبة":"Return to occasion"}</Link>
+        <Link to="/money" className="text-brand underline">{ar?"افتح المالية":"Open Money"}</Link>
+       </div>
+      </section>}
       <ShoppingReferenceDashboard/>
-      <details id="shopping-tools" className="group mt-6 rounded-[1.6rem] border border-[#E2E8E1] bg-white p-4 sm:p-5">
+      <details id="shopping-tools" open={giftPlan?true:undefined} className="group mt-6 rounded-[1.6rem] border border-[#E2E8E1] bg-white p-4 sm:p-5">
        <summary className="min-h-12 cursor-pointer text-base font-bold text-brand">
         {ar?"أدوات إضافية: مقارنة الأسعار المحفوظة وسجل الرغبات":"More tools: saved price comparisons and wishlist price history"}
        </summary>
@@ -157,6 +263,11 @@ export function SmartBuy() {
                  {ar?evidence.reasonAr:evidence.reasonEn}{evidence.link&&<a href={evidence.link} target="_blank" rel="noopener noreferrer" className="ms-2 underline">{ar?"رابط المصدر":"View source"}</a>}
                 </span>;})()}
             </div>
+            {giftPlan&&matchingGift&&!giftAlreadyPaid&&Number(a.price)>0&&Number.isFinite(a.total)&&a.total>0&&a.store.trim().length>=2&&
+             <button type="button" onClick={()=>chooseGiftQuote(a)}
+              className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#F5E4EF] px-4 text-xs font-bold text-[#8E4774]">
+              {ar?"احفظ هذا العرض لهدية المناسبة":"Save this seller option for the birthday gift"}
+             </button>}
             {selectedPlan&&Number(a.price)>0&&Number.isFinite(a.total)&&a.total>=0&&a.store.trim()&&<div className="mt-3 rounded-xl border border-[#D7E6DA] bg-[#F2F7F0] p-3">
               <p className="text-xs font-medium text-muted-foreground">{ar?"اختيار لخطة: ":"Choose for plan: "}{selectedPlan.title}</p>
               <button type="button" onClick={()=>{

@@ -92,7 +92,7 @@ export function OccasionPlanner(){
    </details>
    <div className="rounded-xl bg-[#F1F7EF] p-3 text-sm">
     <span>{t("Want to compare a price before buying? ","بدك تقارن السعر قبل الشراء؟ ")}</span>
-    <Link to="/explore/smartbuy" className="font-semibold text-brand underline">{t("Compare and choose","قارن واختر")}</Link>
+    <Link to="/explore/smartbuy" onClick={()=>{if(plan)writeLocal(ACTIVE_PLAN_KEY,plan.id);}} className="font-semibold text-brand underline">{t("Compare and choose","قارن واختر")}</Link>
     <p className="mt-1 text-xs text-muted-foreground">{t(
      "A wish, a comparison or a planned gift never deducts cash. Financial advice uses only entered facts.",
      "الرغبة أو المقارنة أو التخطيط لهدية لا تخصم من الرصيد. الإرشاد المالي يعتمد فقط على ما أدخلته.")}</p>

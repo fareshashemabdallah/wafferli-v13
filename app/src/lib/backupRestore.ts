@@ -37,11 +37,28 @@ const url=z.string().max(700).refine(raw=>{
   parsed.hostname.includes(".")&&!parsed.hostname.endsWith(".local")&&
   !/^127\./.test(parsed.hostname);}catch{return false;}
 },"Public HTTPS URL required");
+/** Validate the nested fields we now rely on when restoring occasion plans.
+ * Older backups without preparations or price choices are still supported. */
+const giftSellerChoice=opts({
+ productName:z.string().min(2).max(100),store:z.string().min(2).max(90),
+ totalJod:positiveSmallMoney,checkedByParent:z.boolean(),
+ parentCheckedOn:isoDate.optional()
+});
+const occasionCost=opts({
+ amountJod:smallMoney,dueDate:isoDate,
+ certainty:z.enum(["idea","planned","firm"]).optional()
+});
+const occasionPreparation=opts({
+ gift:occasionCost.extend({description:z.string().max(100),
+  selectedQuote:giftSellerChoice.optional()}),
+ celebration:occasionCost,extras:occasionCost
+});
 const expense=opts({
  id, date:isoDate, categoryId:id, budgetItemId:id.optional(), amount:maxNumber,
  shared:z.boolean(),status:z.enum(["planned","paid"]).optional(),
  note:text.optional(),owner:text.optional(),billId:id.optional(),dueDate:isoDate.optional(),
  cashDeducted:z.boolean().optional(),sourcePlanId:id.optional(),
+ sourceOccasionCost:z.enum(["gift","celebration","extras"]).optional(),
  plannedAmount:maxNumber.optional(),varianceDismissed:z.boolean().optional(),
  allocation:opts({kind:z.enum(["variable","savings"]),categoryId:id.optional(),
   delta:z.number().finite().min(-1_000_000).max(1_000_000),
@@ -149,6 +166,7 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   budgetJod:maxNumber.optional(),actualJod:maxNumber.optional(),
   completedAt:isoTime.optional(),expenseId:id.optional(),
   note:text.optional(),sourceRef:text.optional(),savingsGoalId:id.optional(),
+  occasionPreparation:occasionPreparation.optional(),
   choice:opts({label:text,estimatedJod:maxNumber.optional(),
    source:z.enum(["comparison","outing","occasion","manual"]),verified:z.boolean().optional()}).optional()
  }),1500),

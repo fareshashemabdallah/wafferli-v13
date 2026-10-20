@@ -9,6 +9,7 @@ import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,makeFamilyPlan,type FamilyPlan,type Occ
 import {sampleMoney,type MoneyState} from "@/lib/money";
 import {FAMILY_TASKS_KEY,makeFamilyTask,setTaskComplete,type FamilyTask} from "@/lib/familyTasks";
 import {initialOccasionPreparation,validateOccasionPreparation,occasionFunding,occasionBudgetAdvice,type OccasionCostKind,occasionKinds} from "@/lib/occasionPreparation";
+import {matchesGiftProduct} from "@/lib/occasionGiftPurchase";
 
 const panel="mt-3 rounded-2xl border border-[#EED9E4] bg-[#FFFCFD] p-4 sm:p-5";
 const labels:Record<OccasionCostKind,{en:string;ar:string}>={
@@ -104,13 +105,19 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
   if(!current){setError(t("Plan not found. Refresh and try again.","الخطة غير موجودة. أعد المحاولة."));return;}
   // Preserve a parent-entered spending ceiling. If none exists, the explicit
   // itemized costs establish it, without modifying any Money records.
-  const updated:FamilyPlan={...current,occasionPreparation:next!,
+  // Reuse a parent-chosen seller only while its product still matches this
+  // gift. Editing the gift never leaves an unrelated quote silently attached.
+  const chosenQuote=current.occasionPreparation?.gift.selectedQuote;
+  const prepared:OccasionPreparation={...next!,gift:{...next!.gift,
+   ...(chosenQuote&&matchesGiftProduct(next!.gift.description,chosenQuote.productName)?
+    {selectedQuote:chosenQuote}:{})}};
+  const updated:FamilyPlan={...current,occasionPreparation:prepared,
    ...(current.budgetJod===undefined?{budgetJod:total}:{}),
    updatedAt:new Date().toISOString()};
   if(!writeLocal(FAMILY_PLANS_KEY,allPlans.map(p=>p.id===current.id?updated:p))){
    setError(t("Unable to save in this browser.","تعذّر الحفظ في هذا المتصفح."));return;
   }
-  setJustSavedPrep(next!);
+  setJustSavedPrep(prepared);
   setError("");setSaved(t("Saved to this existing occasion plan. No expense or transfer was recorded.",
    "تم حفظ التكاليف في الخطة الحالية من دون تسجيل مصروف أو تحويل أموال."));
  };
@@ -215,6 +222,22 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
     "سقف الخطة السابق يبقى كما هو. التكاليف تظهر كالتزامات عائلية في المالية دون تسجيل مصروف أو خصم رصيد أو تحويل ادخار.")}</p>
   </form>}
   {saved&&<p role="status" className="mt-2 rounded-lg bg-[#EDF8F0] p-2 text-xs font-semibold text-[#26765A]">{saved}</p>}
+  {prep&&prep.gift.amountJod>0&&<div className="mt-3 rounded-xl border border-[#E5D9E4] bg-white p-3">
+   <p className="text-sm font-bold text-[#9C4679]">{t("Gift shopping — connected to this occasion","تسوق الهدية — مرتبط بهذه المناسبة")}</p>
+   <p className="mt-1 text-xs text-[#697588]">{prep.gift.description?
+    t("Compare prices for: ","قارن أسعار: ")+prep.gift.description:
+    t("Describe the gift above, then save before comparing prices.","اكتب وصف الهدية أعلاه واحفظه قبل مقارنة الأسعار.")}</p>
+   {prep.gift.selectedQuote&&<p className="mt-2 text-xs font-semibold">
+    {t("Chosen seller (parent-entered): ","المتجر المختار (حسب إدخالك): ")}
+    {prep.gift.selectedQuote.store} · {fmtJOD(prep.gift.selectedQuote.totalJod)}
+   </p>}
+   {prep.gift.description.trim().length>=2&&<Link to="/explore/smartbuy"
+    onClick={()=>writeLocal(ACTIVE_PLAN_KEY,plan.id)}
+    className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-[#E8F4EC] px-3 text-xs font-bold text-[#2D7859]">
+    {t("Compare, choose or record this gift","قارن أو اختر أو سجّل هذه الهدية")} →
+   </Link>}
+  </div>}
+
   {prep&&funding&&advice&&<div className="mt-4 space-y-3">
    <div className="rounded-2xl bg-[#F4F8F3] p-4">
     <div className="flex flex-wrap items-center justify-between gap-3">
