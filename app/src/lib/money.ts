@@ -19,6 +19,8 @@ export type MoneyState = {
   /** Declared priorities for family life, not automatically deducted or shared. */
   protectedLifestyle?:("children"|"education"|"family-time"|"health"|"travel"|"buffer")[];
   incomeSources?:IncomeSource[]; commitments?:Commitment[];
+  /** Optional forecast cadence for existing monthly category envelopes. No extra expenses. */
+  spendingPaces?:import("./familyMoneyRhythm").SpendingPace[];
   /** Manual actual cash available now, intentionally not inferred from historic expense entries. */
   cashOnHand?:number|null; cashReserve?:number;
   /** Date on which the user last refreshed the manually entered cash balance. */

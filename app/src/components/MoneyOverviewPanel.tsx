@@ -15,17 +15,18 @@ import {AdventureMoneyJourney} from "@/components/AdventureMoneyJourney";
 import {WorldScene} from "@/components/AdventureArtwork";
 import {HouseholdBudgetBuilder} from "@/components/HouseholdBudgetBuilder";
 import {sampleMembers,type Member} from "@/lib/money";
-import {useState,type ReactNode} from "react";
+import {useEffect,useState,type ReactNode} from "react";
 import {needsStarterBudget} from "@/lib/starterBudget";
 import {monthCarryover,nextMonthKey} from "@/lib/monthlyCarryover";
 import {useI18n} from "@/lib/i18n";
 
 type Section="overview"|"spending"|"planning";
-type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(s:Section)=>void;onManageCategories?:()=>void;budgetManagement?:ReactNode;householdPanel?:ReactNode;onEditIncome?:()=>void};
-export function MoneyOverviewPanel({state,setState,goTo,onManageCategories,budgetManagement,householdPanel,onEditIncome}:Props){
+type Props={state:MoneyState;setState:(fn:(s:MoneyState)=>MoneyState)=>void;goTo:(s:Section)=>void;onManageCategories?:()=>void;budgetManagement?:ReactNode;householdPanel?:ReactNode;onEditIncome?:()=>void;forceBudgetOpen?:number};
+export function MoneyOverviewPanel({state,setState,goTo,onManageCategories,budgetManagement,householdPanel,onEditIncome,forceBudgetOpen=0}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
  const [view,setView]=useState<"home"|"budget"|"insights">("home");
  const [focusedCategory,setFocusedCategory]=useState<string|null>(null);
+ useEffect(()=>{if(forceBudgetOpen>0){setView("budget");setFocusedCategory(null);}},[forceBudgetOpen]);
  const openBudget=()=>setView("budget");
  const manageCategories=()=>{setView("budget");onManageCategories?.();};
  const [familyPlans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
