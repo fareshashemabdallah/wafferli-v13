@@ -146,10 +146,14 @@ function MoneyPage() {
        <button type="button" className="mt-2 text-sm font-semibold text-brand underline underline-offset-2" onClick={()=>setSection("planning")}>{ar?"عندي فاتورة أو دفعة قادمة":"I have an upcoming bill or payment"} →</button>
       </div>
       {(s.demo||s.categories.length===0)&&<div className="mb-4 rounded-xl border border-[#DBE5D8] bg-[#F2F7EF] p-4">
-        <p className="text-sm font-semibold">{ar?"سجّل أول مصروف حقيقي بخطوة واحدة":"Start real spending with one category"}</p>
+        <p className="text-sm font-semibold">{ar?"ابدأ بمصروف واحد، حتى بلا ميزانية":"Record one actual expense, even without a budget"}</p>
         <p className="mt-1 text-xs text-muted-foreground">{ar?
          "اختَر وين بدك تسجّل المصروف. المبلغ بتدخله بعدين؛ ما بدك تكمّل ميزانية ولا تدخل دخل. الأرقام التجريبية رح تختفي فقط بعد موافقتك.":
-         "Choose what you spent on, then enter the amount. No full budget or income needed. Demo Money is replaced only with your permission."}</p>
+         "You can record an actual purchase without entering income or creating a category. Missing budget amounts remain unknown. Demo finance is replaced only with your permission."}</p>
+        {s.demo&&<button type="button" className="mt-3 min-h-11 rounded-full bg-brand px-4 text-sm font-semibold text-white" onClick={()=>{
+          if(window.confirm(ar?"بدك تبدأ تسجيل مصاريف حقيقية؟ رح نستبدل أرقام المال التجريبية فقط ونحافظ على ملف العيلة والخطط.":"Start recording real spending? This replaces demo Money figures only. Family profiles, plans and calendar stay unchanged."))setS(current=>current.demo?emptyRealMoney():current);
+        }}>{ar?"ابدأ بأول مصروف مدفوع":"Start with my first paid expense"}</button>}
+        <details className="mt-3"><summary className="min-h-10 cursor-pointer text-xs font-semibold text-brand">{ar?"اختياري: أنشئ فئة للميزانية":"Optional: organize a budget category"}</summary>
         <div className="mt-3 flex flex-wrap gap-2">
          {([{id:"groceries",en:"Groceries",ar:"البقالة"},{id:"transport",en:"Transport",ar:"المواصلات"},
            {id:"education",en:"Education",ar:"التعليم"},{id:"health",en:"Healthcare",ar:"الصحة"},
@@ -164,14 +168,21 @@ function MoneyPage() {
              return {...base,categories:[...base.categories,{id,name:item.en,type:"variable",planned:0,amountConfidence:"estimate"}]};
             });
            }}>{ar?item.ar:item.en}</button>)}
-        </div>
+        </div></details>
        </div>}
             <Expenses
+        demo={s.demo}
         cats={s.categories}
         members={members}
         budgetItems={s.budgetItems??[]}
         expenses={s.expenses}
         onChange={(expenses) => upd({ expenses })}
+        onRecord={(entry)=>setS(previous=>{
+          if(previous.demo||previous.expenses.some(e=>e.id===entry.id)||
+            !(entry.categoryId==="uncategorized"||previous.categories.some(c=>c.id===entry.categoryId)))return previous;
+          return {...previous,expenses:[entry,...previous.expenses],
+            ...(previous.categories.length===0?{financialInputsPartial:true}:{})};
+        })}
         cashBalance={s.cashOnHand??null}
         onConfirmPlanned={(expenseId,amount,mode)=>setS(prev=>{
           if(mode==="deduct"&&(prev.cashOnHand==null||prev.cashOnHand<amount))return prev;
@@ -350,15 +361,15 @@ function CategoryForm({ initial, minimumAllocation, onSave, onCancel }: { initia
   );
 }
 
-function Expenses({ cats, members, budgetItems, expenses, onChange, onDelete, onConfirmPlanned, cashBalance }: {
-  cats: Category[]; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];
-  onChange: (e: Expense[]) => void; onDelete: (e:Expense)=>void;
+function Expenses({ cats, demo, members, budgetItems, expenses, onChange, onRecord, onDelete, onConfirmPlanned, cashBalance }: {
+  cats: Category[]; demo:boolean; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];
+  onChange: (e: Expense[]) => void; onRecord:(e:Expense)=>void; onDelete: (e:Expense)=>void;
   onConfirmPlanned:(id:string,actual:number,mode:"already"|"deduct"|"untracked")=>void;
   cashBalance:number|null;
 }) {
   const { tr,lang } = useI18n();
   const ar=lang==="ar";
-  const blank: Expense = { id: "", date: today(), categoryId: cats[0]?.id ?? "", amount: 0, shared: false };
+  const blank: Expense = { id: "", date: today(), categoryId: cats[0]?.id ?? "uncategorized", amount: 0, shared: false };
   const [editing, setEditing] = useState<Expense | null>(null);
   const [quickAmount, setQuickAmount] = useState("");
   const [quickExpected,setQuickExpected]=useState("");
@@ -369,18 +380,20 @@ function Expenses({ cats, members, budgetItems, expenses, onChange, onDelete, on
   const [quickCategory, setQuickCategory] = useState(cats[0]?.id ?? "");
   const [quickItem,setQuickItem]=useState("");
   const [quickError, setQuickError] = useState("");
-  const selectedCategory=cats.some(x=>x.id===quickCategory)?quickCategory:(cats[0]?.id??"");
+  const [quickRecorded,setQuickRecorded] = useState(false);
+  const selectedCategory=cats.some(x=>x.id===quickCategory)?quickCategory:(quickCategory==="uncategorized"?"uncategorized":cats[0]?.id??"uncategorized");
   const matchingItems=budgetItems.filter(i=>i.categoryId===selectedCategory);
   const selectedItem=matchingItems.some(i=>i.id===quickItem)?quickItem:"";
   const recordQuick=(ev:FormEvent)=>{
     ev.preventDefault();
+    if(demo||quickRecorded)return setQuickError(ar?"ابدأ بسجلات مالية حقيقية أولاً.":"Start real Money before logging a paid purchase.");
     const amount=parseAmount(quickAmount,50000);
     if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
     if(quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":"Enter a valid expected amount.");
     if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
     const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:false,status:"paid",...(selectedItem?{budgetItemId:selectedItem}:{}),...(quickNote.trim()?{note:quickNote.trim().slice(0,60)}:{}),...(quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
-    onChange([entry,...expenses]);
-    setQuickAmount("");setQuickExpected("");setQuickNote("");setQuickItem("");setQuickError("");
+    onRecord(entry);
+    setQuickRecorded(true);setQuickError("");
     toast.success(ar?"تم تسجيل المصروف المدفوع.":"Paid expense recorded.");
   };
   const month=today().slice(0,7);
@@ -391,7 +404,7 @@ function Expenses({ cats, members, budgetItems, expenses, onChange, onDelete, on
     <section className="card-soft mt-6 p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{ar?"أضف مصروفاً":"Add an expense"}</h2>
-        <Button size="sm" variant="outline" onClick={() => setEditing(blank)} disabled={cats.length === 0}>
+        <Button size="sm" variant="outline" onClick={() => setEditing(blank)} disabled={demo}>
           <Plus className="size-4" /> {ar?"إدخال بتفاصيل أكثر":"Add with more details"} </Button>
       </div>
       <form onSubmit={recordQuick} className="mt-3 grid gap-2 rounded-xl bg-muted/40 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
@@ -402,7 +415,7 @@ function Expenses({ cats, members, budgetItems, expenses, onChange, onDelete, on
         </Field>
         <Field label={tr("Category")}>
           <NativeSelect value={selectedCategory} onChange={e=>{setQuickCategory(e.target.value);setQuickItem("");}}>
-            {cats.length===0&&<option value="">{tr("Add category first")}</option>}
+            <option value="uncategorized">{ar?"غير مصنف بعد":"Uncategorized for now"}</option>
             {cats.map(cat=><option key={cat.id} value={cat.id}>{tr(cat.name)}</option>)}
           </NativeSelect>
         </Field>
@@ -415,7 +428,13 @@ function Expenses({ cats, members, budgetItems, expenses, onChange, onDelete, on
         <Field label={ar?"على شو صرفت؟ (اختياري)":"What was it for? (optional)"}>
           <Input className={inputCls} maxLength={60} value={quickNote} onChange={e=>setQuickNote(e.target.value)} placeholder={ar?"مثلاً: تسوّق أسبوعي":"e.g. weekly groceries"}/>
         </Field>
-        <Button type="submit" className="h-11" disabled={!selectedCategory}><Plus className="size-4"/> {ar?"سجّل المصروف":"Record expense"}</Button>
+        <Button type="submit" className="h-11" disabled={demo||quickRecorded||!selectedCategory}><Plus className="size-4"/> {ar?"سجّل المصروف":"Record expense"}</Button>
+        {quickRecorded&&<div role="status" className="sm:col-span-3 rounded-xl bg-[#EDF7EB] p-3 text-sm">
+          <strong>{ar?"تم تسجيل المصروف مرة واحدة.":"Expense recorded once."}</strong>
+          <button type="button" className="ms-3 min-h-10 font-semibold text-brand underline" onClick={()=>{
+            setQuickRecorded(false);setQuickAmount("");setQuickExpected("");setQuickNote("");setQuickItem("");setQuickError("");
+          }}>{ar?"مصروف جديد":"Add another"}</button>
+        </div>}
         <details className="sm:col-span-3 rounded-xl border border-border bg-white p-3">
           <summary className="cursor-pointer text-xs font-semibold text-brand">{ar?"هل المبلغ مختلف عن المتوقع؟ (اختياري)":"Compare with an expected amount (optional)"} +</summary>
           <label className="mt-2 block text-xs font-medium">{ar?"كم كنت تتوقع أن تدفع؟ (د.أ)":"What did you expect to pay? (JOD)"}
@@ -519,7 +538,8 @@ function ExpenseForm({ initial, cats, members, budgetItems, onSave, onCancel }: 
       <Field label={tr("Date")}><Input className={inputCls} type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
       <Field label={tr("Category")}>
         <NativeSelect value={f.categoryId} onChange={(e) => setF(previous=>{const {budgetItemId:_item,...rest}=previous;return {...rest,categoryId:e.target.value};})}>
-          {cats.map((c) => <option key={c.id} value={c.id}>{tr(c.name)}</option>)}
+          <option value="uncategorized">{ar?"غير مصنف بعد":"Uncategorized for now"}</option>
+          {cats.map((c) => <option key={c.id} value={c.id}>{tr(c.name)}</option>}
         </NativeSelect>
       </Field>
       {budgetItems.some(i=>i.categoryId===f.categoryId)&&<Field label={ar?"البند (اختياري)":"Item (optional)"}>
