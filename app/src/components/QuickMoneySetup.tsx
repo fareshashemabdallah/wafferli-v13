@@ -37,7 +37,8 @@ export function QuickMoneySetup({money,setMoney,compact=false}:Props){
  const [zeroIncome,setZeroIncome]=useState(false);
  const [error,setError]=useState("");
  const fact=choices.includes(choice)?choice:choices[0];
- if((!needsStarterBudget(money)&&money.financialInputsPartial!==true)||!fact)return null;
+ if((!needsStarterBudget(money)&&money.financialInputsPartial!==true)||
+  (!needsStarterBudget(money)&&choices.every(key=>key==="savings"))||!fact)return null;
  const labels:Record<Fact,{en:string;ar:string;placeholderEn:string;placeholderAr:string}>={
   essential:{en:"Essential monthly costs",ar:"المصاريف الشهرية الأساسية",placeholderEn:"e.g. housing, food, school",placeholderAr:"مثل البيت والأكل والمدرسة"},
   income:{en:"Monthly family income",ar:"الدخل الشهري للعيلة",placeholderEn:"Leave unknown amounts blank",placeholderAr:"اترك المبلغ المجهول فارغ"},
