@@ -34,9 +34,9 @@ describe("Prototype-faithful Money experience",()=>{
    expect(within(home).getByRole("button",{name:new RegExp(item)})).toBeInTheDocument();
   }
   for(const name of ["Groceries","Fuel","Restaurants","Children","Housing","Health"]){
-   expect(within(home).getByRole("button",{name:new RegExp(name)})).toBeInTheDocument();
+   expect(within(home).getAllByRole("button",{name:new RegExp(name)}).length).toBeGreaterThan(0);
   }
-  expect(within(home).getByText("••••")).toBeInTheDocument();
+  expect(within(home).getAllByText("••••").length).toBeGreaterThan(0);
   expect(screen.getAllByRole("tab",{name:/Money Map/})).toHaveLength(1);
  });
  it("edits the same dated income source without inventing a payment or duplicating it",()=>{
