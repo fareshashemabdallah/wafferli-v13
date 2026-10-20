@@ -1,14 +1,15 @@
 import {useState,type FormEvent} from "react";
-import {ChevronRight,Eye,EyeOff,Plus,ShieldCheck} from "lucide-react";
+import {Eye,EyeOff,Plus,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,fmtJOD,uid} from "@/lib/storage";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {type MoneyState} from "@/lib/money";
-import {computeMoney} from "@/lib/money";
-import {futureDate,localToday,legacyIncome} from "@/lib/cashflow";
+import {futureDate,localToday} from "@/lib/cashflow";
 import {buildFamilyMoneyRhythm,annualPreparation,paceAllowed,removeSpendingPace,upsertSpendingPace,
  type RhythmEvent,type SpendingPace} from "@/lib/familyMoneyRhythm";
 import {parseCalendarDate} from "@/lib/familyCalendar";
+import {FamilyMoneyPrototypeHome} from "./FamilyMoneyPrototypeHome";
+import {FamilyMoneyQuickEdit,type QuickMoneyEditor} from "./FamilyMoneyQuickEdit";
 
 type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>MoneyState))=>void;
  onBills:()=>void;onSpending:()=>void;onCategories:()=>void};
@@ -31,7 +32,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  const [days,setDays]=useState<7|30|90>(30);
  const [includeExpected,setIncludeExpected]=useState(true);
  const [showMoney,setShowMoney]=useState(false);
- const [selected,setSelected]=useState<string|null>(null);
+ const [quickEdit,setQuickEdit]=useState<QuickMoneyEditor|null>(null);
  const [editingPace,setEditingPace]=useState<string|null>(null);
  const [paceStart,setPaceStart]=useState(today);
  const [paceInterval,setPaceInterval]=useState<SpendingPace["intervalDays"]>(7);
@@ -44,20 +45,8 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  const [success,setSuccess]=useState("");
  const now=today();
  const forecast=buildFamilyMoneyRhythm(state,plansReady?plans:[],now,days,includeExpected);
- const fullThirty=buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true);
  const annual=annualPreparation(state,now);
  const categories=state.categories;
- const summary=computeMoney(state);
- const income=state.incomeSources??legacyIncome(state.income);
- const incomeScheduled=income.some(i=>parseCalendarDate(i.nextDate));
- const report=(!state.demo&&forecast.cashStart!==null&&incomeScheduled&&forecast.missingDates===0)?
-   forecast.firstReserveRiskDate?
-    t("Your entered dates and estimated spending indicate possible cash pressure. Review essential obligations before committing to new purchases.",
-      "المواعيد والمخصصات التي أدخلتها تشير لضغط محتمل على السيولة. راجع الالتزامات الأساسية قبل شراء جديد."):
-    t("No shortfall against your entered reserve appears in this scenario. It is not a bank-confirmed spending allowance.",
-      "ما ظهر عجز مقابل الاحتياطي المدخل بهالسيناريو، لكنه مش مبلغ مؤكد من البنك للصرف.") :
-   t("Your financial picture is incomplete. Add today's cash, income dates and upcoming bills to make this timeline useful.",
-     "الصورة المالية بعدها ناقصة. أدخل سيولة اليوم ومواعيد الدخل والفواتير لتصير التوقعات أدق.");
  const moneyLabel=(v:number|null)=>state.demo||!showMoney||v===null?t("Hidden / unknown","مخفي / غير معروف"):fmtJOD(v);
  const iconFor=(name:string)=>illustrations.find(x=>x.test.test(name))??{emoji:"🧾",color:"#ECF6EB",name:"Other",ar:"أخرى"};
  const registerPace=(e:FormEvent)=>{
@@ -131,13 +120,6 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"} alt="" aria-hidden="true" loading="lazy"
     className="pointer-events-none absolute bottom-[-12px] end-0 h-[145px] w-[43%] object-contain object-bottom sm:h-[176px]"/>
   </div>
-  <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-[#DCE8D9] bg-[#F0F8EE] p-1.5" role="tablist" aria-label={t("Family money rhythm sections","أقسام الإيقاع المالي")}>
-   {([{id:"map",en:"Money Map",ar:"الخريطة",icon:"🏡"},{id:"timeline",en:"Timeline",ar:"الجدول",icon:"📅"},
-    {id:"pace",en:"Spending pace",ar:"وتيرة الصرف",icon:"🥦"},{id:"annual",en:"Annual costs",ar:"السنوية",icon:"🚘"}] as const).map(x=>
-    <button key={x.id} type="button" role="tab" aria-selected={screen===x.id} onClick={()=>setScreen(x.id)}
-     className={"min-h-11 flex-1 rounded-xl px-2 text-xs font-bold "+(screen===x.id?"bg-white text-[#2B7955] shadow-sm":"text-[#718477]")}>
-     {x.icon} {t(x.en,x.ar)}</button>)}
-  </div>
   <div className="flex justify-end">
    <button type="button" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#DBE7DC] bg-white px-3 text-xs font-bold text-[#41805E]"
     onClick={()=>setShowMoney(x=>!x)} aria-pressed={showMoney} aria-label={showMoney?t("Hide amounts","إخفاء المبالغ"):t("Reveal amounts","إظهار المبالغ")}>
@@ -149,58 +131,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
    {t("These are sample records. They will not be used to claim your household can afford anything. Start real Money to use a saved cash-flow outlook.",
     "البيانات الموجودة تجريبية. ما منستخدمها للحكم على قدرة العيلة على الدفع. ابدأ ببيانات فعلية لتحفظ التوقعات.")}</div>}
 
-  {screen==="map"&&<>
-   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-    <div className="rounded-xl bg-[#EAF5E8] p-3"><p className="text-xs text-[#5D8069]">{t("Monthly expected income","الدخل المتوقع بالشهر")}</p>
-     <p className="mt-2 text-lg font-black text-[#2D7554]">{!state.demo&&(income.length>0||state.incomeKnown)?moneyLabel(summary.monthlyIncome):t("Not entered","غير مدخل")}</p></div>
-    <div className="rounded-xl bg-[#FCEFF4] p-3"><p className="text-xs text-[#856778]">{t("Paid this month","المدفوع بالشهر")}</p>
-     <p className="mt-2 text-lg font-black text-[#B65780]">{!state.demo?moneyLabel(summary.spent):t("Sample","تجريبي")}</p></div>
-    <div className="col-span-2 rounded-xl bg-[#FFF7E9] p-3 sm:col-span-1"><p className="text-xs text-[#8E7755]">{t("Bills in next 30 days","فواتير ٣٠ يوم")}</p>
-     <p className="mt-2 text-lg font-black text-[#8C6B41]">{!state.demo?moneyLabel(fullThirty.futureBillsJod):t("Sample","تجريبي")}</p></div>
-   </div>
-   <div className={soft}>
-    <h3 className="text-base font-extrabold text-[#2B614A]">🌿 {t("What matters before the next payday?","شو المهم قبل الراتب الجاي؟")}</h3>
-    <p className="mt-2 text-sm leading-relaxed text-[#617569]">{report}</p>
-    <p className="mt-2 text-xs text-[#748377]">{t("Projected income is not received money. An entered category budget is not cash reserved or a bill paid.",
-     "الدخل المتوقع مش دخل مستلم، ومخصص الفئة مش مال محفوظ أو فاتورة مدفوعة.")}</p>
-    <button type="button" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#38855D] px-4 text-xs font-bold text-white" onClick={()=>setScreen("timeline")}>
-     {t("Explore the cash-flow timeline","شوف جدول السيولة")}<ChevronRight className="size-4 rtl:rotate-180"/></button>
-   </div>
-   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-    {[{label:t("Income & paydays","الدخل والرواتب"),emoji:"💵",desc:t("Expected and received","متوقع ومستلم"),action:onBills},
-      {label:t("Bills & commitments","الفواتير والالتزامات"),emoji:"🏠",desc:t("Dates and paid status","المواعيد وحالة الدفع"),action:onBills},
-      {label:t("Everyday spending","المصاريف اليومية"),emoji:"🥦",desc:t("Groceries, fuel and more","مونة وبنزين وغيرها"),action:()=>setScreen("pace")},
-      {label:t("Annual payments","المصاريف السنوية"),emoji:"🚘",desc:t("Insurance, tax, building","تأمين وضرائب وبناية"),action:()=>setScreen("annual")}].map(x=>
-     <button key={x.label} type="button" onClick={x.action} className="min-h-28 rounded-2xl border border-[#E4E9DE] bg-white p-3 text-start transition hover:border-[#A6CEAC]">
-      <span className="text-2xl">{x.emoji}</span><strong className="mt-2 block text-xs">{x.label}</strong>
-      <span className="mt-1 block text-[11px] text-[#809083]">{x.desc}</span></button>)}
-   </div>
-   <div className={soft}>
-    <div className="flex items-center justify-between gap-2">
-     <h3 className="font-extrabold text-[#2B614A]">{t("Your family categories","فئات مصاريف العيلة")}</h3>
-     <button type="button" onClick={onCategories} className="min-h-10 text-xs font-bold text-[#3C825C] underline">{t("Edit budget","عدّل الميزانية")}</button>
-    </div>
-    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-     {categories.map(cat=>{
-      const art=iconFor(cat.name+" "+cat.id);
-      const spent=summary.spentBy(cat.id),pct=cat.planned>0?Math.min(100,spent/cat.planned*100):0;
-      return <button type="button" key={cat.id} onClick={()=>setSelected(selected===cat.id?null:cat.id)}
-       className={"min-h-28 rounded-xl border p-3 text-start "+(selected===cat.id?"border-[#4E9C75] bg-[#F5FFF6]":"border-[#E7ECE4] bg-white")}>
-       <span className="grid size-10 place-items-center rounded-xl text-2xl" style={{background:art.color}}>{art.emoji}</span>
-       <strong className="mt-2 block truncate text-xs">{cat.name}</strong>
-       <p className="mt-1 text-[11px] text-[#788A7B]">{moneyLabel(spent)} {t("paid","مدفوع")}</p>
-       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#EDF1EB]"><div className="h-full rounded-full bg-[#58A47B]" style={{width:pct+"%"}}/></div>
-      </button>;
-     })}
-     {!categories.length&&<div className="col-span-2 text-xs leading-relaxed text-[#738477] sm:col-span-3">{t("No real category budgets yet. Add only the ones your family needs.","ما في فئات ميزانية فعلية بعد. أضف اللي بتحتاجه عيلتك بس.")}</div>}
-    </div>
-    {selected&&<div className="mt-3 rounded-xl bg-[#F1F8F0] p-3 text-sm">
-     <p className="font-bold">{categories.find(c=>c.id===selected)?.name}</p>
-     <p className="mt-1 text-xs text-[#60796A]">{t("Monthly allocation","المخصص الشهري")}: {moneyLabel(categories.find(c=>c.id===selected)?.planned??0)}</p>
-     <button type="button" className="mt-2 min-h-10 rounded-xl border border-[#9CCBAA] bg-white px-3 text-xs font-bold" onClick={onSpending}>{t("Record an actual expense","سجّل مصروف فعلي")}</button>
-    </div>}
-   </div>
-  </>}
+  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onBills={()=>setQuickEdit("bill")} onSpending={onSpending} onCategories={onCategories}/>}
 
   {screen==="timeline"&&<>
    <div className={soft}>
@@ -342,6 +273,15 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
       "ما في فواتير سنوية بعد. أضف التأمين أو الضريبة أو مساهمة البناية وقت تعرف مواعيدها.")}</p></div>}
    </div>
   </>}
+  <p className="mt-4 text-xs font-extrabold text-[#4B7F61]">{t("Our Money areas","أقسام مال العيلة")}</p>
+  <div className="grid grid-cols-4 items-center gap-1.5 rounded-2xl border border-[#DCE8D9] bg-white p-1.5" role="tablist" aria-label={t("Family money rhythm sections","أقسام الإيقاع المالي")}>
+   {([{id:"map",en:"Money Map",ar:"الخريطة",icon:"🏡"},{id:"timeline",en:"Timeline",ar:"الجدول",icon:"📅"},
+    {id:"pace",en:"Spending pace",ar:"وتيرة الصرف",icon:"🥦"},{id:"annual",en:"Annual costs",ar:"السنوية",icon:"🚘"}] as const).map(x=>
+    <button key={x.id} type="button" role="tab" aria-selected={screen===x.id} onClick={()=>setScreen(x.id)}
+     className={"min-h-11 flex-1 rounded-xl px-1 py-2 text-[10px] font-bold sm:text-xs "+(screen===x.id?"bg-white text-[#2B7955] shadow-sm":"text-[#718477]")}>
+     {x.icon} {t(x.en,x.ar)}</button>)}
+  </div>
+  {quickEdit&&<FamilyMoneyQuickEdit kind={quickEdit} state={state} setState={setState} onClose={()=>setQuickEdit(null)}/>}
   {success&&<p role="status" className="rounded-xl bg-[#EDF7EC] p-3 text-xs font-bold text-[#387954]">{success}</p>}
   <p className="flex items-start gap-2 px-2 text-[11px] leading-relaxed text-[#77877D]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>
    {t("Saved locally on this device. Income forecasts, spending pace and annual preparation are estimates. Nothing is automatically paid, debited, shared or invested.",
