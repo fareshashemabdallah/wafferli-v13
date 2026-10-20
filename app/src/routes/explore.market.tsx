@@ -2,6 +2,7 @@ import {createFileRoute,Link} from "@tanstack/react-router";
 import {useState,type FormEvent} from "react";
 import {ArrowUpRight,Search,ShoppingBasket,ShieldCheck} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
+import {ShoppingJourneyStrip} from "@/components/ShoppingJourneyStrip";
 import {useI18n} from "@/lib/i18n";
 import {marketSearchLink,safeMarketSearchTerm,sourcesForMarket,
  type MarketIntent} from "@/lib/jordanMarketSources";
@@ -39,6 +40,7 @@ export function MarketDiscovery(){
  const searchAll=marketSearchLink(searched);
  const offers=feed?.offers??[];
  return <AppShell title={ar?"وين بلاقي المنتج وبأي سعر؟":"Where can I buy it, and for how much?"}>
+  <ShoppingJourneyStrip current="find"/>
   <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{ar?
    "لازم دبّرنا يساعدك توصل لعروض حقيقية من المتاجر. ابحث عن منتج واحد، وافتح أسعار المتاجر الأردنية من مصدرها. المقارنة المباشرة داخل التطبيق تحتاج ربطاً بمصدر أسعار موثوق.":
    "Start with real online seller listings, not blank price-entry forms. Search one product, open Jordanian retailer results at their sources, and check current prices. In-app price comparison needs an authorized product feed."}</p>
