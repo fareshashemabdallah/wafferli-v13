@@ -88,7 +88,7 @@ describe("birthday gift click continuity",()=>{
   const optional=screen.getByText("Other shopping and wishlists (optional)").closest("details");
   expect(optional).toHaveProperty("open",false);
   const gift=screen.getByRole("region",{name:"Occasion gift purchase journey"});
-  expect(gift.compareDocumentPosition(comparison)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(gift.compareDocumentPosition(comparison!)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   expect(screen.queryByRole("button",{name:"Use saved gift name for comparison"})).not.toBeInTheDocument();
  });
  it("reuses saved gift name without wiping previous comparison records",async()=>{
