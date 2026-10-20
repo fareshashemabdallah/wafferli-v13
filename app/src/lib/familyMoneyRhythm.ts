@@ -20,7 +20,7 @@ export type RhythmForecast={
  missingDates:number;unknownCash:boolean;excludedPaces:string[];
  monthlyPaceJod:number;futureBillsJod:number;futureIncomeJod:number;
 };
-const money=(n:number)=>typeof n==="number"&&Number.isFinite(n)&&n>=0;
+const money=(n:unknown):n is number=>typeof n==="number"&&Number.isFinite(n)&&n>=0;
 const ym=(d:string)=>d.slice(0,7);
 const lastDay=(d:string)=>new Date(Number(d.slice(0,4)),Number(d.slice(5,7)),0).getDate();
 const dayCount=(d:string)=>lastDay(d);
