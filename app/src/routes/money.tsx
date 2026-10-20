@@ -176,7 +176,7 @@ function MoneyPage() {
         members={members}
         budgetItems={s.budgetItems??[]}
         expenses={s.expenses}
-        onChange={(expenses) => upd({ expenses })}
+        onChange={(apply) => setS(previous=>({...previous,expenses:apply(previous.expenses)}))}
         onRecord={(entry)=>setS(previous=>{
           if(previous.demo||previous.expenses.some(e=>e.id===entry.id)||
             !(entry.categoryId==="uncategorized"||previous.categories.some(c=>c.id===entry.categoryId)))return previous;
@@ -363,7 +363,7 @@ function CategoryForm({ initial, minimumAllocation, onSave, onCancel }: { initia
 
 function Expenses({ cats, demo, members, budgetItems, expenses, onChange, onRecord, onDelete, onConfirmPlanned, cashBalance }: {
   cats: Category[]; demo:boolean; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];
-  onChange: (e: Expense[]) => void; onRecord:(e:Expense)=>void; onDelete: (e:Expense)=>void;
+  onChange: (apply: (existing:Expense[])=>Expense[]) => void; onRecord:(e:Expense)=>void; onDelete: (e:Expense)=>void;
   onConfirmPlanned:(id:string,actual:number,mode:"already"|"deduct"|"untracked")=>void;
   cashBalance:number|null;
 }) {
@@ -453,7 +453,7 @@ function Expenses({ cats, demo, members, budgetItems, expenses, onChange, onReco
           budgetItems={budgetItems}
           onCancel={() => setEditing(null)}
           onSave={(x) => {
-            onChange(x.id ? expenses.map((e) => (e.id === x.id ? x : e)) : [{ ...x, id: uid() }, ...expenses]);
+            onChange(existing=>x.id ? existing.map(e=>e.id===x.id?x:e) : [{...x,id:uid()},...existing]);
             setEditing(null);
             toast.success(tr("Expense saved"));
           }}
