@@ -35,6 +35,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  const [quickEdit,setQuickEdit]=useState<QuickMoneyEditor|null>(null);
  const [editingPace,setEditingPace]=useState<string|null>(null);
  const [paceStart,setPaceStart]=useState(today);
+ const [paceBudget,setPaceBudget]=useState("");
  const [paceInterval,setPaceInterval]=useState<SpendingPace["intervalDays"]>(7);
  const [annualOpen,setAnnualOpen]=useState(false);
  const [annualName,setAnnualName]=useState("");
@@ -53,9 +54,16 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
   e.preventDefault();setError("");setSuccess("");
   if(!editingPace)return;
   const value:SpendingPace={categoryId:editingPace,intervalDays:paceInterval,nextDate:paceStart};
-  const next=upsertSpendingPace(state,value);
-  if(!next){setError(t("Add a positive monthly category allocation and valid future date first. This category must not already have a linked bill.",
-   "لازم يكون للفئة مخصص شهري موجب وتاريخ صحيح، وما يكون مربوط فيها جدول فواتير."));return;}
+  const hasDetailed=(state.budgetItems??[]).some(x=>x.categoryId===editingPace);
+  const amount=Number(paceBudget);
+  if(!hasDetailed&&(!validAmount(paceBudget)||!Number.isFinite(amount))){
+   setError(t("Enter a valid monthly allowance before scheduling a pace.","أدخل مخصص شهري صحيح قبل توزيع المصروف."));return;
+  }
+  const base=hasDetailed?state:{...state,categories:state.categories.map(x=>
+   x.id===editingPace?{...x,planned:Math.round(amount*100)/100}:x)};
+  const next=upsertSpendingPace(base,value);
+  if(!next){setError(t("This category needs a valid date and must not duplicate a scheduled bill.",
+   "الفئة بدها تاريخ صحيح وما لازم تكرر فاتورة مجدولة."));return;}
   setState(next);setEditingPace(null);
   setSuccess(t("The spending pace was saved as a forecast only. No payments were created.","تم حفظ وتيرة صرف متوقعة فقط، من دون تسجيل أي دفعات."));
  };
@@ -204,7 +212,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
       {value&&<p className="mt-1 text-[11px] text-[#8E8B75]">{t("A plan, not a confirmed shopping date.","تقدير مش موعد تسوق مؤكد.")}</p>}
       <div className="mt-3 flex flex-wrap gap-2">
        <button type="button" disabled={!allowed||state.demo} className="min-h-10 rounded-xl bg-[#EAF4E9] px-3 text-xs font-bold text-[#368258] disabled:opacity-50"
-        onClick={()=>{setEditingPace(cat.id);setPaceInterval(value?.intervalDays??7);setPaceStart(value?.nextDate??now);setError("");}}>
+        onClick={()=>{setEditingPace(cat.id);setPaceInterval(value?.intervalDays??7);setPaceStart(value?.nextDate??now);setPaceBudget(String(cat.planned));setError("");}}>
         {value?t("Change pace","عدّل الوتيرة"):t("Spread this budget","وزّع المخصص")}</button>
        {value&&<button type="button" className="min-h-10 text-xs font-bold text-[#9D5D67]"
         onClick={()=>setState(s=>removeSpendingPace(s,cat.id))}>{t("Stop pacing","أوقف التوزيع")}</button>}
@@ -216,6 +224,16 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
    </div>
    {editingPace&&<form className={soft} onSubmit={registerPace} aria-label={t("Edit spending pace","تعديل وتيرة الصرف")}>
     <h3 className="font-extrabold">{t("Spending rhythm: ","وتيرة صرف: ")+categories.find(c=>c.id===editingPace)?.name}</h3>
+    {(state.budgetItems??[]).some(x=>x.categoryId===editingPace)?
+     <div className="mt-2 rounded-xl bg-[#F4F8ED] p-3 text-xs text-[#617C66]">
+      {t("This category's allowance comes from detailed budget items. Edit that budget to change the amount; you can still set the spending interval here.",
+       "مخصص هالفئة من بنود الميزانية التفصيلية. عدّل الميزانية لتغيير المبلغ، وفيك تحدد وتيرة الصرف هون.")}
+      <button type="button" onClick={onCategories} className="ms-2 font-bold underline">{t("Edit budget","عدّل الميزانية")}</button>
+     </div>:
+     <label className="mt-3 block text-xs font-bold">{t("Monthly allowance (JOD)","المخصص الشهري (دينار)")}
+      <input className="mt-1 min-h-11 w-full rounded-xl border bg-white p-2" type="number" step=".01" min=".01"
+       inputMode="decimal" value={paceBudget} onChange={e=>setPaceBudget(e.target.value)}/>
+     </label>}
     <div className="mt-3 grid gap-3 sm:grid-cols-2">
      <label className="text-xs font-bold">{t("Approximate interval","الفترة التقريبية")}
       <select className="mt-1 min-h-11 w-full rounded-xl border bg-white p-2" value={paceInterval}
