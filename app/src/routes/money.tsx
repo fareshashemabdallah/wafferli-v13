@@ -165,7 +165,7 @@ function MoneyPage() {
              const base=previous.demo?emptyRealMoney():previous;
              const id="quick-"+item.id;
              if(base.categories.some(cat=>cat.id===id))return base;
-             return {...base,categories:[...base.categories,{id,name:item.en,type:"variable",planned:0,amountConfidence:"estimate"}]};
+             return {...base,financialInputsPartial:true,categories:[...base.categories,{id,name:item.en,type:"variable",planned:0,amountConfidence:"estimate"}]};
             });
            }}>{ar?item.ar:item.en}</button>)}
         </div></details>
