@@ -15,6 +15,24 @@ describe("bill payments reconcile with expenses and cash",()=>{
   expect(s.commitments?.[0]?.paidDates).toEqual(["2026-10-14"]);
   expect(recordBillPayment(s,"rent","2026-10-14","2026-10-14","other","deduct")).toBe(s);
  });
+ it("uses a linked expense even if the paid marker is missing after a restore",()=>{
+  const paid=recordBillPayment(initial(),"rent","2026-10-14","2026-10-14","expense1","deduct");
+  const missingMarker={...paid,commitments:paid.commitments?.map(b=>({...b,paidDates:[]}))};
+  expect(recordBillPayment(missingMarker,"rent","2026-10-14","2026-10-14","another","deduct")).toBe(missingMarker);
+  expect(missingMarker.cashOnHand).toBe(350);
+  expect(missingMarker.expenses).toHaveLength(1);
+  const repeatedId={...initial(),expenses:[{id:"expense1",date:"2026-10-10",categoryId:"housing",amount:7,shared:false}]};
+  expect(recordBillPayment(repeatedId,"rent","2026-10-14","2026-10-14","expense1","deduct")).toBe(repeatedId);
+ });
+ it("refuses to discard two legacy linked expenses when reversing one payment",()=>{
+  const first=recordBillPayment(initial(),"rent","2026-10-14","2026-10-14","expense1","deduct");
+  const inconsistent={...first,expenses:[{...first.expenses[0]!,id:"legacy-copy"},...first.expenses]};
+  expect(reverseBillPayment(inconsistent,"rent","2026-10-14",true,"2026-10-14")).toBe(inconsistent);
+  expect(inconsistent.cashOnHand).toBe(350);
+  expect(inconsistent.expenses).toHaveLength(2);
+  const untouched=initial();
+  expect(reverseBillPayment(untouched,"rent","2026-10-14",true,"2026-10-14")).toBe(untouched);
+ });
  it("doesn't deduct twice if current bank balance already includes the payment",()=>{
   const s=recordBillPayment(initial(),"rent","2026-10-14","2026-10-14","expense1","already");
   expect(s.cashOnHand).toBe(750);
