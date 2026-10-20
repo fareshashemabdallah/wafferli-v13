@@ -1,11 +1,11 @@
 import {useState,type FormEvent} from "react";
-import {CalendarClock,ChevronRight,Eye,EyeOff,Plus,ShieldCheck,Wallet} from "lucide-react";
+import {ChevronRight,Eye,EyeOff,Plus,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,fmtJOD,uid} from "@/lib/storage";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {type MoneyState} from "@/lib/money";
 import {computeMoney} from "@/lib/money";
-import {futureDate,localToday,monthlyTotal,legacyIncome} from "@/lib/cashflow";
+import {futureDate,localToday,legacyIncome} from "@/lib/cashflow";
 import {buildFamilyMoneyRhythm,annualPreparation,paceAllowed,removeSpendingPace,upsertSpendingPace,
  type RhythmEvent,type SpendingPace} from "@/lib/familyMoneyRhythm";
 import {parseCalendarDate} from "@/lib/familyCalendar";
@@ -24,7 +24,6 @@ const validAmount=(s:string)=>/^\d{1,6}(?:\.\d{1,2})?$/.test(s.trim())&&Number(s
 const moneyColor=(v:number|null)=>v===null?"#526B5C":v<0?"#AD5365":"#307956";
 const today=()=>localToday();
 const soft="rounded-[1.3rem] border border-[#E0E8DB] bg-white px-4 py-4 shadow-[0_12px_30px_-30px_rgba(48,83,55,.28)]";
-const years=(s:string)=>s.slice(0,4);
 export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategories}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(e:string,a:string)=>ar?a:e;
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
@@ -123,13 +122,14 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  </div>;
  return <section className="mx-auto max-w-[940px] space-y-3" aria-label={t("Family money rhythm","الإيقاع المالي للعيلة")} data-testid="family-money-rhythm">
   <div className="relative overflow-hidden rounded-[1.5rem] border border-[#DCEADC] bg-[linear-gradient(120deg,#EEF7E8,#FAF7E9_65%,#FFF0F1)] p-4 sm:p-6">
-   <div className="relative z-10 max-w-[76%]">
+   <div className="relative z-10 max-w-[57%] sm:max-w-[66%]">
     <p className="text-xs font-extrabold tracking-wide text-[#4C8D68]">{t("OUR MONEY · FAMILY RHYTHM","مال العيلة · الإيقاع المالي")}</p>
     <h2 className="mt-2 text-xl font-black text-[#24573E] sm:text-2xl">{t("Spend wisely. Live well together.","اصرفوا بذكاء، وعيشوا منيح سوا.")}</h2>
     <p className="mt-2 text-xs leading-relaxed text-[#688273]">{t("Not just how much—when income arrives and what your family needs next.",
      "مش بس قديش، كمان متى بيوصل الدخل وشو العيلة بحاجة تدفع بعدين.")}</p>
    </div>
-   <span aria-hidden="true" className="pointer-events-none absolute bottom-[-10px] end-3 text-[80px] opacity-80 sm:text-[105px]">👨‍👩‍👧‍👦</span>
+   <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"} alt="" aria-hidden="true" loading="lazy"
+    className="pointer-events-none absolute bottom-[-12px] end-0 h-[145px] w-[43%] object-contain object-bottom sm:h-[176px]"/>
   </div>
   <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-[#DCE8D9] bg-[#F0F8EE] p-1.5" role="tablist" aria-label={t("Family money rhythm sections","أقسام الإيقاع المالي")}>
    {([{id:"map",en:"Money Map",ar:"الخريطة",icon:"🏡"},{id:"timeline",en:"Timeline",ar:"الجدول",icon:"📅"},
