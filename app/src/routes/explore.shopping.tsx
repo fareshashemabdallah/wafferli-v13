@@ -39,7 +39,7 @@ function Shopping() {
     if(cycleReady&&!cycleId)setCycleId(uid());
   },[cycleReady,cycleId,setCycleId]);
   const suggestedCategory=money.categories.find(c=>/grocer|food|supermarket|بقالة|سوبر|مواد غذائية/i.test(c.name))?.id??"";
-  const categoryId=money.categories.some(c=>c.id===categoryInput)?categoryInput:suggestedCategory;
+  const categoryId=money.categories.some(c=>c.id===categoryInput)?categoryInput:(categoryInput==="uncategorized"?"uncategorized":suggestedCategory||"uncategorized");
   const recorded=!!cycleId&&money.expenses.some(e=>e.id===basketExpenseId(cycleId));
   const sampleRows=items.filter(isSampleBasketEntry);
   const ready=itemsReady&&moneyReady&&cycleReady&&!!cycleId;
@@ -63,7 +63,7 @@ function Shopping() {
     if(!ready||recorded)return;
     if(money.demo){setErr(ar?"ابدأ بميزانية حقيقية قبل تسجيل المصروف.":"Start your own Money budget before recording a purchase.");return;}
     if(sampleRows.length){setErr(ar?"احذف العناصر التجريبية أولاً.":"Remove the sample products before recording your own purchases.");return;}
-    if(!categoryId){setErr(ar?"اختر فئة المصروف الصحيحة.":"Choose an expense category first.");return;}
+    
     if(total<=0){setErr(ar?"أدخل سعراً حقيقياً واحداً على الأقل.":"Enter at least one real price.");return;}
     setErr("");
     setMoney(m=>recordBasketExpense(m,items,cycleId,categoryId,localToday()));
@@ -129,15 +129,12 @@ function Shopping() {
           {ar?"فئة المصروف":"Expense category"}
           <select className="mt-1 min-h-11 w-full rounded-xl border border-border bg-white px-3"
             value={categoryId} onChange={e=>setCategoryInput(e.target.value)} disabled={recorded}>
-            <option value="">{ar?"اختر الفئة":"Choose category"}</option>
+            <option value="uncategorized">{ar?"غير مصنف الآن":"Uncategorized for now"}</option>
             {money.categories.map(c=><option key={c.id} value={c.id}>{tr(c.name)}</option>)}
           </select>
         </label>}
         {money.demo?<p className="text-sm text-muted-foreground">
           {ar?"المالية فيها أرقام تجريبية. ابدأ بميزانيتك قبل تسجيل المشتريات.":"Your finances still contain sample figures. Set up your budget before recording purchases."}
-          <Link to="/money" className="ms-2 font-semibold text-brand underline">{ar?"افتح المالية":"Open Money"}</Link>
-        </p>:money.categories.length===0?<p className="text-sm text-muted-foreground">
-          {ar?"أضف فئة مصروف في المالية أولاً.":"Add an expense category in Money first."}
           <Link to="/money" className="ms-2 font-semibold text-brand underline">{ar?"افتح المالية":"Open Money"}</Link>
         </p>:null}
         {err&&<p role="alert" className="text-sm text-destructive">{err}</p>}
