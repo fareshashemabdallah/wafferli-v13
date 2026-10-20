@@ -1,8 +1,9 @@
-import {Link} from "@tanstack/react-router";
+import {Link,useNavigate} from "@tanstack/react-router";
 import {ArrowRight,Compass,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {RobotBuddy,WorldScene} from "./AdventureArtwork";
 import {FamilyMoneyJourneyCard} from "./FamilyMoneyJourneyCard";
+import {TodayQuickActions} from "./TodayQuickActions";
 import "./adventureFamilyHero.css";
 
 /** The ONE family story at the centre of the app.
@@ -11,6 +12,7 @@ import "./adventureFamilyHero.css";
  * four extra navigation panels were intentionally removed from Home.
  */
 export function AdventureFamilyHome(){
+ const navigate=useNavigate();
  const {lang}=useI18n(),ar=lang==="ar";
  const t=(en:string,arabic:string)=>ar?arabic:en;
  const ideas=[
@@ -49,8 +51,10 @@ export function AdventureFamilyHome(){
   </section>
 
   <FamilyMoneyJourneyCard/>
+  <TodayQuickActions onAsk={()=>navigate({to:"/advisor"})}/>
 
-  <section className="rounded-[1.4rem] border border-[#DDE9DF] bg-[#F9FCF8] p-4 sm:p-5" aria-label={t("Explore family possibilities","اكتشف فرص لعيلتك")}>
+  <details className="rounded-[1.4rem] border border-[#DDE9DF] bg-[#F9FCF8] p-4 sm:p-5" aria-label={t("Explore family possibilities","اكتشف فرص لعيلتك")}>
+  <summary className="min-h-11 cursor-pointer text-sm font-extrabold text-[#2D7559]">{t("More family options (optional)","خيارات عائلية أخرى (اختياري)")}</summary>
    <div className="mb-3 flex items-start gap-2">
     <Compass className="mt-0.5 size-5 shrink-0 text-[#348269]"/>
     <div>
@@ -69,7 +73,7 @@ export function AdventureFamilyHome(){
       <ArrowRight className="size-4 shrink-0 text-[#44886F] rtl:rotate-180"/>
      </Link>)}
    </div>
-  </section>
+  </details>
   <p className="flex items-start gap-2 px-1 text-[11px] leading-relaxed text-[#70837B]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>
    {t("Your private family financial details remain on this device during the pilot. Plans, dates and costs are recorded in their original workspaces—never duplicated by this home.",
       "تفاصيل مالية العيلة خاصة ومحفوظة على هالجهاز خلال التجربة. الخطط والمواعيد والمصاريف بتبقى بسجلاتها الأصلية، مش نسخ مكررة هون.")}</p>

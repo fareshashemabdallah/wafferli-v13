@@ -29,13 +29,12 @@ describe("Dabberna one rhythm across pages",()=>{
    unmount();
   }
  });
- it("shows only one advisor method, not simultaneous overlapping assistants",()=>{
+ it("asks one grounded question first and keeps other methods collapsed and consent gated",()=>{
   render(<I18nProvider><Advisor/></I18nProvider>);
-  expect(screen.getByTestId("decision-method")).toBeInTheDocument();
-  expect(screen.queryByTestId("guided-method")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Ask about my records"}));
   expect(screen.getByTestId("guided-method")).toBeInTheDocument();
-  expect(screen.queryByTestId("decision-method")).not.toBeInTheDocument();
+  const summary=screen.getByText("Optional: compare different ways forward");
+  expect(summary.closest("details")).not.toHaveAttribute("open");
+  expect(screen.getByTestId("decision-method")).toBeInTheDocument();
   expect(screen.queryByTestId("connected-method")).not.toBeInTheDocument();
  });
 });

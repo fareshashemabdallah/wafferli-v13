@@ -25,7 +25,7 @@ export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{
   const latest=readLocal<MoneyState>("money",money);
   const updated=recordFamilyCommitmentPayment(latest,entry,Number(paidAmount),categoryId);
   if(!updated){
-   setMessage(t("Check the amount, category and payment status. Nothing was recorded.",
+   setMessage(t("Check the amount and payment status. Nothing was recorded.",
     "راجع المبلغ والفئة وحالة الدفع. لم يتم تسجيل شيء."));return;
   }
   if(!writeLocal("money",updated)){
@@ -81,8 +81,6 @@ export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{
      {t("Actual payment is in your expense history.","المبلغ المدفوع مسجّل في المصاريف.")}</p>
     :money.demo?<p className="mt-2 text-xs text-muted-foreground">{t(
       "Replace sample finances with your actual plan to record payments.","استبدل المالية التجريبية بخطتك الفعلية لتسجيل الدفع.")}</p>
-    :money.categories.length===0?<p className="mt-2 text-xs text-muted-foreground">{t(
-      "Create an expense category in Our Money before confirming payment.","أضف فئة مصاريف في المالية قبل تسجيل الدفع.")}</p>
     :<div className="mt-2">
       {confirmId===item.id?<div className="space-y-3 rounded-xl border border-[#E4D9E1] bg-[#FFF7FA] p-3">
        <p className="text-xs font-bold">{t("Confirm you actually paid for this item","أكد أنك دفعت قيمة هذا البند فعلياً")}</p>
@@ -92,14 +90,14 @@ export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{
        <label className="block text-xs font-semibold">{t("Expense category","فئة المصروف")}
         <select className="mt-1 min-h-11 w-full rounded-lg border bg-white px-3 text-sm"
          value={categoryId} onChange={e=>setCategoryId(e.target.value)}>
-         <option value="">{t("Choose category","اختر الفئة")}</option>
+         <option value="">{t("Uncategorized for now","غير مصنف الآن")}</option>
          {money.categories.map(cat=><option key={cat.id} value={cat.id}>{cat.name}</option>)}
         </select></label>
        <p className="text-[11px] text-[#6C7483]">{t(
         "This creates one paid expense. It does not automatically deduct your manually entered cash or adjust savings.",
         "سيُسجّل مصروف مدفوع واحد، دون خصم الرصيد المدخل أو تعديل هدف الادخار.")}</p>
        <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={!amountOk||!categoryId} onClick={()=>record(item)}
+        <button type="button" disabled={!amountOk} onClick={()=>record(item)}
          className="min-h-11 rounded-xl bg-[#B25A85] px-4 text-xs font-bold text-white disabled:opacity-50">
          {t("Confirm paid expense","تأكيد المصروف المدفوع")}</button>
         <button type="button" onClick={()=>setConfirmId(null)} className="min-h-11 rounded-xl border px-3 text-xs font-semibold">

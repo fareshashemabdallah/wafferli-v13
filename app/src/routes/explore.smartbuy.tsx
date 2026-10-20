@@ -7,6 +7,7 @@ import { ShoppingExperienceShell } from "@/components/ShoppingExperienceShell";
 import { PlanContextBanner } from "@/components/PlanContextBanner";
 import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
 import {ShoppingReferenceDashboard} from "@/components/ShoppingReferenceDashboard";
+import {ShoppingJourneyStrip} from "@/components/ShoppingJourneyStrip";
 import {evaluatePriceEvidence} from "@/lib/merchantQuoteDraft";
 import {compareManuallyEnteredPrices} from "@/lib/clearShoppingResult";
 import {dateKey} from "@/lib/familyCalendar";
@@ -56,6 +57,7 @@ export function SmartBuy() {
 
   return (
     <ShoppingExperienceShell>
+      <ShoppingJourneyStrip current="compare"/>
       <ShoppingReferenceDashboard/>
       <details id="shopping-tools" className="group mt-6 rounded-[1.6rem] border border-[#E2E8E1] bg-white p-4 sm:p-5">
        <summary className="min-h-12 cursor-pointer text-base font-bold text-brand">

@@ -5,6 +5,7 @@ import {I18nProvider} from "./i18n";
 import {AdventureFamilyHome} from "@/components/AdventureFamilyHome";
 
 vi.mock("@tanstack/react-router",()=>({
+ useNavigate:()=>vi.fn(),
  Link:({to,children,...props}:{to:string;children?:ReactNode}&AnchorHTMLAttributes<HTMLAnchorElement>)=>
   <a href={to} {...props}>{children}</a>
 }));

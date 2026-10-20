@@ -28,14 +28,16 @@ describe("new financial records are private by default",()=>{
   expect(entry.cashOnHand).toBe(800);
   expect(prepareExpenseForShare(entry,entry.expenses[0]!,new Date(2026,9,16,12))).toBeNull();
  });
- it("prevents source-code regression in five distinct record-creation paths",()=>{
-  expect(source("routes/money.tsx")).toContain('amount: 0, shared: false');
+ it("ensures new payment paths use one private-by-default ledger",()=>{
   expect(source("routes/money.tsx")).toContain('amount,shared:false,status:"paid"');
-  expect(source("routes/plans.tsx")).toContain('status:"paid",shared:false,note:plan.title');
+  expect(source("routes/plans.tsx")).toContain('recordConfirmedExpense(');
+  expect(source("components/QuickExpenseCard.tsx")).toContain('recordConfirmedExpense(');
   expect(source("routes/explore.shopping.tsx")).toContain('recordBasketExpense(');
-  expect(source("lib/basketRecording.ts")).toContain('note:"Shopping basket",shared:false,status:"paid"');
+  expect(source("lib/basketRecording.ts")).toContain('recordConfirmedExpense(');
+  expect(source("lib/familyFinancialCommitments.ts")).toContain('recordConfirmedExpense(');
+  expect(source("lib/billPayment.ts")).toContain('recordConfirmedExpense(');
+  expect(source("lib/confirmedExpense.ts")).toContain('shared:input.shared??false');
   expect(source("components/CashFlowPlanner.tsx")).toContain('frequency:"monthly",nextDate:"",shared:false');
-  expect(source("lib/billPayment.ts")).toContain('note:bill.name,shared:false,billId');
  });
  it("shows the exact hypothetical sharing fields without leaking notes or a household member identity",async()=>{
   window.localStorage.setItem("wafferli.v13.money",JSON.stringify(real()));

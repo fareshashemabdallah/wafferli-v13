@@ -47,15 +47,12 @@ describe("remove distractions, not parent decision support",()=>{
   expect(screen.queryByRole("link",{name:/Family & Friends Circles/})).not.toBeInTheDocument();
   expect(screen.queryByRole("link",{name:/Community experiences/})).not.toBeInTheDocument();
  });
- it("Advisor has just one amount checker in the guided experience, not a second full form",()=>{
+ it("starts with the parent's question and keeps additional decision flows optional",()=>{
   draw(<Advisor/>);
-  expect(screen.queryByText("Ask one family question")).not.toBeInTheDocument();
-  expect(screen.getByRole("button",{name:"Compare ways forward"})).toHaveAttribute("aria-pressed","true");
-  expect(screen.queryByText("Check a specific purchase amount (optional)")).not.toBeInTheDocument();
-  expect(screen.queryByText("Ask people you trust (optional)")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Ask about my records"}));
   expect(screen.getByText("Ask one family question")).toBeInTheDocument();
-  expect(screen.getByRole("button",{name:"Ask about my records"})).toHaveAttribute("aria-pressed","true");
+  expect(screen.getByText("Optional: compare different ways forward")).toBeInTheDocument();
+  const advanced=screen.getByText("Optional: compare different ways forward").closest("details");
+  expect(advanced).not.toHaveAttribute("open");
   expect(screen.queryByText("About live AI (not activated yet)")).not.toBeInTheDocument();
  });
 });

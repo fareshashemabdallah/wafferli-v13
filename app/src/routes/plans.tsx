@@ -7,12 +7,13 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {useI18n} from "@/lib/i18n";
 import {uid,fmtJOD,useLocalState} from "@/lib/storage";
-import {sampleMoney,type MoneyState,type Expense} from "@/lib/money";
+import {sampleMoney,type MoneyState} from "@/lib/money";
 import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,makeFamilyPlan,markPlanComplete,moneyAmount,setPlanChoice,upcomingFamilyPlans,type FamilyPlan,type PlanKind} from "@/lib/familyPlans";
 import {PlanDecisionPanel} from "@/components/PlanDecisionPanel";
 import {checkFamilyPlan,postponeFlexiblePlan,markPlanDoneWithoutCost,addPlanActualCost} from "@/lib/familyPlanCheckIn";
 import {OccasionPreparationSection} from "@/components/OccasionPreparationSection";
 import {localToday} from "@/lib/cashflow";
+import {recordConfirmedExpense} from "@/lib/confirmedExpense";
 export const Route=createFileRoute("/plans")({
  head:()=>({meta:[{title:"My Plans — Dabberna"},{name:"description",content:"Plan meaningful purchases, outings and occasions in one private place."}]}),
  component:PlansPage
@@ -85,15 +86,20 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
  const recordExpense=(plan:FamilyPlan)=>{
   if(money.demo||!moneyReady)return setErr(ar?"ابدأ ببيانات مالية حقيقية قبل ربط المصروف.":"Switch from demo to your real finances before recording.");
   if(plan.status!=="completed"||plan.actualJod===undefined)return;
-  if(!category||!money.categories.some(c=>c.id===category))return setErr(ar?"اختَر فئة مصروف أولاً.":"Choose a spending category.");
+  if(category&& !money.categories.some(c=>c.id===category))return setErr(ar?"فئة غير صحيحة.":"Invalid category.");
   const expenseId="family-plan-"+plan.id;
-  if(money.expenses.some(e=>e.id===expenseId)||plan.expenseId)return setErr(ar?"هذا المصروف مسجّل بالفعل.":"This expense is already recorded.");
-  if(!window.confirm(ar?"سنضيف المبلغ الفعلي كمصروف مدفوع في المالية دون خصمه من رصيد البنك. هل تؤكد؟":"Record this actual amount as a paid expense in Money without changing the manually entered bank balance?"))return;
-  const expense:Expense={id:expenseId,date:localToday(),categoryId:category,amount:plan.actualJod,
-    status:"paid",shared:false,note:plan.title,sourcePlanId:plan.id};
-  setMoney(prev=>prev.expenses.some(e=>e.id===expenseId)?prev:{...prev,expenses:[expense,...prev.expenses]});
+  if(money.expenses.some(e=>e.id===expenseId||e.sourcePlanId===plan.id)||plan.expenseId)
+   return setErr(ar?"هذا المصروف مسجّل بالفعل.":"This expense is already recorded.");
+  if(!window.confirm(ar?"سنضيف المبلغ الفعلي كمصروف مدفوع دون خصم رصيدك اليدوي. هل تؤكد؟":"Record this actual cost once in Money without changing your manually entered cash?"))return;
+  const next=recordConfirmedExpense(money,{id:expenseId,date:localToday(),
+   categoryId:category||"uncategorized",amount:plan.actualJod,note:plan.title,
+   sourcePlanId:plan.id},"untracked");
+  if(next===money)return setErr(ar?"تعذّر التسجيل، راجع سجلاتك.":"Could not record. Review existing expenses.");
+  setMoney(prev=>recordConfirmedExpense(prev,{id:expenseId,date:localToday(),
+   categoryId:category||"uncategorized",amount:plan.actualJod!,note:plan.title,
+   sourcePlanId:plan.id},"untracked"));
   update({...plan,expenseId,updatedAt:new Date().toISOString()});setErr("");
-  toast.success(ar?"تم الربط بالمالية دون تعديل رصيد البنك.":"Recorded in Money without deducting cash.");
+  toast.success(ar?"تم تسجيل مصروف واحد في المالية.":"Recorded one expense in Money.");
  };
  const content=<>
    
@@ -249,7 +255,7 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
         <option value="">{ar?"اختر فئة مصروف":"Choose spending category"}</option>{money.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
        </select>}
        {money.demo?<Link to="/money" className="mt-2 inline-block text-sm font-semibold text-brand underline">{ar?"ابدأ بماليتي الحقيقية":"Start real Money first"}</Link>:
-        <Button variant="outline" className="mt-3" onClick={()=>recordExpense(currentPlan)} disabled={!category||money.categories.length===0||currentPlan.actualJod===undefined}>{ar?"سجّل المصروف في المالية":"Record actual expense in Money"}</Button>}
+        <Button variant="outline" className="mt-3" onClick={()=>recordExpense(currentPlan)} disabled={currentPlan.actualJod===undefined}>{ar?"سجّل المصروف في المالية":"Record actual expense in Money"}</Button>}
       </div>}
     </section>}
    </section>}
