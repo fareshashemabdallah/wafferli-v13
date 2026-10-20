@@ -1,5 +1,5 @@
 import {Link} from "@tanstack/react-router";
-import {ChevronDown,Languages,MoreHorizontal,Settings2,UsersRound} from "lucide-react";
+import {ChevronDown,Languages,MessageCircle,MoreHorizontal,Settings2,UsersRound} from "lucide-react";
 import type {CSSProperties,ReactNode} from "react";
 import {useI18n} from "@/lib/i18n";
 import {areaFromRoute,currentRoutePath,familyDestinations,type FamilyArea} from "@/lib/familyNavigation";
@@ -9,8 +9,8 @@ import {RhythmPageHeader} from "./RhythmPageHeader";
 import "./adventureWorldSkin.css";
 import {LocalSaveNotice} from "./LocalSaveNotice";
 
-// Exactly four main destinations for all families.
-// Shopping and specialist tools remain accessible under a single optional menu.
+// Exactly three primary destinations; Ask remains persistent and contextual.
+// Shopping and specialist tools remain accessible under one optional menu.
 // Page-specific links are reserved for tasks that actually need the next tool.
 const tools=[
  {to:"/explore/smartbuy" as const,en:"Shopping & Wishlist",ar:"المشتريات والرغبات"},
@@ -26,7 +26,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
  const {lang,setLang}=useI18n();const ar=lang==="ar";
  const location=currentRoutePath();
  const area:FamilyArea=homeLayout?"today":areaFromRoute(location);
- // Shopping is an optional tool, not part of any of the four pillars.
+ // Shopping is an optional contextual tool, not a primary area.
  const secondaryShopping=shopping||(location.startsWith("/explore/")&&!location.startsWith("/explore/weekend")&&!location.startsWith("/explore/together"));
  const text=(en:string,arabic:string)=>ar?arabic:en;
  const accent=familyDestinations.find(x=>x.id===area)!;
@@ -55,6 +55,9 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
      </Link>;
     })}
    </nav>
+   <Link to="/advisor" className="mt-4 flex min-h-12 items-center gap-3 rounded-2xl border border-[#E3DBEC] bg-[#F9F4FE] px-3 text-sm font-semibold text-[#6D528A] focus-visible:ring-2">
+    <MessageCircle className="size-5"/>{text("Ask Dabberna","اسأل دبّرنا")}
+   </Link>
    <details className="group mt-5 border-t border-[#DAECDF] pt-3">
     <summary className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-xs font-semibold text-[#637084] hover:bg-[#F9F2F5]">
      {text("Other tools","أدوات أخرى")}<ChevronDown className="ms-auto size-4 transition group-open:rotate-180"/>
@@ -77,6 +80,10 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
      {text("Understand · Prepare · Decide · Live","نفهم · نتحضّر · نقرّر · نعيش")}
     </span>
     <div className="ms-auto flex items-center gap-2">
+     <Link to="/advisor" aria-label={text("Ask Dabberna","اسأل دبّرنا")}
+       className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#E6D6ED] bg-[#F6EEFC] px-3 text-xs font-bold text-[#79569A] focus-visible:ring-2">
+       <MessageCircle className="size-4"/><span className="hidden min-[370px]:inline">{text("Ask","اسأل")}</span>
+     </Link>
      <details className="group relative lg:hidden">
       <summary aria-label={text("More features","مميزات أخرى")} className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-full border border-[#F0E4E9] bg-white text-[#536277] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]">
        <MoreHorizontal className="size-5"/>
@@ -105,7 +112,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
    </main>
   </div>
   <nav aria-label={mobileName}
-   className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#D1E9D8] bg-[#F9FFF9]/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,91,60,.16)] backdrop-blur-xl lg:hidden">
+   className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-[#D1E9D8] bg-[#F9FFF9]/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,91,60,.16)] backdrop-blur-xl lg:hidden">
    {familyDestinations.map(item=>{
     const Icon=item.icon,active=!secondaryShopping&&item.id===area;
     return <Link key={item.id} to={item.to} aria-current={active?"page":undefined}
@@ -116,5 +123,9 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
     </Link>;
    })}
   </nav>
+  <Link to="/advisor" aria-label={text("Ask Dabberna anywhere","اسأل دبّرنا من أي مكان")}
+   className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] end-3 z-30 grid size-12 place-items-center rounded-full border-2 border-white bg-[#398C68] text-white shadow-[0_10px_24px_-8px_rgba(32,89,66,.5)] transition hover:scale-105 focus-visible:ring-2 focus-visible:ring-[#358E6A] lg:bottom-6 lg:end-6">
+   <MessageCircle className="size-5"/><span className="sr-only">{text("Ask Dabberna","اسأل دبّرنا")}</span>
+  </Link>
  </div>;
 }
