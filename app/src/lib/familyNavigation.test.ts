@@ -2,10 +2,10 @@ import {describe,expect,it} from "vitest";
 import {areaFromRoute,familyDestinations} from "@/lib/familyNavigation";
 
 describe("single Dabberna family navigation",()=>{
- it("has four unique connected pillars in both languages",()=>{
-  expect(familyDestinations.map(x=>x.id)).toEqual(["today","money","ask","family"]);
-  expect(new Set(familyDestinations.map(x=>x.to)).size).toBe(4);
-  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Decide","Plans"]);
+ it("has three unique family areas in both languages",()=>{
+  expect(familyDestinations.map(x=>x.id)).toEqual(["today","money","family"]);
+  expect(new Set(familyDestinations.map(x=>x.to)).size).toBe(3);
+  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Family"]);
   for(const x of familyDestinations){
    expect(x.en.length).toBeGreaterThan(0);
    expect(x.ar.length).toBeGreaterThan(0);
@@ -13,7 +13,7 @@ describe("single Dabberna family navigation",()=>{
   }
  });
  it.each([
-  ["/","today"],["/advisor","ask"],["/family","family"],["/plans","family"],["/money","money"],["/household","money"],
+  ["/","today"],["/advisor","today"],["/family","family"],["/plans","family"],["/money","money"],["/household","money"],
   ["/explore/smartbuy","today"],["/explore/shopping","today"],["/explore/market","today"],
   ["/explore/restaurants","today"],["/explore/services","today"],["/explore/weekend","family"],
   ["/calendar","family"],["/occasions","family"],["/space","family"]
