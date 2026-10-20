@@ -167,10 +167,10 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
      {t("Explore the cash-flow timeline","شوف جدول السيولة")}<ChevronRight className="size-4 rtl:rotate-180"/></button>
    </div>
    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-    {([{label:t("Income & paydays","الدخل والرواتب"),emoji:"💵",desc:t("Expected and received","متوقع ومستلم"),action:onBills},
+    {[{label:t("Income & paydays","الدخل والرواتب"),emoji:"💵",desc:t("Expected and received","متوقع ومستلم"),action:onBills},
       {label:t("Bills & commitments","الفواتير والالتزامات"),emoji:"🏠",desc:t("Dates and paid status","المواعيد وحالة الدفع"),action:onBills},
       {label:t("Everyday spending","المصاريف اليومية"),emoji:"🥦",desc:t("Groceries, fuel and more","مونة وبنزين وغيرها"),action:()=>setScreen("pace")},
-      {label:t("Annual payments","المصاريف السنوية"),emoji:"🚘",desc:t("Insurance, tax, building","تأمين وضرائب وبناية"),action:()=>setScreen("annual")}])).map(x=>
+      {label:t("Annual payments","المصاريف السنوية"),emoji:"🚘",desc:t("Insurance, tax, building","تأمين وضرائب وبناية"),action:()=>setScreen("annual")}].map(x=>
      <button key={x.label} type="button" onClick={x.action} className="min-h-28 rounded-2xl border border-[#E4E9DE] bg-white p-3 text-start transition hover:border-[#A6CEAC]">
       <span className="text-2xl">{x.emoji}</span><strong className="mt-2 block text-xs">{x.label}</strong>
       <span className="mt-1 block text-[11px] text-[#809083]">{x.desc}</span></button>)}
