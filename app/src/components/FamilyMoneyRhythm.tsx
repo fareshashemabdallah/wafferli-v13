@@ -161,8 +161,16 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
     {forecast.missingDates>0&&<p className="mt-2 text-xs text-[#986D52]">{forecast.missingDates} {t("schedule(s) lack valid dates and cannot be forecast.","موعد دخل أو فاتورة بلا تاريخ صحيح ولا يدخل بالتوقع.")}</p>}
     <p className="mt-2 text-xs text-[#748878]">{t("A forecast isn't verified cash. Past payments are not subtracted from the manually entered opening balance twice.",
      "التوقع مش رصيد مؤكد. المصاريف القديمة ما بتنخصم مرتين من السيولة اللي أدخلتها.")}</p>
-    <button type="button" className="mt-3 min-h-11 rounded-xl border border-[#B6D8BD] bg-white px-4 text-xs font-bold text-[#357C56]" onClick={onBills}>
-     {t("Edit income, bill dates or cash balance","عدّل مواعيد الدخل والفواتير أو السيولة")}</button>
+    <div className="mt-3 flex flex-wrap gap-2">
+     <button type="button" className="min-h-11 rounded-xl border border-[#B6D8BD] bg-white px-3 text-xs font-bold text-[#357C56]"
+      onClick={()=>setQuickEdit("cash")}>{t("Edit starting cash & reserve","عدّل السيولة والاحتياطي")}</button>
+     <button type="button" className="min-h-11 rounded-xl border border-[#B6D8BD] bg-white px-3 text-xs font-bold text-[#357C56]"
+      onClick={()=>setQuickEdit("income")}>{t("Edit income dates","عدّل مواعيد الدخل")}</button>
+     <button type="button" className="min-h-11 rounded-xl border border-[#B6D8BD] bg-white px-3 text-xs font-bold text-[#357C56]"
+      onClick={()=>setQuickEdit("bill")}>{t("Edit bill dates","عدّل مواعيد الفواتير")}</button>
+     <button type="button" className="min-h-11 text-xs font-bold text-[#387C59] underline" onClick={onBills}>
+      {t("Confirm paid bills and received income","تأكيد الفواتير المدفوعة والدخل المستلم")}</button>
+    </div>
    </div>
    <div className={soft}>
     <h3 className="text-sm font-extrabold">{t("What is coming up","شو جاي بعدين")}</h3>
