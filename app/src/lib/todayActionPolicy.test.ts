@@ -64,7 +64,7 @@ describe("Today: one contextual next action",()=>{
   const b=buildTodayActionPolicy(data(money,[gift]));
   expect(b.action?.kind).toBe("bill");
   expect(b.action?.id).toContain("overdue");
-  expect(money.commitments?.[0]?.paidDates).toBeUndefined();
+  expect(money.commitments).toEqual([{id:"school",name:"School fee",amount:80,frequency:"once",dueDate:"2026-10-18"}]);
  });
  it("respects lifestyle preference without suppressing genuine financial warnings",()=>{
   const prefs={...defaultFamilyPreferences,lifestyle:false};
