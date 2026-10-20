@@ -52,7 +52,7 @@ export function QuickMoneySetup({money,setMoney,compact=false}:Props){
   }
   const input:ProgressiveMoneyFacts=fact==="income"?
    {income:value,incomeConfidence:approximate?"estimate":"confirmed",zeroIncomeConfirmed:zeroIncome}:
-   {[fact]:value};
+   fact==="essential"?{essential:value}:fact==="other"?{other:value}:{savings:value};
   if(money.demo&&!window.confirm(tr("Start your own Money records? Sample finance amounts will be replaced; family members, plans and occasions remain unchanged.",
    "تبدأ سجلات مالية لعيلتك؟ سيتم استبدال الأرقام المالية التجريبية فقط. ملفات العيلة والخطط والمناسبات ما بتتغيّر.")))return;
   if(applyProgressiveMoneyFacts(money,input)===money){
