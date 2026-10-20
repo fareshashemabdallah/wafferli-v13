@@ -1,4 +1,4 @@
-import {isDuplicateFamilyMoment} from "@/lib/canonicalFamilyInput";
+import {isDuplicateFamilyMoment,isDuplicateProfileBirthday} from "@/lib/canonicalFamilyInput";
 import { useI18n } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Cake, CalendarHeart, Heart, Pencil, Plus, Trash2 } from "lucide-react";
@@ -77,6 +77,9 @@ function Space() {
       id:occasion.id||uid(),title,date:occasion.date,kind:occasion.kind,
       annual:occasion.annual,note:occasion.note.trim().slice(0,240),
     };
+    if(isDuplicateProfileBirthday(members,record)){
+      setOccasionError(ar?"عيد الميلاد موجود بملف هذا الشخص وبيظهر بالتقويم تلقائياً. عدّل تاريخ الميلاد بملف العيلة.":"This birthday is already in the family profile and calendar. Edit the saved person's birthday instead.");return;
+    }
     if(isDuplicateFamilyMoment(events,record)){setOccasionError(ar?"هذه المناسبة موجودة مسبقاً في تقويم العيلة.":"This family occasion is already on your calendar.");return;}
     setEvents(old=>occasion.id?old.map(x=>x.id===occasion.id?record:x):[...old,record]);
     setOccasion(null);setOccasionError("");
