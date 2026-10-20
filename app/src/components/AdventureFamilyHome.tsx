@@ -1,81 +1,187 @@
+import {useState} from "react";
 import {Link,useNavigate} from "@tanstack/react-router";
-import {ArrowRight,Compass,ShieldCheck} from "lucide-react";
+import {ArrowRight,CalendarDays,ChevronRight,Eye,EyeOff,Gift,Heart,Info,ShieldCheck,Wallet} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
-import {RobotBuddy,WorldScene} from "./AdventureArtwork";
-import {FamilyMoneyJourneyCard} from "./FamilyMoneyJourneyCard";
+import {useLocalState,writeLocal,fmtJOD} from "@/lib/storage";
+import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
+import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan} from "@/lib/familyPlans";
+import type {FamilyMoment} from "@/lib/familyCalendar";
+import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
+import {buildTodayActionPolicy,type TodayAction,type TodayWeekItem} from "@/lib/todayActionPolicy";
 import {TodayQuickActions} from "./TodayQuickActions";
-import "./adventureFamilyHero.css";
+import {RobotBuddy} from "./AdventureArtwork";
 
-/** The ONE family story at the centre of the app.
- * Detailed money and planning are owned by their workspaces, not repeated here.
- * The old optional summary, a second 'next step', activity catalogue and
- * four extra navigation panels were intentionally removed from Home.
+const panel="rounded-[1.5rem] border border-[#DFE8DE] bg-white/95 p-4 shadow-[0_12px_30px_-27px_rgba(44,71,55,.25)] sm:p-5";
+/** Today is one contextual briefing, not a second Money or Family editor.
+ * No historical local preferences or records are changed by opening it.
  */
 export function AdventureFamilyHome(){
  const navigate=useNavigate();
  const {lang}=useI18n(),ar=lang==="ar";
  const t=(en:string,arabic:string)=>ar?arabic:en;
- const ideas=[
-  {to:"/explore/weekend" as const,icon:"🌳",en:"Find something to enjoy",ar:"دور على نشاط تستمتعوا فيه",
-   descriptionEn:"Real mapped places and family activity ideas",descriptionAr:"أماكن على الخريطة وأفكار تناسب العيلة"},
-  {to:"/explore/smartbuy" as const,icon:"🛍️",en:"Choose what to buy",ar:"اختار شو لازم تشتري",
-   descriptionEn:"Compare options before committing",descriptionAr:"قارن الخيارات قبل ما تلتزم"},
-  {to:"/calendar" as const,icon:"🎂",en:"Prepare a family moment",ar:"حضّر مناسبة للعيلة",
-   descriptionEn:"Occasions and dates, connected to your plans",descriptionAr:"المناسبات والمواعيد مرتبطة بخطط العيلة"}
- ];
- return <main className="mx-auto max-w-[1040px] space-y-4 pb-6 text-[#153A37]" data-adventure-home>
-  <header className="flex items-center justify-between gap-3 px-1">
-   <div>
-    <p className="text-xs font-extrabold tracking-[.13em] text-[#458778]">{t("ONE FAMILY, ONE RHYTHM","عيلة واحدة، وإيقاع واحد")}</p>
-    <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Dabberna <span className="text-[#448979]">✦</span></h1>
-    <p className="mt-1 text-sm text-[#5F746D]">{t("Your family money and life, cared for together","مال عيلتك وحياتها، منعتني فيهم سوا")}</p>
+ const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
+ const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
+ const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [prefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
+ const [privateVisible,setPrivateVisible]=useState(false);
+ const ready=moneyReady&&membersReady&&momentsReady&&plansReady&&prefsReady;
+ const brief=ready?buildTodayActionPolicy({money,members,moments,plans,preferences:prefs}):null;
+ const current=brief?.action;
+ const tr=(en:string,arabic:string)=>ar?arabic:en;
+ function continueAction(action:TodayAction|TodayWeekItem){
+  if(action.planId)writeLocal(ACTIVE_PLAN_KEY,action.planId);
+  if(action.occasionKey)writeLocal("focusedOccasionKey",action.occasionKey);
+ }
+ const actionLabel=(a:TodayAction)=>t(a.actionEn,a.actionAr);
+ const makeWeekLink=(item:TodayWeekItem)=><Link key={item.id} to={item.route} onClick={()=>continueAction(item)}
+  className="flex min-h-12 items-center gap-2 rounded-xl border border-[#E9EDE7] bg-white px-3 py-2 text-sm text-[#385448] hover:border-[#A9D4B9] focus-visible:ring-2 focus-visible:ring-[#2F8F69]">
+  <CalendarDays className="size-4 shrink-0 text-[#61947A]"/>
+  <span className="min-w-0 flex-1 truncate">{item.title}</span>
+  <span className="shrink-0 text-[11px] text-[#687F74]">{item.date}</span>
+  <ChevronRight className="size-4 shrink-0 rtl:rotate-180"/>
+ </Link>;
+ const sensitiveAmounts=privateVisible&&!money.demo;
+ return <div className="mx-auto max-w-[930px] space-y-3 pb-5 text-[#263E36]" data-adventure-home>
+  <header className="relative isolate overflow-hidden rounded-[1.7rem] border border-[#D7E8D9] bg-[linear-gradient(120deg,#FAFBF2_5%,#E6F5E8_60%,#FFEFE4_100%)] p-4 sm:p-6" aria-label={t("Dabberna family greeting","ترحيب دبّرنا بالعائلة")}>
+   <div className="relative z-10 max-w-[58%] pb-2 sm:max-w-[65%]">
+    <p className="text-xs font-semibold text-[#4F8270]">{t("Welcome to Dabberna","أهلاً في دبّرنا")}</p>
+    <h1 className="mt-1 text-[clamp(1.45rem,5vw,2.4rem)] font-black leading-tight text-[#234E3D]">
+     {t("Today, with your family","اليوم مع العيلة")}
+    </h1>
+    <p className="mt-2 text-xs leading-relaxed text-[#5B7867] sm:text-sm">
+     {t("One clear next step. More time for what matters.","خطوة واحدة واضحة، ووقت أكتر للي بهم العيلة.")}
+    </p>
    </div>
-   <Link to="/space" aria-label={t("Your family","عيلتك")}
-    className="grid size-12 shrink-0 place-items-center rounded-2xl border border-[#C5E3D8] bg-[#F2FCF4] text-2xl shadow-sm">🏡</Link>
+   <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"}
+    alt={t("Illustrated family together","رسم عائلة معاً")}
+    className="pointer-events-none absolute bottom-[-4px] end-0 z-0 h-[145px] w-[49%] object-contain object-bottom sm:h-[195px]" loading="eager"/>
   </header>
 
-  <section className="adventure-family-hero rounded-[2rem] border border-[#CFE8DD] bg-[linear-gradient(165deg,#B8E6F5_0%,#E1F5F4_40%,#FFF2D8_77%,#F4E4C9_100%)] shadow-[0_22px_48px_-37px_rgba(22,76,67,.55)]" aria-label={t("Welcome to your family adventure","أهلاً بمغامرة العيلة")}>
-   <div className="adventure-family-hero__scene" aria-hidden="true">
-    <WorldScene place="home" className="adventure-family-hero__world"/>
-   </div>
-   <div className="adventure-family-hero__greeting" data-testid="adventure-family-greeting">
-    <p className="text-sm font-extrabold leading-snug text-[#183F38] sm:text-lg">{t("How can our money care for our family?","كيف في مالنا يساعد عيلتنا؟")}</p>
-    <p className="mt-1 text-xs leading-relaxed text-[#4D6B62]">{t("Understand, protect and prepare—so we can live well together.","نفهم ونحمي ونتحضّر، لنعيش منيح سوا.")}</p>
-   </div>
-   <div className="adventure-family-hero__art" data-testid="adventure-family-portrait-area">
-    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"}
-     alt={t("Cartoon family with two parents and children","عيلة كرتونية فيها أم وأب وأطفال")}
-     loading="eager" className="adventure-family-hero__family"/>
-    <RobotBuddy className="adventure-family-hero__robot"/>
+  <section className={panel} aria-label={t("Family briefing","ملخص العيلة")}>
+   <div className="flex items-start gap-3">
+    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#E6F2E6] text-[#3B815D]">
+     <Heart className="size-5" aria-hidden="true"/></span>
+    <div className="min-w-0 flex-1">
+     <h2 className="text-base font-extrabold">{t("How your family is doing","كيف أمور العيلة؟")}</h2>
+     <p className="mt-1 text-sm leading-relaxed text-[#60766A]">
+      {!ready?t("Reading your saved family information…","عم نراجع معلومات العيلة المحفوظة…"):
+       brief?.moneyStatus==="risk"?
+       t("Your entered figures suggest a financial issue to review. This is not a verified bank assessment.",
+        "الأرقام اللي أدخلتها بتشير لموضوع مالي بحاجة لمراجعة، مش تقييم بنكي مؤكّد."):
+       current?t("One saved family matter could use your attention. Everything else can wait.",
+        "في شغلة محفوظة بتستاهل انتباهك، والباقي فيك تتركه لوقت تاني."):
+       t("Nothing in your saved records needs urgent action. Enjoy your day.",
+        "ما في شي عاجل ضمن المعلومات المحفوظة. استمتعوا بيومكم.")}
+     </p>
+    </div>
    </div>
   </section>
 
-  <FamilyMoneyJourneyCard/>
-  <TodayQuickActions onAsk={()=>navigate({to:"/advisor"})}/>
-
-  <details className="rounded-[1.4rem] border border-[#DDE9DF] bg-[#F9FCF8] p-4 sm:p-5" aria-label={t("Explore family possibilities","اكتشف فرص لعيلتك")}>
-  <summary className="min-h-11 cursor-pointer text-sm font-extrabold text-[#2D7559]">{t("More family options (optional)","خيارات عائلية أخرى (اختياري)")}</summary>
-   <div className="mb-3 flex items-start gap-2">
-    <Compass className="mt-0.5 size-5 shrink-0 text-[#348269]"/>
-    <div>
-     <h2 className="text-base font-extrabold">{t("When you're ready, explore possibilities","وقت تكون جاهز، اكتشف الخيارات")}</h2>
-     <p className="mt-1 text-xs leading-relaxed text-[#668174]">{t("Family experiences and purchases support the journey; they're not another money dashboard.","الطلعات والمشتريات جزء من الحياة، مش شاشة مالية ثانية.")}</p>
+  {current?<section className="overflow-hidden rounded-[1.7rem] border border-[#F0DAE5] bg-[linear-gradient(135deg,#FFF9FA,#FCEEF3_62%,#FFF5E9)] p-4 shadow-[0_18px_35px_-30px_rgba(146,63,97,.3)] sm:p-6"
+    aria-label={t("One next action","الخطوة القادمة")} data-testid="today-one-action">
+   <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-[#B2467F]">
+    {current.kind==="gift"||current.kind==="occasion"?<Gift className="size-4"/>:
+     current.kind==="financial"||current.kind==="bill"?<Wallet className="size-4"/>:<Heart className="size-4"/>}
+    {t("One next action","خطوة واحدة مهمة")}
+   </div>
+   <h2 className="mt-3 text-base font-semibold text-[#564256]">{ar?current.titleAr:current.titleEn}</h2>
+   <p className="mt-1 text-lg font-black leading-snug text-[#263D37] sm:text-xl">
+    {current.kind==="gift"?t("Choose the right gift option","اختار أنسب خيار للهدية"):
+     current.kind==="bill"?t("Check the recorded payment","راجع الدفعة المسجّلة"):
+     current.kind==="financial"?t("Review your family's money picture","راجع الوضع المالي للعيلة"):
+     current.kind==="occasion"?t("Prepare this family moment","حضّر هالمناسبة"):
+     t("Continue your family plan","كمل خطة العيلة")}
+   </p>
+   <p className="mt-2 max-w-[680px] text-sm leading-relaxed text-[#665D62]">
+    {ar?current.detailAr:current.detailEn}
+   </p>
+   {current.kind==="gift"&&<div className="mt-3 flex flex-wrap gap-2 text-xs">
+    <span className="rounded-full border border-[#EDD8E1] bg-white/75 px-3 py-1.5">
+     {t("Planned gift: ","الهدية المخططة: ")}
+     {sensitiveAmounts?fmtJOD(current.giftEstimateJod??0):t("Hidden","مخفي")}
+    </span>
+    <span className="rounded-full border border-[#EDD8E1] bg-white/75 px-3 py-1.5">
+     {current.sellerCount?t("Seller option saved","خيار متجر محفوظ"):t("No seller selected yet","ما تم اختيار متجر بعد")}
+    </span>
+    <span className="rounded-full border border-[#EDD8E1] bg-white/75 px-3 py-1.5">
+     {t("Not recorded as paid","لم تُسجل كدفعة")}
+    </span>
+   </div>}
+   <div className="mt-4 flex flex-wrap items-center gap-2">
+    <Link to={current.route} onClick={()=>continueAction(current)}
+     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[linear-gradient(100deg,#D96E7C,#C84381)] px-5 text-sm font-bold text-white shadow-sm transition hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[#B64680]">
+     {actionLabel(current)}<ArrowRight className="size-4 rtl:rotate-180"/>
+    </Link>
+    <Link to="/advisor" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[#E9D4E2] bg-white/80 px-4 text-sm font-semibold text-[#895778]">
+     {t("Ask Dabberna","اسأل دبّرنا")}
+    </Link>
+   </div>
+   <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[#EADBE1] pt-3 text-xs text-[#745E6D]">
+    <Info className="size-4 shrink-0"/><strong>{t("Why now?","ليش هلّق؟")}</strong>
+    <span>{ar?current.whyAr:current.whyEn}</span>
+    {current.date&&<span className="rounded-full bg-white/80 px-2 py-1">{current.date}</span>}
+   </div>
+  </section>:ready?<section className={panel} aria-label={t("No urgent next action","لا توجد خطوة عاجلة")}>
+    <div className="flex items-center gap-3">
+     <Heart className="size-6 shrink-0 text-[#509677]"/>
+     <div><h2 className="font-extrabold">{t("You're free to enjoy your day","خدوا راحتكم اليوم")}</h2>
+      <p className="mt-1 text-sm text-[#677A72]">{t("No need to manufacture a task. Add something only when it matters.",
+       "مش ضروري نختلق مهمة. أضف شي بس وقت يكون مهم.")}</p></div>
     </div>
-   </div>
-   <div className="grid gap-2 sm:grid-cols-3">
-    {ideas.map(item=><Link key={item.to} to={item.to}
-     className="flex min-h-24 items-center gap-3 rounded-xl border border-[#DEEADF] bg-white p-3 transition hover:bg-[#F0F8EE]">
-      <span className="text-2xl" aria-hidden="true">{item.icon}</span>
-      <span className="min-w-0 flex-1">
-       <strong className="block text-sm text-[#244D3D]">{ar?item.ar:item.en}</strong>
-       <span className="mt-1 block text-xs leading-snug text-[#718378]">{ar?item.descriptionAr:item.descriptionEn}</span>
-      </span>
-      <ArrowRight className="size-4 shrink-0 text-[#44886F] rtl:rotate-180"/>
-     </Link>)}
-   </div>
-  </details>
-  <p className="flex items-start gap-2 px-1 text-[11px] leading-relaxed text-[#70837B]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>
-   {t("Your private family financial details remain on this device during the pilot. Plans, dates and costs are recorded in their original workspaces—never duplicated by this home.",
-      "تفاصيل مالية العيلة خاصة ومحفوظة على هالجهاز خلال التجربة. الخطط والمواعيد والمصاريف بتبقى بسجلاتها الأصلية، مش نسخ مكررة هون.")}</p>
- </main>;
+   </section>:null}
+
+  <div className="grid gap-3 md:grid-cols-2">
+   <section className={panel} aria-label={t("This week","هذا الأسبوع")}>
+    <div className="flex items-center justify-between gap-2">
+     <h2 className="flex items-center gap-2 text-sm font-extrabold"><CalendarDays className="size-4 text-[#4F956E]"/>{t("This week","هذا الأسبوع")}</h2>
+     <Link to="/family" className="text-xs font-semibold text-[#497E66] underline">{t("See family","شوف العيلة")}</Link>
+    </div>
+    {brief?.week.length?<div className="mt-3 space-y-2">{brief.week.map(makeWeekLink)}</div>:
+     <p className="mt-2 text-xs leading-relaxed text-[#738378]">
+      {t("No other scheduled items found in the next seven days. This only reflects saved records.",
+       "ما في مواعيد أخرى مسجلة خلال سبعة أيام. هذا حسب البيانات المحفوظة فقط.")}
+     </p>}
+   </section>
+   <section className={panel} aria-label={t("Money at a glance","لمحة عن المال")}>
+    <div className="flex items-center justify-between gap-2">
+     <h2 className="flex items-center gap-2 text-sm font-extrabold"><Wallet className="size-4 text-[#4F956E]"/>{t("Money at a glance","لمحة عن المال")}</h2>
+     <button type="button" disabled={!ready||money.demo} aria-pressed={privateVisible}
+      aria-label={privateVisible?t("Hide private amounts","إخفاء المبالغ الخاصة"):t("Show private amounts","إظهار المبالغ الخاصة")}
+      onClick={()=>setPrivateVisible(x=>!x)}
+      className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-[#E2EAE2] bg-[#FAFCF8] px-3 text-xs font-semibold text-[#427E61] disabled:opacity-50">
+      {privateVisible?<EyeOff className="size-4"/>:<Eye className="size-4"/>}
+      {privateVisible?t("Hide","إخفاء"):t("Reveal","إظهار")}
+     </button>
+    </div>
+    <div className="mt-3 grid grid-cols-2 gap-2">
+     <div className="rounded-xl bg-[#F4F9F2] p-3">
+      <p className="text-xs text-[#63776A]">{t("Recorded bills: next 7 days","الفواتير المسجّلة: ٧ أيام")}</p>
+      <strong className="mt-1 block text-lg text-[#307855]">{sensitiveAmounts?fmtJOD(brief?.upcomingBillsJod??0):"••••"}</strong>
+     </div>
+     <div className="rounded-xl bg-[#FFF5F7] p-3">
+      <p className="text-xs text-[#866874]">{t("Actual recorded spending this month","المصاريف المدفوعة المسجّلة للشهر")}</p>
+      <strong className="mt-1 block text-lg text-[#B34D7C]">{sensitiveAmounts?fmtJOD(brief?.monthPaidJod??0):"••••"}</strong>
+     </div>
+    </div>
+    <p className="mt-3 flex gap-2 text-xs leading-relaxed text-[#758378]">
+     <ShieldCheck className="mt-0.5 size-4 shrink-0"/>
+     {money.demo?t("Only sample money is saved; no real family amounts are shown.","المبالغ الموجودة تجريبية؛ لا نعرضها كمالية حقيقية."):
+      brief?.moneyStatus==="partial"?t("Your information is partial. Neither estimates nor planned costs prove money is available.",
+       "معلومات المال جزئية. التقديرات والخطط لا تثبت توفر المبلغ."):
+      t("Amounts come from your entries, not a bank. Planned costs do not count as paid until confirmed.",
+       "الأرقام من إدخالاتك، مش من البنك. التكاليف المخططة مش مدفوعة إلا بعد تأكيدها.")}
+    </p>
+    <Link to="/money" className="mt-2 inline-flex min-h-10 items-center gap-1 text-xs font-bold text-[#417E60] underline">
+     {t("Review Money","راجع المالية")}<ArrowRight className="size-4 rtl:rotate-180"/>
+    </Link>
+   </section>
+  </div>
+
+  <TodayQuickActions onAsk={()=>navigate({to:"/advisor"})}/>
+  <p className="px-2 text-[11px] leading-relaxed text-[#789086]">
+   {t("Your family records stay on this device during the pilot. Today only reads existing information; it never creates a purchase, payment or bank transaction.",
+    "سجلات العيلة محفوظة على هالجهاز خلال التجربة. اليوم يعرض معلومات موجودة فقط؛ ما بينشئ شراء أو دفع أو عملية بنكية.")}
+  </p>
+ </div>;
 }
