@@ -9,7 +9,7 @@ export type PlanKind="purchase"|"outing"|"occasion"|"other";
 export type PlanStatus="planning"|"decided"|"completed";
 export type OccasionCost={amountJod:number;dueDate:string;/** Idea is a potential cost, planned enters forecasts, firm is parent-confirmed commitment. */certainty?:"idea"|"planned"|"firm"};
 export type OccasionPreparation={
- gift:OccasionCost&{description:string};
+ gift:OccasionCost&{description:string;/** Parent-entered chosen seller, not paid or externally verified. */selectedQuote?:{productName:string;store:string;totalJod:number;checkedByParent:boolean;parentCheckedOn?:string}};
  celebration:OccasionCost;
  extras:OccasionCost;
 };
