@@ -76,11 +76,16 @@ function MoneyPage() {
   return (
     <AppShell title={tr("Our Finances")}>
       
+      {section!=="overview"&&<>
+      <button type="button" onClick={()=>setSection("overview")}
+       className="mb-3 inline-flex min-h-11 items-center rounded-xl border border-[#CFE1D1] bg-white px-4 text-sm font-bold text-[#397D58]">
+       ← {ar?"رجوع إلى خريطة المال":"Back to Money Map"}
+      </button>
       <div role="tablist" aria-label={ar?"أقسام المالية":"Money sections"} className="mb-3 grid grid-cols-3 gap-1 rounded-[1.25rem] border border-[#CFE4D8] bg-[#E5F3E6] p-1.5">
         {([{id:"overview",en:"Our Money",ar:"مال العيلة",icon:"🏡"},{id:"spending",en:"Spending",ar:"المصاريف",icon:"🛍️"},{id:"planning",en:"Bills",ar:"الفواتير",icon:"📅"}] as const)
           .map(v=><button role="tab" aria-selected={section===v.id} key={v.id} type="button" onClick={()=>setSection(v.id)}
             className={"flex min-h-12 items-center justify-center gap-1.5 rounded-xl px-1 text-xs font-bold transition sm:text-sm "+(section===v.id?"bg-white text-[#227355] shadow-sm":"text-[#59786A] hover:bg-white/60")}><span aria-hidden="true">{v.icon}</span>{ar?v.ar:v.en}</button>)}
-      </div>
+      </div></>}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
         <span className="text-xs text-muted-foreground">{tr("Saved on this device only. Use fictional figures during the pilot.")}</span>
