@@ -83,7 +83,7 @@ export function recordFamilyCommitmentPayment(
   date:dateKey(now),categoryId:categoryId||"uncategorized",amount:actual,
   plannedAmount:entry.amountJod,sourcePlanId:entry.planId,
   sourceOccasionCost:entry.kind,note:entry.planTitle+" · "+entry.label,
-  shared:true
+  shared:false
  },"untracked");
  return next===money?null:next;
 }
