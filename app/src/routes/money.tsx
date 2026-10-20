@@ -1,6 +1,7 @@
 import { HouseholdPresencePanel } from "@/components/HouseholdPresencePanel";
 import { createFileRoute } from "@tanstack/react-router";
 import { CashFlowPlanner } from "@/components/CashFlowPlanner";
+import {FamilyMoneyRhythm} from "@/components/FamilyMoneyRhythm";
 import { MoneyGuidance } from "@/components/MoneyGuidance";
 import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
@@ -42,6 +43,8 @@ function MoneyPage() {
   const [section,setSection]=useState<"overview"|"spending"|"planning">("overview");
   const [categoryEditorOpen,setCategoryEditorOpen]=useState(false);
   const [incomeEditorOpen,setIncomeEditorOpen]=useState(false);
+  const [legacyMoneyOpen,setLegacyMoneyOpen]=useState(false);
+  const [budgetOpenRequest,setBudgetOpenRequest]=useState(0);
   const [categoryNavigationRequest,setCategoryNavigationRequest]=useState(0);
   const categoryEditorRef=useRef<HTMLDetailsElement>(null);
   const [s, setS, ready] = useLocalState("money", sampleMoney());
@@ -97,7 +100,28 @@ function MoneyPage() {
         </div></details>
       </div>
 
-      {section==="overview"&&<MoneyOverviewPanel state={s} setState={setS} goTo={setSection}
+      {section==="overview"&&<FamilyMoneyRhythm state={s} setState={setS}
+        onBills={()=>setSection("planning")} onSpending={()=>setSection("spending")}
+        onCategories={()=>{setLegacyMoneyOpen(true);setBudgetOpenRequest(n=>n+1);setCategoryEditorOpen(true);}}/>}
+      {section==="overview"&&s.demo&&<div className="mt-3 rounded-2xl border border-[#EBDABE] bg-[#FFF8ED] p-4">
+       <p className="text-sm font-semibold">{ar?"عم تشوف بيانات تجريبية":"You are viewing sample finances"}</p>
+       <p className="mt-1 text-xs text-[#826E56]">{ar?
+        "ابدأ بسجلات فعلية فقط بعد الموافقة. رح نحافظ على ملفات العيلة والتقويم والخطط.":
+        "You can switch to real Money when ready. Family profiles, calendar and plans stay intact."}</p>
+       <button type="button" className="mt-2 min-h-11 rounded-xl bg-[#36855E] px-4 text-xs font-bold text-white"
+         onClick={()=>{if(window.confirm(ar?
+          "تريد استبدال بيانات المالية التجريبية فقط، مع الاحتفاظ بسجلات العيلة؟":
+          "Replace only sample Money with a blank real Money record? Keep all family, calendar and plan records?"))setS(old=>old.demo?emptyRealMoney():old);}}>
+        {ar?"ابدأ بماليتي الفعلية":"Start with real Money"}
+       </button>
+      </div>}
+      {section==="overview"&&<details open={legacyMoneyOpen} onToggle={e=>setLegacyMoneyOpen(e.currentTarget.open)}
+        className="mt-3 rounded-2xl border border-[#E0EADF] bg-[#F8FBF6] p-3 sm:p-4">
+        <summary className="min-h-11 cursor-pointer text-sm font-bold text-[#3F805B]">
+         {ar?"خيارات إضافية: تصنيف الميزانية وتفاصيلها":"More Money tools: detailed budget and category editor"}
+        </summary>
+        <div className="mt-4"><MoneyOverviewPanel state={s} setState={setS} goTo={setSection}
+        forceBudgetOpen={budgetOpenRequest}
         onManageCategories={openCategoryEditor}
         onEditIncome={()=>{setIncomeEditorOpen(true);setSection("overview");}}
         householdPanel={<HouseholdPresencePanel members={members} money={s} setMoney={setS}/>}
@@ -124,7 +148,7 @@ function MoneyPage() {
             <Settings key={`${c.monthlyIncome}:${recurringSavingsGoal}`} income={c.monthlyIncome} target={recurringSavingsGoal} hasSources={!!s.incomeSources?.length}
               onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
           </details>
-        </div>}/>}
+        </div>}/></div></details>}
 
       {section==="overview"&&<details className="editorial-card mb-4 px-4 py-3">
        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
