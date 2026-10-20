@@ -16,9 +16,9 @@ vi.mock("@/components/LiveFamilyAdvisor",()=>({LiveFamilyAdvisor:()=> <section d
 vi.mock("@/lib/liveAiClient",()=>({LIVE_AI_UI_ENABLED:false}));
 afterEach(cleanup);
 describe("Dabberna one rhythm across pages",()=>{
- it("uses the same four main chapters with no duplicate route",()=>{
-  expect(familyDestinations.map(x=>x.to)).toEqual(["/","/money","/advisor","/family"]);
-  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Decide","Plans"]);
+ it("uses three main areas with Ask available throughout",()=>{
+  expect(familyDestinations.map(x=>x.to)).toEqual(["/","/money","/family"]);
+  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Family"]);
  });
  it("gives Money, Decide, Calendar and shopping the same compact title treatment",()=>{
   for(const route of ["/money","/advisor","/calendar","/explore/smartbuy"]){
