@@ -1,4 +1,4 @@
-import {buildForecast,futureDate,legacyIncome,roundJod,scheduleDates,monthlyTotal,type Frequency} from "./cashflow";
+import {buildForecast,futureDate,legacyIncome,roundJod,scheduleDates} from "./cashflow";
 import type {MoneyState,Category} from "./money";
 import type {FamilyPlan} from "./familyPlans";
 import {familyForecastCommitments} from "./familyFinancialCommitments";
@@ -24,7 +24,6 @@ const money=(n:number)=>typeof n==="number"&&Number.isFinite(n)&&n>=0;
 const ym=(d:string)=>d.slice(0,7);
 const lastDay=(d:string)=>new Date(Number(d.slice(0,4)),Number(d.slice(5,7)),0).getDate();
 const dayCount=(d:string)=>lastDay(d);
-const nextMonth=(d:string)=>{const n=new Date(Number(d.slice(0,4)),Number(d.slice(5,7)),1,12);return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-01"};
 const max=(a:number,b:number)=>Math.max(a,b);
 export function paceAllowed(category:Category|undefined,commitments:readonly {categoryId?:string}[]):boolean{
  return !!category&&money(category.planned)&&category.planned>0&&
