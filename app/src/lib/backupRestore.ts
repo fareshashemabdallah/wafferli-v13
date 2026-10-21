@@ -117,7 +117,9 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
    priceCheckedMonth:z.string().regex(/^\\d{4}-\\d{2}$/).optional()
   }).strict(),500).optional(),
   categories:many(opts({
-   id,name:text,type:z.enum(["fixed","variable","periodic"]),planned:maxNumber
+   id,name:text,type:z.enum(["fixed","variable","periodic"]),planned:maxNumber,
+    visualGroup:z.enum(["groceries","fuel","restaurants","children","housing","health","education","utilities","gifts","travel","household","clothing","other","custom"]).optional(),
+    visualIcon:z.enum(["groceries","fuel","restaurants","children","housing","health","education","utilities","gifts","travel","household","clothing","other"]).optional()
   })),expenses:many(expense),demo:z.boolean(),
   incomeSources:many(incomeSource).optional(),commitments:many(commitment).optional(),
   spendingPaces:many(strict({categoryId:id,intervalDays:z.union([z.literal(7),z.literal(10),z.literal(14),z.literal(15),z.literal(30)]),nextDate:isoDate}),60).optional(),
