@@ -64,11 +64,10 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
   expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-focus",localDate);
   expect(screen.queryByTestId("embedded-plans")).not.toBeInTheDocument();
  });
- it("keeps specialist family experiences available but not as extra global tabs",()=>{
+ it("removes the duplicate outings, circles and occasions launcher",()=>{
   draw();
-  fireEvent.click(screen.getByText("More family experiences"));
-  expect(screen.getByRole("link",{name:"Outings"})).toHaveAttribute("href","/explore/weekend");
-  expect(screen.getByRole("link",{name:"Celebrations"})).toHaveAttribute("href","/occasions");
-  expect(screen.getByRole("link",{name:"Family & Friends Circles"})).toHaveAttribute("href","/community");
+  expect(screen.queryByText("More family experiences")).not.toBeInTheDocument();
+  expect(screen.queryByRole("link",{name:"Family & Friends Circles"})).not.toBeInTheDocument();
+  expect(screen.getByRole("navigation",{name:"Family Life sections"})).toBeInTheDocument();
  });
 });
