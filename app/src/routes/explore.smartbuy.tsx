@@ -1,4 +1,5 @@
 import { useI18n } from "@/lib/i18n";
+import {CleanShoppingHome} from "@/components/CleanShoppingHome";
 import { createFileRoute,Link } from "@tanstack/react-router";
 import { CheckCircle2, Plus, RotateCcw, Trash2 } from "lucide-react";
 import {useEffect,useState} from "react";
@@ -32,10 +33,15 @@ export const Route = createFileRoute("/explore/smartbuy")({
       { property: "og:description", content: "Personalized family wishlists and saved shopping needs — no invented retailer offers." },
     ],
   }),
-  component: SmartBuy,
+  component: ShoppingEntry,
 });
 
 type Alt = { id: string; store: string; price: string; extra: string; verified: boolean; quality?: string; fit?: string; note?: string; sourceUrl?:string; checkedDate?:string|undefined };
+
+function ShoppingEntry(){
+ const legacy=typeof window!=="undefined"&&new URLSearchParams(window.location.hash.split("?")[1]??"").get("mode")==="legacy";
+ return legacy?<SmartBuy/>:<CleanShoppingHome/>;
+}
 
 export function SmartBuy() {
   const { tr,lang } = useI18n();
