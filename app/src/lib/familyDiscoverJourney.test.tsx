@@ -25,6 +25,21 @@ vi.mock("@/lib/community",()=>({
 }));
 afterEach(()=>{cleanup();localStorage.clear();vi.clearAllMocks();});
 describe("one complete parent discovery-to-Family journey",()=>{
+ it("automatically searches from a fresh explicit Today idea and never exposes profile data in search",async()=>{
+  localStorage.setItem("wafferli.v13.oneTapDiscoverIntent",JSON.stringify({kind:"park",requestedAt:Date.now()}));
+  localStorage.setItem("wafferli.v13.familyPreferences",JSON.stringify({city:"Irbid"}));
+  render(<I18nProvider><FamilyDiscoverHome/></I18nProvider>);
+  expect(await screen.findByText("Sample Garden")).toBeInTheDocument();
+  expect(findWeekendPlaces).toHaveBeenCalledTimes(1);
+  expect(findWeekendPlaces).toHaveBeenCalledWith("irbid");
+  expect(localStorage.getItem("wafferli.v13.oneTapDiscoverIntent")).toBe("null");
+  expect(screen.queryByText("No matching places")).not.toBeInTheDocument();
+ });
+ it("does not search external listings merely because the parent opens Discover",()=>{
+  render(<I18nProvider><FamilyDiscoverHome/></I18nProvider>);
+  expect(findWeekendPlaces).not.toHaveBeenCalled();
+  expect(screen.getByRole("button",{name:"Explore this idea"})).toBeInTheDocument();
+ });
  it("starts without onboarding, explains review evidence, and saves one outing without payment",async()=>{
   render(<I18nProvider><FamilyDiscoverHome/></I18nProvider>);
   expect(screen.getByText("Less searching. More living.")).toBeInTheDocument();
