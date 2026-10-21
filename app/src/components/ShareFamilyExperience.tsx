@@ -21,13 +21,14 @@ export function ShareFamilyExperience(){
   p.decisionContext?.reflection&&p.decisionContext?.city&&p.decisionContext?.placeId&&!p.decisionContext?.publicSharedAt)
   .sort((a,b)=>(b.completedAt??"").localeCompare(a.completedAt??""))[0];
  useEffect(()=>{
+  if(!candidate)return;
   let mounted=true;
   void db.auth.getUser().then(({data}:{data:{user:User|null}})=>{if(mounted)setUser(data.user);}).catch(()=>{});
   const {data}=db.auth.onAuthStateChange((_event:string,session:{user:User}|null)=>{
    if(mounted)setUser(session?.user??null);
   });
   return ()=>{mounted=false;data.subscription.unsubscribe();};
- },[]);
+ },[candidate?.id]);
  if(!ready||!candidate)return null;
  const sendLogin=(e:FormEvent)=>{
   e.preventDefault();setLoading(true);setNotice("");
