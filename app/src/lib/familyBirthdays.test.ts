@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {birthDateFromParts,birthdayParts,birthYears,memberAgeYears,memberAgeLabel,updateMemberBirthday} from "./familyBirthdays";
+import {birthDateFromParts,birthdayParts,birthYears,memberAgeYears,memberAgeMonths,memberAgeDisplay,memberAgeLabel,updateMemberBirthday} from "./familyBirthdays";
 import {memberBirthdayMoments,upcomingMoments} from "./familyCalendar";
 import {childAgeOptions,suggestedActivityThemes} from "./familyActivityDiscovery";
 import type {Member} from "./money";
@@ -56,6 +56,17 @@ describe("Mobile birthday input and optional birth year",()=>{
   expect(monthOnly.birthday).toBeUndefined();
   expect(monthOnly.birthdayMonthDay).toBe("09-01");
   expect(memberAgeYears(monthOnly,new Date(2027,9,21))).toBeNull();
+ });
+ it("shows a toddler's age in completed months, then switches to years on their second birthday",()=>{
+  const toddler=member({birthday:"2025-09-20",birthdayMonthDay:"09-20"});
+  expect(memberAgeMonths(toddler,new Date(2026,9,21))).toBe(13);
+  expect(memberAgeDisplay(toddler,false,new Date(2026,9,21))).toBe("13 months");
+  expect(memberAgeDisplay(toddler,true,new Date(2026,9,21))).toContain("13");
+  expect(memberAgeDisplay(toddler,false,new Date(2027,8,19))).toBe("23 months");
+  expect(memberAgeDisplay(toddler,false,new Date(2027,8,20))).toBe("2 years");
+  expect(memberAgeMonths(toddler,new Date(2027,8,20))).toBeNull();
+  expect(memberAgeDisplay(member({birthday:"2026-10-01"}),false,new Date(2026,9,21))).toBe("0 months");
+  expect(memberAgeDisplay(member({ageYears:1,birthdayMonthDay:"01-01"}),false,new Date(2026,9,21))).toBe("1 year");
  });
  it("keeps older manual age and age range records working where birth year is absent",()=>{
   expect(memberAgeYears(member({ageYears:5,birthdayMonthDay:"04-20"}),new Date(2026,9,21))).toBe(5);
