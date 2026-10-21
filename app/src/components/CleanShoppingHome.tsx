@@ -3,6 +3,7 @@ import {Link} from "@tanstack/react-router";
 import {ShoppingBag,Plus,Search,ReceiptText,Heart,CheckCircle2} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {useI18n} from "@/lib/i18n";
+import {WishlistDecisionPanel} from "./WishlistDecisionPanel";
 import {uid,useLocalState,fmtJOD} from "@/lib/storage";
 import {FAMILY_WISHLIST_KEY,makeWishlistItem,type WishlistItem,type WishlistKind} from "@/lib/familyWishlist";
 import {isSampleBasketEntry,basketExpenseId,recordBasketExpense,type BasketEntry} from "@/lib/basketRecording";
@@ -27,6 +28,7 @@ export function CleanShoppingHome(){
  const [name,setName]=useState(""),[destination,setDestination]=useState<"basket"|"wish">("basket");
  const [kind,setKind]=useState<WishlistKind>("household"),[message,setMessage]=useState("");
  const [selected,setSelected]=useState("");
+ const [selectedWishId,setSelectedWishId]=useState("");
  const gift=plans.find(p=>p.id===activePlanId&&p.kind==="occasion"&&!!p.occasionPreparation&&p.status!=="completed");
  const ready=basketReady&&wishesReady&&moneyReady&&cycleReady;
  useEffect(()=>{if(cycleReady&&!cycle)setCycle(uid());},[cycleReady,cycle,setCycle]);
@@ -102,7 +104,7 @@ export function CleanShoppingHome(){
     {real.length>0&&<div className="mt-3 space-y-2">
      <p className="text-xs font-semibold">{t("Basket","السلة")} · {real.length}</p>
      {real.slice(0,20).map(item=><div key={item.id} className="flex flex-wrap items-center gap-2 rounded-lg bg-[#F7FAF9] p-2">
-      <button type="button" className="min-w-0 flex-1 text-start text-sm font-semibold underline-offset-2 hover:underline" onClick={()=>setSelected(item.name)}>{item.name}</button>
+      <button type="button" className="min-w-0 flex-1 text-start text-sm font-semibold underline-offset-2 hover:underline" onClick={()=>{setSelected(item.name);setSelectedWishId("");}}>{item.name}</button>
       {!recorded&&<input className="h-10 w-20 rounded-md border bg-white px-2 text-sm" aria-label={t("Price for ","سعر ")+item.name} inputMode="decimal" value={item.price||""}
        onChange={e=>{const n=Number(e.target.value);if(e.target.value===""||Number.isFinite(n)&&n>=0&&n<=5000)setBasket(old=>old.map(v=>v.id===item.id?{...v,price:e.target.value===""?0:Math.round(n*100)/100}:v));}}/>}
       {recorded&&<span className="text-xs">{fmtJOD(item.price)}</span>}
@@ -111,7 +113,7 @@ export function CleanShoppingHome(){
     </div>}
     {activeWish.length>0&&<div className="mt-3 space-y-2">
      <p className="text-xs font-semibold">{t("Wishlist","الرغبات")} · {activeWish.length}</p>
-     {activeWish.slice(0,12).map(item=><button key={item.id} type="button" onClick={()=>setSelected(item.name)}
+     {activeWish.slice(0,12).map(item=><button key={item.id} type="button" onClick={()=>{setSelected(item.name);setSelectedWishId(item.id);}}
       className="flex min-h-10 w-full items-center gap-2 rounded-lg bg-[#F7FAF9] px-3 text-start text-sm"><Heart className="size-4 text-[#BB7C9B]"/>{item.name}</button>)}
     </div>}
     {selected&&<div className="mt-3 rounded-xl border border-[#D9E5E6] bg-[#F7FAFC] p-3">
@@ -119,8 +121,9 @@ export function CleanShoppingHome(){
      <p className="mt-1 text-xs text-[#687984]">{t("External seller search; this is not a live price quote or an endorsed product.","بحث خارجي عن البائع، وليس عرض سعر مباشر أو توصية مؤكدة.")}</p>
      <div className="mt-2 flex flex-wrap gap-2">
       {searchLink&&<a href={searchLink} target="_blank" rel="noopener noreferrer" className={secondary}><Search className="size-4"/>{t("Check seller listings","تحقق من عروض المتاجر")}</a>}
-      <button type="button" className={secondary} onClick={()=>setSelected("")}>{t("Close","أغلق")}</button>
+      <button type="button" className={secondary} onClick={()=>{setSelected("");setSelectedWishId("");}}>{t("Close","أغلق")}</button>
      </div>
+     {selectedWishId&&<WishlistDecisionPanel itemId={selectedWishId}/>}
     </div>}
    </section>
    <section className="rounded-[1.5rem] border border-[#E0E9E7] bg-white p-4 sm:p-5">
