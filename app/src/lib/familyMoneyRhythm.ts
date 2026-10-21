@@ -57,10 +57,14 @@ function predictedCategoryEvents(state:MoneyState,pace:SpendingPace,today:string
   const elapsed=Math.floor((new Date(today+"T12:00:00").getTime()-new Date(anchor+"T12:00:00").getTime())/86400000);
   anchor=futureDate(anchor,(Math.floor(elapsed/pace.intervalDays)+1)*pace.intervalDays);
  }
+ // Allocate each calendar month's allowance across that month's complete
+ // cadence, THEN show only events inside the requested horizon. Otherwise a
+ // 7-day forecast mistakenly charges a whole month's groceries this week.
+ const projectionMonthEnd=ym(end)+"-"+String(dayCount(end)).padStart(2,"0");
  const dates:string[]=[];
  for(let i=0;i<100;i++){
   const d=futureDate(anchor,i*pace.intervalDays);
-  if(d>end)break;
+  if(d>projectionMonthEnd)break;
   if(d>=today)dates.push(d);
  }
  const monthlyGroups=new Map<string,string[]>();
@@ -78,7 +82,7 @@ function predictedCategoryEvents(state:MoneyState,pace:SpendingPace,today:string
   const per=roundJod(target/arr.length);
   arr.forEach((d,i)=>{
    const amount=i===arr.length-1?roundJod(target-per*(arr.length-1)):per;
-   if(amount<=0)return;
+   if(amount<=0||d>end)return;
    events.push({id:"pace:"+cat.id+":"+d,date:d,label:cat.name,
     amountJod:-amount,kind:"pace",categoryId:cat.id});
   });
