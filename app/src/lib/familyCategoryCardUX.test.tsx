@@ -53,7 +53,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
  });
  it("adds a custom school fees category as an independent illustrated tile and allows edits",()=>{
   render(<App/>);
-  fireEvent.click(screen.getByRole("button",{name:/Add category/})[0]!);
+  fireEvent.click(screen.getAllByRole("button",{name:/Add category/})[0]!);
   const dlg=screen.getByRole("dialog",{name:"Add family category"});
   fireEvent.change(within(dlg).getByLabelText("Category name"),{target:{value:"School Fees"}});
   fireEvent.change(within(dlg).getByLabelText("Usual monthly allowance (JOD)"),{target:{value:"220"}});
@@ -71,7 +71,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
   fireEvent.click(screen.getByTestId("category-picture-groceries"));
   fireEvent.change(screen.getByLabelText("Usual monthly allowance (JOD)"),{target:{value:"100"}});
   fireEvent.click(screen.getByRole("button",{name:"Save category"}));
-  fireEvent.click(screen.getByRole("button",{name:/Add category/})[0]!);
+  fireEvent.click(screen.getAllByRole("button",{name:/Add category/})[0]!);
   fireEvent.change(screen.getByLabelText("Category name"),{target:{value:"Groceries"}});
   fireEvent.change(screen.getByLabelText("Usual monthly allowance (JOD)"),{target:{value:"300"}});
   fireEvent.click(screen.getByRole("button",{name:"Save category"}));
