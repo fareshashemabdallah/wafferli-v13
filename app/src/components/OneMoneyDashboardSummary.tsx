@@ -52,6 +52,22 @@ export function OneMoneyDashboardSummary({state,forecast,revealed,onIncome,onCas
     <strong className="mt-2 block break-words text-lg font-black tabular-nums text-[#316C4C] sm:text-xl">{v.value}</strong>
     <p className="mt-1 text-[10px] leading-relaxed text-[#718675]">{v.subtitle}</p>
    </button>)}</div>
+  <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#DCEADD] bg-[#FAFCF8] px-4 py-3">
+   <div className="min-w-0">
+    <p className="text-xs font-bold text-[#456D52]">💰 {t("Manually entered cash","السيولة المدخلة يدوياً")}</p>
+    <strong className="mt-1 block text-sm font-black text-[#347C54]">{money(overview.openingCash)}</strong>
+    <p className="text-[10px] text-[#79897E]">{overview.cashUpdatedAt?
+     t("Last entered: ","آخر تحديث: ")+overview.cashUpdatedAt:t("No bank connection or verified balance","ما في ربط بنكي أو رصيد مؤكد")}</p>
+   </div>
+   <div className="min-w-0">
+    <p className="text-xs font-bold text-[#456D52]">🎯 {t("Monthly savings target","هدف الادخار الشهري")}</p>
+    <strong className="mt-1 block text-sm font-black text-[#347C54]">{state.savingsTargetAmount!==undefined||state.savingsPct>0?
+     money(state.savingsTargetAmount??Math.round((overview.monthlyIncome??0)*state.savingsPct)/100):t("Not set","غير محدد")}</strong>
+    <p className="text-[10px] text-[#79897E]">{t("A target, not money already saved","هدف مش مبلغ مدّخر فعلياً")}</p>
+   </div>
+   <button type="button" className="min-h-11 rounded-xl border border-[#C9E0CD] bg-white px-3 text-xs font-bold text-[#347B56]"
+    onClick={onCash}>{t("Edit cash","عدّل السيولة")}</button>
+  </div>
   <div className="rounded-2xl border border-[#E0EADC] bg-white p-4">
    <div className="flex flex-wrap items-center justify-between gap-2">
     <h3 className="text-sm font-black text-[#315B42]">{t("Monthly plan vs paid","خطة الشهر مقابل المدفوع")}</h3>
