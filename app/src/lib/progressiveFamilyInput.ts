@@ -1,4 +1,5 @@
 import {emptyRealMoney} from "./moneyOverview";
+import {memberAgeLabel} from "./familyBirthdays";
 import type {Category,Member,MoneyState} from "./money";
 import {realFamilyMembers} from "./familySetup";
 import type {HouseholdPresence} from "./householdPresence";
@@ -67,7 +68,5 @@ export function householdCountSource(members:readonly Member[],presence:Househol
 }
 /** Use a known specific age preferentially, or a legacy age band, not both. */
 export function familyAgeLabel(member:Member):string|null{
- if(typeof member.ageYears==="number"&&Number.isInteger(member.ageYears)&&member.ageYears>=0&&member.ageYears<=120)
-  return String(member.ageYears);
- return member.ageGroup.trim()||null;
+ return memberAgeLabel(member);
 }
