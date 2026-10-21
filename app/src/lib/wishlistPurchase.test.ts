@@ -6,7 +6,8 @@ const now=new Date("2026-10-21T10:00:00.000Z");
 const item=makeWishlistItem({id:"gift-1",name:"School shoes",kind:"children"},now)!;
 describe("wishlist purchase: one confirmed expense, no invented savings",()=>{
  it("never charges an item merely because it was shortlisted",()=>{
-  expect(recordWishlistPurchase(sampleMoney(),item,40,"2026-10-21")).toBe(sampleMoney());
+  const demo=sampleMoney();
+  expect(recordWishlistPurchase(demo,item,40,"2026-10-21")).toBe(demo);
   const real={...sampleMoney(),demo:false,expenses:[]};
   expect(recordWishlistPurchase(real,item,0,"2026-10-21")).toBe(real);
   expect(real.expenses).toHaveLength(0);
