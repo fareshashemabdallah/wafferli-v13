@@ -47,20 +47,8 @@ export function FamilyLifePage(){
     {label("Your family's time, plans and responsibilities — organized together.",
      "مواعيد العيلة وخططها ومسؤولياتها — كلها بمكان واحد.")}
    </p>
-   <nav aria-label={label("Family Life sections","أقسام حياة العيلة")} className="rounded-2xl border border-[#DCE9DF] bg-white p-2">
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-     {views.map(item=>{
-      const selected=view===item.id;
-      const Icon=item.icon;
-      return <button key={item.id} type="button" aria-current={selected?"page":undefined}
-       aria-pressed={selected} onClick={()=>setView(item.id)}
-       className={"flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-[#479F7E] "+
-       (selected?"bg-[#E4F4E8] text-[#226C4D]":"text-[#657B6D] hover:bg-[#F3F8F2]")}>
-       <Icon className="size-4 shrink-0"/>{ar?item.ar:item.en}
-      </button>;
-     })}
-    </div>
-   </nav>
+   {view!=="overview"&&<button type="button" onClick={()=>{setView("overview");setCalendarFocus(undefined);}}
+    className="inline-flex min-h-11 items-center rounded-xl border border-[#DCE9DF] bg-white px-4 text-sm font-bold text-[#31775B]">{label("← Back to family timeline","↩ رجوع لحياة العيلة")}</button>}
    {view==="overview"&&<div className="space-y-4">
     <section className={card}>
      <div className="flex flex-wrap items-center justify-between gap-3">
@@ -120,19 +108,19 @@ export function FamilyLifePage(){
       </button>
      </section>
     </div>
-    <section className={card}>
-     <div className="flex items-center justify-between gap-2">
+    <details className={card}>
+     <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2">
       <div className="flex items-center gap-2"><ClipboardList className="size-5 text-[#4A997F]"/>
        <h2 className="text-base font-extrabold">{label("Family responsibilities","مهام العيلة")}</h2></div>
       <button onClick={()=>setView("tasks")} type="button" className="inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#408E74] underline">
        {label("Manage tasks","إدارة المهام")}<ChevronRight className="size-4 rtl:rotate-180"/>
       </button>
-     </div>
+     </summary>
      <p className="mt-2 text-sm text-[#687587]">{ready?
       label(String(activeTasks.dueSoon)+" due within 7 days · "+String(activeTasks.overdue)+" overdue",
        String(activeTasks.dueSoon)+" خلال ٧ أيام · "+String(activeTasks.overdue)+" متأخرة")
       :label("Loading tasks…","جارٍ تحميل المهام…")}</p>
-    </section>
+    </details>
    </div>}
    {view==="calendar"&&<FamilyCalendarWorkspace key={calendarFocus??"calendar"} embedded {...(calendarFocus?{focusDate:calendarFocus}:{})}/>}
    {view==="plans"&&<PlansWorkspace embedded/>}
