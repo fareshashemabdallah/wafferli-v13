@@ -1,5 +1,7 @@
 import {assessFinancialReality} from "./financialReality";
 import {getMoneyOverview} from "./moneyOverview";
+import {buildFamilyMoneyRhythm} from "./familyMoneyRhythm";
+import {confirmedAdjustmentsInWindow} from "./monthAwareMoney";
 import {allFamilyMoments,dateKey,shiftDays,upcomingMoments,type FamilyMoment} from "./familyCalendar";
 import {realFamilyMembers} from "./familySetup";
 import {planKey} from "./occasionAdvisor";
@@ -75,6 +77,33 @@ export function buildTodayActionPolicy(input:{
     whyEn:"Based only on the costs and dates you entered",
     whyAr:"حسب التكاليف والمواعيد التي أدخلتها"
    });
+  }
+  // A confirmed, month-specific spending plan can affect cash timing. This is
+  // a read-only observation of existing records, not a new journey or alert store.
+  // Only surface it when there is enough dated information, parent-entered cash
+  // is recent, and the reserve risk is within two weeks.
+  if(preferences.financeTips&&money.cashOnHand!=null&&money.cashUpdatedAt&&
+     daysFrom(money.cashUpdatedAt,now)>=-30&&daysFrom(money.cashUpdatedAt,now)<=0&&
+     (money.commitments??[]).length>0&&
+     (money.incomeSources??[]).some(i=>i.nextDate>=today)){
+   const changes=confirmedAdjustmentsInWindow(money,today,dateKey(shiftDays(now,30)));
+   const pacedChange=changes.some(a=>(money.spendingPaces??[]).some(p=>p.categoryId===a.categoryId));
+   if(pacedChange){
+    const rhythm=buildFamilyMoneyRhythm(money,plans,today,30,true);
+    const riskDate=rhythm.firstReserveRiskDate;
+    if(rhythm.missingDates===0&&riskDate&&daysFrom(riskDate,now)>=0&&daysFrom(riskDate,now)<=14){
+     add(4,riskDate,{
+      kind:"financial",id:"timing:"+riskDate,
+      titleEn:"Your upcoming cash-flow timing deserves a review",
+      titleAr:"توقيت السيولة القادم بحاجة لمراجعة",
+      detailEn:"Your confirmed monthly spending plan and recorded payment dates suggest a possible dip below your chosen reserve around "+riskDate+". Expected income is not guaranteed; review the timeline before optional commitments.",
+      detailAr:"خطة المصاريف الشهرية المؤكدة ومواعيد الدفعات المسجلة بتشير لاحتمال نزول تحت الاحتياطي بتاريخ "+riskDate+". الدخل المتوقع غير مضمون؛ راجع الجدول قبل أي التزامات اختيارية.",
+      actionEn:"Review the Money timeline",actionAr:"راجع جدول المال",route:"/money",
+      whyEn:"Based on your own monthly adjustments and dated commitments",
+      whyAr:"حسب تعديلاتك الشهرية ومواعيد الالتزامات المسجلة",date:riskDate
+     });
+    }
+   }
   }
   const due=bills.find(x=>!x.overdue&&daysFrom(x.displayDate,now)<=3);
   if(due){
