@@ -115,7 +115,7 @@ export function Explore(){
     <div className="mt-3 flex flex-wrap gap-3 text-xs font-semibold text-[#317F61]">
      <a href={selected.osmUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-1 underline">{t("See source map","شوف المصدر")} <ArrowUpRight className="size-3"/></a>
      <a href={weekendPlaceSearchUrl(selected,city)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-1 underline">{t("Verify venue details","تحقق من المكان")} <ArrowUpRight className="size-3"/></a>
-     <Link to="/experience" className="inline-flex min-h-10 items-center underline" search={{}}>{t("Share or read more experiences","شارك أو اقرأ تجارب أكثر")}</Link>
+     <Link to="/experience" className="inline-flex min-h-10 items-center underline">{t("Share or read more experiences","شارك أو اقرأ تجارب أكثر")}</Link>
     </div>
     <form onSubmit={save} className="mt-4 space-y-3 border-t pt-4">
      <h3 className="flex items-center gap-2 font-bold"><CalendarPlus className="size-4"/>{t("Keep this in our family plan","احفظه بخطة العيلة")}</h3>
