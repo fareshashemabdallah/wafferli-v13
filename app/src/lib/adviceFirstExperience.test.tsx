@@ -7,6 +7,7 @@ import {FamilyStarterCard} from "@/components/FamilyStarterCard";
 import {FamilyNextActions} from "@/components/FamilyNextActions";
 import {GuidedFamilyAdvisor} from "@/components/GuidedFamilyAdvisor";
 import {sampleMoney} from "@/lib/money";
+import {dateKey,shiftDays} from "@/lib/familyCalendar";
 
 vi.mock("@tanstack/react-router",()=>({
  Link:({to,children,activeOptions:_,...props}:{to:string;children?:ReactNode;activeOptions?:unknown}&AnchorHTMLAttributes<HTMLAnchorElement>)=>
@@ -15,7 +16,7 @@ vi.mock("@tanstack/react-router",()=>({
 beforeEach(()=>{window.localStorage.clear();vi.restoreAllMocks()});
 afterEach(()=>{cleanup();window.localStorage.clear();vi.restoreAllMocks()});
 const draw=(view:ReactNode)=>render(<I18nProvider>{view}</I18nProvider>);
-const event={id:"school-gala",title:"School celebration",date:"2026-10-20",kind:"school",annual:false};
+const event={id:"school-gala",title:"School celebration",date:dateKey(shiftDays(new Date(),5)),kind:"school",annual:false};
 describe("Dabberna advice-first parent experience",()=>{
  it("shows three connected family areas with persistent Ask and settings",()=>{
   draw(<AppShell><p>Family briefing</p></AppShell>);
@@ -61,8 +62,8 @@ describe("Dabberna advice-first parent experience",()=>{
   const plans=JSON.parse(window.localStorage.getItem("wafferli.v13.familyPlans")||"[]");
   expect(plans).toHaveLength(1);
   expect(plans[0]).toMatchObject({
-   title:"School celebration",date:"2026-10-20",kind:"occasion",
-   sourceRef:"occasion:school-gala@2026",status:"planning"
+   title:"School celebration",date:event.date,kind:"occasion",
+   sourceRef:"occasion:school-gala@"+event.date.slice(0,4),status:"planning"
   });
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
   expect(window.localStorage.getItem("wafferli.v13.familyCalendar")).toBe(JSON.stringify([event]));
@@ -70,7 +71,7 @@ describe("Dabberna advice-first parent experience",()=>{
  it("recognizes an already linked occasion plan and avoids asking to create another one",async()=>{
   window.localStorage.setItem("wafferli.v13.familyCalendar",JSON.stringify([event]));
   const existing={id:"already",title:event.title,date:event.date,kind:"occasion",status:"planning",
-   sourceRef:"occasion:school-gala@2026",createdAt:"2026-10-15T10:00:00Z",updatedAt:"2026-10-15T10:00:00Z"};
+   sourceRef:"occasion:school-gala@"+event.date.slice(0,4),createdAt:"2026-10-15T10:00:00Z",updatedAt:"2026-10-15T10:00:00Z"};
   window.localStorage.setItem("wafferli.v13.familyPlans",JSON.stringify([existing]));
   draw(<FamilyNextActions/>);
   expect(await screen.findByRole("link",{name:/Open existing plan/})).toBeInTheDocument();
