@@ -3,6 +3,7 @@ import type {SavingsGoal} from "./savingsGoals";
 import type {BudgetItem} from "./householdBudgetBuilder";
 import { monthlyTotal } from "./cashflow";
 import { monthCarryover } from "./monthlyCarryover";
+import {effectiveCategoryAllowance} from "./monthAwareMoney";
 export type CatType = "fixed" | "variable" | "periodic";
 export type Category = { id: string; name: string; type: CatType; planned: number; /** Optional family-declared priority, independent of fixed/variable schedule. */ priority?:"essential"|"protected"|"flexible"; /** Unreviewed legacy values remain estimates. */ amountConfidence?:"estimate"|"confirmed" };
 export type BudgetAllocation = {kind:"variable"|"savings"; categoryId?:string; delta:number; approvedAt:string};
@@ -21,6 +22,8 @@ export type MoneyState = {
   incomeSources?:IncomeSource[]; commitments?:Commitment[];
   /** Optional forecast cadence for existing monthly category envelopes. No extra expenses. */
   spendingPaces?:import("./familyMoneyRhythm").SpendingPace[];
+  /** Optional parent-confirmed category allowance for one YYYY-MM, never an expense or recurring bill. */
+  categoryMonthlyPlans?:Record<string,Record<string,number>>;
   /** Manual actual cash available now, intentionally not inferred from historic expense entries. */
   cashOnHand?:number|null; cashReserve?:number;
   /** Date on which the user last refreshed the manually entered cash balance. */
@@ -79,7 +82,7 @@ export function computeMoney(s: MoneyState, now = new Date()) {
   const savingsTarget=Math.round((baseSavings+(monthly?.savingsDelta??0))*100)/100;
   const carryover=monthCarryover(s,ym);
   const spendable = monthlyIncome - savingsTarget + carryover.net;
-  const plannedBy=(id:string)=>Math.round(((s.categories.find(c=>c.id===id)?.planned??0)+(monthly?.categoryDeltas[id]??0))*100)/100;
+  const plannedBy=(id:string)=>effectiveCategoryAllowance(s,id,ym);
   const planned = Math.round(s.categories.reduce((a, c) => a + plannedBy(c.id), 0)*100)/100;
   const spent = month.reduce((a, e) => a + e.amount, 0);
   const day = now.getDate();
