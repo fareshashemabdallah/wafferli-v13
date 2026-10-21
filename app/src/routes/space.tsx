@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { dateKey,formatMomentDate,kindNames,parseCalendarDate,type FamilyMoment,type MomentKind } from "@/lib/familyCalendar";
 import { sampleMembers, type Member } from "@/lib/money";
-import {birthdayMonths,birthdayDays,birthYears,birthdayParts,birthDateFromParts,memberAgeYears,updateMemberBirthday} from "@/lib/familyBirthdays";
+import {birthdayMonths,birthdayDays,birthYears,birthdayParts,birthDateFromParts,memberAgeYears,memberAgeDisplay,updateMemberBirthday} from "@/lib/familyBirthdays";
 import { uid, useLocalState } from "@/lib/storage";
 
 export const Route = createFileRoute("/space")({
@@ -165,7 +165,7 @@ export function Space() {
                   </NativeSelect>
                 </label>
               </div>
-              {edit.birthday&&<p className="mt-2 text-xs font-semibold text-[#477B5D]">{ar?"العمر المحسوب اليوم: ":"Calculated age today: "}{memberAgeYears(edit)} {ar?"سنة":"years"}</p>}
+              {edit.birthday&&<p className="mt-2 text-xs font-semibold text-[#477B5D]">{ar?"العمر المحسوب اليوم: ":"Calculated age today: "}{memberAgeDisplay(edit,ar)}</p>}
               <p className="mt-2 text-[11px] text-muted-foreground">{ar?"ما في حاجة لكتابة (-) على الهاتف. سنة الميلاد اختيارية، ومعلومات العيلة تظل خاصة على هذا الجهاز.":"No hyphen to type on your phone. Birth year remains optional and family information stays private on this device."}</p>
             </div>
             {err&&<p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
@@ -180,7 +180,7 @@ export function Space() {
             <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#E9F0E8] font-display text-lg font-semibold text-brand">{m.name[0]?.toUpperCase()}</span>
             <div className="min-w-0 flex-1">
               <p className="font-medium">{tr(m.name)}</p>
-              <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")}{memberAgeYears(m)!==null?" · "+memberAgeYears(m)+" "+(ar?"سنة":"years"):m.ageGroup?" · "+m.ageGroup:""}{m.prefs&&" · "+m.prefs}</p>
+              <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")}{memberAgeDisplay(m,ar)?" · "+memberAgeDisplay(m,ar):""}{m.prefs&&" · "+m.prefs}</p>
               {(m.birthday||m.birthdayMonthDay)&&
                 <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":"Birthday: "}{m.birthday?formatMomentDate(m.birthday,ar)+" · "+m.birthday.slice(0,4):m.birthdayMonthDay??""}</p>}
             </div>
