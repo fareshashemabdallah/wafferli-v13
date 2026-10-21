@@ -17,8 +17,8 @@ vi.mock("@/lib/liveAiClient",()=>({LIVE_AI_UI_ENABLED:false}));
 afterEach(cleanup);
 describe("Dabberna one rhythm across pages",()=>{
  it("uses three main areas with Ask available throughout",()=>{
-  expect(familyDestinations.map(x=>x.to)).toEqual(["/","/money","/family"]);
-  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Family"]);
+  expect(familyDestinations.map(x=>x.to)).toEqual(["/","/money","/family","/explore","/explore/smartbuy"]);
+  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Family","Explore","Shop"]);
  });
  it("gives Money, Decide, Calendar and shopping the same compact title treatment",()=>{
   for(const route of ["/money","/advisor","/calendar","/explore/smartbuy"]){
