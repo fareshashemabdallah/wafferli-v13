@@ -37,6 +37,19 @@ describe("Calm contextual Today redesign",()=>{
   expect(screen.getByRole("region",{name:"Money at a glance"})).not.toHaveTextContent("1,200 JOD");
   expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("Only sample money is saved");
  });
+ it("offers one optional family idea on an empty profile and passes only a short category intent",async()=>{
+  draw();
+  await waitFor(()=>expect(screen.getByRole("region",{name:"No urgent next action"})).toBeInTheDocument());
+  expect(screen.getByText("How about time outdoors?")).toBeInTheDocument();
+  const idea=screen.getByRole("link",{name:/Find ideas without setup/});
+  expect(idea).toHaveAttribute("href","/explore");
+  fireEvent.click(idea);
+  const intent=JSON.parse(localStorage.getItem("wafferli.v13.oneTapDiscoverIntent")??"null");
+  expect(intent).toMatchObject({kind:"park"});
+  expect(Object.keys(intent).sort()).toEqual(["kind","requestedAt"]);
+  expect(localStorage.getItem("wafferli.v13.money")).toBeNull();
+  expect(localStorage.getItem("wafferli.v13.members")).toBeNull();
+ });
  it("reuses the exact birthday gift plan with one click and only reveals private amounts on request",async()=>{
   const date=dateKey(shiftDays(new Date(),6));
   const sourceRef="occasion:bday@"+date.slice(0,4);
