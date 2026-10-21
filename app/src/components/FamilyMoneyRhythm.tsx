@@ -10,6 +10,8 @@ import {buildFamilyMoneyRhythm,annualPreparation,paceAllowed,removeSpendingPace,
 import {parseCalendarDate} from "@/lib/familyCalendar";
 import {FamilyMoneyPrototypeHome} from "./FamilyMoneyPrototypeHome";
 import {FamilyMoneyQuickEdit,type QuickMoneyEditor} from "./FamilyMoneyQuickEdit";
+import {MonthAllowanceAdjustment} from "./MonthAllowanceAdjustment";
+import {effectiveCategoryAllowance,confirmedMonthPlan} from "@/lib/monthAwareMoney";
 
 type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>MoneyState))=>void;
  onBills:()=>void;onSpending:()=>void;onCategories:()=>void};
@@ -33,6 +35,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  const [includeExpected,setIncludeExpected]=useState(true);
  const [showMoney,setShowMoney]=useState(false);
  const [quickEdit,setQuickEdit]=useState<QuickMoneyEditor|null>(null);
+ const [adjustingMonthCategory,setAdjustingMonthCategory]=useState<string|null>(null);
  const [editingPace,setEditingPace]=useState<string|null>(null);
  const [paceStart,setPaceStart]=useState(today);
  const [paceBudget,setPaceBudget]=useState("");
@@ -139,7 +142,8 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
    {t("These are sample records. They will not be used to claim your household can afford anything. Start real Money to use a saved cash-flow outlook.",
     "البيانات الموجودة تجريبية. ما منستخدمها للحكم على قدرة العيلة على الدفع. ابدأ ببيانات فعلية لتحفظ التوقعات.")}</div>}
 
-  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onBills={()=>setQuickEdit("bill")} onSpending={onSpending} onCategories={onCategories}/>}
+  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onBills={()=>setQuickEdit("bill")} onSpending={onSpending} onCategories={onCategories}
+   onMonthPlan={setAdjustingMonthCategory}/>}
 
   {screen==="timeline"&&<>
    <div className={soft}>
@@ -197,6 +201,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
       <p className="mt-1 text-xs text-[#6C8272]">{t("Choose a pattern for an existing monthly spending category. No automatic payments are created.",
        "اختار وتيرة صرف لفئة شهرية موجودة. ما بينتج عنها أي دفع تلقائي.")}</p></div></div>
     <p className="mt-3 text-xs font-semibold text-[#3E8060]">{t("Monthly allocations with a pace","المخصصات الشهرية الموزعة")}: {moneyLabel(forecast.monthlyPaceJod)}</p>
+   <p className="mt-1 text-xs text-[#6D8071]">{t("Amounts reflect any month-specific adjustments you confirmed.","المبالغ بتراعي أي تعديلات للشهر أكّدتها بنفسك.")}</p>
    </div>
    <div className="grid gap-2 sm:grid-cols-2">
     {categories.map(cat=>{
@@ -205,7 +210,8 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
      return <div className={soft} key={cat.id}>
       <div className="flex gap-3"><span className="grid size-11 place-items-center rounded-xl text-2xl" style={{background:art.color}}>{art.emoji}</span>
        <div className="min-w-0 flex-1"><h3 className="truncate text-sm font-bold">{cat.name}</h3>
-       <p className="mt-1 text-xs text-[#79877B]">{t("Monthly budget","مخصص الشهر")}: {moneyLabel(cat.planned)}</p></div></div>
+       <p className="mt-1 text-xs text-[#79877B]">{t("Monthly budget","مخصص الشهر")}: {moneyLabel(effectiveCategoryAllowance(state,cat.id,now.slice(0,7)))}</p>
+       {confirmedMonthPlan(state,cat.id,now.slice(0,7))!==null&&<p className="mt-1 text-[11px] font-semibold text-[#458568]">{t("Confirmed change for this month","تعديل مؤكد لهالشهر")}</p>}</div></div>
       {value?<p className="mt-3 text-xs text-[#3F805D]">{t("Every ","كل ")+value.intervalDays+t(" days from "," يوم من ")+value.nextDate}</p>:
        <p className="mt-3 text-xs text-[#899486]">{allowed?t("No spending pace chosen yet","ما اخترت وتيرة بعد"):
         t("Needs a positive category allowance and no linked bill","تحتاج مخصص موجب وما تكون مرتبطة بفاتورة")}</p>}
@@ -308,6 +314,8 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
      {x.icon} {t(x.en,x.ar)}</button>)}
   </div>
   {quickEdit&&<FamilyMoneyQuickEdit kind={quickEdit} state={state} setState={setState} onClose={()=>setQuickEdit(null)}/>}
+  {adjustingMonthCategory&&<MonthAllowanceAdjustment state={state} setState={setState}
+   categoryId={adjustingMonthCategory} onClose={()=>setAdjustingMonthCategory(null)}/>}
   {success&&<p role="status" className="rounded-xl bg-[#EDF7EC] p-3 text-xs font-bold text-[#387954]">{success}</p>}
   <p className="flex items-start gap-2 px-2 text-[11px] leading-relaxed text-[#77877D]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>
    {t("Saved locally on this device. Income forecasts, spending pace and annual preparation are estimates. Nothing is automatically paid, debited, shared or invested.",
