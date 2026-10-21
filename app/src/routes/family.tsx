@@ -107,9 +107,6 @@ export function FamilyLifePage(){
      <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2">
       <div className="flex items-center gap-2"><ClipboardList className="size-5 text-[#4A997F]"/>
        <h2 className="text-base font-extrabold">{label("Family responsibilities","مهام العيلة")}</h2></div>
-      <button onClick={()=>setView("tasks")} type="button" className="inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#408E74] underline">
-       {label("Manage tasks","إدارة المهام")}<ChevronRight className="size-4 rtl:rotate-180"/>
-      </button>
      </summary>
      <button onClick={()=>setView("tasks")} type="button" className="mt-2 inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#408E74] underline">{label("Manage tasks","إدارة المهام")}<ChevronRight className="size-4 rtl:rotate-180"/></button>
      <p className="mt-2 text-sm text-[#687587]">{ready?
