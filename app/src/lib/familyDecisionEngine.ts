@@ -18,6 +18,7 @@ export type FamilyDecisionContext={
  category?:string;
  placeSource?:"openstreetmap"|"manual";
  reflection?:FamilyDecisionReflection;
+ publicSharedAt?:string;
 };
 export type DecisionPlan=FamilyPlan&{decisionContext?:FamilyDecisionContext};
 
