@@ -233,7 +233,12 @@ export function FamilyDiscoverHome(){
     <div><p className="text-xs font-bold">{t("Did you enjoy it?","انبسطتوا؟")}</p><div className="mt-2 flex gap-2">{yesNo.map(x=><button key={x.id} type="button" aria-pressed={enjoyed===x.id} onClick={()=>setEnjoyed(x.id)} className={"flex-1 rounded-lg border px-2 py-2 text-xs "+(enjoyed===x.id?"border-[#B8648D] bg-[#FBE6EF]":"bg-white")}>{ar?x.ar:x.en}</button>)}</div></div>
     <div><p className="text-xs font-bold">{t("Worth the cost?","بتستاهل التكلفة؟")}</p><div className="mt-2 flex gap-2">{yesNo.map(x=><button key={x.id} type="button" aria-pressed={value===x.id} onClick={()=>setValue(x.id)} className={"flex-1 rounded-lg border px-2 py-2 text-xs "+(value===x.id?"border-[#B8648D] bg-[#FBE6EF]":"bg-white")}>{ar?x.ar:x.en}</button>)}</div></div>
    </div>
-   <label className="mt-3 block text-xs font-bold">{t("A note for yourself (optional)","ملاحظة إلك (اختياري)")}<textarea maxLength={300} rows={2} className="mt-1 w-full rounded-xl border border-[#E5DDE3] p-3 text-sm" value={reflectionNote} onChange={e=>setReflectionNote(e.target.value)}/></label>
+   <details className="mt-3 rounded-xl bg-white p-2">
+    <summary className="min-h-9 cursor-pointer text-xs font-semibold text-[#866779]">{t("Add a note (optional)","أضف ملاحظة (اختياري)")}</summary>
+    <label className="mt-2 block text-xs font-bold">{t("Your private note","ملاحظتك الخاصة")}
+     <textarea maxLength={300} rows={2} className="mt-1 w-full rounded-xl border border-[#E5DDE3] p-3 text-sm" value={reflectionNote} onChange={e=>setReflectionNote(e.target.value)}/>
+    </label>
+   </details>
    <p className="mt-2 text-[11px] text-[#867781]">{t("Private by default. Not published to other families.","خاص إلكم. ما رح يننشر للأهل الآخرين.")}</p>
    <button onClick={saveReflection} type="button" className="mt-2 min-h-11 rounded-xl bg-[#985B7D] px-4 text-sm font-bold text-white">{t("Remember our experience","احفظ تجربتنا")}</button>
   </details>}
