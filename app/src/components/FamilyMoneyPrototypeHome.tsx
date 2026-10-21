@@ -6,23 +6,17 @@ import {type RhythmForecast} from "@/lib/familyMoneyRhythm";
 import {fmtJOD} from "@/lib/storage";
 import {localToday} from "@/lib/cashflow";
 import {confirmedMonthPlan} from "@/lib/monthAwareMoney";
+import {STARTER_PICTURES,visualGroupOf,iconForCategory,pictureFor,pictureCategories,type CategoryPicture} from "@/lib/familyCategoryCards";
 
 type Area="timeline"|"pace"|"annual";
 type Props={
  state:MoneyState;forecast:RhythmForecast;revealed:boolean;
  onArea:(screen:Area)=>void;onIncome:()=>void;onBills:()=>void;
- onSpending:()=>void;onCategories:()=>void;onMonthPlan:(categoryId:string)=>void;
+ onSpending:()=>void;onCategories:()=>void;
+ onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
-const groups=[
- {key:"groceries",name:"Groceries",ar:"المونة",icon:"🥦",bg:"#EAF5E7",test:/groc|food|market|بقالة|مونة/i},
- {key:"fuel",name:"Fuel",ar:"البنزين",icon:"⛽",bg:"#FFF5DE",test:/fuel|transport|car|بنزين|نقل/i},
- {key:"restaurants",name:"Restaurants",ar:"المطاعم",icon:"🍕",bg:"#FFEAF0",test:/restaurant|eating|dining|out|مطعم/i},
- {key:"children",name:"Children",ar:"الأولاد",icon:"🎒",bg:"#F8ECF7",test:/child|school|educ|درس|مدرسة|طفل/i},
- {key:"housing",name:"Housing",ar:"البيت",icon:"🏡",bg:"#EAF2FA",test:/home|housing|rent|house|shelter|سكن|بيت/i},
- {key:"health",name:"Health",ar:"الصحة",icon:"💗",bg:"#FFEFF5",test:/health|medical|doctor|care|صحة|طب/i}
-] as const;
 const tile="rounded-[1.05rem] border border-[#E3EAE0] bg-white p-3 text-start transition hover:-translate-y-0.5 hover:border-[#91C6A4] focus-visible:ring-2 focus-visible:ring-[#4E9D70]";
-export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncome,onBills,onSpending,onCategories,onMonthPlan}:Props){
+export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncome,onBills,onSpending,onCategories,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [selected,setSelected]=useState<string|null>(null);
  const m=computeMoney(state),unknown=t("Not entered","غير مدخل");
@@ -89,36 +83,66 @@ export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncom
      {e.amountJod>0?"+":"−"}{shown(Math.abs(e.amountJod))}</strong>
    </div>):<p className="p-4 text-xs text-[#839185]">{t("No dated items recorded yet.","ما في مواعيد مدخلة بعد.")}</p>}
   </div>
-  <div className="flex items-center justify-between gap-2 pt-2">
-   <h3 className="text-sm font-black text-[#2B5944]">{t("Recognizable family categories","فئات من حياتنا اليومية")}</h3>
-   <button type="button" onClick={onCategories} className="min-h-10 text-xs font-bold text-[#3C825B] underline">{t("Edit plan","عدّل الخطة")}</button>
+  <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+   <div>
+    <h3 className="text-sm font-black text-[#2B5944]">{t("Where our money goes","وين بتروح مصاريف العيلة")}</h3>
+    <p className="mt-1 text-[11px] text-[#7A8A7B]">{t("Tap a picture to enter or edit your usual monthly amount.","اضغط على الصورة لتضيف أو تعدّل المخصص الشهري المعتاد.")}</p>
+   </div>
+   <button type="button" onClick={()=>onEditCategory({})} className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-[#B5D8BD] bg-white px-3 text-xs font-bold text-[#387F58]">
+    <Plus className="size-4"/>{t("Add category","أضف فئة")}</button>
   </div>
-  <div className="grid grid-cols-3 gap-2">
-   {groups.map(g=>{
-    const cat=state.categories.filter(c=>g.test.test(c.name+" "+c.id));
-    const target=cat.reduce((a,x)=>a+m.plannedBy(x.id),0),used=cat.reduce((a,x)=>a+m.spentBy(x.id),0);
+  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+   {STARTER_PICTURES.map(g=>{
+    const cat=pictureCategories(state,g.key),target=cat.reduce((a,x)=>a+m.plannedBy(x.id),0);
+    const used=cat.reduce((a,x)=>a+m.spentBy(x.id),0),pct=target>0?Math.min(100,used/target*100):0;
     const confirmed=cat.some(c=>confirmedMonthPlan(state,c.id,localToday().slice(0,7))!==null);
-    const pct=target>0?Math.min(100,used/target*100):0;
-    return <button key={g.key} type="button" onClick={()=>setSelected(selected===g.key?null:g.key)}
-      aria-pressed={selected===g.key} className={tile+" min-h-32 "+(selected===g.key?"!border-[#51A277] !bg-[#F5FFF5]":"")}>
-      <span className="grid size-11 place-items-center rounded-2xl text-2xl" style={{background:g.bg}}>{g.icon}</span>
-      <strong className="mt-2 block text-xs text-[#385C48]">{t(g.name,g.ar)}</strong>
-      <small className="mt-1 block text-[10px] text-[#839085]">{cat.length?shown(target):unknown}</small>
-      {confirmed&&<span className="mt-1 block text-[9px] font-bold text-[#438567]">{t("Monthly adjustment","تعديل للشهر")}</span>}
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#EEF0EA]"><div className="h-full rounded-full bg-[#63B387]" style={{width:pct+"%"}}/></div>
+    return <button key={g.key} type="button" data-testid={"category-picture-"+g.key}
+      onClick={()=>cat.length===0?onEditCategory({starter:g.key}):
+       cat.length===1?onEditCategory({id:cat[0]!.id}):setSelected(selected===g.key?null:g.key)}
+      aria-pressed={selected===g.key} className={tile+" min-h-36 "+(selected===g.key?"!border-[#51A277] !bg-[#F5FFF5]":"")}>
+     <span className="grid size-11 place-items-center rounded-2xl text-2xl" style={{background:g.bg}} aria-hidden="true">{g.icon}</span>
+     <strong className="mt-2 block text-xs text-[#385C48]">{cat.length===1?cat[0]!.name:t(g.en,g.ar)}</strong>
+     <small className="mt-1 block text-[11px] text-[#839085]">{cat.length?shown(target):t("Not entered","غير مدخل")}</small>
+     {confirmed&&<span className="mt-1 block text-[10px] font-bold text-[#438567]">{t("Adjusted this month","معدّل هالشهر")}</span>}
+     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#EEF0EA]"><div className="h-full rounded-full bg-[#63B387]" style={{width:pct+"%"}}/></div>
+     <span className="mt-2 block text-[10px] font-semibold text-[#42845F]">{cat.length===0?t("Tap to set amount","اضغط لتحدد المبلغ"):
+       cat.length===1?t("Tap to edit","اضغط للتعديل"):t("Manage "+cat.length+" categories","إدارة "+cat.length+" فئات")}</span>
     </button>;
    })}
+   {state.categories.filter(c=>visualGroupOf(c)==="custom").map(cat=>{
+    const info=pictureFor(iconForCategory(cat)),target=m.plannedBy(cat.id);
+    const spent=m.spentBy(cat.id),pct=target>0?Math.min(100,spent/target*100):0;
+    return <button key={cat.id} type="button" data-testid={"category-custom-"+cat.id}
+      onClick={()=>onEditCategory({id:cat.id})} className={tile+" min-h-36"}>
+     <span className="grid size-11 place-items-center rounded-2xl text-2xl" style={{background:info.bg}} aria-hidden="true">{info.icon}</span>
+     <strong className="mt-2 block truncate text-xs text-[#385C48]">{cat.name}</strong>
+     <small className="mt-1 block text-[11px] text-[#839085]">{shown(target)}</small>
+     {confirmedMonthPlan(state,cat.id,localToday().slice(0,7))!==null&&
+      <span className="mt-1 block text-[10px] font-bold text-[#438567]">{t("Adjusted this month","معدّل هالشهر")}</span>}
+     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#EEF0EA]"><div className="h-full rounded-full bg-[#63B387]" style={{width:pct+"%"}}/></div>
+     <span className="mt-2 block text-[10px] font-semibold text-[#42845F]">{t("Tap to edit","اضغط للتعديل")}</span>
+    </button>;
+   })}
+   <button type="button" onClick={()=>onEditCategory({})} className="flex min-h-36 flex-col items-start justify-center gap-2 rounded-[1.05rem] border-2 border-dashed border-[#A9D4B8] bg-[#F4FAF1] p-3 text-start text-[#3D825B]">
+    <span className="grid size-11 place-items-center rounded-2xl bg-white text-2xl" aria-hidden="true"><Plus className="size-6"/></span>
+    <strong className="text-xs">{t("Add category","أضف فئة")}</strong>
+    <span className="text-[11px]">{t("School fees, nanny, gifts…","مدرسة، مربية، هدايا…")}</span>
+   </button>
   </div>
-  {selected&&<div className="rounded-xl border border-[#BDDCC5] bg-[#F5FBF3] p-3 text-xs">
-   <strong className="text-[#3E7653]">{t(groups.find(g=>g.key===selected)?.name??"",groups.find(g=>g.key===selected)?.ar??"")}</strong>
-   <p className="mt-1 text-[#738A77]">{t("The category card uses only your recorded category allocations—not preset amounts.","هذه الفئة تعرض مخصصاتك المدخلة فقط، مش أرقام جاهزة.")}</p>
-   <div className="mt-2 flex flex-wrap gap-2"><button className="min-h-10 rounded-xl bg-white px-3 font-bold text-[#327A55]" type="button" onClick={onCategories}>{t("Manage category","عدّل الفئة")}</button>
-   <button className="min-h-10 rounded-xl bg-white px-3 font-bold text-[#327A55]" type="button" onClick={onSpending}>{t("Record expense","سجّل مصروف")}</button></div>
-   {state.categories.filter(c=>groups.find(g=>g.key===selected)?.test.test(c.name+" "+c.id)).map(c=><div key={c.id} className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D6E9D8] bg-white p-2">
-    <div><strong>{c.name}</strong><p className="mt-1 text-[11px] text-[#7D8D7F]">{t("Usual monthly plan","المخصص المعتاد")}: {shown(c.planned)}</p></div>
-    <button type="button" onClick={()=>onMonthPlan(c.id)} className="min-h-10 rounded-xl bg-[#E6F4E9] px-3 text-xs font-bold text-[#367B55]">{t("Adjust a month","عدّل شهر")}</button>
-   </div>)}
-  </div>}
+  {selected&&<div className="rounded-xl border border-[#BBDCC5] bg-[#F5FBF3] p-3" data-testid="category-group-list">
+    <h4 className="text-sm font-bold text-[#387A54]">{t("Your categories in this picture","فئاتك تحت هالصورة")}</h4>
+    <div className="mt-2 space-y-2">
+     {state.categories.filter(c=>visualGroupOf(c)===selected).map(c=><div key={c.id}
+      className="flex items-center justify-between gap-2 rounded-xl border border-[#D7E6D8] bg-white p-2">
+      <div className="min-w-0"><strong className="block truncate text-xs text-[#3A6348]">{c.name}</strong>
+       <span className="text-[11px] text-[#7E907D]">{shown(m.plannedBy(c.id))}</span></div>
+      <button type="button" onClick={()=>onEditCategory({id:c.id})}
+       className="min-h-10 shrink-0 rounded-xl bg-[#E9F6EB] px-3 text-xs font-bold text-[#397C56]">{t("Edit","عدّل")}</button>
+     </div>)}
+    </div>
+    <button type="button" onClick={()=>onEditCategory({starter:selected as CategoryPicture})}
+      className="mt-3 min-h-11 text-xs font-bold text-[#3A7C59] underline">{t("Add another here","أضف فئة هون")}</button>
+   </div>}
   <div className="flex flex-wrap gap-2">
    <button type="button" onClick={onSpending} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#3C9266] px-4 text-xs font-bold text-white"><Plus className="size-4"/>{t("Add an expense","سجّل مصروف")}</button>
    <button type="button" onClick={onIncome} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#BBDAC4] bg-white px-4 text-xs font-bold text-[#397B59]">{t("Edit payday","عدّل موعد الراتب")}</button>
