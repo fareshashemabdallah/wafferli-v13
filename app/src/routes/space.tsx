@@ -139,11 +139,35 @@ function Space() {
             </NativeSelect></Field>}
             <Field label={tr("Preferences")}><Input className={inputCls} maxLength={120} value={edit.prefs} onChange={e=>setEdit({...edit,prefs:e.target.value})}/></Field>
             </div></details>
-            <label className="block text-sm font-medium sm:col-span-2">
-              <span className="flex items-center gap-2"><Cake className="size-4 text-[#B87976]"/>{ar?"عيد الميلاد (شهر-يوم اختياري)":"Birthday (month-day, optional)"}</span>
-              <Input type="text" inputMode="numeric" maxLength={5} placeholder="MM-DD" className={inputCls+" mt-1"} value={edit.birthdayMonthDay??(edit.birthday?.slice(5)??"")} onChange={e=>setEdit({...edit,birthdayMonthDay:e.target.value,birthday:undefined})}/>
-              <span className="mt-1 block text-xs font-normal text-muted-foreground">{ar?"الشهر واليوم كافيان للتذكير. إذا عدّلت هذه الخانة، لن نحفظ سنة الميلاد.":"Month and day are enough for reminders. Changing this field does not retain the birth year."}</span>
-            </label>
+            <div className="sm:col-span-2 rounded-2xl border border-[#E6DCE0] bg-[#FFFAFC] p-3">
+              <p className="flex items-center gap-2 text-sm font-semibold"><Cake className="size-4 text-[#B87976]"/>{ar?"تاريخ الميلاد (اختياري)":"Birthday (optional)"}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{ar?"اختَر الشهر واليوم للتذكير، وأضف سنة الميلاد إذا أردت نصائح تناسب العمر، للأطفال والكبار.":"Choose month and day for reminders. Add the birth year if you want age-appropriate suggestions for children or adults."}</p>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <label className="text-xs font-semibold">{ar?"الشهر":"Month"}
+                  <NativeSelect aria-label={ar?"شهر الميلاد":"Birth month"} value={birthdayParts(edit).month}
+                    onChange={e=>setEdit(updateMemberBirthday(edit,e.target.value,birthdayParts(edit).day,birthYearDraft))}>
+                    <option value="">{ar?"اختَر":"Select"}</option>
+                    {birthdayMonths.map(m=><option key={m} value={m}>{m}</option>)}
+                  </NativeSelect>
+                </label>
+                <label className="text-xs font-semibold">{ar?"اليوم":"Day"}
+                  <NativeSelect aria-label={ar?"يوم الميلاد":"Birth day"} value={birthdayParts(edit).day}
+                    onChange={e=>setEdit(updateMemberBirthday(edit,birthdayParts(edit).month,e.target.value,birthYearDraft))}>
+                    <option value="">{ar?"اختَر":"Select"}</option>
+                    {birthdayDays.map(d=><option key={d} value={d}>{d}</option>)}
+                  </NativeSelect>
+                </label>
+                <label className="text-xs font-semibold">{ar?"السنة (اختياري)":"Year (optional)"}
+                  <NativeSelect aria-label={ar?"سنة الميلاد الاختيارية":"Optional birth year"} value={birthYearDraft}
+                    onChange={e=>{setBirthYearDraft(e.target.value);const p=birthdayParts(edit);setEdit(updateMemberBirthday(edit,p.month,p.day,e.target.value));}}>
+                    <option value="">{ar?"بدون سنة":"No year"}</option>
+                    {birthYears().map(y=><option key={y} value={y}>{y}</option>)}
+                  </NativeSelect>
+                </label>
+              </div>
+              {edit.birthday&&<p className="mt-2 text-xs font-semibold text-[#477B5D]">{ar?"العمر المحسوب اليوم: ":"Calculated age today: "}{memberAgeYears(edit)} {ar?"سنة":"years"}</p>}
+              <p className="mt-2 text-[11px] text-muted-foreground">{ar?"ما في حاجة لكتابة (-) على الهاتف. سنة الميلاد اختيارية، ومعلومات العيلة تظل خاصة على هذا الجهاز.":"No hyphen to type on your phone. Birth year remains optional and family information stays private on this device."}</p>
+            </div>
             {err&&<p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}
             <div className="flex gap-2 sm:col-span-2">
               <Button className="flex-1" onClick={save}>{tr("Save")}</Button>
