@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { dateKey,formatMomentDate,kindNames,parseCalendarDate,type FamilyMoment,type MomentKind } from "@/lib/familyCalendar";
 import { sampleMembers, type Member } from "@/lib/money";
+import {birthdayMonths,birthdayDays,birthYears,birthdayParts,birthDateFromParts,memberAgeYears,updateMemberBirthday} from "@/lib/familyBirthdays";
 import { uid, useLocalState } from "@/lib/storage";
 
 export const Route = createFileRoute("/space")({
@@ -51,6 +52,7 @@ function Space() {
   const samples=members.filter(isSampleFamilyMember);
   const [events,setEvents,eventsReady] = useLocalState<FamilyMoment[]>("familyCalendar",[]);
   const [edit,setEdit] = useState<Member|null>(null);
+  const [birthYearDraft,setBirthYearDraft] = useState("");
   const [err,setErr] = useState("");
   const [occasion,setOccasion] = useState<OccasionDraft|null>(null);
   const [occasionError,setOccasionError] = useState("");
@@ -58,12 +60,14 @@ function Space() {
     if(!edit)return;
     if(!edit.name.trim())return setErr(tr("Name is required."));
     if(edit.ageYears!==undefined&&(!Number.isInteger(edit.ageYears)||edit.ageYears<0||edit.ageYears>120))return setErr(ar?"أدخل عمراً صحيحاً.":"Please enter a valid age.");
-    if(edit.birthday){
-      const date=parseCalendarDate(edit.birthday);
-      if(!date||date.getTime()>new Date().getTime())return setErr(ar?"تاريخ الميلاد غير صالح أو في المستقبل.":"Please enter a valid birth date that is not in the future.");
-    }
-    if(edit.birthdayMonthDay&&(!/^\d{2}-\d{2}$/.test(edit.birthdayMonthDay)||!parseCalendarDate("2000-"+edit.birthdayMonthDay)))return setErr(ar?"أدخل شهراً ويوماً صحيحين بصيغة MM-DD.":"Enter a valid birthday month and day as MM-DD.");
-    const m:Member={...edit,name:edit.name.trim().slice(0,30),prefs:edit.prefs.slice(0,120),ageGroup:edit.ageYears!==undefined?"":edit.ageGroup,birthday:edit.birthday||undefined,birthdayMonthDay:edit.birthdayMonthDay||undefined};
+    const parts=birthdayParts(edit);
+    const birth=birthDateFromParts(parts.month,parts.day,birthYearDraft);
+    if(!birth.valid)return setErr(ar?"اختَر شهراً ويوماً صحيحين، وتأكد أن سنة الميلاد إن أُدخلت توافق التاريخ.":"Choose a valid month and day. If a birth year is provided, it must match the date.");
+    if(birth.full&&birth.full>dateKey(new Date()))return setErr(ar?"تاريخ الميلاد لا يمكن أن يكون في المستقبل.":"Birth date cannot be in the future.");
+    const m:Member={...edit,name:edit.name.trim().slice(0,30),prefs:edit.prefs.slice(0,120),
+      ageGroup:birth.full||edit.ageYears!==undefined?"":edit.ageGroup,
+      ageYears:birth.full?undefined:edit.ageYears,
+      birthday:birth.full,birthdayMonthDay:birth.monthDay};
     setMembers(old=>m.id?old.map(x=>x.id===m.id?m:x):[...old,{...m,id:uid()}]);
     setEdit(null);setErr("");
   };
@@ -116,7 +120,7 @@ function Space() {
             <h2 className="text-lg font-semibold">{tr("Household members")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">{ar?"أضف تاريخ الميلاد مرة واحدة ليظهر تلقائياً في التقويم وفي يومي.":"Add a birthday once: it automatically appears in the Family Calendar and My Day."}</p>
           </div>
-          <Button size="sm" onClick={()=>{setEdit({id:"",name:"",role:"adult",ageGroup:"",prefs:"",birthday:"",birthdayMonthDay:""});setErr("");}} disabled={members.length>=12}>
+          <Button size="sm" onClick={()=>{setEdit({id:"",name:"",role:"adult",ageGroup:"",prefs:"",birthday:"",birthdayMonthDay:""});setBirthYearDraft("");setErr("");}} disabled={members.length>=12}>
             <Plus className="size-4"/> {tr("Add")}
           </Button>
         </div>
@@ -127,9 +131,9 @@ function Space() {
               <option value="adult">{tr("Adult")}</option><option value="child">{tr("Child")}</option>
             </NativeSelect></Field>
             <details className="sm:col-span-2 rounded-xl border border-border bg-white p-3"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"معلومات إضافية (اختياري)":"More about this person (optional)"}</summary><div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <Field label={ar?"العمر بالسنوات (اختياري)":"Age in whole years (optional)"}><Input type="number" min={0} max={120} className={inputCls}
-              value={edit.ageYears??""} onChange={e=>setEdit({...edit,ageYears:e.target.value===""?undefined:Number(e.target.value)})}/></Field>
-            {edit.ageYears===undefined&&<Field label={ar?"الفئة العمرية (إذا العمر الدقيق غير معروف)":"Age group (if exact age is unknown)"}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
+            {!edit.birthday&&<Field label={ar?"العمر التقريبي بالسنوات (إذا لم تدخل سنة الميلاد)":"Approximate age in years (if no birth year)"}><Input type="number" min={0} max={120} className={inputCls}
+              value={edit.ageYears??""} onChange={e=>setEdit({...edit,ageYears:e.target.value===""?undefined:Number(e.target.value)})}/></Field>}
+            {!edit.birthday&&edit.ageYears===undefined&&<Field label={ar?"الفئة العمرية (إذا العمر الدقيق غير معروف)":"Age group (if exact age is unknown)"}><NativeSelect value={edit.ageGroup} onChange={e=>setEdit({...edit,ageGroup:e.target.value})}>
               <option value="">{ar?"أفضل عدم الإجابة":"Not provided"}</option>
               {ages.map(a=><option key={a}>{a}</option>)}
             </NativeSelect></Field>}
@@ -152,11 +156,11 @@ function Space() {
             <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#E9F0E8] font-display text-lg font-semibold text-brand">{m.name[0]?.toUpperCase()}</span>
             <div className="min-w-0 flex-1">
               <p className="font-medium">{tr(m.name)}</p>
-              <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")}{typeof m.ageYears==="number"?" · "+m.ageYears+" "+(ar?"سنة":"years"):m.ageGroup?" · "+m.ageGroup:""}{m.prefs&&" · "+m.prefs}</p>
+              <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")}{memberAgeYears(m)!==null?" · "+memberAgeYears(m)+" "+(ar?"سنة":"years"):m.ageGroup?" · "+m.ageGroup:""}{m.prefs&&" · "+m.prefs}</p>
               {(m.birthday||m.birthdayMonthDay)&&
-                <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":"Birthday: "}{m.birthdayMonthDay??(m.birthday?formatMomentDate(m.birthday,ar):"")}</p>}
+                <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":"Birthday: "}{m.birthday?formatMomentDate(m.birthday,ar)+" · "+m.birthday.slice(0,4):m.birthdayMonthDay??""}</p>}
             </div>
-            <Button size="icon" variant="ghost" aria-label={(ar?"تعديل ":"Edit ")+m.name} onClick={()=>{setEdit(m);setErr("");}}><Pencil className="size-4"/></Button>
+            <Button size="icon" variant="ghost" aria-label={(ar?"تعديل ":"Edit ")+m.name} onClick={()=>{setEdit(m);setBirthYearDraft(m.birthday?.slice(0,4)??"");setErr("");}}><Pencil className="size-4"/></Button>
             <Button size="icon" variant="ghost" aria-label={(ar?"حذف ":"Delete ")+m.name} onClick={()=>removeMember(m)}><Trash2 className="size-4"/></Button>
           </li>)}
           {members.length===0&&<li className="rounded-xl bg-muted p-6 text-center text-sm text-muted-foreground">{tr("No members yet.")}</li>}
