@@ -14,7 +14,7 @@ export function OneMoneyDashboardSummary({state,forecast,revealed,onIncome,onCas
  const money=(value:number|null)=>value===null||state.demo?t("Not entered","غير مدخل"):revealed?fmtJOD(value):"••••";
  const values=[
   {id:"income",emoji:"💵",label:t("Monthly income","الدخل الشهري"),value:money(overview.monthlyIncome),
-   subtitle:t("Expected, not necessarily received","متوقع، مش بالضرورة مستلم"),bg:"#EAF5E8",action:onIncome},
+   subtitle:t("Expected; confirmed received this month: ","متوقع؛ المستلم المؤكد هالشهر: ")+money(overview.receivedIncome),bg:"#EAF5E8",action:onIncome},
   {id:"plan",emoji:"🧺",label:t("Monthly spending plan","خطة مصروف الشهر"),value:money(overview.planned),
    subtitle:t("Usual + confirmed adjustments","المعتاد والتعديلات المؤكدة"),bg:"#EDF3FF",action:()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"})},
   {id:"paid",emoji:"✅",label:t("Paid so far","المدفوع لليوم"),value:state.demo?t("Demo","تجريبي"):money(overview.paid),
