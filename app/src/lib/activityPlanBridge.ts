@@ -1,4 +1,5 @@
 import type {Member} from "./money";
+import {memberAgeYears} from "./familyBirthdays";
 import type {ActivityTheme} from "./familyActivityDiscovery";
 import {realFamilyMembers} from "./familySetup";
 import type {FamilyMoment} from "./familyCalendar";
@@ -9,7 +10,7 @@ import type {WeekendPlace} from "./weekendPlaceSearch";
 export type FamilyThemeMatch={theme:ActivityTheme;matches:number;total:number;fit:"all"|"some"|"unknown"};
 /** Age-band matches are editorial suggestions, never verified admission or safeguarding claims. */
 export function familyThemeMatches(themes:readonly ActivityTheme[],members:readonly Member[]):FamilyThemeMatch[]{
- const ages=realFamilyMembers(members).filter(x=>x.role==="child"&&typeof x.ageYears==="number"&&Number.isInteger(x.ageYears)&&x.ageYears>=0&&x.ageYears<=18).map(x=>x.ageYears!);
+ const ages=realFamilyMembers(members).filter(x=>x.role==="child"&&memberAgeYears(x)!==null&&memberAgeYears(x)!<=18).map(x=>memberAgeYears(x)!);
  return themes.map(theme=>{
   const matches=ages.filter(age=>age>=theme.minAge&&age<=theme.maxAge).length;
   const fit:FamilyThemeMatch["fit"]=ages.length===0?"unknown":matches===ages.length?"all":"some";
