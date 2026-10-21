@@ -12,6 +12,7 @@ import {FamilyMoneyPrototypeHome} from "./FamilyMoneyPrototypeHome";
 import {FamilyMoneyQuickEdit,type QuickMoneyEditor} from "./FamilyMoneyQuickEdit";
 import {MonthAllowanceAdjustment} from "./MonthAllowanceAdjustment";
 import {FamilyCategoryEditor} from "./FamilyCategoryEditor";
+import {QuickExpenseEntry} from "./QuickExpenseEntry";
 import type {CategoryPicture} from "@/lib/familyCategoryCards";
 import {effectiveCategoryAllowance,confirmedMonthPlan} from "@/lib/monthAwareMoney";
 
@@ -37,6 +38,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  const [includeExpected,setIncludeExpected]=useState(true);
  const [showMoney,setShowMoney]=useState(false);
  const [quickEdit,setQuickEdit]=useState<QuickMoneyEditor|null>(null);
+ const [quickExpenseOpen,setQuickExpenseOpen]=useState(false);
  const [adjustingMonthCategory,setAdjustingMonthCategory]=useState<string|null>(null);
  const [editingCategory,setEditingCategory]=useState<{id?:string;starter?:CategoryPicture}|null>(null);
  const [editingPace,setEditingPace]=useState<string|null>(null);
@@ -145,7 +147,9 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
    {t("These are sample records. They will not be used to claim your household can afford anything. Start real Money to use a saved cash-flow outlook.",
     "البيانات الموجودة تجريبية. ما منستخدمها للحكم على قدرة العيلة على الدفع. ابدأ ببيانات فعلية لتحفظ التوقعات.")}</div>}
 
-  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onBills={()=>setQuickEdit("bill")} onSpending={onSpending} onCategories={onCategories}
+  {screen!=="map"&&<button type="button" className="min-h-11 rounded-xl border border-[#C7DEC9] bg-white px-4 text-sm font-bold text-[#3B7958]" onClick={()=>setScreen("map")}>
+   ← {t("Back to the Money dashboard","ارجع للوحة المال")}</button>}
+  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onCash={()=>setQuickEdit("cash")} onBills={()=>setQuickEdit("bill")} onQuickAdd={()=>setQuickExpenseOpen(true)} onSpending={onSpending} onCategories={onCategories}
    onEditCategory={setEditingCategory}/>}
 
   {screen==="timeline"&&<>
@@ -308,14 +312,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
       "ما في فواتير سنوية بعد. أضف التأمين أو الضريبة أو مساهمة البناية وقت تعرف مواعيدها.")}</p></div>}
    </div>
   </>}
-  <p className="mt-4 text-xs font-extrabold text-[#4B7F61]">{t("Our Money areas","أقسام مال العيلة")}</p>
-  <div className="grid grid-cols-4 items-center gap-1.5 rounded-2xl border border-[#DCE8D9] bg-white p-1.5" role="tablist" aria-label={t("Family money rhythm sections","أقسام الإيقاع المالي")}>
-   {([{id:"map",en:"Money Map",ar:"الخريطة",icon:"🏡"},{id:"timeline",en:"Timeline",ar:"الجدول",icon:"📅"},
-    {id:"pace",en:"Spending pace",ar:"وتيرة الصرف",icon:"🥦"},{id:"annual",en:"Annual costs",ar:"السنوية",icon:"🚘"}] as const).map(x=>
-    <button key={x.id} type="button" role="tab" aria-selected={screen===x.id} onClick={()=>setScreen(x.id)}
-     className={"min-h-11 flex-1 rounded-xl px-1 py-2 text-[10px] font-bold sm:text-xs "+(screen===x.id?"bg-white text-[#2B7955] shadow-sm":"text-[#718477]")}>
-     {x.icon} {t(x.en,x.ar)}</button>)}
-  </div>
+  {quickExpenseOpen&&<QuickExpenseEntry state={state} setState={setState} onClose={()=>setQuickExpenseOpen(false)} onHistory={onSpending}/>}
   {quickEdit&&<FamilyMoneyQuickEdit kind={quickEdit} state={state} setState={setState} onClose={()=>setQuickEdit(null)}/>}
   {adjustingMonthCategory&&<MonthAllowanceAdjustment state={state} setState={setState}
    categoryId={adjustingMonthCategory} onClose={()=>setAdjustingMonthCategory(null)}/>}
