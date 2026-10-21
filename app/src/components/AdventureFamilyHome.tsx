@@ -8,7 +8,7 @@ import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan} from "@/lib/familyPlan
 import type {FamilyMoment} from "@/lib/familyCalendar";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {buildTodayActionPolicy,type TodayAction,type TodayWeekItem} from "@/lib/todayActionPolicy";
-import {RobotBuddy} from "./AdventureArtwork";
+import {suggestLowEffortFamilyIdea,QUICK_DISCOVERY_KEY} from "@/lib/lowEffortDiscovery";
 
 const panel="rounded-[1.5rem] border border-[#DFE8DE] bg-white/95 p-4 shadow-[0_12px_30px_-27px_rgba(44,71,55,.25)] sm:p-5";
 /** Today is one contextual briefing, not a second Money or Family editor.
@@ -26,6 +26,7 @@ export function AdventureFamilyHome(){
  const ready=moneyReady&&membersReady&&momentsReady&&plansReady&&prefsReady;
  const brief=ready?buildTodayActionPolicy({money,members,moments,plans,preferences:prefs}):null;
  const current=brief?.action;
+ const inspiration=suggestLowEffortFamilyIdea(members);
  const tr=(en:string,arabic:string)=>ar?arabic:en;
  function continueAction(action:TodayAction|TodayWeekItem){
   if(action.planId)writeLocal(ACTIVE_PLAN_KEY,action.planId);
@@ -111,9 +112,7 @@ export function AdventureFamilyHome(){
      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[linear-gradient(100deg,#D96E7C,#C84381)] px-5 text-sm font-bold text-white shadow-sm transition hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[#B64680]">
      {actionLabel(current)}<ArrowRight className="size-4 rtl:rotate-180"/>
     </Link>
-    <Link to="/advisor" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[#E9D4E2] bg-white/80 px-4 text-sm font-semibold text-[#895778]">
-     {t("Ask Dabberna","اسأل دبّرنا")}
-    </Link>
+
    </div>
    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[#EADBE1] pt-3 text-xs text-[#745E6D]">
     <Info className="size-4 shrink-0"/><strong>{t("Why now?","ليش هلّق؟")}</strong>
@@ -125,7 +124,16 @@ export function AdventureFamilyHome(){
      <Heart className="size-6 shrink-0 text-[#509677]"/>
      <div><h2 className="font-extrabold">{t("You're free to enjoy your day","خدوا راحتكم اليوم")}</h2>
       <p className="mt-1 text-sm text-[#677A72]">{t("No need to manufacture a task. Add something only when it matters.",
-       "مش ضروري نختلق مهمة. أضف شي بس وقت يكون مهم.")}</p></div>
+       "مش ضروري نختلق مهمة. أضف شي بس وقت يكون مهم.")}</p>
+      <div className="mt-3 rounded-2xl border border-[#DCE9D8] bg-[#F6FAF3] p-3">
+       <p className="text-sm font-extrabold text-[#315F46]">{t(inspiration.titleEn,inspiration.titleAr)}</p>
+       <p className="mt-1 text-xs leading-relaxed text-[#607669]">{t(inspiration.contextEn,inspiration.contextAr)}</p>
+       <Link to="/explore" onClick={()=>writeLocal(QUICK_DISCOVERY_KEY,{kind:inspiration.kind,requestedAt:Date.now()})}
+        className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#337B5B] px-4 text-sm font-bold text-white">
+        {t("Find ideas without setup","شوف أفكار بلا إعداد")}<ArrowRight className="size-4 rtl:rotate-180"/>
+       </Link>
+       <p className="mt-2 text-[11px] text-[#748379]">{t("An optional idea, not a paid recommendation or a claim that a venue is suitable.","فكرة اختيارية، مش توصية مدفوعة ولا تأكيد لملاءمة مكان.")}</p>
+      </div></div>
     </div>
    </section>:null}
 
