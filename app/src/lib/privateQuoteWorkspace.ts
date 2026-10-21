@@ -83,8 +83,8 @@ export function compareEnteredOffers(quote:PrivateQuote,now=new Date()):OfferCom
   a.offer.merchant.localeCompare(b.offer.merchant));
 }
 /** No claim of provider verification, savings, payments or delivery. */
-export function privateQuoteSummary(quote:PrivateQuote):{activeCount:number;enteredCount:number;lowestActiveJod:number|null}{
- const ranked=compareEnteredOffers(quote);
+export function privateQuoteSummary(quote:PrivateQuote,now=new Date()):{activeCount:number;enteredCount:number;lowestActiveJod:number|null}{
+ const ranked=compareEnteredOffers(quote,now);
  return {activeCount:ranked.filter(r=>!r.expired).length,enteredCount:ranked.length,
   lowestActiveJod:ranked.find(r=>!r.expired)?.totalJod??null};
 }

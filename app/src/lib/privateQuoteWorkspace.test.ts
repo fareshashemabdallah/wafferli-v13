@@ -27,7 +27,7 @@ describe("user-controlled local quotation lifecycle",()=>{
   expect(compared.map(o=>o.offer.id)).toEqual(["o3","o1","o2"]);
   expect(compared.map(o=>o.totalJod)).toEqual([77,84,67]);
   expect(compared[2]?.expired).toBe(true);
-  expect(privateQuoteSummary(record).lowestActiveJod).toBe(77);
+  expect(privateQuoteSummary(record,now).lowestActiveJod).toBe(77);
   expect(offerTotalJod(compared[0]!.offer)).toBe(77);
  });
  it("rejects invalid prices, duplicate offers and private or dangerous evidence links",()=>{

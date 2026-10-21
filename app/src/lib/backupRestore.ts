@@ -121,6 +121,7 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   })),expenses:many(expense),demo:z.boolean(),
   incomeSources:many(incomeSource).optional(),commitments:many(commitment).optional(),
   spendingPaces:many(strict({categoryId:id,intervalDays:z.union([z.literal(7),z.literal(10),z.literal(14),z.literal(15),z.literal(30)]),nextDate:isoDate}),60).optional(),
+   categoryMonthlyPlans:z.record(z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),z.record(smallMoney)).optional(),
   cashOnHand:cash.optional(),cashReserve:maxNumber.optional(),cashUpdatedAt:isoDate.optional(),
   savingsTargetAmount:maxNumber.optional(),financialInputsPartial:z.boolean().optional(),
   monthlyAdjustments:z.record(opts({

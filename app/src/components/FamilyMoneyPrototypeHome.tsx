@@ -5,12 +5,13 @@ import {computeMoney,type MoneyState} from "@/lib/money";
 import {type RhythmForecast} from "@/lib/familyMoneyRhythm";
 import {fmtJOD} from "@/lib/storage";
 import {localToday} from "@/lib/cashflow";
+import {confirmedMonthPlan} from "@/lib/monthAwareMoney";
 
 type Area="timeline"|"pace"|"annual";
 type Props={
  state:MoneyState;forecast:RhythmForecast;revealed:boolean;
  onArea:(screen:Area)=>void;onIncome:()=>void;onBills:()=>void;
- onSpending:()=>void;onCategories:()=>void;
+ onSpending:()=>void;onCategories:()=>void;onMonthPlan:(categoryId:string)=>void;
 };
 const groups=[
  {key:"groceries",name:"Groceries",ar:"المونة",icon:"🥦",bg:"#EAF5E7",test:/groc|food|market|بقالة|مونة/i},
@@ -21,7 +22,7 @@ const groups=[
  {key:"health",name:"Health",ar:"الصحة",icon:"💗",bg:"#FFEFF5",test:/health|medical|doctor|care|صحة|طب/i}
 ] as const;
 const tile="rounded-[1.05rem] border border-[#E3EAE0] bg-white p-3 text-start transition hover:-translate-y-0.5 hover:border-[#91C6A4] focus-visible:ring-2 focus-visible:ring-[#4E9D70]";
-export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncome,onBills,onSpending,onCategories}:Props){
+export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncome,onBills,onSpending,onCategories,onMonthPlan}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [selected,setSelected]=useState<string|null>(null);
  const m=computeMoney(state),unknown=t("Not entered","غير مدخل");
@@ -95,13 +96,15 @@ export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncom
   <div className="grid grid-cols-3 gap-2">
    {groups.map(g=>{
     const cat=state.categories.filter(c=>g.test.test(c.name+" "+c.id));
-    const target=cat.reduce((a,x)=>a+x.planned,0),used=cat.reduce((a,x)=>a+m.spentBy(x.id),0);
+    const target=cat.reduce((a,x)=>a+m.plannedBy(x.id),0),used=cat.reduce((a,x)=>a+m.spentBy(x.id),0);
+    const confirmed=cat.some(c=>confirmedMonthPlan(state,c.id,localToday().slice(0,7))!==null);
     const pct=target>0?Math.min(100,used/target*100):0;
     return <button key={g.key} type="button" onClick={()=>setSelected(selected===g.key?null:g.key)}
       aria-pressed={selected===g.key} className={tile+" min-h-32 "+(selected===g.key?"!border-[#51A277] !bg-[#F5FFF5]":"")}>
       <span className="grid size-11 place-items-center rounded-2xl text-2xl" style={{background:g.bg}}>{g.icon}</span>
       <strong className="mt-2 block text-xs text-[#385C48]">{t(g.name,g.ar)}</strong>
       <small className="mt-1 block text-[10px] text-[#839085]">{cat.length?shown(target):unknown}</small>
+      {confirmed&&<span className="mt-1 block text-[9px] font-bold text-[#438567]">{t("Monthly adjustment","تعديل للشهر")}</span>}
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#EEF0EA]"><div className="h-full rounded-full bg-[#63B387]" style={{width:pct+"%"}}/></div>
     </button>;
    })}
@@ -109,8 +112,12 @@ export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncom
   {selected&&<div className="rounded-xl border border-[#BDDCC5] bg-[#F5FBF3] p-3 text-xs">
    <strong className="text-[#3E7653]">{t(groups.find(g=>g.key===selected)?.name??"",groups.find(g=>g.key===selected)?.ar??"")}</strong>
    <p className="mt-1 text-[#738A77]">{t("The category card uses only your recorded category allocations—not preset amounts.","هذه الفئة تعرض مخصصاتك المدخلة فقط، مش أرقام جاهزة.")}</p>
-   <div className="mt-2 flex gap-2"><button className="min-h-10 rounded-xl bg-white px-3 font-bold text-[#327A55]" type="button" onClick={onCategories}>{t("Manage category","عدّل الفئة")}</button>
+   <div className="mt-2 flex flex-wrap gap-2"><button className="min-h-10 rounded-xl bg-white px-3 font-bold text-[#327A55]" type="button" onClick={onCategories}>{t("Manage category","عدّل الفئة")}</button>
    <button className="min-h-10 rounded-xl bg-white px-3 font-bold text-[#327A55]" type="button" onClick={onSpending}>{t("Record expense","سجّل مصروف")}</button></div>
+   {state.categories.filter(c=>groups.find(g=>g.key===selected)?.test.test(c.name+" "+c.id)).map(c=><div key={c.id} className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D6E9D8] bg-white p-2">
+    <div><strong>{c.name}</strong><p className="mt-1 text-[11px] text-[#7D8D7F]">{t("Usual monthly plan","المخصص المعتاد")}: {shown(c.planned)}</p></div>
+    <button type="button" onClick={()=>onMonthPlan(c.id)} className="min-h-10 rounded-xl bg-[#E6F4E9] px-3 text-xs font-bold text-[#367B55]">{t("Adjust a month","عدّل شهر")}</button>
+   </div>)}
   </div>}
   <div className="flex flex-wrap gap-2">
    <button type="button" onClick={onSpending} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#3C9266] px-4 text-xs font-bold text-white"><Plus className="size-4"/>{t("Add an expense","سجّل مصروف")}</button>
