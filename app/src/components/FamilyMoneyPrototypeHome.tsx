@@ -1,5 +1,6 @@
 import {useState} from "react";
-import {ChevronRight,Plus} from "lucide-react";
+import {Plus} from "lucide-react";
+import {OneMoneyDashboardSummary} from "./OneMoneyDashboardSummary";
 import {useI18n} from "@/lib/i18n";
 import {computeMoney,type MoneyState} from "@/lib/money";
 import {type RhythmForecast} from "@/lib/familyMoneyRhythm";
@@ -11,78 +12,22 @@ import {STARTER_PICTURES,visualGroupOf,iconForCategory,pictureFor,pictureCategor
 type Area="timeline"|"pace"|"annual";
 type Props={
  state:MoneyState;forecast:RhythmForecast;revealed:boolean;
- onArea:(screen:Area)=>void;onIncome:()=>void;onBills:()=>void;
+ onArea:(screen:Area)=>void;onIncome:()=>void;onCash:()=>void;onBills:()=>void;onQuickAdd:()=>void;
  onSpending:()=>void;onCategories:()=>void;
  onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
 const tile="rounded-[1.05rem] border border-[#E3EAE0] bg-white p-3 text-start transition hover:-translate-y-0.5 hover:border-[#91C6A4] focus-visible:ring-2 focus-visible:ring-[#4E9D70]";
-export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncome,onBills,onSpending,onCategories,onEditCategory}:Props){
+export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncome,onCash,onBills,onQuickAdd,onSpending,onCategories,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [selected,setSelected]=useState<string|null>(null);
  const m=computeMoney(state),unknown=t("Not entered","غير مدخل");
  const shown=(n:number|null)=>state.demo||n===null?unknown:revealed?fmtJOD(n):"••••";
- const salary=forecast.events.filter(x=>x.kind==="income"&&x.date>=localToday()).sort((a,b)=>a.date.localeCompare(b.date))[0];
- const haveBills=(state.commitments??[]).length>0;
- const warning=state.demo||forecast.unknownCash||forecast.missingDates>0||!salary?
-  t("Your family cash-flow picture is incomplete. Add your cash balance, a payday and upcoming bills to build a useful outlook.",
-    "صورة السيولة بعدها ناقصة. أدخل الرصيد وموعد الراتب والفواتير الجاية لنقدر نخطط بشكل مفيد."):
-  forecast.firstReserveRiskDate?
-  t("The recorded dates suggest possible pressure around "+forecast.firstReserveRiskDate+". Review essential payments first. Expected income is not guaranteed.",
-    "المواعيد المدخلة بتشير لاحتمال ضغط بالسيولة بتاريخ "+forecast.firstReserveRiskDate+". راجع دفعات الأساسيات أولاً. الدخل المتوقع مش مضمون."):
-  t("No reserve shortfall appears in your recorded 30-day forecast, but missing everyday costs could change that.",
-    "ما ظهر نقص تحت الاحتياطي خلال ٣٠ يوم حسب المسجل، بس مصاريف الحياة الناقصة ممكن تغيّر النتيجة.");
- const snapshot=[
-  {key:"cash",label:t("Starting cash · manually entered","سيولة البداية · مدخلة يدوياً"),amount:shown(forecast.cashStart),sub:state.cashUpdatedAt?state.cashUpdatedAt:t("Not bank verified","مش مؤكدة بنكياً"),bg:"#E9F6E9",fg:"#327D54"},
-  {key:"salary",label:t("Next expected income","الدخل المتوقع التالي"),amount:salary?shown(salary.amountJod):unknown,sub:salary?.date??t("Date needed","التاريخ مطلوب"),bg:"#FFF0F4",fg:"#B96082"},
-  {key:"bills",label:t("Bills due · next 30 days","الفواتير · ٣٠ يوم"),amount:haveBills?shown(forecast.futureBillsJod):unknown,sub:t("Not yet paid","لسا مش مدفوعة"),bg:"#FFF5E7",fg:"#8A704A"}
- ];
- const sorted=forecast.events.slice(0,3);
+ const sorted=forecast.events.filter(e=>e.kind!=="pace").slice(0,5);
+ const recent=state.expenses.filter(e=>e.status!=="planned").sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
  return <div className="space-y-3" data-testid="prototype-money-home">
-  <div className="grid grid-cols-3 gap-2">
-   {snapshot.map(x=><div className="min-w-0 rounded-2xl border border-white p-3" key={x.key} style={{background:x.bg}}>
-     <p className="min-h-9 text-[10px] font-semibold leading-[1.45] text-[#687D70]">{x.label}</p>
-     <strong className="mt-1 block break-words text-base font-black tabular-nums sm:text-xl" style={{color:x.fg}}>{x.amount}</strong>
-     <p className="mt-1 text-[10px] leading-snug text-[#77887C]">{x.sub}</p>
-    </div>)}
-  </div>
-  <div className="rounded-[1.3rem] border border-[#DFE9DC] bg-[#F3FAF1] p-4">
-   <div className="flex items-center justify-between gap-2">
-    <h3 className="font-extrabold text-[#2B6149]">🌿 {t("What matters next","شو المهم هلّق؟")}</h3>
-    <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-[#63836D]">{t("30-day view","نظرة ٣٠ يوم")}</span>
-   </div>
-   <p className="mt-2 text-sm leading-relaxed text-[#63786A]">{warning}</p>
-   <button type="button" onClick={()=>onArea("timeline")} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#3D9067] px-4 text-xs font-extrabold text-white">
-    {t("Explore payment timeline","شوف جدول الدفعات")} <ChevronRight className="size-4 rtl:rotate-180"/>
-   </button>
-  </div>
-  <h3 className="pt-2 text-sm font-black text-[#2B5944]">{t("What makes up our family's money?","شو بيكوّن مال العيلة؟")}</h3>
-  <div className="grid grid-cols-2 gap-2">
-   {[
-    {id:"income",name:t("Income & paydays","الدخل والرواتب"),description:t("Amounts and dates","المبالغ والمواعيد"),emoji:"💵",go:onIncome},
-    {id:"bills",name:t("Bills & commitments","الفواتير والالتزامات"),description:t("Deadlines and payment status","المواعيد وحالة الدفع"),emoji:"🏠",go:onBills},
-    {id:"pace",name:t("Everyday spending","مصاريف كل يوم"),description:t("Groceries, fuel, restaurants","المونة والبنزين والمطاعم"),emoji:"🥦",go:()=>onArea("pace")},
-    {id:"annual",name:t("Annual expenses","مصاريف سنوية"),description:t("Insurance, taxes, building","التأمين والضريبة والبناية"),emoji:"🚘",go:()=>onArea("annual")}
-   ].map(x=><button type="button" key={x.id} onClick={x.go} className={tile+" min-h-28"}>
-    <span className="block text-[27px]" aria-hidden="true">{x.emoji}</span>
-    <strong className="mt-2 block text-sm text-[#2E5540]">{x.name}</strong>
-    <span className="mt-1 block text-[11px] text-[#849287]">{x.description} ↗</span>
-   </button>)}
-  </div>
-  <div className="flex items-center justify-between gap-2 pt-2">
-   <h3 className="text-sm font-black text-[#2B5944]">{t("Upcoming on your calendar","مواعيد قريبة")}</h3>
-   <button type="button" onClick={()=>onArea("timeline")} className="min-h-10 text-xs font-bold text-[#397E59] underline">
-    {t("View all","كل المواعيد")} <ChevronRight className="inline size-3 rtl:rotate-180"/></button>
-  </div>
-  <div className="overflow-hidden rounded-2xl border border-[#E4EAE1] bg-white">
-   {sorted.length?sorted.map(e=><div key={e.id} className="flex items-center gap-3 border-b border-[#EDF1EC] p-3 last:border-0">
-    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#F2F8EE] text-xl">
-     {e.kind==="income"?"💵":e.kind==="annual"?"🚘":e.kind==="pace"?"🥦":"🏡"}</span>
-    <div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-[#2E5641]">{e.label}</p>
-     <p className="mt-1 text-[10px] text-[#839184]">{e.date} · {e.kind==="income"?t("Expected","متوقع"):e.kind==="pace"?t("Estimated","تقديري"):t("Due","مستحق")}</p></div>
-    <strong className={"shrink-0 text-xs tabular-nums "+(e.amountJod>0?"text-[#35805B]":"text-[#AD5975]")}>
-     {e.amountJod>0?"+":"−"}{shown(Math.abs(e.amountJod))}</strong>
-   </div>):<p className="p-4 text-xs text-[#839185]">{t("No dated items recorded yet.","ما في مواعيد مدخلة بعد.")}</p>}
-  </div>
+  <OneMoneyDashboardSummary state={state} forecast={forecast} revealed={revealed}
+   onIncome={onIncome} onCash={onCash} onBills={onBills} onExpense={onQuickAdd}
+   onTimeline={()=>onArea("timeline")}/>
   <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
    <div>
     <h3 className="text-sm font-black text-[#2B5944]">{t("Where our money goes","وين بتروح مصاريف العيلة")}</h3>
@@ -91,7 +36,7 @@ export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncom
    <button type="button" onClick={()=>onEditCategory({})} className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-[#B5D8BD] bg-white px-3 text-xs font-bold text-[#387F58]">
     <Plus className="size-4"/>{t("Add category","أضف فئة")}</button>
   </div>
-  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+  <div id="money-category-cards" className="scroll-mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
    {STARTER_PICTURES.map(g=>{
     const cat=pictureCategories(state,g.key),target=cat.reduce((a,x)=>a+m.plannedBy(x.id),0);
     const used=cat.reduce((a,x)=>a+m.spentBy(x.id),0),pct=target>0?Math.min(100,used/target*100):0;
@@ -143,10 +88,48 @@ export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncom
     <button type="button" onClick={()=>onEditCategory({starter:selected as CategoryPicture})}
       className="mt-3 min-h-11 text-xs font-bold text-[#3A7C59] underline">{t("Add another here","أضف فئة هون")}</button>
    </div>}
+  <section className="space-y-2" aria-label={t("Next payments and income","الدفعات والدخل القادم")}>
+   <div className="flex flex-wrap items-center justify-between gap-2">
+    <h3 className="text-sm font-black text-[#305D44]">{t("Coming up next","المواعيد الجاية")}</h3>
+    <button type="button" onClick={()=>onArea("timeline")}
+     className="min-h-11 text-xs font-bold text-[#3E855E] underline">{t("Full timeline · 7 / 30 / 90 days","الجدول الكامل · ٧ / ٣٠ / ٩٠ يوم")}</button>
+   </div>
+   <div className="divide-y divide-[#EDF1EB] overflow-hidden rounded-2xl border border-[#E4EAE1] bg-white">
+    {sorted.length?sorted.map(e=><div key={e.id} className="flex items-center gap-3 p-3">
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#F2F8EE] text-xl" aria-hidden="true">{e.kind==="income"?"💵":e.kind==="annual"?"🚘":"🏠"}</span>
+      <div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-[#355943]">{e.label}</p>
+       <p className="text-[11px] text-[#78897C]">{e.date} · {e.kind==="income"?t("Expected, not received","متوقع مش مستلم"):t("Unpaid commitment","التزام غير مدفوع")}</p></div>
+      <strong className="text-xs tabular-nums text-[#3E7B5C]">{e.amountJod>0?"+":"−"}{shown(Math.abs(e.amountJod))}</strong>
+     </div>):<p className="p-4 text-xs text-[#829082]">{t("No dated income or bills entered yet.","ما في دخل أو فواتير مؤرخة بعد.")}</p>}
+   </div>
+   <button type="button" onClick={onBills} className="min-h-11 rounded-xl border border-[#BAD7C0] bg-white px-3 text-xs font-bold text-[#397B55]">{t("Edit bills & due dates","عدّل الفواتير ومواعيدها")}</button>
+  </section>
+  <section className="space-y-2" aria-label={t("Recent paid expenses","آخر المصاريف المدفوعة")}>
+   <div className="flex flex-wrap items-center justify-between gap-2">
+    <h3 className="text-sm font-black text-[#305D44]">{t("Recently recorded","المصاريف المسجلة مؤخراً")}</h3>
+    <button type="button" onClick={onSpending} className="min-h-11 text-xs font-bold text-[#3E855E] underline">{t("View & edit history","شوف وعدّل السجل")}</button>
+   </div>
+   <div className="divide-y divide-[#EDF1EB] overflow-hidden rounded-2xl border border-[#E4EAE1] bg-white">
+    {recent.length?recent.map(x=><div key={x.id} className="flex items-center gap-3 p-3">
+      <span className="text-xl" aria-hidden="true">🧾</span>
+      <div className="min-w-0 flex-1"><strong className="block truncate text-xs text-[#365C44]">{state.categories.find(c=>c.id===x.categoryId)?.name??t("Uncategorized","غير مصنف")}</strong>
+       <p className="text-[11px] text-[#839082]">{x.date}{x.note?" · "+x.note:""}</p></div>
+      <strong className="text-xs text-[#3A8058]">{shown(x.amount)}</strong>
+    </div>):<p className="p-4 text-xs text-[#7B8C7E]">{t("No paid expenses recorded yet.","ما في مصاريف مدفوعة مسجلة بعد.")}</p>}
+   </div>
+  </section>
   <div className="flex flex-wrap gap-2">
-   <button type="button" onClick={onSpending} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#3C9266] px-4 text-xs font-bold text-white"><Plus className="size-4"/>{t("Add an expense","سجّل مصروف")}</button>
+   <button type="button" onClick={onQuickAdd} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#3C9266] px-4 text-xs font-bold text-white"><Plus className="size-4"/>{t("Add an expense","سجّل مصروف")}</button>
    <button type="button" onClick={onIncome} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#BBDAC4] bg-white px-4 text-xs font-bold text-[#397B59]">{t("Edit payday","عدّل موعد الراتب")}</button>
   </div>
+  <details className="rounded-2xl border border-[#E4EADF] bg-white p-3">
+   <summary className="min-h-11 cursor-pointer text-xs font-bold text-[#4F7E60]">{t("More planning options (optional)","خيارات تخطيط إضافية (اختيارية)")}</summary>
+   <div className="mt-2 flex flex-wrap gap-2">
+    <button type="button" onClick={()=>onArea("annual")} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Annual insurance, tax & property costs","التأمين والضرائب والمصاريف السنوية")}</button>
+    <button type="button" onClick={()=>onArea("pace")} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Customize spending timing","خصّص مواعيد توزيع الصرف")}</button>
+    <button type="button" onClick={onCategories} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Detailed item budgets","تفاصيل بنود الميزانية")}</button>
+   </div>
+  </details>
   <p className="text-[11px] leading-relaxed text-[#768678]">{t("This is an estimate using the records you entered. There is no bank connection; a plan never becomes a payment automatically.",
     "هذه توقعات من معلوماتك المدخلة. ما في ربط بنكي؛ الخطة مش دفعة فعلية إلا بعد تأكيدها.")}</p>
  </div>;

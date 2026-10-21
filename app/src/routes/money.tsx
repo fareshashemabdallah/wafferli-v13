@@ -123,10 +123,10 @@ function MoneyPage() {
       {section==="overview"&&<details open={legacyMoneyOpen} onToggle={e=>setLegacyMoneyOpen(e.currentTarget.open)}
         className="mt-3 rounded-2xl border border-[#E0EADF] bg-[#F8FBF6] p-3 sm:p-4">
         <summary className="min-h-11 cursor-pointer text-sm font-bold text-[#3F805B]">
-         {ar?"خيارات إضافية: تصنيف الميزانية وتفاصيلها":"More Money tools: detailed budget and category editor"}
+         {ar?"تفاصيل متقدمة للميزانية (اختياري)":"Advanced budget details (optional)"}
         </summary>
         <div className="mt-4"><MoneyOverviewPanel state={s} setState={setS} goTo={setSection}
-        forceBudgetOpen={budgetOpenRequest}
+        forceBudgetOpen={budgetOpenRequest+1}
         onManageCategories={openCategoryEditor}
         onEditIncome={()=>{setIncomeEditorOpen(true);setSection("overview");}}
         householdPanel={<HouseholdPresencePanel members={members} money={s} setMoney={setS}/>}
@@ -157,7 +157,7 @@ function MoneyPage() {
 
       {section==="overview"&&<details className="editorial-card mb-4 px-4 py-3">
        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
-        {ar?"أدوات إضافية: تاريخ المصاريف وتجربة خطط مستقبلية":"Optional: spending history and future budget experiments"} +
+        {ar?"تحليل مالي متقدم (اختياري)":"Advanced financial analysis (optional)"} +
        </summary>
        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?
         "هذه أدوات لمن يحب التفاصيل. ما تحتاجها لتفهم ميزانية بيتك اليوم.":
