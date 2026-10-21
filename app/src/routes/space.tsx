@@ -36,7 +36,7 @@ type OccasionDraft = {
 };
 const newOccasion=():OccasionDraft=>({id:"",title:"",date:dateKey(new Date()),kind:"anniversary",annual:true,note:""});
 
-function Space() {
+export function Space() {
   const { tr,lang } = useI18n();
   const ar=lang==="ar";
   useEffect(()=>{
