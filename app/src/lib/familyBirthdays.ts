@@ -49,6 +49,29 @@ export function memberAgeYears(member:Pick<Member,"birthday"|"ageYears">,asOf=ne
  return Number.isInteger(member.ageYears)&&member.ageYears!==undefined&&
   member.ageYears>=0&&member.ageYears<=120?member.ageYears:null;
 }
+/** For the first two years, whole-year age hides major developmental
+ * differences. Calculate completed calendar months from an explicitly given
+ * birth date; never infer months from a manually entered whole-year age. */
+export function memberAgeMonths(member:Pick<Member,"birthday">,asOf=new Date()):number|null{
+ if(!member.birthday)return null;
+ const birth=parseCalendarDate(member.birthday);
+ if(!birth)return null;
+ const today=new Date(asOf.getFullYear(),asOf.getMonth(),asOf.getDate(),12);
+ if(birth.getTime()>today.getTime())return null;
+ const months=(today.getFullYear()-birth.getFullYear())*12+
+  (today.getMonth()-birth.getMonth())-(today.getDate()<birth.getDate()?1:0);
+ return months>=0&&months<24?months:null;
+}
+export function memberAgeDisplay(
+ member:Pick<Member,"birthday"|"ageYears"|"ageGroup">,
+ arabic=false,asOf=new Date()
+):string|null{
+ const months=memberAgeMonths(member,asOf);
+ if(months!==null)return arabic?months+" "+(months===1?"شهر":"شهر"):months+" "+(months===1?"month":"months");
+ const age=memberAgeYears(member,asOf);
+ if(age!==null)return arabic?age+" سنة":age+" "+(age===1?"year":"years");
+ return member.ageGroup.trim()||null;
+}
 export function memberAgeLabel(member:Pick<Member,"birthday"|"ageYears"|"ageGroup">,asOf=new Date()):string|null{
  const age=memberAgeYears(member,asOf);
  return age===null?member.ageGroup.trim()||null:String(age);
