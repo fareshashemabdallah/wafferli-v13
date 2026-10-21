@@ -1,6 +1,6 @@
 import {createFileRoute,Link} from "@tanstack/react-router";
 import {useState} from "react";
-import {CalendarDays,CalendarHeart,ClipboardList,HeartHandshake,UsersRound,CheckCircle2,ChevronRight,MapPinned} from "lucide-react";
+import {CalendarDays,CalendarHeart,ClipboardList,UsersRound,CheckCircle2,ChevronRight} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {PlansWorkspace} from "@/routes/plans";
@@ -18,12 +18,6 @@ export const Route=createFileRoute("/family")({
  component:FamilyLifePage
 });
 type View="overview"|"calendar"|"plans"|"tasks";
-const views=[
- {id:"overview" as const,en:"Our Family",ar:"عيلتنا",icon:HeartHandshake},
- {id:"calendar" as const,en:"Special Moments",ar:"مناسباتنا",icon:CalendarDays},
- {id:"plans" as const,en:"Our Plans",ar:"خططنا",icon:CalendarHeart},
- {id:"tasks" as const,en:"Family Tasks",ar:"مهام العيلة",icon:ClipboardList}
-];
 export function FamilyLifePage(){
  const {lang}=useI18n(),ar=lang==="ar";
  const label=(en:string,arabic:string)=>ar?arabic:en;
@@ -43,10 +37,11 @@ export function FamilyLifePage(){
  const card="rounded-[1.55rem] border border-[#DDEBDD] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,82,64,.18)] sm:p-5";
  return <AppShell title={label("Family Life","حياة العيلة")}>
   <div className="space-y-4">
-   <p className="px-1 text-sm leading-relaxed text-[#657185]">
-    {label("Your family's time, plans and responsibilities — organized together.",
-     "مواعيد العيلة وخططها ومسؤولياتها — كلها بمكان واحد.")}
-   </p>
+   {view==="overview"&&<div className="overflow-hidden rounded-[1.6rem] border border-[#E8E0E2] bg-[linear-gradient(120deg,#FFF7FB,#EFF7EC)] p-5">
+    <p className="text-[11px] font-black uppercase tracking-widest text-[#AA6585]">{label("THE FAMILY RHYTHM","إيقاع العيلة")}</p>
+    <h2 className="mt-2 text-xl font-black leading-snug text-[#2B5140]">{label("Life together, planned better.","حياتنا سوا، بتنظيم أريح.")}</h2>
+    <p className="mt-2 text-sm leading-relaxed text-[#607468]">{label("One timeline for birthdays, outings and the little things that matter. Every choice stays connected.","مكان واحد للمناسبات والطلعات والتفاصيل المهمة. كل قرار بيضل مربوط بخطته.")}</p>
+   </div>}
    {view!=="overview"&&<button type="button" onClick={()=>{setView("overview");setCalendarFocus(undefined);}}
     className="inline-flex min-h-11 items-center rounded-xl border border-[#DCE9DF] bg-white px-4 text-sm font-bold text-[#31775B]">{label("← Back to family timeline","↩ رجوع لحياة العيلة")}</button>}
    {view==="overview"&&<div className="space-y-4">
@@ -116,6 +111,7 @@ export function FamilyLifePage(){
        {label("Manage tasks","إدارة المهام")}<ChevronRight className="size-4 rtl:rotate-180"/>
       </button>
      </summary>
+     <button onClick={()=>setView("tasks")} type="button" className="mt-2 inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#408E74] underline">{label("Manage tasks","إدارة المهام")}<ChevronRight className="size-4 rtl:rotate-180"/></button>
      <p className="mt-2 text-sm text-[#687587]">{ready?
       label(String(activeTasks.dueSoon)+" due within 7 days · "+String(activeTasks.overdue)+" overdue",
        String(activeTasks.dueSoon)+" خلال ٧ أيام · "+String(activeTasks.overdue)+" متأخرة")
