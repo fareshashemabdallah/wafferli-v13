@@ -35,7 +35,8 @@ export function withoutConfirmedMonthPlan(state:MoneyState,categoryId:string,mon
  delete row[categoryId];
  const next={...state.categoryMonthlyPlans};
  if(Object.keys(row).length)next[month]=row;else delete next[month];
- return {...state,categoryMonthlyPlans:Object.keys(next).length?next:undefined};
+ if(!Object.keys(next).length){const copy={...state};delete copy.categoryMonthlyPlans;return copy;}
+ return {...state,categoryMonthlyPlans:next};
 }
 /** A plan change is a stored *approval*, never an automatically learned pattern.
  * This enumerates categories with parent-entered adjustments in a date window.
