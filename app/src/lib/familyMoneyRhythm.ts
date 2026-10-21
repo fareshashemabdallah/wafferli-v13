@@ -3,6 +3,7 @@ import type {MoneyState,Category} from "./money";
 import type {FamilyPlan} from "./familyPlans";
 import {familyForecastCommitments} from "./familyFinancialCommitments";
 import {parseCalendarDate} from "./familyCalendar";
+import {effectiveCategoryAllowance} from "./monthAwareMoney";
 
 /** Optional, local-only frequency for an existing monthly category allocation.
  * It is NOT an expense, a bill, a bank withdrawal, or another monthly budget.
@@ -69,10 +70,11 @@ function predictedCategoryEvents(state:MoneyState,pace:SpendingPace,today:string
    .reduce((a,e)=>a+e.amount,0):0;
   // Partial month: don't assert the entire month's missing allocation as due.
   // Each future cadence gets a reasonable share of that month's estimated total.
-  const remaining=max(0,cat.planned-spent);
+  const monthlyAllowance=effectiveCategoryAllowance(state,cat.id,month);
+  const remaining=max(0,monthlyAllowance-spent);
   const from=month===todayMonth?today:month+"-01";
   const daysLeft=dayCount(from)-Number(from.slice(8))+1;
-  const target=max(0,Math.min(remaining,roundJod(cat.planned*daysLeft/dayCount(from))));
+  const target=max(0,Math.min(remaining,roundJod(monthlyAllowance*daysLeft/dayCount(from))));
   const per=roundJod(target/arr.length);
   arr.forEach((d,i)=>{
    const amount=i===arr.length-1?roundJod(target-per*(arr.length-1)):per;
@@ -132,7 +134,7 @@ export function buildFamilyMoneyRhythm(state:MoneyState,plans:readonly FamilyPla
   excludedPaces,
   unverifiedIncomeJod:roundJod(events.filter(e=>e.kind==="income").reduce((a,e)=>a+e.amountJod,0)),
   monthlyPaceJod:roundJod((state.spendingPaces??[]).filter(p=>!excludedPaces.includes(p.categoryId))
-   .reduce((a,p)=>a+(state.categories.find(c=>c.id===p.categoryId)?.planned??0),0)),
+   .reduce((a,p)=>a+effectiveCategoryAllowance(state,p.categoryId,ym(today)),0)),
   futureBillsJod:roundJod(events.filter(e=>e.kind==="bill"||e.kind==="annual").reduce((a,e)=>a-e.amountJod,0)),
   futureIncomeJod:roundJod(events.filter(e=>e.kind==="income").reduce((a,e)=>a+e.amountJod,0))};
 }
