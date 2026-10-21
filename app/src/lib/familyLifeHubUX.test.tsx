@@ -30,14 +30,16 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
  it("offers one accessible in-page workspace for Calendar, Plans and Responsibilities",async()=>{
   draw();
   expect(screen.getByRole("heading",{level:1,name:"Family Life"})).toBeInTheDocument();
-  const nav=screen.getByRole("navigation",{name:"Family Life sections"});
-  expect(nav.querySelectorAll("button")).toHaveLength(4);
-  fireEvent.click(screen.getByRole("button",{name:"Special Moments"}));
+  expect(screen.queryByRole("navigation",{name:"Family Life sections"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Open family calendar"}));
   expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-embedded","true");
   expect(screen.queryByTestId("embedded-plans")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Our Plans"}));
+  fireEvent.click(screen.getByRole("button",{name:/Back to family timeline/}));
+  fireEvent.click(screen.getByRole("button",{name:"Open plans"}));
   expect(screen.getByTestId("embedded-plans")).toHaveAttribute("data-embedded","true");
-  fireEvent.click(screen.getByRole("button",{name:"Family Tasks"}));
+  fireEvent.click(screen.getByRole("button",{name:/Back to family timeline/}));
+  fireEvent.click(screen.getByText("Family responsibilities"));
+  fireEvent.click(screen.getByRole("button",{name:"Manage tasks"}));
   expect(screen.getByTestId("embedded-tasks")).toBeInTheDocument();
   expect(localStorage.getItem("wafferli.v13.familyCalendar")).toBeNull();
   expect(localStorage.getItem("wafferli.v13.familyPlans")).toBeNull();
@@ -68,6 +70,7 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
   draw();
   expect(screen.queryByText("More family experiences")).not.toBeInTheDocument();
   expect(screen.queryByRole("link",{name:"Family & Friends Circles"})).not.toBeInTheDocument();
-  expect(screen.getByRole("navigation",{name:"Family Life sections"})).toBeInTheDocument();
+  expect(screen.queryByRole("navigation",{name:"Family Life sections"})).not.toBeInTheDocument();
+  expect(screen.getByText("Life together, planned better.")).toBeInTheDocument();
  });
 });
