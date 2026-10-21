@@ -51,6 +51,33 @@ jobs:
           test -s react-dist/explore/weekend/index.html
           grep -Fq '/wafferli-v13/#/explore/weekend' react-dist/explore/weekend/index.html
           grep -qi 'Dabberna' react-dist/index.html
+      - name: Build isolated redesign preview (PR #131)
+        uses: actions/checkout@v4
+        with:
+          ref: design/clean-slate-single-category-2026-10-21
+          path: redesign-preview
+          persist-credentials: false
+      - name: Install preview dependencies
+        working-directory: redesign-preview/app
+        run: bun install --frozen-lockfile
+      - name: Verify preview TypeScript
+        working-directory: redesign-preview/app
+        run: bun run typecheck
+      - name: Verify preview regression tests
+        working-directory: redesign-preview/app
+        run: bun run test
+      - name: Build redesign under isolated /preview/ path
+        working-directory: redesign-preview/app
+        env:
+          VITE_ENABLE_LIVE_AI: "false"
+        run: bunx vite build --base=/wafferli-v13/preview/
+      - name: Assemble production and preview pages
+        run: |
+          mkdir -p react-dist/preview
+          cp -a redesign-preview/react-dist/. react-dist/preview/
+          rm -f react-dist/preview/offline-sw.js
+          test -s react-dist/preview/index.html
+          grep -Fq '/wafferli-v13/preview/assets/' react-dist/preview/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
