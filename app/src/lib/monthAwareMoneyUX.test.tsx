@@ -45,6 +45,7 @@ describe("Month-aware guidance embedded in existing illustrated Money Map",()=>{
   fireEvent.click(screen.getByRole("button",{name:"Adjust a particular month"}));
   fireEvent.change(screen.getByLabelText("Plan for that month (JOD)"),{target:{value:"600"}});
   fireEvent.click(screen.getByRole("button",{name:"Confirm this month's plan"}));
+  fireEvent.click(groceries());
   fireEvent.click(screen.getByRole("button",{name:"Adjust a particular month"}));
   fireEvent.click(screen.getByRole("button",{name:"Use usual plan"}));
   const json=screen.getByTestId("finance-json");
