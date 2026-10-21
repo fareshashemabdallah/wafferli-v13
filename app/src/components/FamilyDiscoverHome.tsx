@@ -2,6 +2,7 @@ import {useState,type FormEvent} from "react";
 import {Link} from "@tanstack/react-router";
 import {ArrowRight,ArrowUpRight,CalendarDays,Check,ChevronRight,Compass,Heart,MapPin,Search,ShieldCheck,Sparkles,UsersRound,Wallet} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
+import {ShareFamilyExperience} from "./ShareFamilyExperience";
 import {useI18n} from "@/lib/i18n";
 import {findWeekendPlaces,weekendPlaceSearchUrl,weekendCityName,type WeekendPlace,type WeekendCity} from "@/lib/weekendPlaceSearch";
 import {useLocalState,uid} from "@/lib/storage";
@@ -194,6 +195,7 @@ export function FamilyDiscoverHome(){
    <p className="mt-2 text-[11px] text-[#867781]">{t("Private by default. Not published to other families.","خاص إلكم. ما رح يننشر للأهل الآخرين.")}</p>
    <button onClick={saveReflection} type="button" className="mt-2 min-h-11 rounded-xl bg-[#985B7D] px-4 text-sm font-bold text-white">{t("Remember our experience","احفظ تجربتنا")}</button>
   </details>}
+  <ShareFamilyExperience/>
   <p className="flex items-start gap-2 px-2 text-[11px] leading-relaxed text-[#778C7D]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>{t("You choose what to save. Your private financial information is never shared with other parents by this page.","إنت بتختار شو تحفظ. هالصفحة ما بتشارك معلوماتك المالية الخاصة مع الأهل.")}</p>
  </div>
  </AppShell>;
