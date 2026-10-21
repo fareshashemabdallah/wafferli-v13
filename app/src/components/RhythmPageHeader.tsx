@@ -10,7 +10,9 @@ export function rhythmChapter(path:string){
   today:{en:"Today",ar:"اليوم",sentenceEn:"One clear view of your family journey.",sentenceAr:"صورة واضحة لرحلة عيلتك."},
   money:{en:"Understand",ar:"افهم",sentenceEn:"Edit the real figures behind your story. Plans, bills and recorded spending are different things.",sentenceAr:"عدّل الأرقام الأساسية لحكايتكم؛ الخطة والفاتورة والمصروف المدفوع أشياء مختلفة."},
   ask:{en:"Decide",ar:"قرّر",sentenceEn:"Compare realistic choices. Only you decide what becomes a saved family plan.",sentenceAr:"قارن خيارات واقعية؛ أنت وحدك بتقرر شو يتحوّل لخطة محفوظة."},
-  family:{en:"Prepare & act",ar:"تحضّر ونفّذ",sentenceEn:"Your saved dates and plans stay connected as one source of truth.",sentenceAr:"المواعيد والخطط المحفوظة بتبقى مترابطة بدون نسخ ثانية."}
+  family:{en:"Family",ar:"العيلة",sentenceEn:"Dates and plans belong together in one family space.",sentenceAr:"المواعيد والخطط بمكان واحد للعيلة."},
+  discover:{en:"Discover",ar:"اكتشف",sentenceEn:"Choose experiences with clear sources, not advertising disguised as advice.",sentenceAr:"اختَر تجارب بمصادر واضحة، مش دعايات متخفّية كنصائح."},
+  shopping:{en:"Shopping",ar:"التسوّق",sentenceEn:"One journey from finding what you need to recording what you actually paid.",sentenceAr:"رحلة واحدة من البحث عن حاجتك لتسجيل شو دفعت فعلاً."}
  } as const;
  if(path==="/space"||path.startsWith("/household"))return {en:"Know our family",ar:"تعرّف على عيلتنا",
   sentenceEn:"Add only details that improve guidance. Profiles and birthdays are optional; manage them once here.",
