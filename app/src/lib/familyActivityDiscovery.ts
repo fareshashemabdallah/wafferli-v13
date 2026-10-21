@@ -1,4 +1,5 @@
 import type {Member} from "./money";
+import {memberAgeYears} from "./familyBirthdays";
 import {realFamilyMembers} from "./familySetup";
 
 export type DiscoveryPriority="quality"|"balance"|"affordable";
@@ -18,10 +19,10 @@ export const ACTIVITY_THEMES:readonly ActivityTheme[]=[
  {id:"robotics",minAge:9,maxAge:18,en:"Robotics & coding workshops",ar:"روبوتات وبرمجة",term:"youth robotics coding classes",icon:"🤖",tags:["learning"]},
  {id:"teen",minAge:13,maxAge:18,en:"Teen skills & creative courses",ar:"مهارات ودورات للشباب",term:"teenagers skills photography technology classes",icon:"🎯",tags:["learning","arts"]}
 ];
-export function childAgeOptions(members:readonly Member[]):number[]{
+export function childAgeOptions(members:readonly Member[],asOf=new Date()):number[]{
  return Array.from(new Set(realFamilyMembers(members)
- .filter(m=>m.role==="child"&&typeof m.ageYears==="number"&&Number.isInteger(m.ageYears)&&m.ageYears>=0&&m.ageYears<=18)
- .map(m=>m.ageYears!))).sort((a,b)=>a-b);
+ .filter(m=>m.role==="child"&&memberAgeYears(m,asOf)!==null&&memberAgeYears(m,asOf)!<=18)
+ .map(m=>memberAgeYears(m,asOf)!))).sort((a,b)=>a-b);
 }
 export function suggestedActivityThemes(
  age:number|null,priority:DiscoveryPriority="balance",freeFirst=false,

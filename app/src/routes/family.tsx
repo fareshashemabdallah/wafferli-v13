@@ -1,6 +1,6 @@
 import {createFileRoute,Link} from "@tanstack/react-router";
 import {useState} from "react";
-import {CalendarDays,CalendarHeart,ClipboardList,HeartHandshake,UsersRound,CheckCircle2,ChevronRight,MapPinned} from "lucide-react";
+import {CalendarDays,CalendarHeart,ClipboardList,UsersRound,CheckCircle2,ChevronRight} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {PlansWorkspace} from "@/routes/plans";
@@ -18,12 +18,6 @@ export const Route=createFileRoute("/family")({
  component:FamilyLifePage
 });
 type View="overview"|"calendar"|"plans"|"tasks";
-const views=[
- {id:"overview" as const,en:"Our Family",ar:"عيلتنا",icon:HeartHandshake},
- {id:"calendar" as const,en:"Special Moments",ar:"مناسباتنا",icon:CalendarDays},
- {id:"plans" as const,en:"Our Plans",ar:"خططنا",icon:CalendarHeart},
- {id:"tasks" as const,en:"Family Tasks",ar:"مهام العيلة",icon:ClipboardList}
-];
 export function FamilyLifePage(){
  const {lang}=useI18n(),ar=lang==="ar";
  const label=(en:string,arabic:string)=>ar?arabic:en;
@@ -43,24 +37,13 @@ export function FamilyLifePage(){
  const card="rounded-[1.55rem] border border-[#DDEBDD] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,82,64,.18)] sm:p-5";
  return <AppShell title={label("Family Life","حياة العيلة")}>
   <div className="space-y-4">
-   <p className="px-1 text-sm leading-relaxed text-[#657185]">
-    {label("Your family's time, plans and responsibilities — organized together.",
-     "مواعيد العيلة وخططها ومسؤولياتها — كلها بمكان واحد.")}
-   </p>
-   <nav aria-label={label("Family Life sections","أقسام حياة العيلة")} className="rounded-2xl border border-[#DCE9DF] bg-white p-2">
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-     {views.map(item=>{
-      const selected=view===item.id;
-      const Icon=item.icon;
-      return <button key={item.id} type="button" aria-current={selected?"page":undefined}
-       aria-pressed={selected} onClick={()=>setView(item.id)}
-       className={"flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-[#479F7E] "+
-       (selected?"bg-[#E4F4E8] text-[#226C4D]":"text-[#657B6D] hover:bg-[#F3F8F2]")}>
-       <Icon className="size-4 shrink-0"/>{ar?item.ar:item.en}
-      </button>;
-     })}
-    </div>
-   </nav>
+   {view==="overview"&&<div className="overflow-hidden rounded-[1.6rem] border border-[#E8E0E2] bg-[linear-gradient(120deg,#FFF7FB,#EFF7EC)] p-5">
+    <p className="text-[11px] font-black uppercase tracking-widest text-[#AA6585]">{label("THE FAMILY RHYTHM","إيقاع العيلة")}</p>
+    <h2 className="mt-2 text-xl font-black leading-snug text-[#2B5140]">{label("Life together, planned better.","حياتنا سوا، بتنظيم أريح.")}</h2>
+    <p className="mt-2 text-sm leading-relaxed text-[#607468]">{label("One timeline for birthdays, outings and the little things that matter. Every choice stays connected.","مكان واحد للمناسبات والطلعات والتفاصيل المهمة. كل قرار بيضل مربوط بخطته.")}</p>
+   </div>}
+   {view!=="overview"&&<button type="button" onClick={()=>{setView("overview");setCalendarFocus(undefined);}}
+    className="inline-flex min-h-11 items-center rounded-xl border border-[#DCE9DF] bg-white px-4 text-sm font-bold text-[#31775B]">{label("← Back to family timeline","↩ رجوع لحياة العيلة")}</button>}
    {view==="overview"&&<div className="space-y-4">
     <section className={card}>
      <div className="flex flex-wrap items-center justify-between gap-3">
@@ -120,28 +103,16 @@ export function FamilyLifePage(){
       </button>
      </section>
     </div>
-    <section className={card}>
-     <div className="flex items-center justify-between gap-2">
+    <details className={card}>
+     <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2">
       <div className="flex items-center gap-2"><ClipboardList className="size-5 text-[#4A997F]"/>
        <h2 className="text-base font-extrabold">{label("Family responsibilities","مهام العيلة")}</h2></div>
-      <button onClick={()=>setView("tasks")} type="button" className="inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#408E74] underline">
-       {label("Manage tasks","إدارة المهام")}<ChevronRight className="size-4 rtl:rotate-180"/>
-      </button>
-     </div>
+     </summary>
+     <button onClick={()=>setView("tasks")} type="button" className="mt-2 inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#408E74] underline">{label("Manage tasks","إدارة المهام")}<ChevronRight className="size-4 rtl:rotate-180"/></button>
      <p className="mt-2 text-sm text-[#687587]">{ready?
       label(String(activeTasks.dueSoon)+" due within 7 days · "+String(activeTasks.overdue)+" overdue",
        String(activeTasks.dueSoon)+" خلال ٧ أيام · "+String(activeTasks.overdue)+" متأخرة")
       :label("Loading tasks…","جارٍ تحميل المهام…")}</p>
-    </section>
-    <details className={card}>
-     <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 text-sm font-semibold text-[#58667A]">
-      <MapPinned className="size-5 text-[#B66B92]"/>{label("More family experiences","أنشطة عائلية إضافية")}
-     </summary>
-     <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
-      <Link to="/explore/weekend" className="rounded-xl bg-[#FCECF2] px-4 py-3 text-[#965477]">{label("Outings","الطلعات")}</Link>
-      <Link to="/occasions" className="rounded-xl bg-[#FCECF2] px-4 py-3 text-[#965477]">{label("Celebrations","المناسبات")}</Link>
-      <Link to="/community" className="rounded-xl bg-[#FCECF2] px-4 py-3 text-[#965477]">{label("Family & Friends Circles","دوائر العائلة والأصحاب")}</Link>
-     </div>
     </details>
    </div>}
    {view==="calendar"&&<FamilyCalendarWorkspace key={calendarFocus??"calendar"} embedded {...(calendarFocus?{focusDate:calendarFocus}:{})}/>}

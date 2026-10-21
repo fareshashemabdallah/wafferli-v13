@@ -1,4 +1,5 @@
 import {useState,type FormEvent} from "react";
+import {memberAgeYears} from "@/lib/familyBirthdays";
 import {Link} from "@tanstack/react-router";
 import {ArrowRight,CheckCircle2,ExternalLink,MapPin,ShieldCheck,SlidersHorizontal,UsersRound,Wallet} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
@@ -41,7 +42,7 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
  const [saveError,setSaveError]=useState("");
  const [savedPlan,setSavedPlan]=useState<FamilyPlan|null>(null);
  const priority:DiscoveryPriority=prefs.discoveryPriority??"balance";
- const children=realFamilyMembers(members).filter(x=>x.role==="child"&&typeof x.ageYears==="number"&&Number.isInteger(x.ageYears)&&x.ageYears>=0&&x.ageYears<=18);
+ const children=realFamilyMembers(members).filter(x=>x.role==="child"&&memberAgeYears(x)!==null&&memberAgeYears(x)!<=18);
  const city=cityChoice??outingCity(prefs.city);
  const cityName=weekendCityName(city);
  const themes=suggestedActivityThemes(mode==="one"?Number(age):null,priority,prefs.freeActivitiesFirst??false);
@@ -113,7 +114,7 @@ export function FamilyActivityExplorer({onShowAffordability}:{onShowAffordabilit
      )}
     </div>
     {mode==="family"&&(children.length>0?<p className="mt-3 text-sm text-[#507466]">
-      {t("Using saved ages: ","باستخدام الأعمار المسجّلة: ")}{children.map(m=>m.ageYears).join(", ")}. {t("These are broad category matches, not confirmed admission.","هذه ملاءمة عامة للفئات وليست تأكيداً لقبول الأطفال.")}
+      {t("Using saved ages: ","باستخدام الأعمار المسجّلة: ")}{children.map(m=>memberAgeYears(m)).join(", ")}. {t("These are broad category matches, not confirmed admission.","هذه ملاءمة عامة للفئات وليست تأكيداً لقبول الأطفال.")}
      </p>:<p className="mt-3 text-sm text-[#68796E]">{t("No real child ages saved yet. We'll show general family ideas; you can explore without a profile.","لا توجد أعمار أطفال مسجّلة. سنعرض أفكاراً عامة ويمكنك الاستكشاف بدون ملف عائلي.")} <Link to="/space" className="font-bold text-brand underline">{t("Add optional ages","أضف الأعمار اختيارياً")}</Link></p>)}
     {mode==="one"&&<label className="mt-3 block max-w-xs text-sm font-semibold">{t("Child's age","عمر الطفل")}
       <select className={selectCls} value={age} onChange={e=>setAge(e.target.value)}>

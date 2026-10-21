@@ -39,13 +39,12 @@ describe("remove distractions, not parent decision support",()=>{
   expect(screen.queryByText(/Fictional merchant and offer-review workflow/)).not.toBeInTheDocument();
   expect(screen.getByRole("link",{name:/Ask Dabberna/})).toHaveAttribute("href","/advisor");
  });
- it("Discover helps pick practical family outcomes but doesn't promote social networks",()=>{
+ it("Discover presents one contextual experience and does not send parents to a tool gallery",()=>{
   draw(<Explore/>);
-  expect(screen.getByRole("link",{name:/A family outing/})).toHaveAttribute("href","/explore/weekend");
-  expect(screen.getByRole("link",{name:/Find a product/})).toHaveAttribute("href","/explore/market");
-  expect(screen.getByRole("link",{name:/My shopping list/})).toHaveAttribute("href","/explore/shopping");
+  expect(screen.getByText("What would your family enjoy?")).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"Find family experiences"})).toBeInTheDocument();
   expect(screen.queryByRole("link",{name:/Family & Friends Circles/})).not.toBeInTheDocument();
-  expect(screen.queryByRole("link",{name:/Community experiences/})).not.toBeInTheDocument();
+  expect(screen.queryByRole("link",{name:/Find a product/})).not.toBeInTheDocument();
  });
  it("starts with the parent's question and keeps additional decision flows optional",()=>{
   draw(<Advisor/>);

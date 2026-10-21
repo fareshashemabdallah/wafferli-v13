@@ -54,7 +54,7 @@ export function FamilyChoiceHome({onNavigate}:{onNavigate?:()=>void}){
      </span>
     </span>
    </Link>
-   <Link to="/explore/weekend" onClick={onNavigate}
+   <Link to="/explore" onClick={onNavigate}
     className="soft-action flex min-h-32 items-center gap-4 rounded-2xl bg-[#FFF2E8] p-4 sm:p-5">
     <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white text-[#B17A5F]">
      <Sun className="size-7" strokeWidth={1.6} aria-hidden="true"/>
@@ -67,7 +67,7 @@ export function FamilyChoiceHome({onNavigate}:{onNavigate?:()=>void}){
      </span>
     </span>
    </Link>
-   <Link to="/explore/market" onClick={onNavigate}
+   <Link to="/explore/smartbuy" onClick={onNavigate}
     className="soft-action flex min-h-32 items-center gap-4 rounded-2xl bg-[#EAF1F5] p-4 sm:p-5">
     <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white text-[#527485]">
      <ShoppingBag className="size-7" strokeWidth={1.6} aria-hidden="true"/>

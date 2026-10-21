@@ -23,7 +23,8 @@ describe("Calm contextual Today redesign",()=>{
   expect(screen.queryByRole("button",{name:"Open my private weekly money story"})).not.toBeInTheDocument();
   expect(screen.queryByText("Understand, protect and prepare—so we can live well together.")).not.toBeInTheDocument();
   expect(screen.queryByText("More family options (optional)")).not.toBeInTheDocument();
-  expect(screen.getByRole("region",{name:"Quick family actions"})).toBeInTheDocument();
+  expect(screen.queryByRole("region",{name:"Quick family actions"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByText("This week & money · optional details"));
   expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("••••");
  });
  it("never presents invented sample currency or urgency without real saved records",async()=>{
@@ -32,8 +33,22 @@ describe("Calm contextual Today redesign",()=>{
   expect(screen.queryByTestId("today-one-action")).not.toBeInTheDocument();
   expect(screen.queryByText("Sophia's birthday")).not.toBeInTheDocument();
   expect(screen.queryByText("70 JOD")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByText("This week & money · optional details"));
   expect(screen.getByRole("region",{name:"Money at a glance"})).not.toHaveTextContent("1,200 JOD");
   expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("Only sample money is saved");
+ });
+ it("offers one optional family idea on an empty profile and passes only a short category intent",async()=>{
+  draw();
+  await waitFor(()=>expect(screen.getByRole("region",{name:"No urgent next action"})).toBeInTheDocument());
+  expect(screen.getByText("How about time outdoors?")).toBeInTheDocument();
+  const idea=screen.getByRole("link",{name:/Find ideas without setup/});
+  expect(idea).toHaveAttribute("href","/explore");
+  fireEvent.click(idea);
+  const intent=JSON.parse(localStorage.getItem("wafferli.v13.oneTapDiscoverIntent")??"null");
+  expect(intent).toMatchObject({kind:"park"});
+  expect(Object.keys(intent).sort()).toEqual(["kind","requestedAt"]);
+  expect(localStorage.getItem("wafferli.v13.money")).toBeNull();
+  expect(localStorage.getItem("wafferli.v13.members")).toBeNull();
  });
  it("reuses the exact birthday gift plan with one click and only reveals private amounts on request",async()=>{
   const date=dateKey(shiftDays(new Date(),6));
@@ -54,6 +69,7 @@ describe("Calm contextual Today redesign",()=>{
   fireEvent.click(continueLink);
   expect(JSON.parse(localStorage.getItem("wafferli.v13.activeFamilyPlanId")??"null")).toBe("plan1");
   expect(localStorage.getItem("wafferli.v13.money")).toContain('"expenses":[]');
+  fireEvent.click(screen.getByText("This week & money · optional details"));
   fireEvent.click(screen.getByRole("button",{name:"Show private amounts"}));
   expect(action).toHaveTextContent("70 JOD");
   expect(screen.getByRole("button",{name:"Hide private amounts"})).toBeInTheDocument();
@@ -68,6 +84,7 @@ describe("Calm contextual Today redesign",()=>{
   const action=await screen.findByTestId("today-one-action");
   expect(action).toHaveTextContent("Review your family's money picture");
   expect(screen.getByRole("link",{name:/Review essentials and options/})).toHaveAttribute("href","/money");
+  fireEvent.click(screen.getByText("This week & money · optional details"));
   expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("••••");
  });
 });

@@ -24,7 +24,7 @@ describe("three parent outcomes and retailer-backed discovery",()=>{
   expect(screen.getByText("How is my family doing financially?")).toBeInTheDocument();
   expect(screen.getByText("What can we enjoy together?")).toBeInTheDocument();
   expect(screen.getByText("What should I buy, and where?")).toBeInTheDocument();
-  expect(screen.getByRole("link",{name:/Find products online/})).toHaveAttribute("href","/explore/market");
+  expect(screen.getByRole("link",{name:/Find products online/})).toHaveAttribute("href","/explore/smartbuy");
   expect(screen.getByText(/Start with three numbers/)).toBeInTheDocument();
   expect(screen.getByText(/in-app live prices require a connected source/)).toBeInTheDocument();
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();

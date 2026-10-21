@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-const PREFIX = "wafferli.v13.";
+const PREFIX = import.meta.env.BASE_URL.includes("/preview/") ? "dabberna.preview.v13." : "wafferli.v13.";
 
 export function readLocal<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
