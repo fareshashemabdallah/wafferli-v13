@@ -66,6 +66,17 @@ describe("one family Money system with month-aware allowances",()=>{
   expect(adjusted.commitments).toHaveLength(1);
   expect(adjusted.cashOnHand).toBe(180);
  });
+ it("keeps the same per-interval projected cost across 7, 30 and 90-day horizons",()=>{
+  const state=withConfirmedMonthPlan(household(),"food","2026-10",650)!;
+  const a=buildFamilyMoneyRhythm(state,[],"2026-10-20",7);
+  const b=buildFamilyMoneyRhythm(state,[],"2026-10-20",30);
+  const c=buildFamilyMoneyRhythm(state,[],"2026-10-20",90);
+  const amount=(v:typeof a)=>v.events.find(x=>x.id==="pace:food:2026-10-22")?.amountJod;
+  expect(amount(a)).toBeDefined();
+  expect(amount(a)).toBe(amount(b));
+  expect(amount(b)).toBe(amount(c));
+  expect(a.events.filter(x=>x.kind==="pace").length).toBeLessThan(b.events.filter(x=>x.kind==="pace").length);
+ });
  it("does not double count a scheduled utilities bill when month-adjusted",()=>{
   const base=household();
   const state={...withConfirmedMonthPlan(base,"utilities","2026-11",160)!,
