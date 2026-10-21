@@ -201,7 +201,7 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
        <h3 className="font-semibold">{ar?"الخطوة التالية: قارن الخيارات":"Next step: compare suitable options"}</h3>
        <p className="mt-1 text-xs text-muted-foreground">{ar?"بعد مقارنة أرقام الخطة بالميزانية أعلاه، افتح الخيارات المتاحة وقارن كلفتها قبل اتخاذ القرار.":"After checking the figures above, compare real options by cost and suitability before choosing."}</p>
        <div className="mt-3 flex flex-wrap gap-2">
-        <Link to={currentPlan.kind==="purchase"?"/explore/market":currentPlan.kind==="outing"?"/explore/weekend":currentPlan.kind==="occasion"?"/occasions":"/advisor"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
+        <Link to={currentPlan.kind==="purchase"?"/explore/smartbuy":currentPlan.kind==="outing"?"/explore":currentPlan.kind==="occasion"?"/family":"/advisor"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
          <Compass className="size-4"/>{ar?"استكشف الخيارات":"Explore options"}
         </Link>
        </div>
@@ -233,6 +233,7 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
     </>}
     {currentPlan.status==="completed"&&<section className="mt-5 rounded-2xl bg-[#EDF6EA] p-4">
       <p className="flex items-center gap-2 font-semibold"><CheckCircle2 className="size-5 text-brand"/>{ar?"تمّت الخطة":"Plan completed"}</p>
+      {currentPlan.kind==="outing"&&<p className="mt-2 rounded-xl bg-white p-3 text-xs text-[#47775C]">{ar?"بتحب تحفظ رأيك عن الطلعة؟":"Want to remember how the outing went?"} <Link to="/explore" className="font-bold underline">{ar?"ارجع إلى اكتشف — رأيك رح يبقى خاص":"Open Discover — private by default"}</Link></p>}
       <p className="mt-2 text-sm">{ar?"التكلفة الفعلية: ":"Actual cost: "}
        <strong>{currentPlan.actualJod===undefined?(ar?"لم تسجّل بعد":"Not recorded"):fmtJOD(currentPlan.actualJod)}</strong></p>
       {currentPlan.actualJod===undefined&&<details className="mt-3 rounded-xl border border-[#DDE8DB] bg-white p-3">
