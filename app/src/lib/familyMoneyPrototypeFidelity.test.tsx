@@ -64,7 +64,7 @@ describe("Prototype-faithful Money experience",()=>{
   fireEvent.change(within(dialog).getByLabelText("Cash available now (JOD)"),{target:{value:"650"}});
   fireEvent.click(within(dialog).getByRole("button",{name:"Save and update outlook"}));
   expect(screen.getByTestId("money-state")).toHaveTextContent('"cash":650');
-  fireEvent.click(screen.getByRole("button",{name:"Back to the Money dashboard"}));
+  fireEvent.click(screen.getByRole("button",{name:/Back to the Money dashboard/}));
   fireEvent.click(screen.getByText("More planning options (optional)"));
   fireEvent.click(screen.getByRole("button",{name:"Customize spending timing"}));
   fireEvent.click(screen.getByRole("button",{name:"Spread this budget"}));
