@@ -11,6 +11,8 @@ import {parseCalendarDate} from "@/lib/familyCalendar";
 import {FamilyMoneyPrototypeHome} from "./FamilyMoneyPrototypeHome";
 import {FamilyMoneyQuickEdit,type QuickMoneyEditor} from "./FamilyMoneyQuickEdit";
 import {MonthAllowanceAdjustment} from "./MonthAllowanceAdjustment";
+import {FamilyCategoryEditor} from "./FamilyCategoryEditor";
+import type {CategoryPicture} from "@/lib/familyCategoryCards";
 import {effectiveCategoryAllowance,confirmedMonthPlan} from "@/lib/monthAwareMoney";
 
 type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>MoneyState))=>void;
@@ -36,6 +38,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  const [showMoney,setShowMoney]=useState(false);
  const [quickEdit,setQuickEdit]=useState<QuickMoneyEditor|null>(null);
  const [adjustingMonthCategory,setAdjustingMonthCategory]=useState<string|null>(null);
+ const [editingCategory,setEditingCategory]=useState<{id?:string;starter?:CategoryPicture}|null>(null);
  const [editingPace,setEditingPace]=useState<string|null>(null);
  const [paceStart,setPaceStart]=useState(today);
  const [paceBudget,setPaceBudget]=useState("");
@@ -143,7 +146,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
     "البيانات الموجودة تجريبية. ما منستخدمها للحكم على قدرة العيلة على الدفع. ابدأ ببيانات فعلية لتحفظ التوقعات.")}</div>}
 
   {screen==="map"&&<FamilyMoneyPrototypeHome state={state} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onBills={()=>setQuickEdit("bill")} onSpending={onSpending} onCategories={onCategories}
-   onMonthPlan={setAdjustingMonthCategory}/>}
+   onEditCategory={setEditingCategory}/>}
 
   {screen==="timeline"&&<>
    <div className={soft}>
@@ -316,6 +319,11 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
   {quickEdit&&<FamilyMoneyQuickEdit kind={quickEdit} state={state} setState={setState} onClose={()=>setQuickEdit(null)}/>}
   {adjustingMonthCategory&&<MonthAllowanceAdjustment state={state} setState={setState}
    categoryId={adjustingMonthCategory} onClose={()=>setAdjustingMonthCategory(null)}/>}
+  {editingCategory&&<FamilyCategoryEditor key={editingCategory.id??editingCategory.starter??"new"} state={state} setState={setState}
+   {...(editingCategory.id?{categoryId:editingCategory.id}:{})}
+   {...(editingCategory.starter?{starter:editingCategory.starter}:{})}
+   onMonthPlan={setAdjustingMonthCategory} onAdvanced={onCategories}
+   onClose={()=>setEditingCategory(null)}/>}
   {success&&<p role="status" className="rounded-xl bg-[#EDF7EC] p-3 text-xs font-bold text-[#387954]">{success}</p>}
   <p className="flex items-start gap-2 px-2 text-[11px] leading-relaxed text-[#77877D]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>
    {t("Saved locally on this device. Income forecasts, spending pace and annual preparation are estimates. Nothing is automatically paid, debited, shared or invested.",
