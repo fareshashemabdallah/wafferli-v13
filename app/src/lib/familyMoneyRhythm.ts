@@ -4,6 +4,7 @@ import type {FamilyPlan} from "./familyPlans";
 import {familyForecastCommitments} from "./familyFinancialCommitments";
 import {parseCalendarDate} from "./familyCalendar";
 import {effectiveCategoryAllowance} from "./monthAwareMoney";
+import {autoCategoryForecast} from "./autoCategoryForecast";
 
 /** Optional, local-only frequency for an existing monthly category allocation.
  * It is NOT an expense, a bill, a bank withdrawal, or another monthly budget.
@@ -107,13 +108,17 @@ export function buildFamilyMoneyRhythm(state:MoneyState,plans:readonly FamilyPla
   ...(e.overdue?{overdue:true}:{})
  }));
  const excludedPaces:string[]=[];
+ const scheduledCategoryIds=new Set(commitments.map(x=>x.categoryId).filter((x):x is string=>!!x));
+ const pacedIds=new Set<string>();
  for(const pace of state.spendingPaces??[]){
   const cat=state.categories.find(c=>c.id===pace.categoryId);
   if(!paceAllowed(cat,commitments)||!parseCalendarDate(pace.nextDate)||![7,10,14,15,30].includes(pace.intervalDays)){
    excludedPaces.push(pace.categoryId);continue;
   }
+  pacedIds.add(pace.categoryId);
   events.push(...predictedCategoryEvents({...state,commitments},pace,today,end));
  }
+ events.push(...autoCategoryForecast(state,today,end,new Set([...scheduledCategoryIds,...pacedIds])));
  // Opening cash is current as of the selected start date, so never subtract
  // historic paid expenses again. No automatic receipts/debits take place.
  events=events.sort((a,b)=>a.date.localeCompare(b.date)||
