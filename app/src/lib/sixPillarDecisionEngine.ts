@@ -1,4 +1,5 @@
 import {assessFinancialReality} from "./financialReality";
+import {memberAgeYears} from "./familyBirthdays";
 import {getMoneyOverview} from "./moneyOverview";
 import {allFamilyMoments,dateKey,upcomingMoments,parseCalendarDate} from "./familyCalendar";
 import {realFamilyMembers} from "./familySetup";
@@ -66,7 +67,7 @@ export function futureFamilyMilestones(context:DecisionContext){
 export function decideFamilyNextSteps(scenario:DecisionScenario,ctx:DecisionContext):DecisionBrief{
  const now=ctx.now??new Date(),m=ctx.money;
  const real=realFamilyMembers(ctx.members);
- const childAges=real.filter(x=>x.role==="child"&&typeof x.ageYears==="number"&&Number.isInteger(x.ageYears)&&x.ageYears>=0&&x.ageYears<=18).map(x=>x.ageYears!);
+ const childAges=real.filter(x=>x.role==="child"&&memberAgeYears(x)!==null&&memberAgeYears(x)!<=18).map(x=>memberAgeYears(x)!);
  const allChildren=real.filter(x=>x.role==="child").length;
  const familyEn=childAges.length?
   "Saved ages: "+childAges.join(", ")+". "+(allChildren>childAges.length?"Some children's ages are unknown; don't assume they can attend.":"Confirm actual age rules and supervision for each child."):
