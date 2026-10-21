@@ -40,7 +40,8 @@ describe("shared family decision architecture",()=>{
   const result=decisionMoneyGuidance(p,sampleMoney(),date);
   expect(result.state).toBe("unavailable");
   expect(result.en).toMatch(/Insufficient/);
-  expect(decisionMoneyGuidance({...p,budgetJod:undefined,choice:undefined},sampleMoney(),date).state).toBe("unavailable");
+  const withoutEstimate={...p};delete withoutEstimate.budgetJod;delete withoutEstimate.choice;
+  expect(decisionMoneyGuidance(withoutEstimate,sampleMoney(),date).state).toBe("unavailable");
  });
  it("never changes a preexisting plan while saving a new choice",()=>{
   const old:FamilyPlan={id:"legacy",title:"Existing gift",kind:"occasion",status:"planning",createdAt:date.toISOString(),updatedAt:date.toISOString()};
