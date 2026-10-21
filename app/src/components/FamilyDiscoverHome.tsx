@@ -8,7 +8,9 @@ import {findWeekendPlaces,weekendPlaceSearchUrl,weekendCityName,type WeekendPlac
 import {useLocalState,uid} from "@/lib/storage";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,makeFamilyPlan,type FamilyPlan} from "@/lib/familyPlans";
 import {decisionMoneyGuidance,upsertOutingDecision,latestExperienceOpportunity,reflectOnOuting} from "@/lib/familyDecisionEngine";
-import {sampleMoney,type MoneyState} from "@/lib/money";
+import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
+import {realFamilyMembers} from "@/lib/familySetup";
+import {memberAgeYears} from "@/lib/familyBirthdays";
 import {communityDb as db,itemKey,type ExperienceReview} from "@/lib/community";
 
 type Experience="all"|"playground"|"park"|"museum"|"attraction"|"arts centre";
@@ -42,6 +44,10 @@ export function FamilyDiscoverHome(){
  const [plans,setPlans,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [,setActive]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
+ const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
+ const knownChildAges=membersReady?realFamilyMembers(members)
+  .filter(x=>x.role==="child").map(x=>memberAgeYears(x))
+  .filter((age):age is number=>age!==null&&age>=0&&age<=18).sort((a,b)=>a-b):[];
  const [enjoyed,setEnjoyed]=useState<"yes"|"mixed"|"no">("yes");
  const [value,setValue]=useState<"yes"|"mixed"|"no">("yes");
  const [reflectionNote,setReflectionNote]=useState("");
@@ -129,6 +135,12 @@ export function FamilyDiscoverHome(){
     </label>
     <button type="submit" disabled={busy} className="inline-flex min-h-11 flex-[2] items-center justify-center gap-2 rounded-xl bg-[#317B5D] px-4 text-sm font-bold text-white shadow-sm disabled:opacity-60"><Search className="size-4"/>{busy?t("Looking…","عم ندوّر…"):t("Find family experiences","دبّرنا، دورلنا")}</button>
    </form>
+   {knownChildAges.length>0&&<p className="mt-3 rounded-xl bg-[#F1F8F2] p-3 text-xs leading-relaxed text-[#526D5D]">
+    <UsersRound className="me-1 inline size-4"/>
+    {t("Ages in your family: ","الأعمار المحفوظة لعيلتك: ")}{knownChildAges.join(", ")}.
+    {t(" We will distinguish toddlers from teenagers in activity suggestions. Specific venue age limits are not verified.",
+     " نفرّق بين احتياجات الصغار والمراهقين باقتراحات الأنشطة. شروط العمر في كل مكان غير مؤكدة.")}
+   </p>}
    <p className="mt-2 text-[11px] text-[#839087]">{t("Pilot: public mapped places near selected city centres. Not all venues, and no verified opening hours or tickets.","تجربة أولية لأماكن على الخريطة قرب مراكز المدن. ليست كل الأماكن ولا تشمل أسعار أو مواعيد مؤكدة.")}</p>
   </section>
   {error&&<p role="alert" className="rounded-xl border border-[#F0D4C9] bg-[#FFF4EF] p-3 text-sm text-[#9B5D44]">{error}</p>}
