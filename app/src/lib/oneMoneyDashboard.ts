@@ -31,7 +31,7 @@ export function oneMoneyDashboard(state:MoneyState,forecast:RhythmForecast,today
   hasCategoryPlan,planned:hasCategoryPlan?c.planned:null,
   paid:roundJod(paid.reduce((sum,e)=>sum+e.amount,0)),
   numberPaid:paid.length,unpaidPlannedRecords:pending.length,
-  billsDue:scheduledBills.length?roundJod(due.reduce((sum,e)=>sum-e.amountJod,0)):null,
+  billsDue:scheduledBills.length||due.length?roundJod(due.reduce((sum,e)=>sum-e.amountJod,0)):null,
   upcoming:firstUpcoming,nextIncome,
   openingCash:state.demo?null:state.cashOnHand??null,
   cashUpdatedAt:state.cashUpdatedAt??null,
