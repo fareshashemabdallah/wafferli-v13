@@ -1,16 +1,18 @@
-import {useState,type FormEvent} from "react";
+import {useEffect,useRef,useState,type FormEvent} from "react";
 import {Link} from "@tanstack/react-router";
 import {ArrowRight,ArrowUpRight,CalendarDays,Check,ChevronRight,Compass,Heart,MapPin,Search,ShieldCheck,Sparkles,UsersRound,Wallet} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {ShareFamilyExperience} from "./ShareFamilyExperience";
 import {useI18n} from "@/lib/i18n";
-import {findWeekendPlaces,weekendPlaceSearchUrl,weekendCityName,type WeekendPlace,type WeekendCity} from "@/lib/weekendPlaceSearch";
-import {useLocalState,uid} from "@/lib/storage";
+import {findWeekendPlaces,weekendPlaceSearchUrl,weekendCityName,outingCity,type WeekendPlace,type WeekendCity} from "@/lib/weekendPlaceSearch";
+import {useLocalState,readLocal,writeLocal,uid} from "@/lib/storage";
+import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
+import {QUICK_DISCOVERY_KEY,isFreshQuickDiscoveryIntent,type QuickDiscoveryIntent,suggestLowEffortFamilyIdea} from "@/lib/lowEffortDiscovery";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,makeFamilyPlan,type FamilyPlan} from "@/lib/familyPlans";
 import {decisionMoneyGuidance,upsertOutingDecision,latestExperienceOpportunity,reflectOnOuting} from "@/lib/familyDecisionEngine";
 import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
 import {realFamilyMembers} from "@/lib/familySetup";
-import {memberAgeYears} from "@/lib/familyBirthdays";
+import {memberAgeDisplay,memberAgeYears} from "@/lib/familyBirthdays";
 import {communityDb as db,itemKey,type ExperienceReview} from "@/lib/community";
 
 type Experience="all"|"playground"|"park"|"museum"|"attraction"|"arts centre";
@@ -30,7 +32,8 @@ const yesNo:{id:"yes"|"mixed"|"no";en:string;ar:string}[]=[
 export function FamilyDiscoverHome(){
  const {lang}=useI18n(),ar=lang==="ar";
  const t=(en:string,arabic:string)=>ar?arabic:en;
- const [city,setCity]=useState<WeekendCity>("amman");
+ const [city,setCity]=useState<WeekendCity>(()=>outingCity(readLocal<FamilyPreferences>("familyPreferences",defaultFamilyPreferences).city));
+ const autoDiscoveryStarted=useRef(false);
  const [kind,setKind]=useState<Experience>("all");
  const [filter,setFilter]=useState("");
  const [places,setPlaces]=useState<WeekendPlace[]>([]);
@@ -45,6 +48,8 @@ export function FamilyDiscoverHome(){
  const [,setActive]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
+ const knownChildMembers=membersReady?realFamilyMembers(members).filter(x=>x.role==="child"):[];
+ const familyIdea=suggestLowEffortFamilyIdea(members);
  const knownChildAges=membersReady?realFamilyMembers(members)
   .filter(x=>x.role==="child").map(x=>memberAgeYears(x))
   .filter((age):age is number=>age!==null&&age>=0&&age<=18).sort((a,b)=>a-b):[];
@@ -53,12 +58,26 @@ export function FamilyDiscoverHome(){
  const [reflectionNote,setReflectionNote]=useState("");
  const today=new Date().toISOString().slice(0,10);
  const feedbackPlan=plansReady?latestExperienceOpportunity(plans,today):null;
- const search=async(e:FormEvent)=>{
-  e.preventDefault();setBusy(true);setError("");setResultsReady(false);setSelected(null);
-  try{const result=await findWeekendPlaces(city);setPlaces(result.places);setStale(result.stale);setResultsReady(true);}
+ const loadPlaces=async(chosenCity:WeekendCity)=>{
+  setBusy(true);setError("");setResultsReady(false);setSelected(null);
+  try{const result=await findWeekendPlaces(chosenCity);setPlaces(result.places);setStale(result.stale);setResultsReady(true);}
   catch(err){setPlaces([]);setResultsReady(true);setError(err instanceof Error?err.message:t("Public map source unavailable.","مصدر الخريطة مش متاح."));}
   finally{setBusy(false);}
  };
+ const search=(e:FormEvent)=>{e.preventDefault();void loadPlaces(city);};
+ // An explicit click on Today's suggestion opens a category-only public map
+ // search once. Navigating to Discover normally performs no external search.
+ useEffect(()=>{
+  if(autoDiscoveryStarted.current)return;
+  autoDiscoveryStarted.current=true;
+  const intent=readLocal<QuickDiscoveryIntent|null>(QUICK_DISCOVERY_KEY,null);
+  if(!isFreshQuickDiscoveryIntent(intent))return;
+  writeLocal(QUICK_DISCOVERY_KEY,null);
+  setKind(intent.kind);
+  void loadPlaces(city);
+  // Deliberate one-time navigation handoff; do not retrigger on form edits.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[]);
  const choose=async(place:WeekendPlace)=>{
   setSelected(place);setError("");setNotice("");setDate("");setBudget("");setReviews([]);
   setReviewMessage(t("Looking for parent experiences…","عم نبحث عن تجارب الأهل…"));
@@ -121,12 +140,23 @@ export function FamilyDiscoverHome(){
   <section className="rounded-[1.6rem] border border-[#E0E8DB] bg-white p-4 sm:p-5">
    <div className="flex items-center gap-2"><Heart className="size-5 text-[#B76D7C]"/><h2 className="text-lg font-extrabold">{t("What would your family enjoy?","شو بتحب عيلتك تعمل؟")}</h2></div>
    <p className="mt-1 text-xs text-[#708075]">{t("Choose a feeling, not a complicated filter.","اختَر نوع التجربة، مش استبيان طويل.")}</p>
-   <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
-    {kinds.map(item=><button key={item.id} type="button" aria-pressed={kind===item.id} onClick={()=>{setKind(item.id);setSelected(null);}}
-     className={"flex min-h-[80px] flex-col items-center justify-center gap-1.5 rounded-xl border px-1.5 py-2 text-center text-[11px] font-bold transition focus-visible:outline-2 focus-visible:outline-[#338866] "+(kind===item.id?"border-[#429676] bg-[#EAF6EB] text-[#225C43]":"border-[#ECEDE6] bg-[#FAFCF8] text-[#65746D] hover:bg-[#F4F8F0]")}>
-     <span className="text-2xl" aria-hidden="true">{item.emoji}</span>{ar?item.ar:item.en}
-    </button>)}
+   <div className="mt-3 rounded-xl bg-[#F2F8F0] p-3">
+    <p className="text-sm font-extrabold text-[#2B664A]">{t(familyIdea.titleEn,familyIdea.titleAr)}</p>
+    <p className="mt-1 text-xs leading-relaxed text-[#687C6A]">{t(familyIdea.contextEn,familyIdea.contextAr)}</p>
+    <button type="button" disabled={busy} onClick={()=>{setKind(familyIdea.kind);void loadPlaces(city);}}
+     className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#377E5D] px-4 text-xs font-extrabold text-white disabled:opacity-50">
+     {t("Explore this idea","شوف هالفكرة")}<ChevronRight className="size-4 rtl:rotate-180"/>
+    </button>
    </div>
+   <details className="mt-3 rounded-xl border border-[#E0E8DC] bg-white p-3">
+    <summary className="min-h-10 cursor-pointer text-xs font-bold text-[#58765D]">{t("Choose another experience (optional)","اختَر نوع ثاني من التجارب (اختياري)")}</summary>
+    <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
+     {kinds.map(item=><button key={item.id} type="button" aria-pressed={kind===item.id} onClick={()=>{setKind(item.id);setSelected(null);}}
+      className={"flex min-h-[76px] flex-col items-center justify-center gap-1 rounded-xl border px-1 py-2 text-center text-[11px] font-bold "+(kind===item.id?"border-[#429676] bg-[#EAF6EB] text-[#225C43]":"border-[#ECEDE6] bg-[#FAFCF8] text-[#65746D]")}>
+      <span className="text-xl" aria-hidden="true">{item.emoji}</span>{ar?item.ar:item.en}
+     </button>)}
+    </div>
+   </details>
    <form onSubmit={search} className="mt-4 flex flex-wrap items-end gap-2">
     <label className="min-w-[110px] flex-1 text-xs font-bold">{t("City","المدينة")}
      <select className={compact+" mt-1 w-full"} value={city} onChange={e=>{setCity(e.target.value as WeekendCity);setSelected(null);setResultsReady(false);}}>
@@ -137,7 +167,7 @@ export function FamilyDiscoverHome(){
    </form>
    {knownChildAges.length>0&&<p className="mt-3 rounded-xl bg-[#F1F8F2] p-3 text-xs leading-relaxed text-[#526D5D]">
     <UsersRound className="me-1 inline size-4"/>
-    {t("Ages in your family: ","الأعمار المحفوظة لعيلتك: ")}{knownChildAges.join(", ")}.
+    {t("Ages in your family: ","الأعمار المحفوظة لعيلتك: ")}{knownChildMembers.map(m=>memberAgeDisplay(m,ar)).filter(Boolean).join(", ")}.
     {t(" We will distinguish toddlers from teenagers in activity suggestions. Specific venue age limits are not verified.",
      " نفرّق بين احتياجات الصغار والمراهقين باقتراحات الأنشطة. شروط العمر في كل مكان غير مؤكدة.")}
    </p>}
