@@ -122,6 +122,14 @@ export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncom
    <button type="button" onClick={onQuickAdd} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#3C9266] px-4 text-xs font-bold text-white"><Plus className="size-4"/>{t("Add an expense","سجّل مصروف")}</button>
    <button type="button" onClick={onIncome} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#BBDAC4] bg-white px-4 text-xs font-bold text-[#397B59]">{t("Edit payday","عدّل موعد الراتب")}</button>
   </div>
+  <details className="rounded-2xl border border-[#E4EADF] bg-white p-3">
+   <summary className="min-h-11 cursor-pointer text-xs font-bold text-[#4F7E60]">{t("More planning options (optional)","خيارات تخطيط إضافية (اختيارية)")}</summary>
+   <div className="mt-2 flex flex-wrap gap-2">
+    <button type="button" onClick={()=>onArea("annual")} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Annual insurance, tax & property costs","التأمين والضرائب والمصاريف السنوية")}</button>
+    <button type="button" onClick={()=>onArea("pace")} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Customize spending timing","خصّص مواعيد توزيع الصرف")}</button>
+    <button type="button" onClick={onCategories} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Detailed item budgets","تفاصيل بنود الميزانية")}</button>
+   </div>
+  </details>
   <p className="text-[11px] leading-relaxed text-[#768678]">{t("This is an estimate using the records you entered. There is no bank connection; a plan never becomes a payment automatically.",
     "هذه توقعات من معلوماتك المدخلة. ما في ربط بنكي؛ الخطة مش دفعة فعلية إلا بعد تأكيدها.")}</p>
  </div>;
