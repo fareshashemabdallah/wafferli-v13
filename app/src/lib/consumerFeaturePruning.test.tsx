@@ -3,7 +3,7 @@ import {cleanup,render,screen,fireEvent} from "@testing-library/react";
 import type {ReactNode,AnchorHTMLAttributes} from "react";
 import {I18nProvider} from "@/lib/i18n";
 import {About} from "@/routes/about";
-import {Discover} from "@/routes/explore.index";
+import {Explore} from "@/routes/explore.index";
 import {Advisor} from "@/routes/advisor";
 
 vi.mock("@tanstack/react-router",()=>({
@@ -40,9 +40,9 @@ describe("remove distractions, not parent decision support",()=>{
   expect(screen.getByRole("link",{name:/Ask Dabberna/})).toHaveAttribute("href","/advisor");
  });
  it("Discover presents one contextual experience and does not send parents to a tool gallery",()=>{
-  draw(<Discover/>);
-  expect(screen.getByText("Find a worthwhile family experience")).toBeInTheDocument();
-  expect(screen.getByRole("button",{name:"Explore mapped places"})).toBeInTheDocument();
+  draw(<Explore/>);
+  expect(screen.getByText("What would your family enjoy?")).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"Find family experiences"})).toBeInTheDocument();
   expect(screen.queryByRole("link",{name:/Family & Friends Circles/})).not.toBeInTheDocument();
   expect(screen.queryByRole("link",{name:/Find a product/})).not.toBeInTheDocument();
  });
