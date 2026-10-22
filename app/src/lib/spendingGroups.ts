@@ -74,8 +74,10 @@ export function spendingBreakdown(state:MoneyState,month:string):SpendingBreakdo
     frequency:item.frequency,priority:item.priority
    });
   }
-  const rest=roundJod(Math.max(0,categoryTotal-itemTotal));
-  if(rest>0||paidOther>0||items.length===0)
+  // Month-specific parent adjustments can be below the usual sum of items.
+  // Keep the signed difference visible as an adjustment rather than inflate the month total.
+  const rest=roundJod(categoryTotal-itemTotal);
+  if(rest!==0||paidOther>0||items.length===0)
    unassigned.push({categoryId:category.id,name:category.name,planned:rest,paid:paidOther});
  }
  for(const bill of state.commitments??[]){
