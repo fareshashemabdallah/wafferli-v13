@@ -71,6 +71,23 @@ describe("illustrated homepage uses actual family data instead of mockup values"
   const view=homeSnapshot(input());
   expect(view.shopping.map(item=>item.title)).toEqual(["Milk","Birthday gift for Laila"]);
  });
+ it("matches linked occasions by original source identity, not an ambiguous title/date",()=>{
+  const authored:FamilyMoment={id:"date-1",title:"Family day",date:"2026-10-20",
+   kind:"celebration",annual:false};
+  const linked:FamilyPlan={id:"linked-1",title:"Old title",kind:"occasion",status:"planning",
+   date:"2026-10-20",sourceRef:"occasion:date-1@2026",
+   createdAt:"2026-10-10T12:00:00Z",updatedAt:"2026-10-10T12:00:00Z"};
+  const duplicate=homeSnapshot({...input(),moments:[authored],plans:[linked]});
+  expect(duplicate.plans.filter(p=>p.title==="Family day")).toHaveLength(1);
+  expect(duplicate.plans.find(p=>p.kind==="plan")).toMatchObject({
+   id:"plan:linked-1",date:"2026-10-20"
+  });
+  const unrelated:FamilyPlan={...linked,id:"independent",kind:"outing",sourceRef:undefined,
+   title:"Family day"};
+  const legitimate=homeSnapshot({...input(),moments:[authored],
+   plans:[unrelated]});
+  expect(legitimate.plans.filter(p=>p.title==="Family day")).toHaveLength(2);
+ });
  it("does not mutate any saved finance, task, plan, or family records",()=>{
   const inputData=input(),saved=JSON.stringify(inputData);
   homeSnapshot(inputData);
