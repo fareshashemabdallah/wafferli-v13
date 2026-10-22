@@ -24,7 +24,7 @@ describe("Plan → Money progress explains only genuinely missing facts",()=>{
  });
  it("does not require payday, savings target, actual cash or due bills to compare the monthly plan",()=>{
   const m=ready();
-  expect(m.incomeSources).toBeUndefined();
+  expect(m.incomeSources).toEqual([]);
   expect(m.savingsTargetAmount).toBeUndefined();
   expect(m.cashOnHand).toBeNull();
   expect(m.commitments).toEqual([]);
