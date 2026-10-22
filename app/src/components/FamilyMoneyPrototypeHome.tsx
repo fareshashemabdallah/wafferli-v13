@@ -41,7 +41,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
     <Plus className="size-4"/>{t("Add category","أضف فئة")}</button>
   </div>
   <div id="money-category-cards" className="scroll-mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-   {STARTER_PICTURES.map(g=>{
+   {STARTER_PICTURES.filter(g=>!(state.hiddenStarterGroups??[]).includes(g.key)).map(g=>{
     const cat=pictureCategories(state,g.key),target=cat.reduce((a,x)=>a+m.plannedBy(x.id),0);
     const used=cat.reduce((a,x)=>a+m.spentBy(x.id),0),pct=target>0?Math.min(100,used/target*100):0;
     const confirmed=cat.some(c=>confirmedMonthPlan(state,c.id,localToday().slice(0,7))!==null);
