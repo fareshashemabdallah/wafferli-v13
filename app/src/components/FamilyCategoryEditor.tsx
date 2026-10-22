@@ -3,7 +3,7 @@ import {useI18n} from "@/lib/i18n";
 import {uid} from "@/lib/storage";
 import {emptyRealMoney} from "@/lib/moneyOverview";
 import {removeMoneyCategory} from "@/lib/removeMoneyCategory";
-import {categoryItemTotal} from "@/lib/householdBudgetBuilder";
+import {categoryItemTotal,hasActiveCategoryItems} from "@/lib/householdBudgetBuilder";
 import type {Category,MoneyState} from "@/lib/money";
 import type {SpendingRole} from "@/lib/spendingGroups";
 import {CATEGORY_PICTURES,pictureFor,saveFamilyCategory,visualGroupOf,iconForCategory,
@@ -30,6 +30,7 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
  const [more,setMore]=useState(false);
  const [error,setError]=useState("");
  const amountMinimum=existing?categoryItemTotal(state.budgetItems??[],existing.id):0;
+ const hasLines=!!existing&&hasActiveCategoryItems(state.budgetItems??[],existing.id);
  const amountValid=(s:string)=>/^\d{1,6}(?:\.\d{1,2})?$/.test(s)&&
   Number.isFinite(Number(s))&&Number(s)>=0&&Number(s)<=100000;
  // The editor is keyed by the selection in its parent. Existing categories
@@ -54,7 +55,7 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
   if(!amountValid(amount)){setError(reason("amount"));return;}
   const result=saveFamilyCategory(state,{
    ...(existing?{id:existing.id}:{}),name,planned:Number(amount),type:existing?.type??"variable",
-   ...(priority?{priority}:{}),...(remainderRole?{remainderRole}:{}),visualGroup,visualIcon
+   ...(priority?{priority}:{}),...(!hasLines&&remainderRole?{remainderRole}:{}),visualGroup,visualIcon
   },uid());
   if(!result.ok){setError(reason(result.reason));return;}
   setState(result.state);
@@ -113,20 +114,21 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
      <input className={field} type="number" inputMode="decimal" min="0" max="100000" step=".01" value={amount}
       placeholder={t("Enter an amount, e.g. 300","أدخل المبلغ مثلاً ٣٠٠")} onChange={e=>setAmount(e.target.value)}/>
     </label>
-    <label className={label}>{amountMinimum>0?
-     t("Classification for the amount not split into lines","تصنيف المبلغ غير المفصل إلى بنود"):
-     t("How should this category be classified?","كيف تصنّف مصاريف هذه الفئة؟")}
+    {!hasLines?<label className={label}>{t("How should this category be classified?","كيف تصنّف مصاريف هذه الفئة؟")}
      <select className={field} value={remainderRole} aria-label={t("Category spending classification","تصنيف مصروف الفئة")}
       onChange={e=>setRemainderRole(e.target.value as SpendingRole|"")}>
       <option value="">{t("Not classified yet","لم يُصنّف بعد")}</option>
-      <option value="committed">{t("Committed · fixed obligation (e.g. instalment)","التزام · مبلغ واجب الدفع (مثل القسط)")}</option>
-      <option value="necessary">{t("Necessary but variable (e.g. fuel)","ضروري لكنه متغير (مثل البنزين)")}</option>
-      <option value="flexible">{t("Flexible family choice (e.g. outings)","اختيار مرن للعيلة (مثل الطلعات)")}</option>
+      <option value="committed">{t("Committed · fixed obligation","التزام · مبلغ واجب الدفع")}</option>
+      <option value="necessary">{t("Necessary but variable","ضروري لكنه متغير")}</option>
+      <option value="flexible">{t("Flexible family choice","اختيار مرن للعيلة")}</option>
      </select>
-     <span className="mt-1 block text-[11px] font-normal leading-relaxed text-[#718878]">{t(
-      "Works without subcategories. If you add cost lines later, each line has its own classification; this applies only to the remaining unsplit amount.",
-      "يعمل دون بنود فرعية. إذا أضفت بنوداً لاحقاً فلكل بند تصنيفه، وهذا التصنيف يخص المبلغ المتبقي غير المفصل فقط.")}</span>
-    </label>
+     <span className="mt-1 block text-[11px] font-normal text-[#718878]">{t(
+      "This applies directly when no expense lines have been entered.",
+      "التصنيف مباشر عندما لا توجد بنود مصاريف تفصيلية.")}</span>
+    </label>:<p data-testid="editor-category-cushion" className="rounded-xl border border-[#DBE9D9] bg-[#F4FAF1] p-3 text-xs leading-relaxed text-[#62826A]">
+     {t("This category is already classified through its individual cost lines. Any allowance beyond those lines is an optional monthly cushion, not an extra expense.",
+      "هذه الفئة مصنّفة من خلال بنودها. أي مخصص زائد عن مجموع البنود هو هامش شهري اختياري وليس مصروفاً إضافياً.")}
+    </p>}
     {amountMinimum>0&&<p className="rounded-xl bg-[#F1F7ED] p-3 text-xs text-[#647967]">
       {t("This category contains itemized budget entries totalling ","هذه الفئة فيها بنود تفصيلية بمجموع ")}
       <strong>{amountMinimum} JOD</strong>. {t("Keep the monthly allowance at least this high, or edit those items in Detailed budget.",

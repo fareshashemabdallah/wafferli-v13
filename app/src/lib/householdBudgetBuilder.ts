@@ -25,6 +25,11 @@ export function monthlyItemCost(item:BudgetItem):number{
  const multiplier:Record<ItemFrequency,number>={monthly:1,weekly:52/12,quarterly:1/3,yearly:1/12};
  return r2(base*multiplier[item.frequency]);
 }
+/** One category with any enabled expense lines is already classified by its lines.
+ * Any unused monthly allowance is a cushion, never another cost to classify. */
+export function hasActiveCategoryItems(items:readonly BudgetItem[],id:string):boolean{
+ return items.some(i=>i.categoryId===id&&i.enabled);
+}
 export function categoryItemTotal(items:readonly BudgetItem[],id:string):number{
  return r2(items.filter(i=>i.categoryId===id).reduce((sum,i)=>sum+monthlyItemCost(i),0));
 }

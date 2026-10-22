@@ -66,7 +66,12 @@ export function addCategoryItem(state:MoneyState,item:BudgetItem):MoneyState{
  const allocated=others.reduce((sum,i)=>sum+monthlyItemCost(i),0)+monthlyItemCost(item);
  // Do not silently raise a parent's original category plan or double-count items.
  if(roundJod(allocated)>cat.planned)return state;
- return upsertBudgetItem(state,item);
+ const updated=upsertBudgetItem(state,item);
+ if(updated===state||!cat.remainderRole)return updated;
+ // Once the parent has detailed lines, those lines own the classification.
+ // The difference between line totals and the category allowance is a cushion.
+ return {...updated,categories:updated.categories.map(c=>c.id===cat.id?
+  (()=>{const {remainderRole:_old,...rest}=c;return rest;})():c)};
 }
 export function disableCategoryItem(state:MoneyState,itemId:string):MoneyState{
  if(state.demo)return state;

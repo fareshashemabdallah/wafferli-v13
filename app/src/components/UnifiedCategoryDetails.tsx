@@ -164,14 +164,13 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
      <strong className="mt-1 block break-words text-xs tabular-nums text-[#397E5A] sm:text-base">{show(x.value)}</strong></div>)}
   </div>
   <div className="flex flex-wrap gap-2">
-   <button type="button" className={btn} onClick={onEdit}>{t("Edit amount & classification","تعديل المبلغ والتصنيف")}</button>
+   <button type="button" className={btn} onClick={onEdit}>{items.length===0?t("Edit amount & classification","تعديل المبلغ والتصنيف"):t("Edit category amount","تعديل مخصص الفئة")}</button>
    <button type="button" disabled={state.demo} className={btn+" disabled:opacity-50"}
      onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
      + {t("Break down this category","قسّم الفئة إلى بنود")}</button>
   </div>
-  <label className="block rounded-xl border border-[#CEE2D1] bg-white p-3 text-xs font-bold text-[#397654]" data-testid="category-inline-classification">
-   {items.length===0?t("Classify this category without subcategories","صنّف هذه الفئة دون بنود فرعية"):
-    t("Classify the amount not split into subcategories","صنّف المبلغ غير المقسّم إلى بنود")}
+  {items.length===0?<label className="block rounded-xl border border-[#CEE2D1] bg-white p-3 text-xs font-bold text-[#397654]" data-testid="category-inline-classification">
+   {t("Classify this category without subcategories","صنّف هذه الفئة دون بنود فرعية")}
    <select aria-label={t("Category spending classification","تصنيف مصروف الفئة")} className={field}
     disabled={state.demo} value={category.remainderRole??""}
     onChange={event=>{
@@ -193,13 +192,20 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
     <option value="flexible">{t("Flexible family choice","اختيار عائلي مرن")}</option>
    </select>
    <span className="mt-2 block text-[11px] font-normal leading-relaxed text-[#708672]">{t(
-    "Saved automatically. This classifies only your existing unbroken category allowance, not its detailed lines. No new budget or bill is created.",
-    "يُحفظ تلقائياً. التصنيف للمبلغ العام الموجود فقط، وليس للبنود التفصيلية. لا تُنشأ ميزانية أو فاتورة جديدة.")}</span>
-  </label>
-  <p className="text-xs leading-relaxed text-[#768B7D]">
-   {t("Subcategories explain the category plan; they never add a second budget. Unassigned plan: ",
-    "البنود تفصّل نفس مخصص الفئة، بدون تكرار الميزانية. المخصص غير المفصّل: ")}{show(Math.max(0,free))}
-  </p>
+    "Saved automatically. No subcategory or new budget is created.",
+    "يُحفظ تلقائياً دون إضافة بنود أو ميزانيات أخرى.")}</span>
+  </label>:<div data-testid="category-monthly-cushion" className="rounded-xl border border-[#DAE8D8] bg-white p-3 text-xs leading-relaxed text-[#587661]">
+   <strong>{t("Your expense lines are already classified.","بنود المصاريف مصنّفة بالفعل.")}</strong>
+   <span className="mt-1 block">{free>0?t(
+    "The remaining "+show(free)+" is an optional monthly budget cushion, not an extra cost. No other classification needed.",
+    "المبلغ المتبقي "+show(free)+" هامش اختياري في ميزانية الشهر، وليس مصروفاً إضافياً. لا حاجة لتصنيف آخر."):
+    t("Your category is covered by its cost lines. No other classification needed.",
+      "الفئة موزعة على البنود. لا حاجة لتصنيف إضافي.")}</span>
+  </div>}
+  {items.length>0&&<p className="text-xs leading-relaxed text-[#768B7D]">{t(
+   "Itemized monthly costs: ","مجموع البنود الشهرية: ")}{show(itemized)}. {t(
+   "They belong to this category's single budget; the difference is an optional cushion.",
+   "كلها ضمن ميزانية الفئة الواحدة؛ والفرق هامش اختياري.")}</p>}
   {showNewItem&&<form onSubmit={addItem} className="space-y-2 rounded-xl border border-[#D7E7D9] bg-white p-3"
     aria-label={t("Add subcategory","إضافة بند")}>
    <h4 className="text-sm font-bold">{editingItemId?t("Edit subcategory","تعديل البند"):t("New subcategory","بند جديد")}</h4>

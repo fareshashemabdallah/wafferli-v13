@@ -1,6 +1,7 @@
 import {describe,it,expect} from "vitest";
 import {emptyRealMoney} from "./moneyOverview";
 import {saveFamilyCategory,cleanOldCategoryRoles} from "./familyCategoryCards";
+import {addCategoryItem} from "./unifiedCategoryLedger";
 import {displayItemRole,spendingBreakdown} from "./spendingGroups";
 import {evaluatePlan} from "./planDecision";
 import {makeFamilyPlan} from "./familyPlans";
@@ -43,7 +44,7 @@ describe("Line-level classification is the only canonical Money classification",
   const s=car();
   s.categories[0]!.planned=900;
   const view=spendingBreakdown(s,month);
-  expect(view.unassigned).toMatchObject([{categoryId:"car",planned:200,paid:0}]);
+  expect(view.unassigned).toMatchObject([{categoryId:"car",planned:200,paid:0,kind:"cushion"}]);
   expect(view.groups.reduce((n,g)=>n+g.planned,0)+view.unassigned.reduce((n,g)=>n+g.planned,0))
    .toBe(view.totalPlanned);
   s.commitments=[];
@@ -66,7 +67,7 @@ describe("Line-level classification is the only canonical Money classification",
   expect(view.totalPaid).toBe(180);
   expect(view.due).toEqual([]);
  });
- it("splitting the classified category reallocates only its unsplit allowance, not another budget",()=>{
+ it("an itemized category ignores a stale parent role and keeps the difference as a neutral cushion",()=>{
   const s=car();
   s.categories[0]={...s.categories[0]!,remainderRole:"flexible"};
   const view=spendingBreakdown(s,month);
@@ -74,8 +75,9 @@ describe("Line-level classification is the only canonical Money classification",
   expect(view.unassigned).toEqual([]);
   s.categories[0]!.planned=900;
   const part=spendingBreakdown(s,month);
-  expect(part.groups.map(g=>g.planned)).toEqual([350,350,200]);
-  expect(part.groups.reduce((n,g)=>n+g.planned,0)).toBe(part.totalPlanned);
+  expect(part.groups.map(g=>g.planned)).toEqual([350,350,0]);
+  expect(part.unassigned).toMatchObject([{categoryId:"car",planned:200,kind:"cushion"}]);
+  expect(part.groups.reduce((n,g)=>n+g.planned,0)+part.unassigned.reduce((n,x)=>n+x.planned,0)).toBe(part.totalPlanned);
   expect(part.groups[0]?.paid).toBe(100);
   expect(part.groups[1]?.paid).toBe(90);
  });
@@ -87,7 +89,7 @@ describe("Line-level classification is the only canonical Money classification",
   },"unused");
   expect(first.ok).toBe(true);
   if(!first.ok)return;
-  expect(first.state.categories[0]?.remainderRole).toBe("committed");
+  expect(first.state.categories[0]?.remainderRole).toBeUndefined();
   expect(first.state.budgetItems).toEqual(original.budgetItems);
   expect(first.state.commitments).toEqual(original.commitments);
   expect(first.state.expenses).toEqual(original.expenses);
@@ -110,6 +112,36 @@ describe("Line-level classification is the only canonical Money classification",
   expect(view.unassigned).toMatchObject([{categoryId:"car",planned:-100}]);
   expect(view.totalPlanned).toBe(600);
   expect(view.due[0]?.remaining).toBe(250);
+ });
+ it("Utilities five categorized lines total 405 JOD and leave a 95 JOD cushion, not an unclassified expense",()=>{
+  const s=car();s.expenses=[];s.commitments=[];
+  s.categories=[{id:"util",name:"Utilities",type:"variable",planned:500,remainderRole:"necessary"}];
+  s.budgetItems=[
+   {id:"water",categoryId:"util",name:"Water",enabled:true,amountJod:150,frequency:"monthly",behaviour:"variable",priority:"essential",spendingRole:"necessary"},
+   {id:"elec",categoryId:"util",name:"Electricity",enabled:true,amountJod:150,frequency:"monthly",behaviour:"variable",priority:"essential",spendingRole:"necessary"},
+   {id:"internet",categoryId:"util",name:"Internet",enabled:true,amountJod:35,frequency:"monthly",behaviour:"fixed",priority:"essential",spendingRole:"committed"},
+   {id:"building",categoryId:"util",name:"Building",enabled:true,amountJod:50,frequency:"monthly",behaviour:"fixed",priority:"essential",spendingRole:"committed"},
+   {id:"phone",categoryId:"util",name:"Phone",enabled:true,amountJod:20,frequency:"monthly",behaviour:"fixed",priority:"essential",spendingRole:"committed"}
+  ];
+  const view=spendingBreakdown(s,month);
+  expect(view.groups.map(g=>g.planned)).toEqual([105,300,0]);
+  expect(view.groups.flatMap(g=>g.lines)).toHaveLength(5);
+  expect(view.unassigned).toEqual([{categoryId:"util",name:"Utilities",planned:95,paid:0,kind:"cushion"}]);
+  expect(view.totalPlanned).toBe(500);
+  expect(view.totalPaid).toBe(0);
+  expect(view.due).toEqual([]);
+  const clean=cleanOldCategoryRoles(s);
+  expect(clean.categories[0]?.remainderRole).toBeUndefined();
+  expect(clean.budgetItems).toEqual(s.budgetItems);
+ });
+ it("adding a first expense line retires the old direct category classification without changing its amount",()=>{
+  const s=car();s.budgetItems=[];s.categories[0]={...s.categories[0]!,remainderRole:"committed"};
+  const added=addCategoryItem(s,{id:"fuel",categoryId:"car",name:"Fuel",enabled:true,amountJod:250,
+   frequency:"monthly",behaviour:"variable",priority:"essential",spendingRole:"necessary"});
+  expect(added.categories[0]?.remainderRole).toBeUndefined();
+  expect(added.categories[0]?.planned).toBe(700);
+  expect(added.budgetItems).toHaveLength(1);
+  expect(spendingBreakdown(added,month).unassigned).toMatchObject([{planned:450,kind:"cushion"}]);
  });
  it("a lower month-specific allowance reconciles grouped item amounts to the actual budget",()=>{
   const s=car();
