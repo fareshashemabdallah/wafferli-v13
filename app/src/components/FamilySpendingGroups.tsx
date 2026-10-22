@@ -128,7 +128,7 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
       "لا بنود مصنفة هنا بعد. افتح فئة وقسّمها إلى بنود.")}</p>}
    </section>;
   })}
-  {breakdown.unassigned.length>0&&<section id="money-spending-cushions" className="scroll-mt-4" data-testid="spending-unassigned" className="rounded-2xl border border-dashed border-[#CBDCCE] bg-white p-3 sm:p-4">
+  {breakdown.unassigned.length>0&&<section id="money-spending-cushions" data-testid="spending-unassigned" className="scroll-mt-4 rounded-2xl border border-dashed border-[#CBDCCE] bg-white p-3 sm:p-4">
     <h4 className="text-sm font-extrabold text-[#416B51]">{breakdown.unassigned.some(row=>row.kind==="unclassified")?
      t("Categories without a breakdown & budget cushions","فئات بدون بنود تفصيلية وهوامش الميزانية"):
      t("Unallocated monthly budget cushions","هوامش غير مخصصة من الميزانية الشهرية")}</h4>
