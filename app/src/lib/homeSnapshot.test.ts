@@ -82,8 +82,8 @@ describe("illustrated homepage uses actual family data instead of mockup values"
   expect(duplicate.plans.find(p=>p.kind==="plan")).toMatchObject({
    id:"plan:linked-1",date:"2026-10-20"
   });
-  const unrelated:FamilyPlan={...linked,id:"independent",kind:"outing",sourceRef:undefined,
-   title:"Family day"};
+  const {sourceRef:_linkedSource,...standalone}=linked;
+  const unrelated:FamilyPlan={...standalone,id:"independent",kind:"outing",title:"Family day"};
   const legitimate=homeSnapshot({...input(),moments:[authored],
    plans:[unrelated]});
   expect(legitimate.plans.filter(p=>p.title==="Family day")).toHaveLength(2);
