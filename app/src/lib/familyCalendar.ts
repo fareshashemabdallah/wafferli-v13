@@ -23,7 +23,10 @@ export function memberBirthdayMoments(members: Member[], arabic = false): Family
     .map(m => ({
       id: memberBirthdayPrefix + m.id,
       title: arabic ? "عيد ميلاد " + m.name.trim() : m.name.trim() + "'s birthday",
-      date: m.birthday||"2000-"+m.birthdayMonthDay!,
+      // Month/day explicitly entered in the profile wins over a stale
+      // legacy full birthday. Retain an entered year only for age-based advice.
+      date: m.birthdayMonthDay?
+       (m.birthday?.slice(0,4)??"2000")+"-"+m.birthdayMonthDay:m.birthday!,
       kind: "birthday" as const,
       annual: true,
     }));
@@ -40,11 +43,14 @@ export function allFamilyMoments(events: FamilyMoment[], members: Member[], arab
   const linked=memberBirthdayMoments(members, arabic);
   // Keep historical user-authored notes in storage; only hide an overlapping manual
   // birthday on the calendar when the profile already supplies that person's birthday.
-  const visible=events.filter(event=>!linked.some(member=>
-    event.kind==="birthday" &&
-    event.date.slice(5)===member.date.slice(5) &&
-    birthdaySubject(event.title)===birthdaySubject(member.title)
-  ));
+  const visible=events.filter(event=>{
+    if(event.kind!=="birthday")return true;
+    const matches=linked.filter(m=>birthdaySubject(event.title)===birthdaySubject(m.title));
+    if(matches.length===1)return false; // same one person's old manually entered birthday
+    // Two people with the same name are ambiguous: never delete or silently
+    // merge distinct birthdays simply because they share a display name.
+    return true;
+  });
   return [...visible,...linked];
 }
 export function isMemberBirthday(item: FamilyMoment): boolean {
