@@ -111,6 +111,7 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
    id,name:z.string().min(1).max(90),categoryId:id,enabled:z.boolean(),
    amountJod:smallMoney,frequency:z.enum(["monthly","weekly","quarterly","yearly"]),
    behaviour:z.enum(["fixed","variable"]),
+   spendingRole:z.enum(["committed","necessary","flexible"]).optional(),
    priority:z.enum(["essential","protected","flexible"]),
    quantity:smallMoney.optional(),unitPriceJod:smallMoney.optional(),
    unitLabel:z.string().max(40).optional(),priceSource:url.optional(),
@@ -118,8 +119,6 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   }).strict(),500).optional(),
   categories:many(opts({
    id,name:text,type:z.enum(["fixed","variable","periodic"]),planned:maxNumber,
-   spendingRole:z.enum(["committed","necessary","flexible"]).optional(),
-   expectedCadence:z.enum(["weekly","monthly","quarterly","yearly","once"]).optional(),
     visualGroup:z.enum(["groceries","fuel","restaurants","children","housing","health","education","utilities","gifts","travel","household","clothing","other","custom"]).optional(),
     visualIcon:z.enum(["groceries","fuel","restaurants","children","housing","health","education","utilities","gifts","travel","household","clothing","other"]).optional()
   })),expenses:many(expense),demo:z.boolean(),
