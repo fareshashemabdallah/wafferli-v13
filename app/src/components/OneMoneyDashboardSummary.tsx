@@ -4,11 +4,12 @@ import type {RhythmForecast} from "@/lib/familyMoneyRhythm";
 import {oneMoneyDashboard} from "@/lib/oneMoneyDashboard";
 import {fmtJOD} from "@/lib/storage";
 import {localToday} from "@/lib/cashflow";
+import {SpendingMixDashboard} from "./SpendingMixDashboard";
 
 type Props={state:MoneyState;forecast:RhythmForecast;
  onIncome:()=>void;onCash:()=>void;onSavings:()=>void;onBills:()=>void;onExpense:()=>void;
- onTimeline:()=>void;};
-export function OneMoneyDashboardSummary({state,forecast,onIncome,onCash,onSavings,onBills,onExpense,onTimeline}:Props){
+ onTimeline:()=>void;onOpenCategory:(categoryId:string)=>void;};
+export function OneMoneyDashboardSummary({state,forecast,onIncome,onCash,onSavings,onBills,onExpense,onTimeline,onOpenCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const overview=oneMoneyDashboard(state,forecast,localToday());
  const money=(value:number|null)=>value===null?t("Not entered","غير مدخل"):fmtJOD(value);
@@ -52,6 +53,7 @@ export function OneMoneyDashboardSummary({state,forecast,onIncome,onCash,onSavin
     <strong className="mt-2 block break-words text-lg font-black tabular-nums text-[#316C4C] sm:text-xl">{v.value}</strong>
     <p className="mt-1 text-[10px] leading-relaxed text-[#718675]">{v.subtitle}</p>
    </button>)}</div>
+  <SpendingMixDashboard state={state} onOpenCategory={onOpenCategory}/>
   <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#DCEADD] bg-[#FAFCF8] px-4 py-3">
    <div className="min-w-0">
     <p className="text-xs font-bold text-[#456D52]">💰 {t("Manually entered cash","السيولة المدخلة يدوياً")}</p>
