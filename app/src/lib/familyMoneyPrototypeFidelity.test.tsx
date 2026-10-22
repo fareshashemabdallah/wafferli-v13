@@ -48,7 +48,7 @@ describe("Prototype-faithful Money experience",()=>{
   const dialog=screen.getByRole("dialog",{name:"Income and paydays"});
   fireEvent.change(within(dialog).getByLabelText("Choose an existing entry or add new"),
    {target:{value:"salary"}});
-  fireEvent.change(within(dialog).getByLabelText("Next expected date"),{target:{value:"2026-11-04"}});
+  fireEvent.change(within(dialog).getByLabelText("Next expected date (optional)"),{target:{value:"2026-11-04"}});
   fireEvent.click(within(dialog).getByRole("button",{name:"Save and update outlook"}));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(screen.getByTestId("income-records")).toHaveTextContent("2026-11-04");
