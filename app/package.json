@@ -14,7 +14,8 @@
     "security:staging": "node scripts/verify-staging-security.mjs",
     "security:ai-staging": "node scripts/verify-live-ai-staging.mjs",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "audit:source": "node scripts/audit-source.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
