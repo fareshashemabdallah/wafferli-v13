@@ -5,6 +5,7 @@ import {fmtJOD} from "@/lib/storage";
 import {localToday} from "@/lib/cashflow";
 import {confirmedMonthPlan} from "@/lib/monthAwareMoney";
 import {spendingBreakdown,type SpendingRole} from "@/lib/spendingGroups";
+import {hasActiveCategoryItems} from "@/lib/householdBudgetBuilder";
 import {UnifiedCategoryDetails} from "./UnifiedCategoryDetails";
 import {STARTER_PICTURES,visualGroupOf,iconForCategory,pictureFor,type CategoryPicture} from "@/lib/familyCategoryCards";
 type Props={
@@ -38,6 +39,7 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
    state.categories.find(c=>visualGroupOf(c)===group)?.id===cat.id;
   const id=first?"category-picture-"+group:group==="custom"?"category-custom-"+cat.id:"category-id-"+cat.id;
   const total=m.plannedBy(cat.id),paid=m.spentBy(cat.id);
+  const hasLines=hasActiveCategoryItems(state.budgetItems??[],cat.id);
   const pct=total>0?Math.min(100,paid/total*100):0;
   return <div key={cat.id} className="flex min-w-0 flex-col gap-1.5">
    <button type="button" data-testid={id} className={tile+" min-h-36 w-full flex-1 text-start"}
@@ -45,18 +47,18 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
     <span className="grid size-11 place-items-center rounded-2xl text-2xl" style={{background:pic.bg}} aria-hidden="true">{pic.icon}</span>
     <strong className="mt-2 block truncate text-xs text-[#385C48]">{cat.name}</strong>
     <span className="mt-1 block text-xs text-[#718875]">{money(total)}</span>
-    {cat.remainderRole&&<span className="mt-1 block text-[10px] font-semibold text-[#478462]">{t("General costs","المبلغ العام")}: {t(cat.remainderRole==="committed"?"Committed":cat.remainderRole==="necessary"?"Necessary, variable":"Flexible",cat.remainderRole==="committed"?"التزام":cat.remainderRole==="necessary"?"ضروري متغير":"مرن")}</span>}
+    {!hasLines&&cat.remainderRole&&<span className="mt-1 block text-[10px] font-semibold text-[#478462]">{t("General costs","المبلغ العام")}: {t(cat.remainderRole==="committed"?"Committed":cat.remainderRole==="necessary"?"Necessary, variable":"Flexible",cat.remainderRole==="committed"?"التزام":cat.remainderRole==="necessary"?"ضروري متغير":"مرن")}</span>}
     <span className="mt-0.5 block text-[10px] text-[#758778]">{t("Paid","مدفوع")}: {money(paid)}</span>
     {confirmedMonthPlan(state,cat.id,month)!==null&&<span className="mt-1 block text-[10px] font-bold text-[#438567]">{t("Adjusted this month","معدل هذا الشهر")}</span>}
     <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-[#EEF0EA]"><span className="block h-full rounded-full bg-[#63B387]" style={{width:pct+"%"}}/></span>
     <span className="mt-2 block text-[10px] font-semibold text-[#42845F]">{t("Tap for costs & payments","اضغط للبنود والدفعات")}</span>
    </button>
    <button type="button" data-testid={"edit-category-"+cat.id}
-    aria-label={t("Edit amount & classification for ","تعديل المبلغ والتصنيف لفئة ")+cat.name}
+    aria-label={t(hasLines?"Edit category amount for ":"Edit amount & classification for ",hasLines?"تعديل مخصص الفئة ":"تعديل المبلغ والتصنيف لفئة ")+cat.name}
     onClick={()=>onEditCategory({id:cat.id})}
     className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-[#B8DABE] bg-[#F6FBF3] px-2 py-2 text-center text-[11px] font-extrabold leading-tight text-[#347D52] hover:border-[#86C3A0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#38865B]">
     <Pencil className="size-3.5 shrink-0" aria-hidden="true"/>
-    {t("Edit amount & classification","تعديل المبلغ والتصنيف")}
+    {hasLines?t("Edit category amount","تعديل مخصص الفئة"):t("Edit amount & classification","تعديل المبلغ والتصنيف")}
    </button>
   </div>;
  };
@@ -66,8 +68,8 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
   <div className="flex flex-wrap items-start justify-between gap-3">
    <div><h3 className="text-sm font-black text-[#2B5944]">{t("Where our money goes","وين بتروح مصاريف العيلة")}</h3>
     <p className="mt-1 text-[11px] leading-relaxed text-[#7A8A7B]">{t(
-     "Select Edit amount & classification on a category card to classify it immediately. Subcategories remain optional.",
-     "اختر تعديل المبلغ والتصنيف من بطاقة الفئة مباشرة. البنود الفرعية اختيارية.")}</p></div>
+     "Each line has its own classification. If no lines are entered, you can classify the category directly.",
+     "لكل بند تصنيفه. إذا لم تدخل بنوداً يمكنك تصنيف الفئة مباشرة.")}</p></div>
    <button type="button" onClick={()=>onEditCategory({})}
     className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-[#B5D8BD] bg-white px-3 text-xs font-bold text-[#387F58]">
     <Plus className="size-4"/>{t("Add category","أضف فئة")}</button>
@@ -127,20 +129,25 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
    </section>;
   })}
   {breakdown.unassigned.length>0&&<section data-testid="spending-unassigned" className="rounded-2xl border border-dashed border-[#CBDCCE] bg-white p-3 sm:p-4">
-    <h4 className="text-sm font-extrabold text-[#416B51]">{t("Still to split within categories","مبالغ لم تُقسّم بعد داخل الفئات")}</h4>
-    <p className="mt-1 text-[11px] text-[#7C8A7E]">{t(
-     "These amounts remain in your monthly plan. They're not debts, and Dabberna won't guess whether they're committed, necessary or flexible.",
-     "هذه المبالغ ضمن خطة الشهر وليست ديوناً. دبرنا لا يفترض إن كانت التزاماً أو ضرورة أو اختياراً مرناً.")}</p>
+    <h4 className="text-sm font-extrabold text-[#416B51]">{breakdown.unassigned.some(row=>row.kind==="unclassified")?
+     t("Categories without a breakdown & budget cushions","فئات بدون بنود تفصيلية وهوامش الميزانية"):
+     t("Unallocated monthly budget cushions","هوامش غير مخصصة من الميزانية الشهرية")}</h4>
+    <p className="mt-1 text-[11px] leading-relaxed text-[#7C8A7E]">{t(
+     "Itemized categories are already classified by their lines. Any difference between the category allowance and its lines is available budget space, not a new expense or a debt. No second classification is needed.",
+     "الفئات ذات البنود المفصلة مصنّفة بالفعل. الفرق بين مخصص الفئة ومجموع بنودها مساحة متاحة في الميزانية، وليس مصروفاً أو ديناً جديداً. لا حاجة لتصنيف ثاني.")}</p>
     <div className="mt-2 space-y-2">
      {breakdown.unassigned.map(row=><button type="button" key={row.categoryId}
       className="flex min-h-12 w-full flex-wrap items-center justify-between gap-2 rounded-xl bg-[#F6FAF4] p-3 text-start text-xs"
       onClick={()=>onManage(row.categoryId)}>
       <span className="font-bold text-[#386D50]">{row.name}</span>
-      <span className="text-[#708573]">{row.planned<0?t("Monthly adjustment","تعديل الشهر"):t("Unsplit","غير مفصل")}: {money(row.planned)}
+      <span className="text-[#708573]">{t(
+       row.kind==="unclassified"?"Not yet classified":row.kind==="adjustment"?"Monthly plan adjustment":"Monthly budget cushion",
+       row.kind==="unclassified"?"غير مصنف بعد":row.kind==="adjustment"?"تعديل خطة الشهر":"هامش الميزانية الشهرية")}:
+       {" "}{money(row.planned)}
        {row.paid>0?" · "+t("Paid without a line","مدفوع بدون بند")+": "+money(row.paid):""}</span>
      </button>)}
     </div>
-  </section>}
+   </section>}
   {breakdown.due.length>0&&<section data-testid="actual-bills-due" className="rounded-2xl border border-[#D8E5DA] bg-[#F8FBF8] p-3 sm:p-4">
     <h4 className="text-sm font-extrabold text-[#39624A]">{t("Actual scheduled payments still owed this month","الدفعات المجدولة المستحقة فعلياً هذا الشهر")}</h4>
     <p className="mt-1 text-[11px] text-[#7C8B7E]">{t(
