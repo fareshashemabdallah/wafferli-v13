@@ -58,48 +58,25 @@ jobs:
             echo "::error::Production assets still contain an old hide/reveal amounts control."
             exit 1
           fi
-      - name: Build isolated redesign preview (optional)
-        id: preview_checkout
-        continue-on-error: true
-        uses: actions/checkout@v4
-        with:
-          ref: design/clean-slate-single-category-2026-10-21
-          path: redesign-preview
-          persist-credentials: false
-      - name: Install preview dependencies
-        id: preview_install
-        if: steps.preview_checkout.outcome == 'success'
-        continue-on-error: true
-        working-directory: redesign-preview/app
-        run: bun install --frozen-lockfile
-      - name: Verify preview TypeScript
-        id: preview_types
-        if: steps.preview_install.outcome == 'success'
-        continue-on-error: true
-        working-directory: redesign-preview/app
-        run: bun run typecheck
-      - name: Verify preview regression tests
-        id: preview_tests
-        if: steps.preview_types.outcome == 'success'
-        continue-on-error: true
-        working-directory: redesign-preview/app
-        run: bun run test
-      - name: Build redesign under isolated /preview/ path
+      - name: Build synchronized preview from the same current main source
         id: preview_build
-        if: steps.preview_tests.outcome == 'success'
         continue-on-error: true
-        working-directory: redesign-preview/app
+        working-directory: app
         env:
           VITE_ENABLE_LIVE_AI: "false"
-        run: bunx vite build --base=/wafferli-v13/preview/
-      - name: Assemble production and optional preview pages
+        run: bunx vite build --base=/wafferli-v13/preview/ --outDir ../preview-dist
+      - name: Assemble production and synchronized preview
         run: |
-          if test -s redesign-preview/react-dist/index.html && grep -Fq '/wafferli-v13/preview/assets/' redesign-preview/react-dist/index.html; then
+          if test -s preview-dist/index.html && grep -Fq '/wafferli-v13/preview/assets/' preview-dist/index.html; then
             mkdir -p react-dist/preview
-            cp -a redesign-preview/react-dist/. react-dist/preview/
+            cp -a preview-dist/. react-dist/preview/
             rm -f react-dist/preview/offline-sw.js
+            if grep -RlE 'Hide private amounts|Reveal amounts|Show private amounts' react-dist/preview/assets; then
+              echo "::error::The synchronized preview contains an obsolete private-amount toggle."
+              exit 1
+            fi
           else
-            echo "Optional redesign preview unavailable; publishing current main app without blocking."
+            echo "::warning::Synchronized preview failed; production main is still deployable."
           fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
