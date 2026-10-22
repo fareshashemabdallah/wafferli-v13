@@ -1,4 +1,5 @@
 import {Plus} from "lucide-react";
+import {UnifiedCategoryDetails} from "./UnifiedCategoryDetails";
 import {useI18n} from "@/lib/i18n";
 import {computeMoney,type Category,type MoneyState} from "@/lib/money";
 import {fmtJOD} from "@/lib/storage";
@@ -9,6 +10,8 @@ import {STARTER_PICTURES,visualGroupOf,iconForCategory,pictureFor,type CategoryP
 
 type Props={
  state:MoneyState;
+ setState:(next:MoneyState|((prev:MoneyState)=>MoneyState))=>void;
+ activeCategory:string|null;onClose:()=>void;
  onManage:(id:string)=>void;
  onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
@@ -21,7 +24,7 @@ const labels={
  flexible:{icon:"💗",en:"Flexible family choices",ar:"خيارات العيلة المرنة",desc:"Activities and purchases you can adjust, postpone or skip. Unspent allowance is not a bill.",
   descAr:"أنشطة ومشتريات يمكنك تعديلها أو تأجيلها أو تركها. المتبقي ليس ديناً.",tone:"bg-[#FCF5F4]"}
 } as const;
-export function FamilySpendingGroups({state,onManage,onEditCategory}:Props){
+export function FamilySpendingGroups({state,setState,activeCategory,onClose,onManage,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const month=localToday().slice(0,7);
  const money=computeMoney(state);
@@ -98,6 +101,10 @@ export function FamilySpendingGroups({state,onManage,onEditCategory}:Props){
     </div>:<p className="mt-3 rounded-xl border border-dashed border-[#D7E4D5] bg-white/65 p-3 text-xs text-[#819080]">
      {t("No categories assigned here yet. Add one or classify an existing category.","لا فئات بهالمجموعة بعد. أضف فئة أو غيّر تصنيف فئة موجودة.")}
     </p>}
+    {activeCategory&&group.some(c=>c.id===activeCategory)&&<div className="mt-3">
+     <UnifiedCategoryDetails key={activeCategory} state={state} setState={setState} categoryId={activeCategory}
+      onEdit={()=>onEditCategory({id:activeCategory})} onClose={onClose}/>
+    </div>}
    </section>;
   })}
   {STARTER_PICTURES.filter(g=>!(state.hiddenStarterGroups??[]).includes(g.key)&&
