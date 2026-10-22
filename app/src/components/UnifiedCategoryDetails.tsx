@@ -169,6 +169,10 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
      onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
      + {t("Break down this category","قسّم الفئة إلى بنود")}</button>
   </div>
+  {category.remainderRole&&<p className="rounded-xl bg-white p-3 text-xs text-[#5F8068]">{t("General category costs classified as ","تصنيف مصاريف الفئة العامة: ")}
+   <strong>{t(category.remainderRole==="committed"?"Committed":category.remainderRole==="necessary"?"Necessary but variable":"Flexible",
+    category.remainderRole==="committed"?"التزام":category.remainderRole==="necessary"?"ضروري متغير":"مرن")}</strong>
+   {t(". Edit category amount to change it.",". لتغيير التصنيف، اختر تعديل مخصص الفئة.")}</p>}
   <p className="text-xs leading-relaxed text-[#768B7D]">
    {t("Subcategories explain the category plan; they never add a second budget. Unassigned plan: ",
     "البنود تفصّل نفس مخصص الفئة، بدون تكرار الميزانية. المخصص غير المفصّل: ")}{show(Math.max(0,free))}
