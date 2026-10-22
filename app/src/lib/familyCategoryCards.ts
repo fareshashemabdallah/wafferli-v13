@@ -86,7 +86,8 @@ export function saveFamilyCategory(state:MoneyState,draft:CategoryDraft,newId:st
   return {ok:false,reason:"item-minimum"};
  // Drop the redundant category-level fields from the previous pilot schema.
  // All financial nature classifications now live on budget item lines.
- const {spendingRole:_oldRole,expectedCadence:_oldCadence,...safeExisting}=existing??({id:categoryId} as Category & {spendingRole?:string;expectedCadence?:string});
+ const legacy=(existing??{id:categoryId}) as Category & {spendingRole?:string;expectedCadence?:string};
+ const {spendingRole:_oldRole,expectedCadence:_oldCadence,...safeExisting}=legacy;
  const saved:Category={
   ...safeExisting,id:categoryId,name,
   planned:roundJod(draft.planned),type:draft.type,
