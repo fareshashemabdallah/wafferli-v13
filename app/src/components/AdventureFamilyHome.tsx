@@ -1,6 +1,5 @@
-import {useState} from "react";
 import {Link,useNavigate} from "@tanstack/react-router";
-import {ArrowRight,CalendarDays,ChevronRight,Eye,EyeOff,Gift,Heart,Info,ShieldCheck,Wallet} from "lucide-react";
+import {ArrowRight,CalendarDays,ChevronRight,Gift,Heart,Info,ShieldCheck,Wallet} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,writeLocal,fmtJOD} from "@/lib/storage";
 import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
@@ -24,7 +23,6 @@ export function AdventureFamilyHome(){
  const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [prefs,,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
- const [privateVisible,setPrivateVisible]=useState(false);
  const ready=moneyReady&&membersReady&&momentsReady&&plansReady&&prefsReady;
  const brief=ready?buildTodayActionPolicy({money,members,moments,plans,preferences:prefs}):null;
  const current=brief?.action;
@@ -41,7 +39,6 @@ export function AdventureFamilyHome(){
   <span className="shrink-0 text-[11px] text-[#687F74]">{item.date}</span>
   <ChevronRight className="size-4 shrink-0 rtl:rotate-180"/>
  </Link>;
- const sensitiveAmounts=privateVisible&&!money.demo;
  return <div className="mx-auto max-w-[930px] space-y-3 pb-5 text-[#263E36]" data-adventure-home>
   <header className="relative isolate overflow-hidden rounded-[1.7rem] border border-[#D7E8D9] bg-[linear-gradient(120deg,#FAFBF2_5%,#E6F5E8_60%,#FFEFE4_100%)] p-4 sm:p-6" aria-label={t("Dabberna family greeting","ترحيب دبّرنا بالعائلة")}>
    <div className="relative z-10 max-w-[58%] pb-2 sm:max-w-[65%]">
@@ -99,7 +96,7 @@ export function AdventureFamilyHome(){
    {current.kind==="gift"&&<div className="mt-3 flex flex-wrap gap-2 text-xs">
     <span className="rounded-full border border-[#EDD8E1] bg-white/75 px-3 py-1.5">
      {t("Planned gift: ","الهدية المخططة: ")}
-     {sensitiveAmounts?fmtJOD(current.giftEstimateJod??0):t("Hidden","مخفي")}
+     {fmtJOD(current.giftEstimateJod??0)}
     </span>
     <span className="rounded-full border border-[#EDD8E1] bg-white/75 px-3 py-1.5">
      {current.sellerCount?t("Seller option saved","خيار متجر محفوظ"):t("No seller selected yet","ما تم اختيار متجر بعد")}
@@ -146,27 +143,20 @@ export function AdventureFamilyHome(){
    <section className={panel} aria-label={t("Money at a glance","لمحة عن المال")}>
     <div className="flex items-center justify-between gap-2">
      <h2 className="flex items-center gap-2 text-sm font-extrabold"><Wallet className="size-4 text-[#4F956E]"/>{t("Money at a glance","لمحة عن المال")}</h2>
-     <button type="button" disabled={!ready||money.demo} aria-pressed={privateVisible}
-      aria-label={privateVisible?t("Hide private amounts","إخفاء المبالغ الخاصة"):t("Show private amounts","إظهار المبالغ الخاصة")}
-      onClick={()=>setPrivateVisible(x=>!x)}
-      className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-[#E2EAE2] bg-[#FAFCF8] px-3 text-xs font-semibold text-[#427E61] disabled:opacity-50">
-      {privateVisible?<EyeOff className="size-4"/>:<Eye className="size-4"/>}
-      {privateVisible?t("Hide","إخفاء"):t("Reveal","إظهار")}
-     </button>
     </div>
     <div className="mt-3 grid grid-cols-2 gap-2">
      <div className="rounded-xl bg-[#F4F9F2] p-3">
       <p className="text-xs text-[#63776A]">{t("Recorded bills: next 7 days","الفواتير المسجّلة: ٧ أيام")}</p>
-      <strong className="mt-1 block text-lg text-[#307855]">{sensitiveAmounts?fmtJOD(brief?.upcomingBillsJod??0):"••••"}</strong>
+      <strong className="mt-1 block text-lg text-[#307855]">{ready?fmtJOD(brief?.upcomingBillsJod??0):t("Loading","جار التحميل")}</strong>
      </div>
      <div className="rounded-xl bg-[#FFF5F7] p-3">
       <p className="text-xs text-[#866874]">{t("Actual recorded spending this month","المصاريف المدفوعة المسجّلة للشهر")}</p>
-      <strong className="mt-1 block text-lg text-[#B34D7C]">{sensitiveAmounts?fmtJOD(brief?.monthPaidJod??0):"••••"}</strong>
+      <strong className="mt-1 block text-lg text-[#B34D7C]">{ready?fmtJOD(brief?.monthPaidJod??0):t("Loading","جار التحميل")}</strong>
      </div>
     </div>
     <p className="mt-3 flex gap-2 text-xs leading-relaxed text-[#758378]">
      <ShieldCheck className="mt-0.5 size-4 shrink-0"/>
-     {money.demo?t("Only sample money is saved; no real family amounts are shown.","المبالغ الموجودة تجريبية؛ لا نعرضها كمالية حقيقية."):
+     {money.demo?t("Sample Money amounts are examples only, not your actual family finances.","المبالغ المعروضة تجريبية وليست مالية عيلتك الحقيقية."):
       brief?.moneyStatus==="partial"?t("Your information is partial. Neither estimates nor planned costs prove money is available.",
        "معلومات المال جزئية. التقديرات والخطط لا تثبت توفر المبلغ."):
       t("Amounts come from your entries, not a bank. Planned costs do not count as paid until confirmed.",

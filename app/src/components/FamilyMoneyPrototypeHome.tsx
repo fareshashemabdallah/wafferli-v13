@@ -12,23 +12,23 @@ import {STARTER_PICTURES,visualGroupOf,iconForCategory,pictureFor,pictureCategor
 
 type Area="timeline"|"pace"|"annual";
 type Props={
- state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;forecast:RhythmForecast;revealed:boolean;
+ state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;forecast:RhythmForecast;
  onArea:(screen:Area)=>void;onIncome:()=>void;onCash:()=>void;onSavings:()=>void;onBills:()=>void;onQuickAdd:()=>void;
  onSpending:()=>void;onCategories:()=>void;
  onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
 const tile="rounded-[1.05rem] border border-[#E3EAE0] bg-white p-3 text-start transition hover:-translate-y-0.5 hover:border-[#91C6A4] focus-visible:ring-2 focus-visible:ring-[#4E9D70]";
-export function FamilyMoneyPrototypeHome({state,setState,forecast,revealed,onArea,onIncome,onCash,onSavings,onBills,onQuickAdd,onSpending,onCategories,onEditCategory}:Props){
+export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncome,onCash,onSavings,onBills,onQuickAdd,onSpending,onCategories,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [selected,setSelected]=useState<string|null>(null);
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
  const manage=(id:string)=>{setActiveCategory(current=>current===id?null:id);setSelected(null);};
  const m=computeMoney(state),unknown=t("Not entered","غير مدخل");
- const shown=(n:number|null)=>state.demo||n===null?unknown:revealed?fmtJOD(n):"••••";
+ const shown=(n:number|null)=>n===null?unknown:fmtJOD(n);
  const sorted=forecast.events.filter(e=>e.kind!=="pace").slice(0,5);
  const recent=state.expenses.filter(e=>e.status!=="planned").sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
  return <div className="space-y-3" data-testid="prototype-money-home">
-  <OneMoneyDashboardSummary state={state} forecast={forecast} revealed={revealed}
+  <OneMoneyDashboardSummary state={state} forecast={forecast}
    onIncome={onIncome} onCash={onCash} onSavings={onSavings}
    onBills={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})} onExpense={onQuickAdd}
    onTimeline={()=>onArea("timeline")}/>
@@ -93,7 +93,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,revealed,onAre
       className="mt-3 min-h-11 text-xs font-bold text-[#3A7C59] underline">{t("Add another here","أضف فئة هون")}</button>
    </div>}
   {activeCategory&&state.categories.some(c=>c.id===activeCategory)&&<UnifiedCategoryDetails key={activeCategory}
-    state={state} setState={setState} categoryId={activeCategory} revealed={revealed}
+    state={state} setState={setState} categoryId={activeCategory}
     onEdit={()=>onEditCategory({id:activeCategory})} onClose={()=>setActiveCategory(null)}/>}
   <section className="space-y-2" aria-label={t("Next payments and income","الدفعات والدخل القادم")}>
    <div className="flex flex-wrap items-center justify-between gap-2">
