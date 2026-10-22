@@ -125,7 +125,7 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
       className="flex min-h-12 w-full flex-wrap items-center justify-between gap-2 rounded-xl bg-[#F6FAF4] p-3 text-start text-xs"
       onClick={()=>onManage(row.categoryId)}>
       <span className="font-bold text-[#386D50]">{row.name}</span>
-      <span className="text-[#708573]">{t("Unsplit","غير مفصل")}: {money(row.planned)}
+      <span className="text-[#708573]">{row.planned<0?t("Monthly adjustment","تعديل الشهر"):t("Unsplit","غير مفصل")}: {money(row.planned)}
        {row.paid>0?" · "+t("Paid without a line","مدفوع بدون بند")+": "+money(row.paid):""}</span>
      </button>)}
     </div>
