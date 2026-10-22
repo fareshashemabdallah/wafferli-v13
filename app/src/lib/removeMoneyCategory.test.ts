@@ -20,6 +20,7 @@ describe("Remove Money category from single family dashboard",()=>{
   const before=input();
   const after=removeMoneyCategory(before,"old");
   expect(after.categories.map(c=>c.id)).toEqual(["food"]);
+  expect(after.hiddenStarterGroups).toEqual([]);
   expect(after.retiredCategoryNames?.old).toBe("School fees");
   expect(after.spendingPaces).toEqual([]);
   expect(after.expenses).toEqual(before.expenses);
