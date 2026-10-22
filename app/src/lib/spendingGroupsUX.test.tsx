@@ -41,6 +41,33 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
   expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("Nanny");
   expect(screen.getByTestId("saved-group-state")).toHaveTextContent('"amount":90');
  });
+ it("lets parents classify Nanny without any subcategory, then change or clear it",()=>{
+  render(<App/>);
+  fireEvent.click(screen.getByTestId("category-custom-n"));
+  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
+  let dialog=screen.getByRole("dialog",{name:"Edit family category"});
+  const classification=within(dialog).getByLabelText("Category spending classification");
+  expect(classification).toHaveValue("");
+  fireEvent.change(classification,{target:{value:"committed"}});
+  fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
+  expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("General category costs (no subcategory)");
+  expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("Nanny");
+  expect(screen.getByTestId("spending-unassigned")).not.toHaveTextContent("Nanny");
+  let state=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
+  expect(state.categories.find(c=>c.id==="n")?.remainderRole).toBe("committed");
+  expect(state.budgetItems).toHaveLength(3);
+  fireEvent.click(screen.getByTestId("category-custom-n"));
+  // Click again if the category panel was already open.
+  if(!screen.queryByTestId("unified-category-details"))fireEvent.click(screen.getByTestId("category-custom-n"));
+  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
+  dialog=screen.getByRole("dialog",{name:"Edit family category"});
+  fireEvent.change(within(dialog).getByLabelText("Category spending classification"),{target:{value:"flexible"}});
+  fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
+  expect(screen.getByTestId("spending-group-flexible")).toHaveTextContent("Nanny");
+  state=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
+  expect(state.budgetItems).toHaveLength(3);
+  expect(state.expenses).toHaveLength(1);
+ });
  it("edits a line from necessary to flexible without changing parent category or payment history",()=>{
   render(<App/>);
   fireEvent.click(screen.getByTestId("category-custom-car"));
