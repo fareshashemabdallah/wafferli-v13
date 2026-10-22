@@ -1,7 +1,7 @@
 import type {MoneyState} from "./money";
 import type {BudgetItem} from "./householdBudgetBuilder";
 import type {Frequency} from "./cashflow";
-import {roundJod,scheduleDates} from "./cashflow";
+import {roundJod,scheduleDates,futureDate} from "./cashflow";
 import {monthlyItemCost,upsertBudgetItem} from "./householdBudgetBuilder";
 
 /** A category is a budget envelope, not an additional expense. Payments live
@@ -82,6 +82,11 @@ export function saveCategoryDueDate(state:MoneyState,p:{
    (p.budgetItemId&&b.budgetItemId===p.budgetItemId)))return state;
  return {...state,commitments:[...(state.commitments??[]),{...p}]};
 }
+export function stopCategoryItem(state:MoneyState,itemId:string):MoneyState{
+ const disabled=disableCategoryItem(state,itemId);
+ return (disabled.commitments??[]).filter(b=>b.budgetItemId===itemId)
+  .reduce((current,b)=>removeCategoryBill(current,b.id),disabled);
+}
 export function removeCategoryBill(state:MoneyState,billId:string):MoneyState{
  if(state.demo)return state;
  const bill=(state.commitments??[]).find(b=>b.id===billId);
@@ -90,8 +95,10 @@ export function removeCategoryBill(state:MoneyState,billId:string):MoneyState{
  const paid=state.expenses.filter(e=>e.billId===billId&&e.dueDate);
  if(paid.length){
   const last=paid.map(e=>e.dueDate!).sort().at(-1)!;
+  const partiallyPaid=state.expenses.filter(e=>e.billId===billId&&e.dueDate===last)
+   .reduce((sum,e)=>sum+e.amount,0)<bill.amount;
   return {...state,commitments:(state.commitments??[]).map(b=>b.id===billId?
-   {...b,endDate:last}:b)};
+   {...b,endDate:partiallyPaid?futureDate(last,-1):last}:b)};
  }
  return {...state,commitments:(state.commitments??[]).filter(b=>b.id!==billId)};
 }
