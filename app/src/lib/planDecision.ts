@@ -29,7 +29,8 @@ export function evaluatePlan(plan:FamilyPlan,money:MoneyState,all:FamilyPlan[]=[
   money.categories.every(c=>valid(c.planned))&&finance.savingsTarget>=0;
  const gap=roundJod(finance.monthlyIncome+finance.carryover.net-finance.savingsTarget-finance.planned);
  const monthlyGap=cost!==null&&validBudget?roundJod(gap-cost):null;
- const monthlyFlexible=validBudget?money.categories.filter(c=>c.type==="variable").map(c=>({
+ // Consider only explicitly flexible choices for adjustment recommendations.
+ const monthlyFlexible=validBudget?money.categories.filter(c=>c.spendingRole==="flexible"||(!c.spendingRole&&c.priority==="flexible")).map(c=>({
   name:c.name,room:roundJod(Math.max(0,finance.plannedBy(c.id)-finance.spentBy(c.id)))
  })).filter(c=>c.room>0).sort((a,b)=>b.room-a.room).slice(0,3):[];
  const overview=getMoneyOverview(money,now);
