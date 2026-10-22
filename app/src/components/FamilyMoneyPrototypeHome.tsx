@@ -3,10 +3,9 @@ import {Plus} from "lucide-react";
 import {OneMoneyDashboardSummary} from "./OneMoneyDashboardSummary";
 import {FamilySpendingGroups} from "./FamilySpendingGroups";
 import {useI18n} from "@/lib/i18n";
-import {computeMoney,type MoneyState} from "@/lib/money";
+import {type MoneyState} from "@/lib/money";
 import {type RhythmForecast} from "@/lib/familyMoneyRhythm";
 import {fmtJOD} from "@/lib/storage";
-import {localToday} from "@/lib/cashflow";
 import {type CategoryPicture} from "@/lib/familyCategoryCards";
 
 type Area="timeline"|"pace"|"annual";
@@ -20,7 +19,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
  const manage=(id:string)=>setActiveCategory(current=>current===id?null:id);
- const m=computeMoney(state),unknown=t("Not entered","غير مدخل");
+ const unknown=t("Not entered","غير مدخل");
  const shown=(n:number|null)=>n===null?unknown:fmtJOD(n);
  const sorted=forecast.events.filter(e=>e.kind!=="pace").slice(0,5);
  const recent=state.expenses.filter(e=>e.status!=="planned").sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
