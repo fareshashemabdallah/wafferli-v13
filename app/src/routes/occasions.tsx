@@ -9,6 +9,7 @@ import {type FamilyMoment,formatMomentDate} from "@/lib/familyCalendar";
 import {sampleMembers,sampleMoney,type Member,type MoneyState} from "@/lib/money";
 import {chooseOccasion,planKey,upcomingPlanEvents,type OccasionPlans} from "@/lib/occasionAdvisor";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan} from "@/lib/familyPlans";
+import {canonicalPlanView,canonicalFamilyMoments} from "@/lib/canonicalFamilyFacts";
 
 export const Route=createFileRoute("/occasions")({
  head:()=>({meta:[
@@ -34,7 +35,8 @@ export function OccasionPlanner(){
  const upcoming=useMemo(()=>upcomingPlanEvents(events,members,now,180,ar).slice(0,24),[events,members,now,ar]);
  const active=chooseOccasion(upcoming,chosen,focused);
  const key=active?planKey(active):"";
- const plan=plans.find(p=>p.sourceRef==="occasion:"+key);
+ const storedPlan=plans.find(p=>p.sourceRef==="occasion:"+key);
+ const plan=storedPlan?canonicalPlanView(storedPlan,canonicalFamilyMoments(events,members,ar)):undefined;
  const legacy=oldPlans[key];
  const ready=eventsReady&&membersReady&&oldReady&&plansReady;
  return <AppShell title={t("Plan a family moment","حضّر لمناسبة عائلية")}>
