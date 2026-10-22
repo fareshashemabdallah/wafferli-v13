@@ -99,7 +99,8 @@ export function buildFamilyMoneyRhythm(state:MoneyState,plans:readonly FamilyPla
  const incomes=state.incomeSources??legacyIncome(state.income);
  const commitments=[...(state.commitments??[]),...familyForecastCommitments(plans,state)];
  const base=buildForecast({incomes:includeExpected?incomes:[],commitments,
-  openingBalance:state.cashOnHand??null,reserve:state.cashReserve??0,today,days});
+  openingBalance:state.cashOnHand??null,reserve:state.cashReserve??0,today,days,
+  billPayments:state.expenses});
  const annualIds=new Set(commitments.filter(c=>c.frequency==="yearly").map(c=>c.id));
  let events:Omit<RhythmEvent,"projectedBalance">[]=base.events.map(e=>({
   id:e.key,date:e.date,label:e.name,amountJod:e.kind==="income"?e.amount:-e.amount,
