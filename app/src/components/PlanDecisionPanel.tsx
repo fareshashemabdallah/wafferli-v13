@@ -10,6 +10,7 @@ import {fmtJOD} from "@/lib/storage";
 import {evaluatePlan} from "@/lib/planDecision";
 import {moneyAmount,type FamilyPlan} from "@/lib/familyPlans";
 import {needsStarterBudget} from "@/lib/starterBudget";
+import {planBudgetSetupSteps,PLAN_MONEY_FOCUS_KEY,type PlanSetupStep} from "@/lib/planBudgetSetup";
 import type {MoneyState} from "@/lib/money";
 
 type Props={plan:FamilyPlan;money:MoneyState;plans:FamilyPlan[];
@@ -29,6 +30,38 @@ export function PlanDecisionPanel({plan,money,plans,onUpdate,setMoney}:Props){
   setEditing(false);setError("");toast.success(ar?"تم تحديث المقارنة.":"Plan comparison updated.");
  };
  const first=needsStarterBudget(money);
+ const setupSteps=planBudgetSetupSteps(money);
+ const setupLabels:Record<PlanSetupStep,{en:string;ar:string;enAction:string;arAction:string}>={
+  demo:{en:"Personal money records haven't been started",ar:"لم تبدأ بيانات المال الحقيقية",enAction:"Start my Money",arAction:"ابدأ بماليتي"},
+  income:{en:"Monthly income amount is missing",ar:"مبلغ الدخل الشهري غير مدخل",enAction:"Enter income",arAction:"أدخل الدخل"},
+  categories:{en:"No monthly spending budget category has been entered",ar:"لا توجد فئة واحدة بمخصص شهري",enAction:"Add a spending category",arAction:"أضف فئة مصاريف"},
+  review:{en:"Confirm the categories entered cover your usual household costs",ar:"راجع أن الفئات المسجلة تشمل مصاريف عائلتك المعتادة",enAction:"Review my spending categories",arAction:"راجع فئات المصاريف"}
+ };
+ const moneyLink=(key:PlanSetupStep)=>()=>{
+  window.sessionStorage.setItem(PLAN_MONEY_FOCUS_KEY,key);
+ };
+ const setupGuide=<div className="rounded-2xl border border-[#E6DBCA] bg-[#FFF7EB] p-4" data-testid="plan-budget-missing">
+  <h4 className="font-semibold">{ar?"هذا ما نحتاجه لمقارنة الخطة":"Here's exactly what's needed for the monthly plan check"}</h4>
+  <p className="mt-2 text-sm leading-relaxed">{ar?
+   "نستخدم أرقامك المحفوظة ولا نطلب إدخالها مرة ثانية. المطلوب فقط البنود التالية:":
+   "We keep what you've already entered. Only the items below still need attention:"}</p>
+  <div className="mt-3 space-y-2">
+   {setupSteps.map(key=><div key={key} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#E7DCCB] bg-white p-3">
+    <span className="flex min-w-0 flex-1 items-center gap-2 text-sm"><span aria-hidden="true" className="text-[#A06F43]">○</span>
+      {ar?setupLabels[key].ar:setupLabels[key].en}</span>
+    <Link to="/money" onClick={moneyLink(key)} className="min-h-10 inline-flex items-center gap-1 rounded-full bg-brand px-3 py-2 text-xs font-semibold text-white">
+      {ar?setupLabels[key].arAction:setupLabels[key].enAction} <ArrowRight className="size-3 rtl:rotate-180"/>
+    </Link>
+   </div>)}
+   {!setupSteps.length&&<p className="text-sm font-semibold">{ar?"لا توجد بيانات إلزامية ناقصة":"No required monthly-budget information is missing"}</p>}
+  </div>
+  <p className="mt-3 text-xs leading-relaxed text-[#806F5C]">{ar?
+   "هدف الادخار وموعد الراتب والسيولة الحالية والفواتير المجدولة اختيارية لهذه المقارنة الشهرية. بيانات السيولة والفواتير تساعد بتقييم إمكانية الدفع بموعد محدد.":
+   "Savings targets, payday dates, current cash and scheduled bills are optional for this monthly comparison. Cash and bills help with a separate date-specific payment check."}</p>
+  <Link to="/money" onClick={moneyLink(setupSteps[0]??"review")} className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-brand underline">
+    {ar?"افتح لوحة المالية":"Open my Money dashboard"} <ArrowRight className="size-4 rtl:rotate-180"/>
+  </Link>
+ </div>;
  const hasMonthly=v.unallocated!==null;
  const gap=v.monthlyGap;
  const needsMore=gap!==null&&gap<0;
@@ -57,18 +90,11 @@ export function PlanDecisionPanel({plan,money,plans,onUpdate,setMoney}:Props){
    </div>}
    {v.choiceExceedsLimit!==null&&v.choiceExceedsLimit>0&&<p className="mt-2 text-xs font-semibold text-[#9C5155]">{ar?"الخيار المختار أعلى من سقفك بـ ":"Your chosen option exceeds the ceiling by "}{fmtJOD(v.choiceExceedsLimit)}</p>}
   </div>
-  {first?<div>
-    <QuickMoneySetup money={money} setMoney={setMoney}/>
-    <div className="mt-3 text-center">
-      <Link to={explore} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand">
-       {ar?"مو جاهز للمعلومات المالية؟ قارن الخيارات أولاً":"Not ready to enter finances? Explore options first"} <ArrowRight className="size-4 rtl:rotate-180"/>
-      </Link>
-    </div>
-   </div>:!hasMonthly?<div className="rounded-2xl border border-[#E6DBCA] bg-[#FFF7EB] p-4">
-    <h4 className="font-semibold">{ar?"نحتاج نكمل ميزانية الشهر":"One more step to check your budget"}</h4>
-    <p className="mt-2 text-sm leading-relaxed">{ar?"عندك بيانات مالية جزئية. افتح المالية وأكمل الدخل الشهري ومخصصات المصاريف وهدف الادخار. لا نريد تغيير سجلاتك الموجودة تلقائياً.":"Some financial information is already saved. Complete income, spending budgets and savings in Money. We won't overwrite your existing records."}</p>
-    <Link to="/money" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
-      {ar?"أكمل بياناتي المالية":"Complete my Money setup"} <ArrowRight className="size-4 rtl:rotate-180"/>
+  {first||!hasMonthly?<div className="space-y-3">
+    {setupGuide}
+    {first&&<QuickMoneySetup money={money} setMoney={setMoney}/>}
+    <Link to={explore} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand underline">
+     {ar?"قارن الخيارات الآن، حتى لو كانت الميزانية غير مكتملة":"Compare options without completing Money first"} <ArrowRight className="size-4 rtl:rotate-180"/>
     </Link>
    </div>:v.cost===null?<div className="rounded-2xl bg-[#F2F6EE] p-4">
      <h4 className="font-semibold">{ar?"حدد تكلفة تقريبية أولاً":"Start with an estimated cost"}</h4>
