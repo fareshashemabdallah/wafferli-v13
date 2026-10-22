@@ -4,14 +4,15 @@ import {useI18n} from "@/lib/i18n";
 import {localToday,legacyIncome,monthlyTotal,roundJod,type Frequency} from "@/lib/cashflow";
 import {parseCalendarDate} from "@/lib/familyCalendar";
 import {uid} from "@/lib/storage";
+import {emptyRealMoney} from "@/lib/moneyOverview";
+import {parseHouseholdAmount} from "@/lib/householdAmount";
 import type {MoneyState} from "@/lib/money";
 
-export type QuickMoneyEditor="income"|"bill"|"cash";
+export type QuickMoneyEditor="income"|"bill"|"cash"|"savings";
 type Props={kind:QuickMoneyEditor;state:MoneyState;
  setState:(fn:(current:MoneyState)=>MoneyState)=>void;onClose:()=>void};
 const frequencyOptions:Frequency[]=["once","weekly","biweekly","monthly","quarterly","yearly"];
-const numeric=(s:string,allowZero=false)=>/^(?:\d{1,6})(?:\.\d{1,2})?$/.test(s.trim())&&
- Number(s)<=(allowZero?1000000:100000)&&(allowZero?Number(s)>=0:Number(s)>0);
+const numeric=(s:string,allowZero=false,max=100000)=>{const n=parseHouseholdAmount(s,max);return n!==null&&(allowZero||n>0);};
 const frame="mt-1 min-h-11 w-full rounded-xl border border-[#DCE8D9] bg-white px-3 py-2 text-sm text-[#335440] focus-visible:ring-2 focus-visible:ring-[#4F9E70]";
 const label="block text-xs font-bold text-[#58735E]";
 export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
@@ -26,6 +27,7 @@ export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
  const [variable,setVariable]=useState(false);
  const [balance,setBalance]=useState(state.cashOnHand==null?"":String(state.cashOnHand));
  const [reserve,setReserve]=useState(String(state.cashReserve??0));
+ const [savings,setSavings]=useState(state.savingsTargetAmount===undefined?"":String(state.savingsTargetAmount));
  const [error,setError]=useState("");
  useEffect(()=>{
   const current=kind==="income"?source.find(x=>x.id===picked):kind==="bill"?bills.find(x=>x.id===picked):undefined;
@@ -40,41 +42,61 @@ export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
  },[kind,picked]);
  const onSave=(event:FormEvent)=>{
   event.preventDefault();
-  if(state.demo){setError(t("Start with real Money before editing schedules.","ابدأ بمالية فعلية قبل تعديل الجداول."));return;}
-  if(kind==="cash"){
-   if((balance.trim()&&!numeric(balance,true))||!numeric(reserve,true)){
-    setError(t("Enter valid nonnegative cash and reserve amounts.","أدخل سيولة واحتياطي بأرقام موجبة أو صفر."));return;
-   }
-   setState(old=>({...old,cashOnHand:balance.trim()?roundJod(Number(balance)):null,
-    cashReserve:roundJod(Number(reserve)),cashUpdatedAt:balance.trim()?localToday():undefined}));
+  const base=(old:MoneyState)=>old.demo?emptyRealMoney():old;
+  const confirmed=()=>!state.demo||window.confirm(t("Start your own Money records? This replaces example Money figures only; your family profiles, calendar and plans stay unchanged.",
+   "هل تريد بدء سجلات مالية حقيقية؟ سيتم استبدال أرقام المال التجريبية فقط، مع الاحتفاظ بملفات العيلة والتقويم والخطط."));
+  if(kind==="savings"){
+   const value=savings.trim()===""?null:parseHouseholdAmount(savings);
+   if(savings.trim()!==""&&value===null){setError(t("Enter a valid monthly savings target, or leave it blank for no target.","أدخل هدف ادخار شهري صحيحاً أو اتركه فارغاً بدون هدف."));return;}
+   if(!confirmed())return;
+   setState(old=>({...base(old),savingsTargetAmount:value??0,savingsPct:0}));
    onClose();return;
   }
-  if(name.trim().length<2||name.trim().length>60||!numeric(amount)||!parseCalendarDate(date)){
-   setError(t("Enter a name, positive amount and valid calendar date.","أدخل اسم ومبلغ موجب وتاريخ صحيح."));return;
+  if(kind==="cash"){
+   if((balance.trim()&&!numeric(balance,true,1000000))||!numeric(reserve,true,1000000)){
+    setError(t("Enter valid nonnegative cash and reserve amounts.","أدخل سيولة واحتياطي بأرقام موجبة أو صفر."));return;
+   }
+   if(!confirmed())return;
+   setState(old=>({...base(old),cashOnHand:balance.trim()?parseHouseholdAmount(balance,1000000):null,
+    cashReserve:parseHouseholdAmount(reserve,1000000)??0,cashUpdatedAt:balance.trim()?localToday():undefined}));
+   onClose();return;
   }
-  const value=roundJod(Number(amount)),recordId=picked||uid();
+  const income=kind==="income";
+  const value=parseHouseholdAmount(amount);
+  const finalName=name.trim()||(income?t("Monthly income","الدخل الشهري"):"");
+  if(finalName.length<2||finalName.length>60||value===null||(!income&&value===0)||
+   (date.trim()!==""&&!parseCalendarDate(date))||(!income&&!date.trim())){
+   setError(income?t("Enter a valid income amount. The source name and payday are optional.",
+    "أدخل مبلغ دخل صحيحاً. اسم المصدر وموعد الاستلام اختياريان."):
+    t("Enter a name, positive amount and valid due date.","أدخل اسم ومبلغ موجب وتاريخ استحقاق صحيح."));return;
+  }
+  if(!confirmed())return;
+  const recordId=picked||uid();
   if(kind==="income"){
    setState(old=>{
-    const existing=old.incomeSources??legacyIncome(old.income);
+    const current=base(old);
+    const existing=current.incomeSources??legacyIncome(current.income);
     const prior=existing.find(x=>x.id===recordId);
-    const item={...(prior??{id:recordId,shared:false}),id:recordId,name:name.trim(),amount:value,
+    const item={...(prior??{id:recordId,shared:false}),id:recordId,name:finalName,amount:value,
      nextDate:date,frequency,variable};
     const incomeSources=prior?existing.map(x=>x.id===recordId?item:x):[...existing,item];
-    return {...old,incomeSources,income:monthlyTotal(incomeSources),incomeKnown:true};
+    return {...current,incomeSources,income:monthlyTotal(incomeSources),incomeKnown:true};
    });
   }else{
    setState(old=>{
-    const existing=old.commitments??[];
+    const current=base(old);
+    const existing=current.commitments??[];
     const prior=existing.find(x=>x.id===recordId);
-    const item={...(prior??{id:recordId}),id:recordId,name:name.trim(),amount:value,
+    const item={...(prior??{id:recordId}),id:recordId,name:finalName,amount:value,
      dueDate:date,frequency};
-    return {...old,commitments:prior?existing.map(x=>x.id===recordId?item:x):[...existing,item]};
+    return {...current,commitments:prior?existing.map(x=>x.id===recordId?item:x):[...existing,item]};
    });
   }
   onClose();
  };
  const heading=kind==="income"?t("Income and paydays","الدخل ومواعيد الرواتب"):
   kind==="bill"?t("Bills and due dates","الفواتير ومواعيد الاستحقاق"):
+  kind==="savings"?t("Monthly savings goal","هدف الادخار الشهري"):
   t("Cash and safety reserve","السيولة والاحتياطي");
  return <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-[#19392B]/65 p-3"
    role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}>
@@ -90,21 +112,21 @@ export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
       onClick={onClose} type="button"><X className="size-5"/></button>
     </header>
     <form onSubmit={onSave} className="mt-4 space-y-3">
-     {kind!=="cash"&&<>
+     {(kind==="income"||kind==="bill")&&<>
       <label className={label}>{t("Choose an existing entry or add new","اختر سجل موجود أو أضف جديد")}
        <select className={frame} value={picked} onChange={e=>setPicked(e.target.value)}>
         <option value="">{kind==="income"?t("New income source","دخل جديد"):t("New bill","فاتورة جديدة")}</option>
         {(kind==="income"?source:bills).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}
        </select>
       </label>
-      <label className={label}>{kind==="income"?t("Income source","مصدر الدخل"):t("Payment name","اسم الدفعة")}
-       <input className={frame} maxLength={60} value={name} placeholder={t("Enter a name","أدخل الاسم")}
+      <label className={label}>{kind==="income"?t("Income source (optional)","مصدر الدخل (اختياري)"):t("Payment name","اسم الدفعة")}
+       <input className={frame} maxLength={60} value={name} placeholder={kind==="income"?t("Monthly income (optional)","الدخل الشهري (اختياري)"):t("Enter a name","أدخل الاسم")}
         onChange={e=>setName(e.target.value)}/></label>
       <div className="grid grid-cols-2 gap-2">
        <label className={label}>{t("Amount (JOD)","المبلغ (دينار)")}
-        <input className={frame} inputMode="decimal" type="number" min="0.01" max="100000" step=".01"
-         value={amount} onChange={e=>setAmount(e.target.value)}/></label>
-       <label className={label}>{kind==="income"?t("Next expected date","موعد الاستلام المتوقع"):t("Next due date","موعد الاستحقاق")}
+        <input className={frame} inputMode="decimal" type="text" autoComplete="off"
+         value={amount} placeholder="0.00" onChange={e=>setAmount(e.target.value)}/></label>
+       <label className={label}>{kind==="income"?t("Next expected date (optional)","موعد الاستلام المتوقع (اختياري)"):t("Next due date","موعد الاستحقاق")}
         <input className={frame} type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
       </div>
       <label className={label}>{t("How often?","قديش بيتكرر؟")}
@@ -118,18 +140,24 @@ export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
        <input type="checkbox" className="size-4 accent-[#39835A]" checked={variable} onChange={e=>setVariable(e.target.checked)}/>
        {t("Amount may vary (estimate only)","المبلغ ممكن يتغير (تقديري)")}</label>}
      </>}
+     {kind==="savings"&&<label className={label}>{t("Savings target each month (JOD), optional","هدف الادخار الشهري (دينار)، اختياري")}
+       <input className={frame} type="text" inputMode="decimal" value={savings} placeholder={t("No target","بدون هدف")} onChange={e=>setSavings(e.target.value)}/>
+       <span className="mt-2 block text-xs font-normal text-[#738674]">{t("A goal, not money already saved. Leave blank to remove the goal.","هدف وليس مالاً مدخراً. اتركه فارغاً لحذفه.")}</span>
+      </label>}
      {kind==="cash"&&<div className="grid grid-cols-2 gap-2">
        <label className={label}>{t("Cash available now (JOD)","السيولة الموجودة حالياً")}
-        <input className={frame} type="number" min="0" max="1000000" step=".01"
+        <input className={frame} type="text" inputMode="decimal"
          value={balance} placeholder={t("Unknown","غير معروف")} onChange={e=>setBalance(e.target.value)}/></label>
        <label className={label}>{t("Reserve to protect (JOD)","الاحتياطي المطلوب حمايته")}
-        <input className={frame} type="number" min="0" max="1000000" step=".01"
+        <input className={frame} type="text" inputMode="decimal"
          value={reserve} onChange={e=>setReserve(e.target.value)}/></label>
       </div>}
      {error&&<p role="alert" className="rounded-xl bg-[#FFF0F1] p-3 text-xs font-bold text-[#AF5361]">{error}</p>}
      <p className="rounded-xl border border-[#DFE9DC] bg-[#F1F8ED] p-3 text-[11px] leading-relaxed text-[#718473]">
-      {t("Saving updates the same household record. It does not make a payment, confirm income received, or move money.",
-       "الحفظ بيحدّث نفس سجل العيلة، وما بيعمل دفعة أو بيأكد استلام الدخل أو بيحرّك أي مبلغ.")}</p>
+      {kind==="income"?t("Enter an amount now; add a name or payday later. Undated income is not included in a dated cash-flow forecast.",
+       "أدخل المبلغ الآن وأضف الاسم أو موعد الاستلام لاحقاً. الدخل بدون موعد لا يدخل في توقع السيولة حسب التاريخ."):
+       t("Saving updates your household record. It does not make a payment, confirm a receipt, or move money.",
+       "الحفظ يحدّث سجلك المالي فقط، ولا ينفذ دفعة أو يؤكد استلاماً أو يحرك المال.")}</p>
      <div className="flex gap-2">
       <button type="submit" className="min-h-11 flex-1 rounded-xl bg-[#3C9063] px-4 text-sm font-bold text-white">
        {t("Save and update outlook","احفظ وحدّث التوقع")}</button>
