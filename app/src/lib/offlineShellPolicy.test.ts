@@ -31,6 +31,13 @@ describe("repository-scoped static-only offline shell",()=>{
   expect(code).toContain("await caches.match(SHELL)");
   expect(code).toContain("if(url.pathname!==SCOPE)return;");
  });
+ it("publishes preview from the current source, not an older masked-amount branch",()=>{
+  const deploy=readFileSync(new URL("../../../.github/workflows/dabberna-deploy.yml",import.meta.url),"utf8");
+  expect(deploy).not.toContain("ref: design/clean-slate-single-category-2026-10-21");
+  expect(deploy).toContain("bunx vite build --base=/wafferli-v13/preview/ --outDir ../preview-dist");
+  expect(deploy).toContain("build-revision.txt");
+  expect(deploy).toContain("Hide private amounts|Reveal amounts|Show private amounts");
+ });
  it("does not ship the old amount reveal switches in current Money or Today",()=>{
   const read=(name:string)=>readFileSync(new URL("../components/"+name,import.meta.url),"utf8");
   for(const file of ["FamilyMoneyRhythm.tsx","AdventureFamilyHome.tsx",
