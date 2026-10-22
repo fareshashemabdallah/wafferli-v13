@@ -3,7 +3,9 @@ import {Plus,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,fmtJOD,uid} from "@/lib/storage";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
-import {type MoneyState} from "@/lib/money";
+import {sampleMembers,type Member,type MoneyState} from "@/lib/money";
+import type {FamilyMoment} from "@/lib/familyCalendar";
+import {canonicalPlanViews} from "@/lib/canonicalFamilyFacts";
 import {emptyRealMoney} from "@/lib/moneyOverview";
 import {futureDate,localToday} from "@/lib/cashflow";
 import {buildFamilyMoneyRhythm,annualPreparation,paceAllowed,removeSpendingPace,upsertSpendingPace,
@@ -35,6 +37,9 @@ const soft="rounded-[1.3rem] border border-[#E0E8DB] bg-white px-4 py-4 shadow-[
 export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategories,requestedSetupStep=null}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(e:string,a:string)=>ar?a:e;
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [members]=useLocalState<Member[]>("members",sampleMembers());
+ const [events]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const canonicalPlans=canonicalPlanViews(plans,events,members,ar);
  const [screen,setScreen]=useState<"map"|"timeline"|"pace"|"annual">("map");
  const [scrollToCategories,setScrollToCategories]=useState(false);
  const focusCategories=()=>{setScreen("map");setScrollToCategories(true);};
@@ -83,7 +88,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  const [error,setError]=useState("");
  const [success,setSuccess]=useState("");
  const now=today();
- const forecast=buildFamilyMoneyRhythm(state,plansReady?plans:[],now,days,includeExpected);
+ const forecast=buildFamilyMoneyRhythm(state,plansReady?canonicalPlans:[],now,days,includeExpected);
  const annual=annualPreparation(state,now);
  const categories=state.categories;
  const moneyLabel=(v:number|null)=>v===null?t("Not entered","غير مدخل"):fmtJOD(v);
@@ -207,7 +212,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
 
   {screen!=="map"&&<button type="button" className="min-h-11 rounded-xl border border-[#C7DEC9] bg-white px-4 text-sm font-bold text-[#3B7958]" onClick={()=>setScreen("map")}>
    ← {t("Back to the Money dashboard","ارجع للوحة المال")}</button>}
-  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} setState={setState} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onCash={()=>setQuickEdit("cash")} onSavings={()=>setQuickEdit("savings")} onBills={()=>setQuickEdit("bill")} onQuickAdd={()=>setQuickExpenseOpen(true)} onSpending={onSpending} onCategories={focusCategories}
+  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} setState={setState} forecast={buildFamilyMoneyRhythm(state,plansReady?canonicalPlans:[],now,30,true)} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onCash={()=>setQuickEdit("cash")} onSavings={()=>setQuickEdit("savings")} onBills={()=>setQuickEdit("bill")} onQuickAdd={()=>setQuickExpenseOpen(true)} onSpending={onSpending} onCategories={focusCategories}
    onEditCategory={setEditingCategory}/>}
 
   {screen==="timeline"&&<>
