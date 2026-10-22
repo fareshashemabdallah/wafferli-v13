@@ -3,12 +3,17 @@ import {ArrowRight,CalendarCheck2} from "lucide-react";
 import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,upcomingFamilyPlans,type FamilyPlan} from "@/lib/familyPlans";
 import {useLocalState,fmtJOD} from "@/lib/storage";
 import {useI18n} from "@/lib/i18n";
+import {sampleMembers,type Member} from "@/lib/money";
+import type {FamilyMoment} from "@/lib/familyCalendar";
+import {canonicalPlanViews} from "@/lib/canonicalFamilyFacts";
 export function HomePlanHighlight(){
  const {lang}=useI18n(),ar=lang==="ar";
  const [plans,,ready]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [,setActive]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
+ const [members]=useLocalState<Member[]>("members",sampleMembers());
+ const [events]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  if(!ready)return null;
- const upcoming=upcomingFamilyPlans(plans);
+ const upcoming=upcomingFamilyPlans(canonicalPlanViews(plans,events,members,ar));
  if(!upcoming.length)return null;
  const plan=upcoming[0]!;
  return <section className="editorial-card mt-5 p-4 sm:p-5" aria-label={ar?"الخطط القادمة":"Upcoming family plans"}>
