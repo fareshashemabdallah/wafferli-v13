@@ -6,8 +6,11 @@ import {makeFamilyPlan} from "./familyPlans";
 import type {MoneyState} from "./money";
 const now=new Date(2026,9,15,12);
 const plan=()=>makeFamilyPlan({id:"shopping",title:"A purchase",kind:"purchase",budgetJod:300,date:"2026-10-20"},now)!;
-const ready=():MoneyState=>({...emptyRealMoney(),income:2200,incomeKnown:true,savingsPct:0,
- categories:[{id:"groceries",name:"Groceries",type:"variable",planned:500}]});
+const ready=():MoneyState=>{
+ const {incomeSources:_unset,...base}=emptyRealMoney();
+ return {...base,income:2200,incomeKnown:true,savingsPct:0,
+  categories:[{id:"groceries",name:"Groceries",type:"variable",planned:500}]};
+};
 describe("Plan → Money progress explains only genuinely missing facts",()=>{
  it("identifies exactly which saved records are missing, not a compulsory savings goal",()=>{
   expect(planBudgetSetupSteps(emptyRealMoney())).toEqual(["income","categories"]);
@@ -24,7 +27,7 @@ describe("Plan → Money progress explains only genuinely missing facts",()=>{
  });
  it("does not require payday, savings target, actual cash or due bills to compare the monthly plan",()=>{
   const m=ready();
-  expect(m.incomeSources).toEqual([]);
+  expect(m.incomeSources).toBeUndefined();
   expect(m.savingsTargetAmount).toBeUndefined();
   expect(m.cashOnHand).toBeNull();
   expect(m.commitments).toEqual([]);
