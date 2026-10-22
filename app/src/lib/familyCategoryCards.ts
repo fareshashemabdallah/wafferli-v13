@@ -1,7 +1,6 @@
 import type {Category,CatType,MoneyState} from "./money";
 import {categoryItemTotal} from "./householdBudgetBuilder";
 import {roundJod} from "./cashflow";
-import {spendingRoles,expenseCadences} from "./spendingGroups";
 
 /** Preset pictures are visual entry points, NOT six synthetic budgets.
  * Saved category IDs own all amounts, paid transactions and month overrides.
@@ -61,7 +60,6 @@ export function pictureCategories(state:MoneyState,key:CategoryPicture){
 export type CategoryDraft={
  id?:string;name:string;planned:number;type:CatType;
  priority?:Category["priority"];visualGroup:CategoryVisualGroup;visualIcon:CategoryPicture;
- spendingRole?:Category["spendingRole"];expectedCadence?:Category["expectedCadence"];
 };
 export type CategoryEditResult={ok:true;state:MoneyState;categoryId:string}|{ok:false;reason:
  "demo"|"name"|"duplicate"|"amount"|"item-minimum"|"missing"|"limit"};
@@ -75,8 +73,7 @@ export function saveFamilyCategory(state:MoneyState,draft:CategoryDraft,newId:st
  const name=draft.name.trim().replace(/\s+/g," ");
  if(name.length<1||name.length>40)return {ok:false,reason:"name"};
  if(!validNumber(draft.planned)||!["fixed","variable","periodic"].includes(draft.type)||
-  (draft.spendingRole!==undefined&&!spendingRoles.includes(draft.spendingRole))||
-  (draft.expectedCadence!==undefined&&!expenseCadences.includes(draft.expectedCadence))||!
+  !
     (draft.visualGroup==="custom"||known.has(draft.visualGroup))||!known.has(draft.visualIcon))return {ok:false,reason:"amount"};
  if(state.categories.some(c=>c.id!==draft.id&&c.name.trim().toLocaleLowerCase()===name.toLocaleLowerCase()))
   return {ok:false,reason:"duplicate"};
@@ -87,12 +84,13 @@ export function saveFamilyCategory(state:MoneyState,draft:CategoryDraft,newId:st
  const categoryId=existing?.id??newId;
  if(draft.planned<categoryItemTotal(state.budgetItems??[],categoryId))
   return {ok:false,reason:"item-minimum"};
+ // Drop the redundant category-level fields from the previous pilot schema.
+ // All financial nature classifications now live on budget item lines.
+ const {spendingRole:_oldRole,expectedCadence:_oldCadence,...safeExisting}=existing??({id:categoryId} as Category & {spendingRole?:string;expectedCadence?:string});
  const saved:Category={
-  ...(existing??{id:categoryId}),id:categoryId,name,
+  ...safeExisting,id:categoryId,name,
   planned:roundJod(draft.planned),type:draft.type,
   visualGroup:draft.visualGroup,visualIcon:draft.visualIcon,amountConfidence:"confirmed",
-  ...(draft.spendingRole?{spendingRole:draft.spendingRole}:{}),
-  ...(draft.expectedCadence?{expectedCadence:draft.expectedCadence}:{}),
   ...(draft.priority?{priority:draft.priority}:{})
  };
  if(!draft.priority)delete saved.priority;
