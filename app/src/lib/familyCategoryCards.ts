@@ -1,6 +1,7 @@
 import type {Category,CatType,MoneyState} from "./money";
 import {categoryItemTotal} from "./householdBudgetBuilder";
 import {roundJod} from "./cashflow";
+import {spendingRoles} from "./spendingGroups";
 
 /** Preset pictures are visual entry points, NOT six synthetic budgets.
  * Saved category IDs own all amounts, paid transactions and month overrides.
@@ -60,6 +61,7 @@ export function pictureCategories(state:MoneyState,key:CategoryPicture){
 export type CategoryDraft={
  id?:string;name:string;planned:number;type:CatType;
  priority?:Category["priority"];visualGroup:CategoryVisualGroup;visualIcon:CategoryPicture;
+ remainderRole?:Category["remainderRole"];
 };
 export type CategoryEditResult={ok:true;state:MoneyState;categoryId:string}|{ok:false;reason:
  "demo"|"name"|"duplicate"|"amount"|"item-minimum"|"missing"|"limit"};
@@ -85,6 +87,7 @@ export function saveFamilyCategory(state:MoneyState,draft:CategoryDraft,newId:st
  const name=draft.name.trim().replace(/\s+/g," ");
  if(name.length<1||name.length>40)return {ok:false,reason:"name"};
  if(!validNumber(draft.planned)||!["fixed","variable","periodic"].includes(draft.type)||
+  (draft.remainderRole!==undefined&&!spendingRoles.includes(draft.remainderRole))||
   !
     (draft.visualGroup==="custom"||known.has(draft.visualGroup))||!known.has(draft.visualIcon))return {ok:false,reason:"amount"};
  if(state.categories.some(c=>c.id!==draft.id&&c.name.trim().toLocaleLowerCase()===name.toLocaleLowerCase()))
@@ -103,9 +106,11 @@ export function saveFamilyCategory(state:MoneyState,draft:CategoryDraft,newId:st
   ...safeExisting,id:categoryId,name,
   planned:roundJod(draft.planned),type:draft.type,
   visualGroup:draft.visualGroup,visualIcon:draft.visualIcon,amountConfidence:"confirmed",
+  ...(draft.remainderRole?{remainderRole:draft.remainderRole}:{}),
   ...(draft.priority?{priority:draft.priority}:{})
  };
  if(!draft.priority)delete saved.priority;
+ if(!draft.remainderRole)delete saved.remainderRole;
  return {ok:true,categoryId,state:{...state,
   hiddenStarterGroups:(state.hiddenStarterGroups??[]).filter(g=>g!==saved.visualGroup),
   categories:existing?
