@@ -41,6 +41,24 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
   expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("Nanny");
   expect(screen.getByTestId("saved-group-state")).toHaveTextContent('"amount":90');
  });
+ it("offers Edit amount & classification visibly on the category card, without first opening cost details",()=>{
+  render(<App/>);
+  const tiles=screen.getByTestId("unique-category-cards");
+  const edit=within(tiles).getByRole("button",{name:"Edit amount & classification for Nanny"});
+  expect(edit).toBeVisible();
+  expect(screen.queryByTestId("unified-category-details")).not.toBeInTheDocument();
+  fireEvent.click(edit);
+  const dialog=screen.getByRole("dialog",{name:"Edit family category"});
+  expect(within(dialog).getByLabelText("Usual monthly allowance (JOD)")).toHaveValue(400);
+  expect(within(dialog).getByLabelText("Category spending classification")).toHaveValue("");
+  fireEvent.change(within(dialog).getByLabelText("Category spending classification"),{target:{value:"committed"}});
+  fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
+  expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("Nanny");
+  const money=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
+  expect(money.categories.find(c=>c.id==="n")).toMatchObject({planned:400,remainderRole:"committed"});
+  expect(money.budgetItems).toHaveLength(3);
+  expect(money.expenses).toHaveLength(1);
+ });
  it("lets parents classify Nanny without any subcategory, then change or clear it",()=>{
   render(<App/>);
   fireEvent.click(screen.getByTestId("category-custom-n"));
