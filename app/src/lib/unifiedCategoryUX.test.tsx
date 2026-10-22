@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {beforeEach,afterEach,describe,it,expect} from "vitest";
+import {beforeEach,afterEach,describe,it,expect,vi} from "vitest";
 import {cleanup,fireEvent,render,screen,within} from "@testing-library/react";
 import {I18nProvider} from "./i18n";
 import {emptyRealMoney} from "./moneyOverview";
@@ -18,7 +18,7 @@ function App(){
  </I18nProvider>;
 }
 beforeEach(()=>localStorage.clear());
-afterEach(()=>{cleanup();localStorage.clear();});
+afterEach(()=>{cleanup();localStorage.clear();vi.restoreAllMocks();});
 describe("one-page illustrated category to partial payments",()=>{
  it("adds optional breakdown and a due date, records instalments, and reverses only one",()=>{
   render(<App/>);
@@ -45,7 +45,9 @@ describe("one-page illustrated category to partial payments",()=>{
   fireEvent.click(within(section).getByRole("button",{name:"Confirm payment"}));
   expect(state().expenses).toHaveLength(2);
   expect(state().commitments?.[0]?.paidDates).toEqual([localToday()]);
+  vi.spyOn(window,"confirm").mockReturnValue(true);
   fireEvent.click(within(section).getAllByRole("button",{name:"Undo"})[0]!);
-  // Confirmation dialogs are mocked by jsdom in the test setup or explicitly below.
+  expect(state().expenses).toHaveLength(1);
+  expect(state().commitments?.[0]?.paidDates).toEqual([]);
  });
 });
