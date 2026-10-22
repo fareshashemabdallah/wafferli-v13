@@ -1,6 +1,6 @@
 import {describe,it,expect} from "vitest";
 import {emptyRealMoney} from "./moneyOverview";
-import {saveFamilyCategory} from "./familyCategoryCards";
+import {saveFamilyCategory,cleanOldCategoryRoles} from "./familyCategoryCards";
 import {displayItemRole,spendingBreakdown} from "./spendingGroups";
 import {evaluatePlan} from "./planDecision";
 import {makeFamilyPlan} from "./familyPlans";
@@ -71,6 +71,18 @@ describe("Line-level classification is the only canonical Money classification",
   expect(displayItemRole(old)).toEqual({role:"committed",suggested:true});
   expect(displayItemRole({...old,name:"Fuel"})).toEqual({role:"necessary",suggested:true});
   expect(displayItemRole({...old,name:"Gift",priority:"flexible"})).toEqual({role:"flexible",suggested:true});
+ });
+ it("one-time old category cleanup is idempotent and preserves every item, bill and payment",()=>{
+  const s=car();
+  s.categories[0]={...s.categories[0]!,spendingRole:"committed",expectedCadence:"monthly"} as typeof s.categories[number];
+  const fixed=cleanOldCategoryRoles(s);
+  expect(fixed).not.toBe(s);
+  expect(fixed.categories[0]).not.toHaveProperty("spendingRole");
+  expect(fixed.categories[0]).not.toHaveProperty("expectedCadence");
+  expect(fixed.budgetItems).toEqual(s.budgetItems);
+  expect(fixed.expenses).toEqual(s.expenses);
+  expect(fixed.commitments).toEqual(s.commitments);
+  expect(cleanOldCategoryRoles(fixed)).toBe(fixed);
  });
  it("save of an old category strips redundant category role metadata while keeping original bills",()=>{
   const s=car();
