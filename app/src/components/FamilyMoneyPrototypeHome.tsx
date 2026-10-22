@@ -29,7 +29,8 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,revealed,onAre
  const recent=state.expenses.filter(e=>e.status!=="planned").sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
  return <div className="space-y-3" data-testid="prototype-money-home">
   <OneMoneyDashboardSummary state={state} forecast={forecast} revealed={revealed}
-   onIncome={onIncome} onCash={onCash} onBills={onBills} onExpense={onQuickAdd}
+   onIncome={onIncome} onCash={onCash}
+   onBills={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})} onExpense={onQuickAdd}
    onTimeline={()=>onArea("timeline")}/>
   <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
    <div>
@@ -108,12 +109,16 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,revealed,onAre
       <strong className="text-xs tabular-nums text-[#3E7B5C]">{e.amountJod>0?"+":"−"}{shown(Math.abs(e.amountJod))}</strong>
      </div>):<p className="p-4 text-xs text-[#829082]">{t("No dated income or bills entered yet.","ما في دخل أو فواتير مؤرخة بعد.")}</p>}
    </div>
-   <button type="button" onClick={onBills} className="min-h-11 rounded-xl border border-[#BAD7C0] bg-white px-3 text-xs font-bold text-[#397B55]">{t("Edit bills & due dates","عدّل الفواتير ومواعيدها")}</button>
+   <button type="button" onClick={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})}
+    className="min-h-11 rounded-xl border border-[#BAD7C0] bg-white px-3 text-xs font-bold text-[#397B55]">{t("Manage due payments in categories","إدارة الدفعات من داخل الفئات")}</button>
+   {(state.commitments??[]).some(b=>!b.categoryId||!state.categories.some(c=>c.id===b.categoryId))&&
+    <button type="button" onClick={onBills} className="min-h-11 text-xs font-bold text-[#397B55] underline">{t("Review older uncategorized bills","مراجعة فواتير قديمة بلا فئة")}</button>}
   </section>
   <section className="space-y-2" aria-label={t("Recent paid expenses","آخر المصاريف المدفوعة")}>
    <div className="flex flex-wrap items-center justify-between gap-2">
     <h3 className="text-sm font-black text-[#305D44]">{t("Recently recorded","المصاريف المسجلة مؤخراً")}</h3>
-    <button type="button" onClick={onSpending} className="min-h-11 text-xs font-bold text-[#3E855E] underline">{t("View & edit history","شوف وعدّل السجل")}</button>
+    <button type="button" onClick={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})}
+      className="min-h-11 text-xs font-bold text-[#3E855E] underline">{t("Edit payments by category","عدّل الدفعات من الفئة")}</button>
    </div>
    <div className="divide-y divide-[#EDF1EB] overflow-hidden rounded-2xl border border-[#E4EAE1] bg-white">
     {recent.length?recent.map(x=><div key={x.id} className="flex items-center gap-3 p-3">
