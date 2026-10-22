@@ -1,5 +1,5 @@
 import type {Category,CatType,MoneyState} from "./money";
-import {categoryItemTotal} from "./householdBudgetBuilder";
+import {categoryItemTotal,hasActiveCategoryItems} from "./householdBudgetBuilder";
 import {roundJod} from "./cashflow";
 import {spendingRoles} from "./spendingGroups";
 
@@ -76,8 +76,14 @@ function withoutOldCategoryRole(cat:Category):Category{
  return rest;
 }
 export function cleanOldCategoryRoles(state:MoneyState):MoneyState{
- if(!state.categories.some(c=>"spendingRole" in c||"expectedCadence" in c))return state;
- return {...state,categories:state.categories.map(withoutOldCategoryRole)};
+ const old=state.categories.some(c=>"spendingRole" in c||"expectedCadence" in c||
+  (c.remainderRole&&hasActiveCategoryItems(state.budgetItems??[],c.id)));
+ if(!old)return state;
+ return {...state,categories:state.categories.map(c=>{
+  const next=withoutOldCategoryRole(c);
+  if(hasActiveCategoryItems(state.budgetItems??[],c.id))delete next.remainderRole;
+  return next;
+ })};
 }
 /** One canonical category record. Renames preserve the ID and every linked
  * bill, expense, detailed item, pace and month-specific allowance.
@@ -106,11 +112,11 @@ export function saveFamilyCategory(state:MoneyState,draft:CategoryDraft,newId:st
   ...safeExisting,id:categoryId,name,
   planned:roundJod(draft.planned),type:draft.type,
   visualGroup:draft.visualGroup,visualIcon:draft.visualIcon,amountConfidence:"confirmed",
-  ...(draft.remainderRole?{remainderRole:draft.remainderRole}:{}),
+  ...(!hasActiveCategoryItems(state.budgetItems??[],categoryId)&&draft.remainderRole?{remainderRole:draft.remainderRole}:{}),
   ...(draft.priority?{priority:draft.priority}:{})
  };
  if(!draft.priority)delete saved.priority;
- if(!draft.remainderRole)delete saved.remainderRole;
+ if(!draft.remainderRole||hasActiveCategoryItems(state.budgetItems??[],categoryId))delete saved.remainderRole;
  return {ok:true,categoryId,state:{...state,
   hiddenStarterGroups:(state.hiddenStarterGroups??[]).filter(g=>g!==saved.visualGroup),
   categories:existing?
