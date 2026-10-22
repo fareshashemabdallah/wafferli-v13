@@ -40,7 +40,7 @@ export function recordCategoryPayment(state:MoneyState,p:CategoryPayment):MoneyS
  const expense={id:p.id,categoryId:p.categoryId,date:p.date,amount:roundJod(p.amount),
   status:"paid" as const,shared:false,cashDeducted:false,
   ...(p.budgetItemId?{budgetItemId:p.budgetItemId}:{}),
-  ...(p.billId?{billId:p.billId,dueDate:p.dueDate}:{}),
+  ...(p.billId?{billId:p.billId,dueDate:p.dueDate!}:{}),
  };
  const next={...state,expenses:[expense,...state.expenses]};
  if(!p.billId||!p.dueDate)return next;
