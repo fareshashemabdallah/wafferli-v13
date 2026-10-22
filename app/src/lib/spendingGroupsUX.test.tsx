@@ -86,6 +86,37 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
   expect(state.budgetItems).toHaveLength(3);
   expect(state.expenses).toHaveLength(1);
  });
+ it("classifies Groceries or Nanny right inside the expanded category, without finding Edit or adding a subcategory",()=>{
+  render(<App/>);
+  const before=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
+  fireEvent.click(screen.getByTestId("category-custom-n"));
+  const details=screen.getByTestId("unified-category-details");
+  const inline=within(details).getByTestId("category-inline-classification");
+  const select=within(inline).getByRole("combobox",{name:"Category spending classification"});
+  expect(select).toHaveValue("");
+  fireEvent.change(select,{target:{value:"committed"}});
+  expect(within(screen.getByTestId("spending-group-committed")).getByText("General category costs (no subcategory)")).toBeInTheDocument();
+  const after=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
+  expect(after.categories.find(c=>c.id==="n")?.remainderRole).toBe("committed");
+  expect(after.budgetItems).toEqual(before.budgetItems);
+  expect(after.expenses).toEqual(before.expenses);
+  expect(after.commitments).toEqual(before.commitments);
+ });
+ it("classifies only the unsplit Car remainder while keeping fuel and instalment line assignments",()=>{
+  render(<App/>);
+  fireEvent.click(screen.getByTestId("category-custom-car"));
+  const select=within(screen.getByTestId("unified-category-details")).getByRole("combobox",{name:"Category spending classification"});
+  fireEvent.change(select,{target:{value:"flexible"}});
+  expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("Instalment");
+  expect(screen.getByTestId("spending-group-necessary")).toHaveTextContent("Fuel");
+  // The pictured Car example is entirely split into lines; setting a remainder
+  // classification must not fabricate a new flexible expense amount.
+  expect(screen.getByTestId("spending-group-flexible")).not.toHaveTextContent("General category costs (no subcategory)");
+  const output=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
+  expect(output.categories.find(c=>c.id==="car")?.planned).toBe(700);
+  expect(output.categories.find(c=>c.id==="car")?.remainderRole).toBe("flexible");
+  expect(output.expenses).toHaveLength(1);
+ });
  it("edits a line from necessary to flexible without changing parent category or payment history",()=>{
   render(<App/>);
   fireEvent.click(screen.getByTestId("category-custom-car"));
