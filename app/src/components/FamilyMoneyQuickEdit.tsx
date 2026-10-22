@@ -18,7 +18,7 @@ const label="block text-xs font-bold text-[#58735E]";
 export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const source=state.incomeSources??legacyIncome(state.income),bills=state.commitments??[];
- const [picked,setPicked]=useState("");
+ const [picked,setPicked]=useState(kind==="income"&&source.length===1?source[0]!.id:"");
  const record=kind==="income"?source.find(x=>x.id===picked):kind==="bill"?bills.find(x=>x.id===picked):undefined;
  const [name,setName]=useState(record?.name??"");
  const [amount,setAmount]=useState(record?String(record.amount):"");
