@@ -75,7 +75,7 @@ const commitment=opts({
  id,name:text,amount:maxNumber,
  frequency:z.enum(["daily","weekly","biweekly","monthly","quarterly","yearly","once","irregular"]),
  dueDate:z.union([isoDate,z.literal("")]),endDate:isoDate.optional(),
- categoryId:id.optional(),paidDates:many(isoDate).optional()
+ categoryId:id.optional(),budgetItemId:id.optional(),paidDates:many(isoDate).optional()
 });
 const goal=opts({
  id,name:text,targetJod:maxNumber,savedJod:maxNumber,monthlyJod:maxNumber,

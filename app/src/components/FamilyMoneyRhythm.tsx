@@ -149,7 +149,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
 
   {screen!=="map"&&<button type="button" className="min-h-11 rounded-xl border border-[#C7DEC9] bg-white px-4 text-sm font-bold text-[#3B7958]" onClick={()=>setScreen("map")}>
    ← {t("Back to the Money dashboard","ارجع للوحة المال")}</button>}
-  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onCash={()=>setQuickEdit("cash")} onBills={()=>setQuickEdit("bill")} onQuickAdd={()=>setQuickExpenseOpen(true)} onSpending={onSpending} onCategories={onCategories}
+  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} setState={setState} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onCash={()=>setQuickEdit("cash")} onBills={()=>setQuickEdit("bill")} onQuickAdd={()=>setQuickExpenseOpen(true)} onSpending={onSpending} onCategories={onCategories}
    onEditCategory={setEditingCategory}/>}
 
   {screen==="timeline"&&<>
