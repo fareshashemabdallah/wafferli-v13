@@ -49,6 +49,14 @@ describe("Line-level classification is the only canonical Money classification",
   s.commitments=[];
   expect(spendingBreakdown(s,month).due).toEqual([]);
  });
+ it("a lower month-specific allowance reconciles grouped item amounts to the actual budget",()=>{
+  const s=car();
+  s.categoryMonthlyPlans={"2026-10":{car:600}};
+  const view=spendingBreakdown(s,month);
+  expect(view.totalPlanned).toBe(600);
+  expect(view.unassigned[0]).toMatchObject({categoryId:"car",planned:-100});
+  expect(view.groups.reduce((n,g)=>n+g.planned,0)+view.unassigned.reduce((n,l)=>n+l.planned,0)).toBe(600);
+ });
  it("expense without an item, as well as an orphaned item, stays unassigned instead of guessed",()=>{
   const s=car();
   s.expenses.push({id:"wash",categoryId:"car",date:"2026-10-19",amount:35,shared:false,status:"paid"});
