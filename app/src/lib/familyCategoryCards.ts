@@ -65,6 +65,18 @@ export type CategoryEditResult={ok:true;state:MoneyState;categoryId:string}|{ok:
  "demo"|"name"|"duplicate"|"amount"|"item-minimum"|"missing"|"limit"};
 const validNumber=(n:unknown):n is number=>typeof n==="number"&&Number.isFinite(n)&&n>=0&&n<=100000&&
  Math.abs(n*100-Math.round(n*100))<=0.000001;
+/** Data hygiene for the October category-group pilot. Previous categories
+ * carried role and cadence, but the canonical model now stores both at the
+ * budget-item line. Preserve all other category fields and every transaction. */
+function withoutOldCategoryRole(cat:Category):Category{
+ const {spendingRole:_oldRole,expectedCadence:_oldCadence,...rest}=cat as Category&
+  {spendingRole?:string;expectedCadence?:string};
+ return rest;
+}
+export function cleanOldCategoryRoles(state:MoneyState):MoneyState{
+ if(!state.categories.some(c=>"spendingRole" in c||"expectedCadence" in c))return state;
+ return {...state,categories:state.categories.map(withoutOldCategoryRole)};
+}
 /** One canonical category record. Renames preserve the ID and every linked
  * bill, expense, detailed item, pace and month-specific allowance.
  */
@@ -86,8 +98,7 @@ export function saveFamilyCategory(state:MoneyState,draft:CategoryDraft,newId:st
   return {ok:false,reason:"item-minimum"};
  // Drop the redundant category-level fields from the previous pilot schema.
  // All financial nature classifications now live on budget item lines.
- const legacy=(existing??{id:categoryId}) as Category & {spendingRole?:string;expectedCadence?:string};
- const {spendingRole:_oldRole,expectedCadence:_oldCadence,...safeExisting}=legacy;
+ const safeExisting=existing?withoutOldCategoryRole(existing):{id:categoryId};
  const saved:Category={
   ...safeExisting,id:categoryId,name,
   planned:roundJod(draft.planned),type:draft.type,
