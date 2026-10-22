@@ -18,6 +18,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const category=state.categories.find(c=>c.id===categoryId);
  const [showNewItem,setShowNewItem]=useState(false);
+ const [editingItemId,setEditingItemId]=useState<string|null>(null);
  const [newName,setNewName]=useState("");
  const [newAmount,setNewAmount]=useState("");
  const [newFrequency,setNewFrequency]=useState<ItemFrequency>("monthly");
@@ -74,21 +75,34 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
    "تعذر تسجيل الدفعة. راجع المبلغ المتبقي والتاريخ والفاتورة."));return;}
   setState(next);setPaymentTarget(null);setPayAmount("");
  };
+ const beginEditItem=(item:BudgetItem)=>{
+  setEditingItemId(item.id);setNewName(item.name);setNewAmount(String(item.amountJod));
+  setNewFrequency(item.frequency);setNewDue(false);setShowNewItem(true);setBillForm(false);setError("");
+ };
  const addItem=(ev:FormEvent)=>{
   ev.preventDefault();setError("");
   if(!newName.trim()||!amountOk(newAmount)){setError(t("Enter a name and a positive cost.","أدخل اسم البند ومبلغاً صحيحاً."));return;}
-  const item:BudgetItem={id:uid(),categoryId,name:newName.trim().slice(0,90),enabled:true,
-   amountJod:Number(newAmount),frequency:newFrequency,behaviour:"variable",priority:"essential"};
+  const previous=(state.budgetItems??[]).find(i=>i.id===editingItemId&&i.categoryId===categoryId);
+  const item:BudgetItem=previous?{...previous,name:newName.trim().slice(0,90),
+   amountJod:Number(newAmount),frequency:newFrequency,enabled:true}:
+   {id:uid(),categoryId,name:newName.trim().slice(0,90),enabled:true,
+    amountJod:Number(newAmount),frequency:newFrequency,behaviour:"variable",priority:"essential"};
+  if(previous?.quantity!==undefined||previous?.unitPriceJod!==undefined){
+   if(!window.confirm(t("Replace the old quantity-based calculation with this manually entered amount?",
+    "هل تريد استبدال حساب الكمية السابق بالمبلغ المدخل يدوياً؟")))return;
+   delete item.quantity;delete item.unitPriceJod;delete item.unitLabel;
+   delete item.priceSource;delete item.priceCheckedMonth;
+  }
   const next=addCategoryItem(state,item);
   if(next===state){setError(t("Subcategory exceeds the category's monthly allowance. Edit the category amount first.",
    "مجموع البنود يتجاوز مخصص الفئة الشهري. عدّل مخصص الفئة أولاً."));return;}
-  if(newDue){
+  if(newDue&&!editingItemId){
    const n=saveCategoryDueDate(next,{id:uid(),name:item.name,amount:itemCost(item),
     categoryId,budgetItemId:item.id,dueDate:newDueDate,frequency:newDueFrequency});
    if(n===next){setError(t("Choose a valid due date.","اختر تاريخ استحقاق صحيحاً."));return;}
    setState(n);
   }else setState(next);
-  setNewName("");setNewAmount("");setShowNewItem(false);setNewDue(false);
+  setNewName("");setNewAmount("");setShowNewItem(false);setNewDue(false);setEditingItemId(null);
  };
  const addBill=(ev:FormEvent)=>{
   ev.preventDefault();setError("");
@@ -124,7 +138,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
   <div className="flex flex-wrap gap-2">
    <button type="button" className={btn} onClick={onEdit}>{t("Edit category amount","تعديل مخصص الفئة")}</button>
    <button type="button" disabled={state.demo} className={btn+" disabled:opacity-50"}
-     onClick={()=>{setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
+     onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
      + {t("Break down this category","قسّم الفئة إلى بنود")}</button>
   </div>
   <p className="text-xs leading-relaxed text-[#768B7D]">
@@ -133,7 +147,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
   </p>
   {showNewItem&&<form onSubmit={addItem} className="space-y-2 rounded-xl border border-[#D7E7D9] bg-white p-3"
     aria-label={t("Add subcategory","إضافة بند")}>
-   <h4 className="text-sm font-bold">{t("New subcategory","بند جديد")}</h4>
+   <h4 className="text-sm font-bold">{editingItemId?t("Edit subcategory","تعديل البند"):t("New subcategory","بند جديد")}</h4>
    <label className="block text-xs">{t("Name","الاسم")}
     <input className={field} maxLength={90} value={newName} onChange={e=>setNewName(e.target.value)} placeholder={t("School transport","نقل مدرسي")}/></label>
    <div className="grid grid-cols-2 gap-2">
@@ -145,9 +159,9 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
       <option value="quarterly">{t("Quarterly","ربع سنوي")}</option><option value="yearly">{t("Yearly","سنوي")}</option>
      </select></label>
    </div>
-   <label className="flex min-h-10 items-center gap-2 text-xs"><input type="checkbox" checked={newDue} onChange={e=>setNewDue(e.target.checked)}/>
-    {t("This is a bill with a due date","هذا التزام له موعد دفع")}</label>
-   {newDue&&<div className="grid grid-cols-2 gap-2">
+   {!editingItemId&&<label className="flex min-h-10 items-center gap-2 text-xs"><input type="checkbox" checked={newDue} onChange={e=>setNewDue(e.target.checked)}/>
+    {t("This is a bill with a due date","هذا التزام له موعد دفع")}</label>}
+   {newDue&&!editingItemId&&<div className="grid grid-cols-2 gap-2">
     <label className="text-xs">{t("Next due date","موعد الدفع القادم")}
      <input className={field} type="date" value={newDueDate} onChange={e=>setNewDueDate(e.target.value)}/></label>
     <label className="text-xs">{t("Bill frequency","تكرار الدفعة")}
@@ -156,8 +170,8 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
       <option value="quarterly">{t("Quarterly","ربع سنوي")}</option><option value="yearly">{t("Yearly","سنوي")}</option>
      </select></label>
    </div>}
-   <div className="flex gap-2"><button type="submit" className="min-h-10 rounded-xl bg-[#3C8E62] px-4 text-xs font-bold text-white">{t("Save line","حفظ البند")}</button>
-    <button type="button" className={btn} onClick={()=>setShowNewItem(false)}>{t("Cancel","إلغاء")}</button></div>
+   <div className="flex gap-2"><button type="submit" className="min-h-10 rounded-xl bg-[#3C8E62] px-4 text-xs font-bold text-white">{editingItemId?t("Save changes","حفظ التعديلات"):t("Save line","حفظ البند")}</button>
+    <button type="button" className={btn} onClick={()=>{setShowNewItem(false);setEditingItemId(null);}}>{t("Cancel","إلغاء")}</button></div>
   </form>}
   <div className="space-y-2">
    <h4 className="text-sm font-extrabold text-[#3D7957]">{t("Your costs","بنود المصاريف")}</h4>
@@ -171,6 +185,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
         {" · "}{t("Paid this month","مدفوع هذا الشهر")}: {show(actual)}</p></div>
       <div className="flex flex-wrap gap-2">
        {!linked&&<button type="button" className={btn} disabled={state.demo} onClick={()=>startPayment(item.id)}>{t("Record payment","تسجيل دفعة")}</button>}
+       <button type="button" className={btn} disabled={state.demo} onClick={()=>beginEditItem(item)}>{t("Edit","تعديل")}</button>
        <button type="button" className="min-h-10 px-2 text-xs font-bold text-[#985E61]" disabled={state.demo}
         onClick={()=>{if(window.confirm(t("Remove this line from future budgets? Recorded payments will remain in history.",
          "إيقاف هذا البند من الميزانية القادمة؟ الدفعات السابقة محفوظة.")))setState(s=>stopCategoryItem(s,item.id));}}>
