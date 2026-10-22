@@ -14,7 +14,7 @@ export function removeMoneyCategory(state:MoneyState,categoryId:string):MoneySta
  const keepItems=new Set(state.expenses.map(e=>e.budgetItemId).filter((v):v is string=>!!v));
  const monthPlans=Object.fromEntries(Object.entries(state.categoryMonthlyPlans??{}).map(([month,items])=>
   [month,Object.fromEntries(Object.entries(items).filter(([id])=>id!==categoryId))])
-  .filter(([,items])=>Object.keys(items).length>0));
+  .filter(([,items])=>Object.keys(items as Record<string,number>).length>0));
  const monthlyAdjustments=Object.fromEntries(Object.entries(state.monthlyAdjustments??{}).map(([month,row])=>
   [month,{...row,categoryDeltas:Object.fromEntries(Object.entries(row.categoryDeltas).filter(([id])=>id!==categoryId))}]));
  return {...state,
