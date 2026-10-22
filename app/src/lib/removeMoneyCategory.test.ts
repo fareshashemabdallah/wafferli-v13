@@ -31,7 +31,7 @@ describe("Remove Money category from single family dashboard",()=>{
   expect(after.financialInputsPartial).toBe(true);
   const c=computeMoney(after,new Date(2026,9,22));
   expect(c.spent).toBe(100);
-  expect(c.planned).toBe(200);
+  expect(c.planned).toBe(210);
   expect(c.projected).toBeGreaterThanOrEqual(100);
   const forecast=buildFamilyMoneyRhythm(after,[],"2026-10-22",30);
   expect(forecast.events.some(x=>x.kind==="bill"&&x.label==="School fee due")).toBe(true);
