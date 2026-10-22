@@ -48,7 +48,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
   expect(records).toHaveTextContent('"categoryId":"groc"');
   expect(records).toHaveTextContent('"2026-12":{"groc":370}');
   expect(screen.getByTestId("category-picture-groceries")).toHaveTextContent("Supermarket");
-  fireEvent.click(screen.getByTestId("category-picture-groceries"));
+  // The opened category stays on the same page after editing its amount.
   fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
   dlg=screen.getByRole("dialog",{name:"Edit family category"});
   expect(within(dlg).getByLabelText("Category name")).toHaveValue("Supermarket");
