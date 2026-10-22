@@ -40,7 +40,8 @@ describe("Plan → Money progress explains only genuinely missing facts",()=>{
   expect(planBudgetSetupSteps({...m,demo:true})).toEqual(["demo"]);
  });
  it("accepts an existing income schedule as known when the legacy incomeKnown field is absent",()=>{
-  const m={...ready(),income:0,incomeKnown:undefined,
+  const {incomeKnown:_previous,...rest}=ready();
+  const m:MoneyState={...rest,income:0,
    incomeSources:[{id:"salary",name:"Salary",amount:2200,nextDate:"",frequency:"monthly" as const,shared:false}]};
   expect(planBudgetSetupSteps(m)).toEqual([]);
   expect(monthlyIncomeValue(m)).toBe(2200);
