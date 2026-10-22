@@ -90,6 +90,8 @@ export function saveFamilyCategory(state:MoneyState,draft:CategoryDraft,newId:st
   ...(draft.priority?{priority:draft.priority}:{})
  };
  if(!draft.priority)delete saved.priority;
- return {ok:true,categoryId,state:{...state,categories:existing?
+ return {ok:true,categoryId,state:{...state,
+  hiddenStarterGroups:(state.hiddenStarterGroups??[]).filter(g=>g!==saved.visualGroup),
+  categories:existing?
   state.categories.map(c=>c.id===categoryId?saved:c):[...state.categories,saved]}};
 }

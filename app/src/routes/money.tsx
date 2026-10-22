@@ -161,6 +161,7 @@ function MoneyPage() {
             <Expenses
         demo={s.demo}
         cats={s.categories}
+        retiredCategoryNames={s.retiredCategoryNames??{}}
         members={members}
         budgetItems={s.budgetItems??[]}
         expenses={s.expenses}
@@ -349,8 +350,8 @@ function CategoryForm({ initial, minimumAllocation, onSave, onCancel }: { initia
   );
 }
 
-function Expenses({ cats, demo, members, budgetItems, expenses, onChange, onRecord, onDelete, onConfirmPlanned, cashBalance }: {
-  cats: Category[]; demo:boolean; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];
+function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expenses, onChange, onRecord, onDelete, onConfirmPlanned, cashBalance }: {
+  cats: Category[]; retiredCategoryNames:Record<string,string>; demo:boolean; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];
   onChange: (apply: (existing:Expense[])=>Expense[]) => void; onRecord:(e:Expense)=>void; onDelete: (e:Expense)=>void;
   onConfirmPlanned:(id:string,actual:number,mode:"already"|"deduct"|"untracked")=>void;
   cashBalance:number|null;
@@ -387,7 +388,7 @@ function Expenses({ cats, demo, members, budgetItems, expenses, onChange, onReco
   const month=today().slice(0,7);
   const sorted=[...expenses].filter(e=>showHistory||e.date.startsWith(month)||e.status==="planned").sort((a,b)=>b.date.localeCompare(a.date));
   const olderCount=expenses.filter(e=>!e.date.startsWith(month)&&e.status!=="planned").length;
-  const catName = (id: string) => cats.find((c) => c.id === id)?.name ?? "Uncategorized";
+  const catName = (id: string) => cats.find((c) => c.id === id)?.name ?? retiredCategoryNames[id] ?? "Uncategorized";
   return (
     <section className="card-soft mt-6 p-4">
       <div className="flex items-center justify-between">

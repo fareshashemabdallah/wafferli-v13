@@ -2,6 +2,7 @@ import {useEffect,useState,type FormEvent} from "react";
 import {useI18n} from "@/lib/i18n";
 import {uid} from "@/lib/storage";
 import {emptyRealMoney} from "@/lib/moneyOverview";
+import {removeMoneyCategory} from "@/lib/removeMoneyCategory";
 import {categoryItemTotal} from "@/lib/householdBudgetBuilder";
 import type {Category,CatType,MoneyState} from "@/lib/money";
 import {CATEGORY_PICTURES,pictureFor,saveFamilyCategory,visualGroupOf,iconForCategory,
@@ -62,6 +63,21 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
   if(!window.confirm(t("Replace only the sample Money data with an empty personal Money plan? Your family profiles, calendar and plans will be kept.",
     "بدك تستبدل بيانات المال التجريبية فقط بميزانية فاضية؟ ملفات العيلة والتقويم والخطط بتبقى محفوظة.")))return;
   setState(prev=>prev.demo?emptyRealMoney():prev);onClose();
+ };
+ const removeCategory=()=>{
+  if(!existing||state.demo)return;
+  const expenseCount=state.expenses.filter(e=>e.categoryId===existing.id).length;
+  const billCount=(state.commitments??[]).filter(c=>c.categoryId===existing.id).length;
+  if(!window.confirm(t(
+   "Remove \""+existing.name+"\" from your active budget? "+expenseCount+
+   " existing expense(s) are kept in history under the old category name. "+billCount+
+   " scheduled bill(s) will stay active without this category. Its monthly allowance and spending pace will be removed.",
+   "حذف فئة \""+existing.name+"\" من الميزانية؟ سنحتفظ بعدد "+expenseCount+
+   " من المصاريف السابقة باسم الفئة، و"+billCount+
+   " من الفواتير المجدولة ستبقى مستحقة دون فئة. سيُحذف المخصص الشهري وجدول توزيع المصروف."
+  )))return;
+  setState(previous=>removeMoneyCategory(previous,existing.id));
+  onClose();
  };
  const icon=pictureFor(visualIcon);
  const startMonth=()=>{
@@ -140,6 +156,8 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
       {t("Adjust a particular month","عدّل شهر معيّن")}</button>
      {amountMinimum>0&&<button type="button" className="min-h-10 text-xs font-bold text-[#3E845B] underline"
       onClick={()=>{onClose();onAdvanced();}}>{t("Edit detailed budget items","عدّل بنود الميزانية التفصيلية")}</button>}
+     <button type="button" className="min-h-10 text-xs font-bold text-[#A44F5B] underline"
+      onClick={removeCategory}>{t("Delete category","حذف الفئة")}</button>
     </div>}
    </form>}
   </section>
