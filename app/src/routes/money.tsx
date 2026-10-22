@@ -41,28 +41,8 @@ function MoneyPage() {
   const { lang } = useI18n();
   const ar=lang==="ar";
   const [section,setSection]=useState<"overview"|"spending"|"planning">("overview");
-  const [categoryEditorOpen,setCategoryEditorOpen]=useState(false);
-  const [incomeEditorOpen,setIncomeEditorOpen]=useState(false);
-  const [legacyMoneyOpen,setLegacyMoneyOpen]=useState(false);
-  const [budgetOpenRequest,setBudgetOpenRequest]=useState(0);
-  const [categoryNavigationRequest,setCategoryNavigationRequest]=useState(0);
-  const categoryEditorRef=useRef<HTMLDetailsElement>(null);
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
-  const c = useMemo(() => computeMoney(s), [s]);
-  const recurringSavingsGoal=s.savingsTargetAmount??Math.round(c.monthlyIncome*s.savingsPct)/100;
-  const openCategoryEditor=()=>{
-    setSection("overview");
-    setCategoryEditorOpen(true);
-    // Increment even when already open so repeated taps navigate reliably.
-    setCategoryNavigationRequest(n=>n+1);
-  };
-  useEffect(()=>{
-    if(!ready||!categoryNavigationRequest||section!=="overview")return;
-    const editor=categoryEditorRef.current;
-    editor?.scrollIntoView?.({behavior:"smooth",block:"start"});
-    editor?.querySelector("summary")?.focus({preventScroll:true});
-  },[ready,section,categoryNavigationRequest]);
 
   if (!ready)
     return (
@@ -71,7 +51,6 @@ function MoneyPage() {
       </AppShell>
     );
 
-  const upd = (p: Partial<typeof s>) => setS((prev) => ({ ...prev, ...p, demo: prev.demo }));
 
   return (
     <AppShell title={tr("Our Finances")}>
@@ -89,25 +68,49 @@ function MoneyPage() {
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
         <span className="text-xs text-muted-foreground">{tr("Saved on this device only. Use fictional figures during the pilot.")}</span>
-        <details className="ms-auto"><summary className="cursor-pointer text-xs font-medium text-muted-foreground">Settings / إعدادات</summary>
-        <div className="mt-2">        <Button
-          variant="outline"
-          size="sm"
-          className="ms-auto"
-          onClick={() => {
-            if (confirm(tr("Reset all money data to the demo sample?"))) {
-              setS(sampleMoney());
-              toast.success(tr("Sample data restored"));
-            }
-          }}
-        >
-          <RotateCcw className="size-4" /> {tr("Reset sample data")} </Button>
-        </div></details>
+        <details className="ms-auto">
+         <summary className="min-h-10 cursor-pointer text-xs font-medium text-muted-foreground">Settings / إعدادات</summary>
+         <div className="mt-2 max-w-[740px] space-y-3 rounded-xl border border-[#DFE8DB] bg-white p-3">
+          <Button variant="outline" size="sm" onClick={()=>{
+           if(confirm(tr("Reset all money data to the demo sample?"))){
+            setS(sampleMoney());toast.success(tr("Sample data restored"));
+           }
+          }}><RotateCcw className="size-4"/> {tr("Reset sample data")}</Button>
+          <details className="rounded-xl border border-[#E3EBE0] p-3">
+           <summary className="min-h-10 cursor-pointer text-xs font-bold text-[#3F805B]">
+            {ar?"السكن والمساعدون والزوار (اختياري)":"Household size, helpers & visitors (optional)"}
+           </summary>
+           <div className="mt-3"><HouseholdPresencePanel members={members} money={s} setMoney={setS}/></div>
+          </details>
+          {!s.demo&&s.financialInputsPartial===true&&<button type="button"
+            className="min-h-11 text-start text-xs font-semibold text-[#397B57] underline"
+            onClick={()=>{if(window.confirm(ar?
+             "هل راجعت المصاريف الأساسية والمهمة في الفئات؟ هذا لا يؤكد رصيد البنك.":
+             "Have you reviewed your family's essential and important costs in the categories? This does not verify your bank balance."))
+             setS(prev=>({...prev,financialInputsPartial:false}));}}>
+            {ar?"راجعت مصاريف عائلتي المعتادة":"I've reviewed our regular household costs"}
+          </button>}
+          <details className="rounded-xl border border-[#E3EBE0] p-3">
+           <summary className="min-h-10 cursor-pointer text-xs font-bold text-[#3F805B]">
+            {ar?"تحليل مالي إضافي (اختياري)":"Additional financial analysis (optional)"}
+           </summary>
+           <div className="mt-3"><FinancialIntelligencePanel state={s}/></div>
+          </details>
+          {(s.commitments??[]).some(b=>!b.categoryId||!s.categories.some(c=>c.id===b.categoryId))&&
+           <button type="button" onClick={()=>setSection("planning")} className="min-h-10 text-xs font-bold text-[#3B7C59] underline">
+            {ar?"مراجعة فواتير قديمة غير مصنفة":"Review older uncategorized bills"}
+           </button>}
+          {s.expenses.some(e=>!s.categories.some(c=>c.id===e.categoryId))&&
+           <button type="button" onClick={()=>setSection("spending")} className="min-h-10 text-xs font-bold text-[#3B7C59] underline">
+            {ar?"مراجعة مصاريف غير مصنفة":"Review uncategorized expenses"}
+           </button>}
+         </div>
+        </details>
       </div>
 
       {section==="overview"&&<FamilyMoneyRhythm state={s} setState={setS}
         onBills={()=>setSection("planning")} onSpending={()=>setSection("spending")}
-        onCategories={()=>{setLegacyMoneyOpen(true);setBudgetOpenRequest(n=>n+1);setCategoryEditorOpen(true);}}/>}
+        onCategories={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"})}/>}
       {section==="overview"&&s.demo&&<div className="mt-3 rounded-2xl border border-[#EBDABE] bg-[#FFF8ED] p-4">
        <p className="text-sm font-semibold">{ar?"عم تشوف بيانات تجريبية":"You are viewing sample finances"}</p>
        <p className="mt-1 text-xs text-[#826E56]">{ar?
@@ -120,50 +123,6 @@ function MoneyPage() {
         {ar?"ابدأ بماليتي الفعلية":"Start with real Money"}
        </button>
       </div>}
-      {section==="overview"&&<details open={legacyMoneyOpen} onToggle={e=>setLegacyMoneyOpen(e.currentTarget.open)}
-        className="mt-3 rounded-2xl border border-[#E0EADF] bg-[#F8FBF6] p-3 sm:p-4">
-        <summary className="min-h-11 cursor-pointer text-sm font-bold text-[#3F805B]">
-         {ar?"تفاصيل متقدمة للميزانية (اختياري)":"Advanced budget details (optional)"}
-        </summary>
-        <div className="mt-4"><MoneyOverviewPanel state={s} setState={setS} goTo={setSection}
-        forceBudgetOpen={budgetOpenRequest+1}
-        onManageCategories={openCategoryEditor}
-        onEditIncome={()=>{setIncomeEditorOpen(true);setSection("overview");}}
-        householdPanel={<HouseholdPresencePanel members={members} money={s} setMoney={setS}/>}
-        budgetManagement={<div id="money-budget-controls">
-          <details ref={categoryEditorRef} open={categoryEditorOpen} onToggle={event=>setCategoryEditorOpen(event.currentTarget.open)} className="editorial-card scroll-mt-4 px-4 py-3">
-            <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"أضف وعدّل فئات ميزانيتك":"Add or edit budget categories"}</summary>
-            <p className="mt-2 text-xs text-muted-foreground">{ar?"المخصصات الشهرية ليست مصاريف مدفوعة ولا مواعيد فواتير.":"Category allocations are monthly plans, not paid transactions or dated bills."}</p>
-            <Categories cats={s.categories} budgetItems={s.budgetItems??[]} spentBy={c.spentBy} plannedBy={c.plannedBy} onChange={categories=>upd({categories,budgetItems:(s.budgetItems??[]).filter(item=>categories.some(cat=>cat.id===item.categoryId))})}/>
-            {!s.demo&&s.financialInputsPartial===true&&<div className="mt-4 rounded-xl border border-[#D5E4D2] bg-[#F6FAF5] p-3">
-             <p className="text-sm font-semibold">{ar?"هل هذه الفئات تغطي مصاريف البيت المعتادة؟":"Do these categories cover your regular household costs?"}</p>
-             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
-              "أدخلت أرقاماً جزئية. لن تعرض دبّرنا مبلغاً متاحاً من الميزانية حتى تراجع كافة المصاريف الأساسية والمهمة. إذا ناقص شيء أضفه أولاً.":
-              "You started with partial figures. Dabberna will not suggest that the remaining budget is available until you've reviewed essential and important costs. Add missing categories first."}</p>
-             <button type="button" className="mt-3 min-h-11 rounded-full border border-[#B8DAC2] bg-white px-4 text-xs font-bold text-brand"
-              onClick={()=>{if(window.confirm(ar?
-               "هل راجعت المصاريف الشهرية المعتادة وتؤكد أن الفئات تغطيها قدر الإمكان؟ لا يتأكد رصيد البنك بهذه الخطوة.":
-               "Have you reviewed regular monthly household costs and believe the categories cover them? This does not verify your bank balance."))setS(old=>({...old,financialInputsPartial:false}));}}>
-              {ar?"راجعت المصاريف المعتادة":"I've reviewed our regular costs"}
-             </button>
-            </div>}
-          </details>
-          <details open={incomeEditorOpen} onToggle={event=>setIncomeEditorOpen(event.currentTarget.open)} className="editorial-card mt-3 px-4 py-3">
-            <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">{ar?"الدخل الشهري وهدف الادخار (اختياري)":"Monthly income & savings goal (optional)"}</summary>
-            <Settings key={`${c.monthlyIncome}:${recurringSavingsGoal}`} income={c.monthlyIncome} target={recurringSavingsGoal} hasSources={!!s.incomeSources?.length}
-              onSave={(income,savingsTargetAmount)=>upd(s.incomeSources===undefined?{income,savingsTargetAmount}:{savingsTargetAmount})}/>
-          </details>
-        </div>}/></div></details>}
-
-      {section==="overview"&&<details className="editorial-card mb-4 px-4 py-3">
-       <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-brand">
-        {ar?"تحليل مالي متقدم (اختياري)":"Advanced financial analysis (optional)"} +
-       </summary>
-       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?
-        "هذه أدوات لمن يحب التفاصيل. ما تحتاجها لتفهم ميزانية بيتك اليوم.":
-        "These deeper tools are for parents who want more analysis. You don't need them to understand today's household budget."}</p>
-       <div className="mt-3"><FinancialIntelligencePanel state={s}/></div>
-      </details>}
       {section==="planning"&&<>
       <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"الفواتير والدفعات":"Your bills & payments"}</h2>
        <p className="mt-1 text-sm text-muted-foreground">{ar?"سجّل موعد الاستحقاق مرة واحدة، وبعد الدفع أكّد المبلغ الحقيقي. لإدخال مشترياتك اليومية، استخدم المصاريف.":"Add each bill once with its due date, then confirm the payment when it happens. Use Spending for everyday purchases."}</p></div>

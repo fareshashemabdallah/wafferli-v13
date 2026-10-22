@@ -13,12 +13,12 @@ import {STARTER_PICTURES,visualGroupOf,iconForCategory,pictureFor,pictureCategor
 type Area="timeline"|"pace"|"annual";
 type Props={
  state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;forecast:RhythmForecast;revealed:boolean;
- onArea:(screen:Area)=>void;onIncome:()=>void;onCash:()=>void;onBills:()=>void;onQuickAdd:()=>void;
+ onArea:(screen:Area)=>void;onIncome:()=>void;onCash:()=>void;onSavings:()=>void;onBills:()=>void;onQuickAdd:()=>void;
  onSpending:()=>void;onCategories:()=>void;
  onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
 const tile="rounded-[1.05rem] border border-[#E3EAE0] bg-white p-3 text-start transition hover:-translate-y-0.5 hover:border-[#91C6A4] focus-visible:ring-2 focus-visible:ring-[#4E9D70]";
-export function FamilyMoneyPrototypeHome({state,setState,forecast,revealed,onArea,onIncome,onCash,onBills,onQuickAdd,onSpending,onCategories,onEditCategory}:Props){
+export function FamilyMoneyPrototypeHome({state,setState,forecast,revealed,onArea,onIncome,onCash,onSavings,onBills,onQuickAdd,onSpending,onCategories,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [selected,setSelected]=useState<string|null>(null);
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
@@ -29,7 +29,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,revealed,onAre
  const recent=state.expenses.filter(e=>e.status!=="planned").sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
  return <div className="space-y-3" data-testid="prototype-money-home">
   <OneMoneyDashboardSummary state={state} forecast={forecast} revealed={revealed}
-   onIncome={onIncome} onCash={onCash}
+   onIncome={onIncome} onCash={onCash} onSavings={onSavings}
    onBills={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})} onExpense={onQuickAdd}
    onTimeline={()=>onArea("timeline")}/>
   <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
@@ -138,7 +138,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,revealed,onAre
    <div className="mt-2 flex flex-wrap gap-2">
     <button type="button" onClick={()=>onArea("annual")} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Annual insurance, tax & property costs","التأمين والضرائب والمصاريف السنوية")}</button>
     <button type="button" onClick={()=>onArea("pace")} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Customize spending timing","خصّص مواعيد توزيع الصرف")}</button>
-    <button type="button" onClick={onCategories} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Detailed item budgets","تفاصيل بنود الميزانية")}</button>
+    <button type="button" onClick={onCategories} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Open category breakdown","تفاصيل المصاريف ضمن الفئات")}</button>
    </div>
   </details>
   <p className="text-[11px] leading-relaxed text-[#768678]">{t("This is an estimate using the records you entered. There is no bank connection; a plan never becomes a payment automatically.",
