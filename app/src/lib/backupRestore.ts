@@ -119,6 +119,7 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   }).strict(),500).optional(),
   categories:many(opts({
    id,name:text,type:z.enum(["fixed","variable","periodic"]),planned:maxNumber,
+   remainderRole:z.enum(["committed","necessary","flexible"]).optional(),
     visualGroup:z.enum(["groceries","fuel","restaurants","children","housing","health","education","utilities","gifts","travel","household","clothing","other","custom"]).optional(),
     visualIcon:z.enum(["groceries","fuel","restaurants","children","housing","health","education","utilities","gifts","travel","household","clothing","other"]).optional()
   })),expenses:many(expense),demo:z.boolean(),

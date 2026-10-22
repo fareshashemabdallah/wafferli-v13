@@ -5,6 +5,7 @@ import {emptyRealMoney} from "@/lib/moneyOverview";
 import {removeMoneyCategory} from "@/lib/removeMoneyCategory";
 import {categoryItemTotal} from "@/lib/householdBudgetBuilder";
 import type {Category,MoneyState} from "@/lib/money";
+import type {SpendingRole} from "@/lib/spendingGroups";
 import {CATEGORY_PICTURES,pictureFor,saveFamilyCategory,visualGroupOf,iconForCategory,
  type CategoryPicture,type CategoryVisualGroup,type CategoryEditResult} from "@/lib/familyCategoryCards";
 
@@ -23,6 +24,7 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
  const [name,setName]=useState(existing?.name??(suggested?t(suggested.en,suggested.ar):""));
  const [amount,setAmount]=useState(existing?String(existing.planned):"");
  const [priority,setPriority]=useState<Category["priority"]>(existing?.priority);
+ const [remainderRole,setRemainderRole]=useState<SpendingRole|"">(existing?.remainderRole??"");
  const [visualIcon,setVisualIcon]=useState<CategoryPicture>(existing?iconForCategory(existing):(starter??"other"));
  const [visualGroup,setVisualGroup]=useState<CategoryVisualGroup>(existing?visualGroupOf(existing):starter??"custom");
  const [more,setMore]=useState(false);
@@ -52,7 +54,7 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
   if(!amountValid(amount)){setError(reason("amount"));return;}
   const result=saveFamilyCategory(state,{
    ...(existing?{id:existing.id}:{}),name,planned:Number(amount),type:existing?.type??"variable",
-   ...(priority?{priority}:{}),visualGroup,visualIcon
+   ...(priority?{priority}:{}),...(remainderRole?{remainderRole}:{}),visualGroup,visualIcon
   },uid());
   if(!result.ok){setError(reason(result.reason));return;}
   setState(result.state);
@@ -111,10 +113,20 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
      <input className={field} type="number" inputMode="decimal" min="0" max="100000" step=".01" value={amount}
       placeholder={t("Enter an amount, e.g. 300","أدخل المبلغ مثلاً ٣٠٠")} onChange={e=>setAmount(e.target.value)}/>
     </label>
-    <p className="rounded-xl bg-[#F2F8EF] p-3 text-xs leading-relaxed text-[#5C7E68]">
-     {t("Each cost inside this category can be committed, necessary or flexible. Choose its nature when you break down the category—Car can contain both fuel and instalments.",
-      "كل بند داخل الفئة يمكن أن يكون التزاماً أو ضرورياً أو مرناً. اختر طبيعته عند تقسيم الفئة؛ السيارة قد تحتوي على بنزين وأقساط.")}
-    </p>
+    <label className={label}>{amountMinimum>0?
+     t("Classification for the amount not split into lines","تصنيف المبلغ غير المفصل إلى بنود"):
+     t("How should this category be classified?","كيف تصنّف مصاريف هذه الفئة؟")}
+     <select className={field} value={remainderRole} aria-label={t("Category spending classification","تصنيف مصروف الفئة")}
+      onChange={e=>setRemainderRole(e.target.value as SpendingRole|"")}>
+      <option value="">{t("Not classified yet","لم يُصنّف بعد")}</option>
+      <option value="committed">{t("Committed · fixed obligation (e.g. instalment)","التزام · مبلغ واجب الدفع (مثل القسط)")}</option>
+      <option value="necessary">{t("Necessary but variable (e.g. fuel)","ضروري لكنه متغير (مثل البنزين)")}</option>
+      <option value="flexible">{t("Flexible family choice (e.g. outings)","اختيار مرن للعيلة (مثل الطلعات)")}</option>
+     </select>
+     <span className="mt-1 block text-[11px] font-normal leading-relaxed text-[#718878]">{t(
+      "Works without subcategories. If you add cost lines later, each line has its own classification; this applies only to the remaining unsplit amount.",
+      "يعمل دون بنود فرعية. إذا أضفت بنوداً لاحقاً فلكل بند تصنيفه، وهذا التصنيف يخص المبلغ المتبقي غير المفصل فقط.")}</span>
+    </label>
     {amountMinimum>0&&<p className="rounded-xl bg-[#F1F7ED] p-3 text-xs text-[#647967]">
       {t("This category contains itemized budget entries totalling ","هذه الفئة فيها بنود تفصيلية بمجموع ")}
       <strong>{amountMinimum} JOD</strong>. {t("Keep the monthly allowance at least this high, or edit those items in Detailed budget.",

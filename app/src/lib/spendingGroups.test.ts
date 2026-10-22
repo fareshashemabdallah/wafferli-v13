@@ -49,6 +49,68 @@ describe("Line-level classification is the only canonical Money classification",
   s.commitments=[];
   expect(spendingBreakdown(s,month).due).toEqual([]);
  });
+ it("classifies a single category with no subcategories, with payments recorded once",()=>{
+  const s=car();
+  s.budgetItems=[];
+  s.commitments=[];
+  s.categories[0]={...s.categories[0]!,remainderRole:"necessary"};
+  s.expenses=[{id:"fuel-expense",date:"2026-10-18",categoryId:"car",amount:180,shared:false,status:"paid"}];
+  const view=spendingBreakdown(s,month);
+  expect(view.groups.map(g=>g.planned)).toEqual([0,700,0]);
+  expect(view.groups.map(g=>g.paid)).toEqual([0,180,0]);
+  expect(view.groups[1]?.lines).toMatchObject([{
+   categoryId:"car",isRemainder:true,planned:700,paid:180,needsReview:false
+  }]);
+  expect(view.unassigned).toEqual([]);
+  expect(view.totalPlanned).toBe(700);
+  expect(view.totalPaid).toBe(180);
+  expect(view.due).toEqual([]);
+ });
+ it("splitting the classified category reallocates only its unsplit allowance, not another budget",()=>{
+  const s=car();
+  s.categories[0]={...s.categories[0]!,remainderRole:"flexible"};
+  const view=spendingBreakdown(s,month);
+  expect(view.groups.map(g=>g.planned)).toEqual([350,350,0]);
+  expect(view.unassigned).toEqual([]);
+  s.categories[0]!.planned=900;
+  const part=spendingBreakdown(s,month);
+  expect(part.groups.map(g=>g.planned)).toEqual([350,350,200]);
+  expect(part.groups.reduce((n,g)=>n+g.planned,0)).toBe(part.totalPlanned);
+  expect(part.groups[0]?.paid).toBe(100);
+  expect(part.groups[1]?.paid).toBe(90);
+ });
+ it("saving or clearing a direct category classification preserves all payments and subitems",()=>{
+  const original=car();
+  const first=saveFamilyCategory(original,{
+   id:"car",name:"Car",planned:700,type:"variable",visualGroup:"custom",
+   visualIcon:"fuel",remainderRole:"committed"
+  },"unused");
+  expect(first.ok).toBe(true);
+  if(!first.ok)return;
+  expect(first.state.categories[0]?.remainderRole).toBe("committed");
+  expect(first.state.budgetItems).toEqual(original.budgetItems);
+  expect(first.state.commitments).toEqual(original.commitments);
+  expect(first.state.expenses).toEqual(original.expenses);
+  const cleared=saveFamilyCategory(first.state,{
+   id:"car",name:"Car",planned:700,type:"variable",visualGroup:"custom",
+   visualIcon:"fuel"
+  },"unused");
+  expect(cleared.ok).toBe(true);
+  if(!cleared.ok)return;
+  expect(cleared.state.categories[0]?.remainderRole).toBeUndefined();
+  expect(cleared.state.budgetItems).toEqual(original.budgetItems);
+  expect(cleared.state.expenses).toEqual(original.expenses);
+ });
+ it("monthly overrides preserve the signed reconciliation even if a direct role is set",()=>{
+  const s=car();
+  s.categories[0]={...s.categories[0]!,remainderRole:"committed"};
+  s.categoryMonthlyPlans={"2026-10":{car:600}};
+  const view=spendingBreakdown(s,month);
+  expect(view.groups.reduce((n,g)=>n+g.planned,0)).toBe(700);
+  expect(view.unassigned).toMatchObject([{categoryId:"car",planned:-100}]);
+  expect(view.totalPlanned).toBe(600);
+  expect(view.due[0]?.remaining).toBe(250);
+ });
  it("a lower month-specific allowance reconciles grouped item amounts to the actual budget",()=>{
   const s=car();
   s.categoryMonthlyPlans={"2026-10":{car:600}};

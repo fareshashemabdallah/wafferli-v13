@@ -44,6 +44,7 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
     <span className="grid size-11 place-items-center rounded-2xl text-2xl" style={{background:pic.bg}} aria-hidden="true">{pic.icon}</span>
     <strong className="mt-2 block truncate text-xs text-[#385C48]">{cat.name}</strong>
     <span className="mt-1 block text-xs text-[#718875]">{money(total)}</span>
+    {cat.remainderRole&&<span className="mt-1 block text-[10px] font-semibold text-[#478462]">{t("General costs","المبلغ العام")}: {t(cat.remainderRole==="committed"?"Committed":cat.remainderRole==="necessary"?"Necessary, variable":"Flexible",cat.remainderRole==="committed"?"التزام":cat.remainderRole==="necessary"?"ضروري متغير":"مرن")}</span>}
     <span className="mt-0.5 block text-[10px] text-[#758778]">{t("Paid","مدفوع")}: {money(paid)}</span>
     {confirmedMonthPlan(state,cat.id,month)!==null&&<span className="mt-1 block text-[10px] font-bold text-[#438567]">{t("Adjusted this month","معدل هذا الشهر")}</span>}
     <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-[#EEF0EA]"><span className="block h-full rounded-full bg-[#63B387]" style={{width:pct+"%"}}/></span>
@@ -104,10 +105,11 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
       onClick={()=>editLine(line.categoryId)}
       className="min-h-20 rounded-xl border border-[#DDE8D9] bg-white p-3 text-start">
       <span className="block text-[11px] text-[#718B76]">{line.categoryName} ›</span>
-      <strong className="block text-sm text-[#385C48]">{line.name}</strong>
+      <strong className="block text-sm text-[#385C48]">{line.isRemainder?t("General category costs (no subcategory)","مصاريف الفئة العامة (بدون بند فرعي)"):line.name}</strong>
       <span className="mt-1 block text-xs tabular-nums text-[#466E52]">{money(line.planned)} {t("monthly","شهرياً")}
        {" · "}{t("Paid","مدفوع")} {money(line.paid)}</span>
       {line.needsReview&&<span className="mt-1 block text-[10px] text-[#A07846]">{t("Suggested nature · confirm in this line","تصنيف مقترح · أكده داخل البند")}</span>}
+      {line.isRemainder&&<span className="mt-1 block text-[10px] text-[#69836B]">{t("Uses your category classification; no extra budget is created","يستخدم تصنيف الفئة، دون إنشاء ميزانية إضافية")}</span>}
       {line.priority==="protected"&&<span className="mt-1 block text-[10px] text-[#3D7B5C]">{t("Protected family priority","أولوية محمية للعيلة")}</span>}
      </button>)}
     </div>:<p className="mt-3 text-xs text-[#7A907E]">{t(

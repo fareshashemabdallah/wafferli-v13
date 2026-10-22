@@ -164,11 +164,15 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
      <strong className="mt-1 block break-words text-xs tabular-nums text-[#397E5A] sm:text-base">{show(x.value)}</strong></div>)}
   </div>
   <div className="flex flex-wrap gap-2">
-   <button type="button" className={btn} onClick={onEdit}>{t("Edit category amount","تعديل مخصص الفئة")}</button>
+   <button type="button" className={btn} onClick={onEdit}>{t("Edit amount & classification","تعديل المبلغ والتصنيف")}</button>
    <button type="button" disabled={state.demo} className={btn+" disabled:opacity-50"}
      onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
      + {t("Break down this category","قسّم الفئة إلى بنود")}</button>
   </div>
+  {category.remainderRole&&<p className="rounded-xl bg-white p-3 text-xs text-[#5F8068]">{t("General category costs classified as ","تصنيف مصاريف الفئة العامة: ")}
+   <strong>{t(category.remainderRole==="committed"?"Committed":category.remainderRole==="necessary"?"Necessary but variable":"Flexible",
+    category.remainderRole==="committed"?"التزام":category.remainderRole==="necessary"?"ضروري متغير":"مرن")}</strong>
+   {t(". Edit category amount to change it.",". لتغيير التصنيف، اختر تعديل مخصص الفئة.")}</p>}
   <p className="text-xs leading-relaxed text-[#768B7D]">
    {t("Subcategories explain the category plan; they never add a second budget. Unassigned plan: ",
     "البنود تفصّل نفس مخصص الفئة، بدون تكرار الميزانية. المخصص غير المفصّل: ")}{show(Math.max(0,free))}
