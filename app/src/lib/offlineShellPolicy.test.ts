@@ -15,6 +15,7 @@ describe("repository-scoped static-only offline shell",()=>{
  });
  it("rejects POST, third-party origins and nonstatic requests before any cache action",()=>{
   const code=base("offline-sw.js");
+  expect(code).toContain("dabberna-static-shell-20261022-v2");
   expect(code).toContain('request.method!=="GET"');
   expect(code).toContain("url.origin!==self.location.origin");
   expect(code).toContain("url.pathname.startsWith(SCOPE)");
@@ -29,5 +30,16 @@ describe("repository-scoped static-only offline shell",()=>{
   expect(code).toContain("await fetch(request)");
   expect(code).toContain("await caches.match(SHELL)");
   expect(code).toContain("if(url.pathname!==SCOPE)return;");
+ });
+ it("does not ship the old amount reveal switches in current Money or Today",()=>{
+  const read=(name:string)=>readFileSync(new URL("../components/"+name,import.meta.url),"utf8");
+  for(const file of ["FamilyMoneyRhythm.tsx","AdventureFamilyHome.tsx",
+   "FamilyMoneyPrototypeHome.tsx","OneMoneyDashboardSummary.tsx","UnifiedCategoryDetails.tsx"]){
+   const component=read(file);
+   expect(component).not.toContain("Hide private amounts");
+   expect(component).not.toContain("Reveal amounts");
+   expect(component).not.toContain("Show private amounts");
+   expect(component).not.toContain("••••");
+  }
  });
 });
