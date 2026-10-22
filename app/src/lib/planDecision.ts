@@ -1,4 +1,5 @@
 import {computeMoney,type MoneyState} from "./money";
+import {monthlyPlanReady} from "./planBudgetSetup";
 import {getMoneyOverview} from "./moneyOverview";
 import {roundJod,futureDate,scheduleDates} from "./cashflow";
 import type {FamilyPlan} from "./familyPlans";
@@ -24,7 +25,7 @@ export function evaluatePlan(plan:FamilyPlan,money:MoneyState,all:FamilyPlan[]=[
  const finance=computeMoney(money,monthDate);
  const cost=valid(plan.choice?.estimatedJod)?plan.choice!.estimatedJod!:valid(plan.budgetJod)?plan.budgetJod!:null;
  const source=valid(plan.choice?.estimatedJod)?"option":valid(plan.budgetJod)?"limit":"missing";
- const validBudget=!money.demo&&money.financialInputsPartial!==true&&finance.monthlyIncome>0&&money.categories.length>0&&
+ const validBudget=monthlyPlanReady(money)&&finance.monthlyIncome>=0&&
   money.categories.every(c=>valid(c.planned))&&finance.savingsTarget>=0;
  const gap=roundJod(finance.monthlyIncome+finance.carryover.net-finance.savingsTarget-finance.planned);
  const monthlyGap=cost!==null&&validBudget?roundJod(gap-cost):null;
