@@ -37,7 +37,7 @@ describe("Prototype-faithful Money experience",()=>{
    expect(within(home).getAllByRole("button",{name:new RegExp(name)}).length).toBeGreaterThan(0);
   }
   expect(home).not.toHaveTextContent("••••");
-  expect(within(home)).toHaveTextContent("520 JOD");
+  expect(home).toHaveTextContent("520 JOD");
   expect(screen.queryByRole("button",{name:/Reveal amounts|Hide private amounts/i})).not.toBeInTheDocument();
   expect(within(home).getByText("Where our money goes")).toBeInTheDocument();
   expect(within(home).getAllByRole("button",{name:/Add category/}).length).toBeGreaterThan(0);
