@@ -9,12 +9,12 @@ import {addCategoryItem,recordCategoryPayment,undoCategoryPayment,
 import {pictureFor,iconForCategory} from "@/lib/familyCategoryCards";
 
 type Props={state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;
- categoryId:string;revealed:boolean;onEdit:()=>void;onClose:()=>void};
+ categoryId:string;onEdit:()=>void;onClose:()=>void};
 const field="mt-1 min-h-10 w-full rounded-xl border border-[#D7E5D8] bg-white px-3 py-2 text-sm text-[#315B43]";
 const btn="min-h-10 rounded-xl border border-[#BBD8C4] bg-white px-3 text-xs font-bold text-[#347C57]";
 const amountOk=(s:string)=>/^\d{1,6}(\.\d{1,2})?$/.test(s)&&Number(s)>0&&Number(s)<=100000;
 const money=(n:number)=>fmtJOD(roundJod(n));
-export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdit,onClose}:Props){
+export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const category=state.categories.find(c=>c.id===categoryId);
  const [showNewItem,setShowNewItem]=useState(false);
@@ -46,7 +46,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
  const plan=overview.plannedBy(categoryId),paid=overview.spentBy(categoryId);
  const itemized=categoryItemTotal(state.budgetItems??[],categoryId);
  const free=roundJod(category.planned-itemized);
- const show=(n:number)=>revealed?money(n):"••••";
+ const show=(n:number)=>money(n);
  const itemCost=(item:BudgetItem)=>item.amountJod;
  const pastDue=(billId:string)=>bills.find(b=>b.id===billId);
  const dueRows=bills.flatMap(b=>{
