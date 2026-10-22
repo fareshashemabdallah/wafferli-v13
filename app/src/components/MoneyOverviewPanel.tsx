@@ -15,6 +15,8 @@ import {AdventureMoneyJourney} from "@/components/AdventureMoneyJourney";
 import {WorldScene} from "@/components/AdventureArtwork";
 import {HouseholdBudgetBuilder} from "@/components/HouseholdBudgetBuilder";
 import {sampleMembers,type Member} from "@/lib/money";
+import type {FamilyMoment} from "@/lib/familyCalendar";
+import {canonicalPlanViews} from "@/lib/canonicalFamilyFacts";
 import {useEffect,useState,type ReactNode} from "react";
 import {needsStarterBudget} from "@/lib/starterBudget";
 import {monthCarryover,nextMonthKey} from "@/lib/monthlyCarryover";
@@ -31,8 +33,10 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories,budge
  const manageCategories=()=>{setView("budget");onManageCategories?.();};
  const [familyPlans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [members]=useLocalState<Member[]>("members",sampleMembers());
- const plannedItems=upcomingFamilyPlans(familyPlans.filter(p=>!p.occasionPreparation));
- const v=getMoneyOverview(state,new Date(),familyPlans);
+ const [events]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const canonicalPlans=canonicalPlanViews(familyPlans,events,members,ar);
+ const plannedItems=upcomingFamilyPlans(canonicalPlans.filter(p=>!p.occasionPreparation));
+ const v=getMoneyOverview(state,new Date(),canonicalPlans);
  const f=v.forecast,c=v.month;
  const alignment=budgetAlignment(state);
  const plain=budgetPlainResult(alignment);
@@ -96,8 +100,8 @@ export function MoneyOverviewPanel({state,setState,goTo,onManageCategories,budge
  return <div className="space-y-4" data-money-view="insights">
    {backButton}
    <h2 className="text-xl font-semibold">{ar?"تفاصيل وتحليلات المال":"Financial insights & details"}</h2>
-   <FinancialRealityPanel money={state} plans={familyPlans} update={setState} goTo={goTo}/>
-   {!state.demo&&<MoneyReadinessCard state={state} setState={setState} goTo={goTo} plans={familyPlans}/>} 
+   <FinancialRealityPanel money={state} plans={canonicalPlans} update={setState} goTo={goTo}/>
+   {!state.demo&&<MoneyReadinessCard state={state} setState={setState} goTo={goTo} plans={canonicalPlans}/>} 
 
    {state.demo&&!needsStarterBudget(state)&&<section className="rounded-2xl border border-[#EBDCC9] bg-[#FFF6E9] px-4 py-4">
      <p className="text-sm font-semibold text-ink">{ar?"هذه أرقام للتجربة فقط":"You're viewing example finances"}</p>
