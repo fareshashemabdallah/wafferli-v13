@@ -164,7 +164,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
      <strong className="mt-1 block break-words text-xs tabular-nums text-[#397E5A] sm:text-base">{show(x.value)}</strong></div>)}
   </div>
   <div className="flex flex-wrap gap-2">
-   <button type="button" className={btn} onClick={onEdit}>{t("Edit category amount","تعديل مخصص الفئة")}</button>
+   <button type="button" className={btn} onClick={onEdit}>{t("Edit amount & classification","تعديل المبلغ والتصنيف")}</button>
    <button type="button" disabled={state.demo} className={btn+" disabled:opacity-50"}
      onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
      + {t("Break down this category","قسّم الفئة إلى بنود")}</button>
