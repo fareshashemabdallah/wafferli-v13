@@ -6,6 +6,7 @@ import { MoneyGuidance } from "@/components/MoneyGuidance";
 import {reverseVarianceAllocation} from "@/lib/financeAlignment";
 import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
 import {emptyRealMoney} from "@/lib/moneyOverview";
+import {PLAN_MONEY_FOCUS_KEY,type PlanSetupStep} from "@/lib/planBudgetSetup";
 import {FinancialIntelligencePanel} from "@/components/FinancialIntelligencePanel";
 import { localToday } from "@/lib/cashflow";
 import { Pencil, Plus, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
@@ -41,6 +42,13 @@ function MoneyPage() {
   const { lang } = useI18n();
   const ar=lang==="ar";
   const [section,setSection]=useState<"overview"|"spending"|"planning">("overview");
+  const [requestedSetupStep]=useState<PlanSetupStep|null>(()=>{
+    if(typeof window==="undefined")return null;
+    const value=window.sessionStorage.getItem(PLAN_MONEY_FOCUS_KEY);
+    return value==="demo"||value==="income"||value==="categories"||value==="review"?value:null;
+  });
+  useEffect(()=>{window.sessionStorage.removeItem(PLAN_MONEY_FOCUS_KEY);},[]);
+
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
 
@@ -110,7 +118,8 @@ function MoneyPage() {
 
       {section==="overview"&&<FamilyMoneyRhythm state={s} setState={setS}
         onBills={()=>setSection("planning")} onSpending={()=>setSection("spending")}
-        onCategories={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"})}/>}
+        onCategories={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"})}
+        requestedSetupStep={requestedSetupStep}/>}
       {section==="overview"&&s.demo&&<div className="mt-3 rounded-2xl border border-[#EBDABE] bg-[#FFF8ED] p-4">
        <p className="text-sm font-semibold">{ar?"عم تشوف بيانات تجريبية":"You are viewing sample finances"}</p>
        <p className="mt-1 text-xs text-[#826E56]">{ar?
