@@ -8,6 +8,7 @@ import {FamilyMoneyRhythm} from "@/components/FamilyMoneyRhythm";
 
 const sample=():MoneyState=>({
  ...emptyRealMoney(),income:5000,incomeKnown:true,
+ incomeSources:[{id:"salary",name:"Salary",amount:5000,frequency:"monthly",nextDate:"",shared:false}],
  categories:[
   {id:"car",name:"Car",type:"variable",planned:700},
   {id:"utilities",name:"Utilities",type:"variable",planned:500},
