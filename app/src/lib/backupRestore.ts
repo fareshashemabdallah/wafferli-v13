@@ -118,6 +118,8 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
   }).strict(),500).optional(),
   categories:many(opts({
    id,name:text,type:z.enum(["fixed","variable","periodic"]),planned:maxNumber,
+   spendingRole:z.enum(["committed","necessary","flexible"]).optional(),
+   expectedCadence:z.enum(["weekly","monthly","quarterly","yearly","once"]).optional(),
     visualGroup:z.enum(["groceries","fuel","restaurants","children","housing","health","education","utilities","gifts","travel","household","clothing","other","custom"]).optional(),
     visualIcon:z.enum(["groceries","fuel","restaurants","children","housing","health","education","utilities","gifts","travel","household","clothing","other"]).optional()
   })),expenses:many(expense),demo:z.boolean(),

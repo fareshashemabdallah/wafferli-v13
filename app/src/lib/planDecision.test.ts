@@ -9,7 +9,7 @@ const finances=():MoneyState=>({
  categories:[
   {id:"housing",name:"Housing",planned:400,type:"fixed"},
   {id:"food",name:"Groceries",planned:200,type:"variable"},
-  {id:"fun",name:"Leisure",planned:150,type:"variable"}
+  {id:"fun",name:"Leisure",planned:150,type:"variable",spendingRole:"flexible"}
  ],expenses:[],cashOnHand:1000,cashReserve:100,
  commitments:[{id:"bill",name:"Rent",amount:300,frequency:"once",dueDate:"2026-10-20",categoryId:"housing"}]
 });
@@ -18,7 +18,7 @@ describe("actionable Plan financial comparisons",()=>{
   const result=evaluatePlan(plan(),finances(),[],now);
   expect(result).toMatchObject({cost:120,month:"2026-10",unallocated:50,monthlyGap:-70,
     monthlyAssessment:"shortfall",cashRemaining:600,cashGap:480,cashAssessment:"fits",suggestedCeiling:50});
-  expect(result.monthlyFlexible[0]).toMatchObject({name:"Groceries",room:200});
+  expect(result.monthlyFlexible[0]).toMatchObject({name:"Leisure",room:150});
  });
  it("compares a priced option rather than the earlier ceiling and flags a higher option",()=>{
   const chosen=setPlanChoice(plan(),{label:"Shop B",source:"comparison",estimatedJod:145},now);
