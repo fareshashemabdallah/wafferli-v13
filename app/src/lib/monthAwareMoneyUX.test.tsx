@@ -26,6 +26,7 @@ describe("Month-aware guidance embedded in existing illustrated Money Map",()=>{
   const home=screen.getByTestId("prototype-money-home");
   expect(within(home).getByText("Where our money goes")).toBeInTheDocument();
   fireEvent.click(within(home).getByTestId("category-picture-groceries"));
+  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
   fireEvent.click(screen.getByRole("button",{name:"Adjust a particular month"}));
   const dialog=screen.getByRole("dialog",{name:"Adjust a month's allowance"});
   expect(within(dialog).getByText("Groceries")).toBeInTheDocument();
@@ -42,10 +43,11 @@ describe("Month-aware guidance embedded in existing illustrated Money Map",()=>{
   const home=screen.getByTestId("prototype-money-home");
   const groceries=()=>within(home).getByTestId("category-picture-groceries");
   fireEvent.click(groceries());
+  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
   fireEvent.click(screen.getByRole("button",{name:"Adjust a particular month"}));
   fireEvent.change(screen.getByLabelText("Plan for that month (JOD)"),{target:{value:"600"}});
   fireEvent.click(screen.getByRole("button",{name:"Confirm this month's plan"}));
-  fireEvent.click(groceries());
+  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
   fireEvent.click(screen.getByRole("button",{name:"Adjust a particular month"}));
   fireEvent.click(screen.getByRole("button",{name:"Use usual plan"}));
   const json=screen.getByTestId("finance-json");
