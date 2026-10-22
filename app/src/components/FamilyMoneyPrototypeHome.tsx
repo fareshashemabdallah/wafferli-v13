@@ -2,7 +2,6 @@ import {useState} from "react";
 import {Plus} from "lucide-react";
 import {OneMoneyDashboardSummary} from "./OneMoneyDashboardSummary";
 import {FamilySpendingGroups} from "./FamilySpendingGroups";
-import {UnifiedCategoryDetails} from "./UnifiedCategoryDetails";
 import {useI18n} from "@/lib/i18n";
 import {computeMoney,type MoneyState} from "@/lib/money";
 import {type RhythmForecast} from "@/lib/familyMoneyRhythm";
@@ -30,10 +29,9 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
    onIncome={onIncome} onCash={onCash} onSavings={onSavings}
    onBills={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})} onExpense={onQuickAdd}
    onTimeline={()=>onArea("timeline")}/>
-  <FamilySpendingGroups state={state} onManage={manage} onEditCategory={onEditCategory}/>
-  {activeCategory&&state.categories.some(c=>c.id===activeCategory)&&<UnifiedCategoryDetails key={activeCategory}
-    state={state} setState={setState} categoryId={activeCategory}
-    onEdit={()=>onEditCategory({id:activeCategory})} onClose={()=>setActiveCategory(null)}/>}
+  <FamilySpendingGroups state={state} setState={setState}
+   activeCategory={activeCategory} onClose={()=>setActiveCategory(null)}
+   onManage={manage} onEditCategory={onEditCategory}/>
   <section className="space-y-2" aria-label={t("Next payments and income","الدفعات والدخل القادم")}>
    <div className="flex flex-wrap items-center justify-between gap-2">
     <h3 className="text-sm font-black text-[#305D44]">{t("Coming up next","المواعيد الجاية")}</h3>
