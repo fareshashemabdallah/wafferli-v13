@@ -98,7 +98,7 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
   </div>
   {breakdown.groups.map(group=>{
    const info=groups[group.role as SpendingRole];
-   return <section key={group.role} data-testid={"spending-group-"+group.role}
+   return <section key={group.role} id={"spending-group-"+group.role} data-testid={"spending-group-"+group.role}
     aria-label={t(info.en,info.ar)} className={"rounded-[1.4rem] border border-[#E3EAE0] p-3 sm:p-4 "+info.tone}>
     <div className="flex flex-wrap items-start justify-between gap-2">
      <div className="flex min-w-0 flex-1 items-start gap-2">
@@ -128,7 +128,7 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
       "لا بنود مصنفة هنا بعد. افتح فئة وقسّمها إلى بنود.")}</p>}
    </section>;
   })}
-  {breakdown.unassigned.length>0&&<section data-testid="spending-unassigned" className="rounded-2xl border border-dashed border-[#CBDCCE] bg-white p-3 sm:p-4">
+  {breakdown.unassigned.length>0&&<section id="money-spending-cushions" className="scroll-mt-4" data-testid="spending-unassigned" className="rounded-2xl border border-dashed border-[#CBDCCE] bg-white p-3 sm:p-4">
     <h4 className="text-sm font-extrabold text-[#416B51]">{breakdown.unassigned.some(row=>row.kind==="unclassified")?
      t("Categories without a breakdown & budget cushions","فئات بدون بنود تفصيلية وهوامش الميزانية"):
      t("Unallocated monthly budget cushions","هوامش غير مخصصة من الميزانية الشهرية")}</h4>
