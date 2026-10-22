@@ -7,6 +7,7 @@ import {categoryItemTotal,monthlyItemCost,recordedItemSpending,type BudgetItem,t
 import {addCategoryItem,recordCategoryPayment,undoCategoryPayment,
  billPaidTotal,billOutstanding,saveCategoryDueDate,removeCategoryBill,stopCategoryItem} from "@/lib/unifiedCategoryLedger";
 import {pictureFor,iconForCategory} from "@/lib/familyCategoryCards";
+import {displayItemRole,type SpendingRole} from "@/lib/spendingGroups";
 
 type Props={state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;
  categoryId:string;onEdit:()=>void;onClose:()=>void};
@@ -22,6 +23,8 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
  const [newName,setNewName]=useState("");
  const [newAmount,setNewAmount]=useState("");
  const [newFrequency,setNewFrequency]=useState<ItemFrequency>("monthly");
+ const [newRole,setNewRole]=useState<SpendingRole>("necessary");
+ const [newProtected,setNewProtected]=useState(false);
  const [newDue,setNewDue]=useState(false);
  const [newDueDate,setNewDueDate]=useState(localToday());
  const [newDueFrequency,setNewDueFrequency]=useState<"once"|"monthly"|"quarterly"|"yearly">("monthly");
@@ -78,16 +81,19 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
  };
  const beginEditItem=(item:BudgetItem)=>{
   setEditingItemId(item.id);setNewName(item.name);setNewAmount(String(item.amountJod));
-  setNewFrequency(item.frequency);setNewDue(false);setShowNewItem(true);setBillForm(false);setError("");
+  setNewFrequency(item.frequency);setNewRole(displayItemRole(item).role);
+  setNewProtected(item.priority==="protected");setNewDue(false);setShowNewItem(true);setBillForm(false);setError("");
  };
  const addItem=(ev:FormEvent)=>{
   ev.preventDefault();setError("");
   if(!newName.trim()||!amountOk(newAmount)){setError(t("Enter a name and a positive cost.","أدخل اسم البند ومبلغاً صحيحاً."));return;}
   const previous=(state.budgetItems??[]).find(i=>i.id===editingItemId&&i.categoryId===categoryId);
   const item:BudgetItem=previous?{...previous,name:newName.trim().slice(0,90),
-   amountJod:Number(newAmount),frequency:newFrequency,enabled:true}:
+   amountJod:Number(newAmount),frequency:newFrequency,spendingRole:newRole,
+   priority:newProtected?"protected":newRole==="flexible"?"flexible":"essential",enabled:true}:
    {id:uid(),categoryId,name:newName.trim().slice(0,90),enabled:true,
-    amountJod:Number(newAmount),frequency:newFrequency,behaviour:"variable",priority:"essential"};
+    amountJod:Number(newAmount),frequency:newFrequency,spendingRole:newRole,
+    behaviour:"variable",priority:newProtected?"protected":newRole==="flexible"?"flexible":"essential"};
   if(previous?.quantity!==undefined||previous?.unitPriceJod!==undefined){
    if(!window.confirm(t("Replace the old quantity-based calculation with this manually entered amount?",
     "هل تريد استبدال حساب الكمية السابق بالمبلغ المدخل يدوياً؟")))return;
@@ -103,7 +109,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    if(n===next){setError(t("Choose a valid due date.","اختر تاريخ استحقاق صحيحاً."));return;}
    setState(n);
   }else setState(next);
-  setNewName("");setNewAmount("");setShowNewItem(false);setNewDue(false);setEditingItemId(null);
+  setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setShowNewItem(false);setNewDue(false);setEditingItemId(null);
  };
  const beginEditBill=(id:string)=>{
   const old=(state.commitments??[]).find(b=>b.id===id);
@@ -160,7 +166,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
   <div className="flex flex-wrap gap-2">
    <button type="button" className={btn} onClick={onEdit}>{t("Edit category amount","تعديل مخصص الفئة")}</button>
    <button type="button" disabled={state.demo} className={btn+" disabled:opacity-50"}
-     onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
+     onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
      + {t("Break down this category","قسّم الفئة إلى بنود")}</button>
   </div>
   <p className="text-xs leading-relaxed text-[#768B7D]">
@@ -181,6 +187,21 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
       <option value="quarterly">{t("Quarterly","ربع سنوي")}</option><option value="yearly">{t("Yearly","سنوي")}</option>
      </select></label>
    </div>
+   <label className="block text-xs font-semibold text-[#3B6950]">{t("What kind of cost is this line?","ما طبيعة هذا البند؟")}
+    <select className={field} aria-label={t("Spending behaviour","طبيعة المصروف")} value={newRole}
+     onChange={e=>{setNewRole(e.target.value as SpendingRole);setNewProtected(false);}}>
+     <option value="committed">{t("Committed · must be paid (e.g. car instalment)","التزام · لازم يندفع (مثل قسط السيارة)")}</option>
+     <option value="necessary">{t("Necessary but variable (e.g. fuel)","ضروري لكنه متغير (مثل البنزين)")}</option>
+     <option value="flexible">{t("Flexible choice (e.g. car wash)","اختيار مرن (مثل غسل السيارة)")}</option>
+    </select>
+   </label>
+   <label className="flex min-h-10 items-center gap-2 text-xs text-[#52715A]">
+    <input type="checkbox" checked={newProtected} onChange={e=>setNewProtected(e.target.checked)}/>
+    {t("Personally important to protect, even if adjustable","مهم للعيلة ونريد الحفاظ عليه، حتى لو قابل للتعديل")}
+   </label>
+   <p className="text-[11px] leading-relaxed text-[#708674]">{t(
+    "Monthly equivalents use the line amount and frequency. Selecting committed does not create a bill: add a due date only when you actually owe a payment.",
+    "المعادل الشهري يعتمد على مبلغ البند وتكراره. اختيار التزام لا ينشئ فاتورة؛ أضف موعد استحقاق فقط عندما توجد دفعة مستحقة.")}</p>
    {!editingItemId&&<label className="flex min-h-10 items-center gap-2 text-xs"><input type="checkbox" checked={newDue} onChange={e=>setNewDue(e.target.checked)}/>
     {t("This is a bill with a due date","هذا التزام له موعد دفع")}</label>}
    {newDue&&!editingItemId&&<div className="grid grid-cols-2 gap-2">
@@ -203,6 +224,11 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
     return <div key={item.id} className="rounded-xl border border-[#E0EADD] bg-white p-3">
      <div className="flex flex-wrap items-center justify-between gap-2">
       <div className="min-w-0"><strong className="block text-sm text-[#365943]">{item.name}</strong>
+       <p className="text-[11px] text-[#6D8271]">{t(
+        displayItemRole(item).role==="committed"?"Committed":displayItemRole(item).role==="necessary"?"Necessary, variable":"Flexible",
+        displayItemRole(item).role==="committed"?"التزام":displayItemRole(item).role==="necessary"?"ضروري متغير":"مرن"
+       )}{!item.spendingRole?" · "+t("Suggested","مقترح"):""}
+       {" · "}{item.frequency}</p>
        <p className="text-[11px] text-[#718574]">{t("Monthly equivalent","المعادل الشهري")}: {show(value)}
         {" · "}{t("Paid this month","مدفوع هذا الشهر")}: {show(actual)}</p></div>
       <div className="flex flex-wrap gap-2">
