@@ -169,10 +169,33 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
      onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
      + {t("Break down this category","قسّم الفئة إلى بنود")}</button>
   </div>
-  {category.remainderRole&&<p className="rounded-xl bg-white p-3 text-xs text-[#5F8068]">{t("General category costs classified as ","تصنيف مصاريف الفئة العامة: ")}
-   <strong>{t(category.remainderRole==="committed"?"Committed":category.remainderRole==="necessary"?"Necessary but variable":"Flexible",
-    category.remainderRole==="committed"?"التزام":category.remainderRole==="necessary"?"ضروري متغير":"مرن")}</strong>
-   {t(". Edit category amount to change it.",". لتغيير التصنيف، اختر تعديل مخصص الفئة.")}</p>}
+  <label className="block rounded-xl border border-[#CEE2D1] bg-white p-3 text-xs font-bold text-[#397654]" data-testid="category-inline-classification">
+   {items.length===0?t("Classify this category without subcategories","صنّف هذه الفئة دون بنود فرعية"):
+    t("Classify the amount not split into subcategories","صنّف المبلغ غير المقسّم إلى بنود")}
+   <select aria-label={t("Category spending classification","تصنيف مصروف الفئة")} className={field}
+    disabled={state.demo} value={category.remainderRole??""}
+    onChange={event=>{
+     const role=event.target.value as SpendingRole|"";
+     setState(previous=>({
+      ...previous,
+      categories:previous.categories.map(entry=>{
+       if(entry.id!==categoryId)return entry;
+       const next={...entry};
+       if(role)next.remainderRole=role;
+       else delete next.remainderRole;
+       return next;
+      })
+     }));
+    }}>
+    <option value="">{t("Not classified yet","لم يصنّف بعد")}</option>
+    <option value="committed">{t("Committed · fixed obligation","التزام · مبلغ واجب الدفع")}</option>
+    <option value="necessary">{t("Necessary but variable","ضروري لكنه متغير")}</option>
+    <option value="flexible">{t("Flexible family choice","اختيار عائلي مرن")}</option>
+   </select>
+   <span className="mt-2 block text-[11px] font-normal leading-relaxed text-[#708672]">{t(
+    "Saved automatically. This classifies only your existing unbroken category allowance, not its detailed lines. No new budget or bill is created.",
+    "يُحفظ تلقائياً. التصنيف للمبلغ العام الموجود فقط، وليس للبنود التفصيلية. لا تُنشأ ميزانية أو فاتورة جديدة.")}</span>
+  </label>
   <p className="text-xs leading-relaxed text-[#768B7D]">
    {t("Subcategories explain the category plan; they never add a second budget. Unassigned plan: ",
     "البنود تفصّل نفس مخصص الفئة، بدون تكرار الميزانية. المخصص غير المفصّل: ")}{show(Math.max(0,free))}
