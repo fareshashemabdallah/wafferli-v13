@@ -1,5 +1,6 @@
 import {describe,it,expect} from "vitest";
 import {removeMoneyCategory} from "./removeMoneyCategory";
+import {saveFamilyCategory} from "./familyCategoryCards";
 import {computeMoney,type MoneyState} from "./money";
 import {emptyRealMoney} from "./moneyOverview";
 import {buildFamilyMoneyRhythm} from "./familyMoneyRhythm";
@@ -45,6 +46,17 @@ describe("Remove Money category from single family dashboard",()=>{
   expect(after.budgetItems).toEqual([]);
   expect(after.expenses).toEqual([]);
   expect(before.categories).toHaveLength(2);
+ });
+ it("removes even its starter illustration and allows re-adding it explicitly",()=>{
+  const state=input();
+  state.categories=[{id:"groc",name:"Groceries",type:"variable",planned:200}];
+  const removed=removeMoneyCategory(state,"groc");
+  expect(removed.categories).toEqual([]);
+  expect(removed.hiddenStarterGroups).toContain("groceries");
+  const added=saveFamilyCategory(removed,{name:"Groceries",planned:120,type:"variable",
+   visualGroup:"groceries",visualIcon:"groceries"},"newgroc");
+  expect(added.ok).toBe(true);
+  if(added.ok)expect(added.state.hiddenStarterGroups).not.toContain("groceries");
  });
  it("rejects demo or unknown category removals without touching records",()=>{
   const before=input();
