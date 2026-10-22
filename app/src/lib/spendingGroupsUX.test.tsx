@@ -102,20 +102,44 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
   expect(after.expenses).toEqual(before.expenses);
   expect(after.commitments).toEqual(before.commitments);
  });
- it("classifies only the unsplit Car remainder while keeping fuel and instalment line assignments",()=>{
+ it("a category with detailed cost lines shows a cushion but no second classification selector",()=>{
   render(<App/>);
   fireEvent.click(screen.getByTestId("category-custom-car"));
-  const select=within(screen.getByTestId("unified-category-details")).getByRole("combobox",{name:"Category spending classification"});
-  fireEvent.change(select,{target:{value:"flexible"}});
+  const details=screen.getByTestId("unified-category-details");
+  expect(within(details).queryByRole("combobox",{name:"Category spending classification"})).not.toBeInTheDocument();
+  expect(within(details).getByTestId("category-monthly-cushion")).toHaveTextContent("No other classification needed");
+  expect(within(details).getByRole("button",{name:"Edit category amount"})).toBeInTheDocument();
   expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("Instalment");
   expect(screen.getByTestId("spending-group-necessary")).toHaveTextContent("Fuel");
-  // The pictured Car example is entirely split into lines; setting a remainder
-  // classification must not fabricate a new flexible expense amount.
-  expect(screen.getByTestId("spending-group-flexible")).not.toHaveTextContent("General category costs (no subcategory)");
-  const output=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
-  expect(output.categories.find(c=>c.id==="car")?.planned).toBe(700);
-  expect(output.categories.find(c=>c.id==="car")?.remainderRole).toBe("flexible");
-  expect(output.expenses).toHaveLength(1);
+  const saved=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
+  expect(saved.categories.find(c=>c.id==="car")?.remainderRole).toBeUndefined();
+ });
+ it("Utilities with five classified lines and 95 JOD spare displays it as a cushion, not a classification task",()=>{
+  function Utilities(){
+   const base=sample();
+   const [state,setState]=useState<MoneyState>({...base,
+    categories:[{id:"util",name:"Utilities",planned:500,type:"variable"}],
+    budgetItems:[
+     {id:"water",categoryId:"util",name:"Water",amountJod:150,frequency:"monthly",enabled:true,spendingRole:"necessary",behaviour:"variable",priority:"essential"},
+     {id:"electric",categoryId:"util",name:"Electricity",amountJod:150,frequency:"monthly",enabled:true,spendingRole:"necessary",behaviour:"variable",priority:"essential"},
+     {id:"internet",categoryId:"util",name:"Internet",amountJod:35,frequency:"monthly",enabled:true,spendingRole:"committed",behaviour:"fixed",priority:"essential"},
+     {id:"building",categoryId:"util",name:"Building",amountJod:50,frequency:"monthly",enabled:true,spendingRole:"committed",behaviour:"fixed",priority:"essential"},
+     {id:"phone",categoryId:"util",name:"Phone",amountJod:20,frequency:"monthly",enabled:true,spendingRole:"committed",behaviour:"fixed",priority:"essential"}
+    ],expenses:[]});
+   return <I18nProvider><FamilyMoneyRhythm state={state} setState={setState} onBills={()=>{}} onSpending={()=>{}} onCategories={()=>{}}/></I18nProvider>;
+  }
+  render(<Utilities/>);
+  expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("Monthly budget cushion");
+  expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("95 JOD");
+  expect(screen.getByTestId("spending-unassigned")).not.toHaveTextContent("Still to split within categories");
+  fireEvent.click(screen.getByRole("button",{name:/Utilities · Costs and payments/}));
+  const details=screen.getByTestId("unified-category-details");
+  expect(within(details).getByTestId("category-monthly-cushion")).toHaveTextContent("95 JOD");
+  expect(within(details).queryByTestId("category-inline-classification")).not.toBeInTheDocument();
+  fireEvent.click(within(details).getByRole("button",{name:"Edit category amount"}));
+  const dialog=screen.getByRole("dialog",{name:"Edit family category"});
+  expect(within(dialog).queryByRole("combobox",{name:"Category spending classification"})).not.toBeInTheDocument();
+  expect(within(dialog).getByTestId("editor-category-cushion")).toHaveTextContent("already classified");
  });
  it("edits a line from necessary to flexible without changing parent category or payment history",()=>{
   render(<App/>);
