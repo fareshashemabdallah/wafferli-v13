@@ -6,7 +6,9 @@ import {fmtJOD,uid,useLocalState,writeLocal} from "@/lib/storage";
 import {type MomentOccurrence} from "@/lib/familyCalendar";
 import {planKey,type OccasionPlans} from "@/lib/occasionAdvisor";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,makeFamilyPlan,type FamilyPlan,type OccasionPreparation,type OccasionCost} from "@/lib/familyPlans";
-import {sampleMoney,type MoneyState} from "@/lib/money";
+import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
+import {canonicalFamilyMoments,canonicalPlanView} from "@/lib/canonicalFamilyFacts";
+import type {FamilyMoment} from "@/lib/familyCalendar";
 import {FAMILY_TASKS_KEY,makeFamilyTask,setTaskComplete,type FamilyTask} from "@/lib/familyTasks";
 import {initialOccasionPreparation,validateOccasionPreparation,occasionFunding,occasionBudgetAdvice,type OccasionCostKind,occasionKinds} from "@/lib/occasionPreparation";
 import {matchesGiftProduct} from "@/lib/occasionGiftPurchase";
@@ -25,13 +27,16 @@ export function OccasionPreparationSection({event,planId}:{event?:MomentOccurren
  const {lang}=useI18n(),ar=lang==="ar";
  const t=(en:string,arabic:string)=>ar?arabic:en;
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [members]=useLocalState<Member[]>("members",sampleMembers());
+ const [events]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [olderOccasions,,oldReady]=useLocalState<OccasionPlans>("occasionPlans",{});
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
  const [,,activeReady]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
  const [status,setStatus]=useState("");
  const ref=event?"occasion:"+planKey(event):null;
- const plan=planId?plans.find(p=>p.id===planId):plans.find(p=>p.sourceRef===ref);
+ const savedPlan=planId?plans.find(p=>p.id===planId):plans.find(p=>p.sourceRef===ref);
+ const plan=savedPlan?canonicalPlanView(savedPlan,canonicalFamilyMoments(events,members,ar)):undefined;
  const ready=plansReady&&moneyReady&&tasksReady&&activeReady&&oldReady;
  const create=()=>{
   if(!event||!ready)return;
