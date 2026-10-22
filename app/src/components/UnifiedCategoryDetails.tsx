@@ -57,7 +57,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
     paid:billPaidTotal(state,b.id,d)}));
  });
  const startPayment=(itemId?:string,billId?:string,dueDate?:string)=>{
-  setError("");setPaymentTarget({...(itemId?{itemId}:{}),...(billId?{billId,dueDate}:{})});
+  setError("");setPaymentTarget({...(itemId?{itemId}:{}),...(billId&&dueDate?{billId,dueDate}:{})});
   if(billId&&dueDate)setPayAmount(String(billOutstanding(state,billId,dueDate)));
   else setPayAmount("");
   setPayDate(localToday());
