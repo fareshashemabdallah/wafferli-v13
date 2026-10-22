@@ -41,7 +41,7 @@ describe("Three family spending groups on one Money page",()=>{
   fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
   const dialog=screen.getByRole("dialog",{name:"Edit family category"});
   fireEvent.click(within(dialog).getByLabelText(/Flexible · we choose what to spend/));
-  fireEvent.change(within(dialog).getByLabelText("How often is this expense expected?"),{target:{value:"yearly"}});
+  fireEvent.change(within(dialog).getByLabelText(/How often is this expense expected/),{target:{value:"yearly"}});
   fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
   expect(screen.getByTestId("spending-group-flexible")).toHaveTextContent("Groceries");
   expect(screen.getByTestId("spending-group-necessary")).not.toHaveTextContent("Groceries");
