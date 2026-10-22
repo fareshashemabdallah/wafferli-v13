@@ -44,7 +44,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
  it("lets parents classify Nanny without any subcategory, then change or clear it",()=>{
   render(<App/>);
   fireEvent.click(screen.getByTestId("category-custom-n"));
-  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
+  fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
   let dialog=screen.getByRole("dialog",{name:"Edit family category"});
   const classification=within(dialog).getByLabelText("Category spending classification");
   expect(classification).toHaveValue("");
@@ -59,7 +59,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
   fireEvent.click(screen.getByTestId("category-custom-n"));
   // Click again if the category panel was already open.
   if(!screen.queryByTestId("unified-category-details"))fireEvent.click(screen.getByTestId("category-custom-n"));
-  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
+  fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
   dialog=screen.getByRole("dialog",{name:"Edit family category"});
   fireEvent.change(within(dialog).getByLabelText("Category spending classification"),{target:{value:"flexible"}});
   fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
