@@ -5,13 +5,18 @@ import {I18nProvider} from "./i18n";
 import {FamilyMoneyRhythm} from "@/components/FamilyMoneyRhythm";
 import {emptyRealMoney} from "./moneyOverview";
 import type {MoneyState} from "./money";
-
 const sample=():MoneyState=>({
  ...emptyRealMoney(),categories:[
-  {id:"g",name:"Groceries",type:"variable",planned:1200,spendingRole:"necessary"},
-  {id:"n",name:"Nanny",type:"fixed",planned:400,spendingRole:"committed"},
-  {id:"out",name:"Family outings",type:"variable",planned:400,spendingRole:"flexible"}
- ],expenses:[{id:"paid",date:"2026-10-20",categoryId:"g",amount:120,shared:false,status:"paid"}]
+  {id:"car",name:"Car",type:"variable",planned:700,visualGroup:"custom",visualIcon:"fuel"},
+  {id:"n",name:"Nanny",type:"fixed",planned:400,visualGroup:"custom",visualIcon:"household"}
+ ],budgetItems:[
+  {id:"loan",categoryId:"car",name:"Instalment",enabled:true,amountJod:350,frequency:"monthly",
+   spendingRole:"committed",behaviour:"fixed",priority:"essential"},
+  {id:"fuel",categoryId:"car",name:"Fuel",enabled:true,amountJod:250,frequency:"monthly",
+   spendingRole:"necessary",behaviour:"variable",priority:"essential"},
+  {id:"maint",categoryId:"car",name:"Maintenance",enabled:true,amountJod:1200,frequency:"yearly",
+   spendingRole:"necessary",behaviour:"variable",priority:"essential"}
+ ],expenses:[{id:"paid",date:"2026-10-20",categoryId:"car",budgetItemId:"fuel",amount:90,shared:false,status:"paid"}]
 });
 function App(){
  const [state,setState]=useState(sample());
@@ -22,33 +27,32 @@ function App(){
 }
 beforeEach(()=>localStorage.clear());
 afterEach(()=>{cleanup();localStorage.clear()});
-describe("Three family spending groups on one Money page",()=>{
- it("shows committed, necessary, flexible in vertical order with unchanged saved amounts",()=>{
+describe("Expense-line nature inside a single illustrated family category",()=>{
+ it("shows exactly one Car card while its Instalment and Fuel lines appear in different groups",()=>{
   render(<App/>);
-  const sections=["committed","necessary","flexible"].map(id=>screen.getByTestId("spending-group-"+id));
-  expect(sections[0]).toHaveTextContent("Nanny");
-  expect(sections[1]).toHaveTextContent("Groceries");
-  expect(sections[2]).toHaveTextContent("Family outings");
-  expect(sections[0]!.compareDocumentPosition(sections[1]!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-  expect(sections[1]!.compareDocumentPosition(sections[2]!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-  expect(sections[2]).toHaveTextContent("Allowance left");
-  expect(sections[0]).toHaveTextContent("No linked due dates yet");
-  expect(screen.getByTestId("saved-group-state")).toHaveTextContent('"amount":120');
+  const groups=["committed","necessary","flexible"].map(g=>screen.getByTestId("spending-group-"+g));
+  expect(groups[0]).toHaveTextContent("Car");
+  expect(groups[0]).toHaveTextContent("Instalment");
+  expect(groups[1]).toHaveTextContent("Fuel");
+  expect(groups[1]).toHaveTextContent("Maintenance");
+  expect(groups[2]).not.toHaveTextContent("Car");
+  expect(groups[0]!.compareDocumentPosition(groups[1]!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  expect(within(screen.getByTestId("unique-category-cards")).getAllByText("Car")).toHaveLength(1);
+  expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("Nanny");
+  expect(screen.getByTestId("saved-group-state")).toHaveTextContent('"amount":90');
  });
- it("changes a category role and frequency without changing any expense or creating a bill",()=>{
+ it("edits a line from necessary to flexible without changing parent category or payment history",()=>{
   render(<App/>);
-  fireEvent.click(screen.getByTestId("category-picture-groceries"));
-  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
-  const dialog=screen.getByRole("dialog",{name:"Edit family category"});
-  fireEvent.click(within(dialog).getByLabelText(/Flexible · we choose what to spend/));
-  fireEvent.change(within(dialog).getByLabelText(/How often is this expense expected/),{target:{value:"yearly"}});
-  fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
-  expect(screen.getByTestId("spending-group-flexible")).toHaveTextContent("Groceries");
-  expect(screen.getByTestId("spending-group-necessary")).not.toHaveTextContent("Groceries");
+  fireEvent.click(screen.getByTestId("category-custom-car"));
+  fireEvent.click(within(screen.getByTestId("unified-category-details")).getAllByRole("button",{name:"Edit"})[0]!);
+  const form=screen.getByRole("form",{name:"Add subcategory"});
+  expect(within(form).getByLabelText("Spending behaviour")).toHaveValue("committed");
+  fireEvent.change(within(form).getByLabelText("Spending behaviour"),{target:{value:"flexible"}});
+  fireEvent.click(within(form).getByRole("button",{name:"Save changes"}));
+  expect(screen.getByTestId("spending-group-flexible")).toHaveTextContent("Instalment");
   const output=screen.getByTestId("saved-group-state");
   expect(output).toHaveTextContent('"spendingRole":"flexible"');
-  expect(output).toHaveTextContent('"expectedCadence":"yearly"');
-  expect(output).toHaveTextContent('"amount":120');
-  expect(output).toHaveTextContent('"commitments":[]');
+  expect(output).toHaveTextContent('"amount":90');
+  expect(output).toHaveTextContent('"planned":700');
  });
 });
