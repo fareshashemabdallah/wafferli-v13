@@ -22,7 +22,7 @@ describe("Remove Money category from single family dashboard",()=>{
   const after=removeMoneyCategory(before,"old");
   expect(after.categories.map(c=>c.id)).toEqual(["food"]);
   expect(after.hiddenStarterGroups).toEqual([]);
-  expect(after.retiredCategoryNames?.old).toBe("School fees");
+  expect(after.retiredCategoryNames?.["old"]).toBe("School fees");
   expect(after.spendingPaces).toEqual([]);
   expect(after.expenses).toEqual(before.expenses);
   expect(after.commitments?.[0]).toMatchObject({name:"School fee due",dueDate:"2026-11-15",amount:300});
