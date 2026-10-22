@@ -1,5 +1,5 @@
 import {useEffect,useState,type FormEvent} from "react";
-import {Eye,EyeOff,Plus,ShieldCheck} from "lucide-react";
+import {Plus,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,fmtJOD,uid} from "@/lib/storage";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
@@ -42,7 +42,6 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  },[screen,scrollToCategories,onCategories]);
  const [days,setDays]=useState<7|30|90>(30);
  const [includeExpected,setIncludeExpected]=useState(true);
- const [showMoney,setShowMoney]=useState(false);
  const [quickEdit,setQuickEdit]=useState<QuickMoneyEditor|null>(null);
  const [quickExpenseOpen,setQuickExpenseOpen]=useState(false);
  const [adjustingMonthCategory,setAdjustingMonthCategory]=useState<string|null>(null);
@@ -62,7 +61,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  const forecast=buildFamilyMoneyRhythm(state,plansReady?plans:[],now,days,includeExpected);
  const annual=annualPreparation(state,now);
  const categories=state.categories;
- const moneyLabel=(v:number|null)=>state.demo||!showMoney||v===null?t("Hidden / unknown","مخفي / غير معروف"):fmtJOD(v);
+ const moneyLabel=(v:number|null)=>v===null?t("Not entered","غير مدخل"):fmtJOD(v);
  const iconFor=(name:string)=>illustrations.find(x=>x.test.test(name))??{emoji:"🧾",color:"#ECF6EB",name:"Other",ar:"أخرى"};
  const registerPace=(e:FormEvent)=>{
   e.preventDefault();setError("");setSuccess("");
@@ -142,20 +141,13 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"} alt="" aria-hidden="true" loading="lazy"
     className="pointer-events-none absolute bottom-[-12px] end-0 h-[145px] w-[43%] object-contain object-bottom sm:h-[176px]"/>
   </div>
-  <div className="flex justify-end">
-   <button type="button" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#DBE7DC] bg-white px-3 text-xs font-bold text-[#41805E]"
-    onClick={()=>setShowMoney(x=>!x)} aria-pressed={showMoney} aria-label={showMoney?t("Hide amounts","إخفاء المبالغ"):t("Reveal amounts","إظهار المبالغ")}>
-    {showMoney?<EyeOff className="size-4"/>:<Eye className="size-4"/>}
-    {showMoney?t("Hide private amounts","إخفاء المبالغ الخاصة"):t("Reveal amounts","إظهار المبالغ")}
-   </button>
-  </div>
   {state.demo&&<div className="rounded-xl border border-[#E8D9BF] bg-[#FFF7E8] p-3 text-xs text-[#896C43]">
    {t("These are sample records. They will not be used to claim your household can afford anything. Start real Money to use a saved cash-flow outlook.",
     "البيانات الموجودة تجريبية. ما منستخدمها للحكم على قدرة العيلة على الدفع. ابدأ ببيانات فعلية لتحفظ التوقعات.")}</div>}
 
   {screen!=="map"&&<button type="button" className="min-h-11 rounded-xl border border-[#C7DEC9] bg-white px-4 text-sm font-bold text-[#3B7958]" onClick={()=>setScreen("map")}>
    ← {t("Back to the Money dashboard","ارجع للوحة المال")}</button>}
-  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} setState={setState} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onCash={()=>setQuickEdit("cash")} onSavings={()=>setQuickEdit("savings")} onBills={()=>setQuickEdit("bill")} onQuickAdd={()=>setQuickExpenseOpen(true)} onSpending={onSpending} onCategories={focusCategories}
+  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} setState={setState} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onCash={()=>setQuickEdit("cash")} onSavings={()=>setQuickEdit("savings")} onBills={()=>setQuickEdit("bill")} onQuickAdd={()=>setQuickExpenseOpen(true)} onSpending={onSpending} onCategories={focusCategories}
    onEditCategory={setEditingCategory}/>}
 
   {screen==="timeline"&&<>
@@ -179,8 +171,8 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
       <p className="text-[10px] leading-4 text-[#617668]">{x.name}</p>
       <p className="mt-2 break-words text-sm font-black sm:text-lg" style={{color:moneyColor(x.value)}}>{moneyLabel(x.value)}</p></div>)}
     </div>
-    {showMoney&&chart()}
-    {(!showMoney||state.demo||forecast.cashStart===null)&&<p className="mt-3 text-xs text-[#788B7B]">{t("Reveal amounts to view your private forecast curve. Starting cash is never inferred from income minus spending.","أظهر المبالغ لتشوف المنحنى الخاص. السيولة لا تُحسب من الدخل ناقص المصروف.")}</p>}
+    {chart()}
+    {(state.demo||forecast.cashStart===null)&&<p className="mt-3 text-xs text-[#788B7B]">{t("A cash-flow curve needs a real, manually entered starting cash balance. Cash is never inferred from income minus spending.","رسم السيولة بحاجة لرصيد بداية فعلي تدخلُه يدوياً. ما منحسب السيولة من الدخل ناقص المصاريف.")}</p>}
     {forecast.firstReserveRiskDate&&<div className="mt-3 rounded-xl border border-[#F0DBC5] bg-[#FFF6E9] p-3 text-xs font-semibold text-[#885C42]">
      {t("Potential reserve shortfall around ","احتمال نقص تحت الاحتياطي بتاريخ ")+forecast.firstReserveRiskDate}</div>}
     {forecast.missingDates>0&&<p className="mt-2 text-xs text-[#986D52]">{forecast.missingDates} {t("schedule(s) lack valid dates and cannot be forecast.","موعد دخل أو فاتورة بلا تاريخ صحيح ولا يدخل بالتوقع.")}</p>}
