@@ -23,6 +23,8 @@ export type ClassifiedLine={
  itemId:string;categoryId:string;categoryName:string;name:string;
  role:SpendingRole;needsReview:boolean;planned:number;paid:number;
  frequency:BudgetItem["frequency"];priority:BudgetItem["priority"];
+ /** Virtual view of an existing category envelope; never another budget or bill. */
+ isRemainder?:boolean;
 };
 export type UnassignedCategory={categoryId:string;name:string;planned:number;paid:number};
 export type DueObligation={
@@ -77,8 +79,22 @@ export function spendingBreakdown(state:MoneyState,month:string):SpendingBreakdo
   // Month-specific parent adjustments can be below the usual sum of items.
   // Keep the signed difference visible as an adjustment rather than inflate the month total.
   const rest=roundJod(categoryTotal-itemTotal);
-  if(rest!==0||paidOther>0||items.length===0)
+  // A single-category budget can be classified without adding a synthetic
+  // budget item. This virtual *view* covers only the unsplit remainder and
+  // payments not linked to an item; detailed lines remain independent.
+  // A negative month-specific override stays a signed adjustment, not a
+  // negative committed/necessary/flexible budget.
+  if(category.remainderRole&&rest>=0&&(rest>0||paidOther>0||items.length===0)){
+   lines.push({
+    itemId:"remainder:"+category.id,categoryId:category.id,
+    categoryName:category.name,name:category.name,role:category.remainderRole,
+    needsReview:false,planned:rest,paid:paidOther,frequency:"monthly",
+    priority:category.priority??(category.remainderRole==="flexible"?"flexible":"essential"),
+    isRemainder:true
+   });
+  }else if(rest!==0||paidOther>0||items.length===0){
    unassigned.push({categoryId:category.id,name:category.name,planned:rest,paid:paidOther});
+  }
  }
  for(const bill of state.commitments??[]){
   if(!bill.categoryId||!state.categories.some(c=>c.id===bill.categoryId))continue;
