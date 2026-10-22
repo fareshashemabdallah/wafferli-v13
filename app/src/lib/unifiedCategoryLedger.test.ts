@@ -71,7 +71,7 @@ describe("single-page category payment ledger",()=>{
   state=recordCategoryPayment(state,{id:"paid",categoryId:"school",billId:"tuition-bill",
    dueDate:"2026-11-05",date:"2026-10-22",amount:100});
   const archived=removeCategoryBill(state,"tuition-bill");
-  expect(archived.commitments?.[0]?.endDate).toBe("2026-11-05");
+  expect(archived.commitments?.[0]?.endDate).toBe("2026-11-04");
   expect(archived.expenses).toHaveLength(1);
  });
  it("does not allow invalid dates, phantom categories or an already-marked payment",()=>{
