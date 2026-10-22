@@ -19,6 +19,13 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
  const manage=(id:string)=>setActiveCategory(current=>current===id?null:id);
+ const openCategoryFromMix=(id:string)=>{
+  setActiveCategory(id);
+  // Open the exact original category record, not a second dashboard editor.
+  window.requestAnimationFrame?.(()=>{
+   document.getElementById("active-money-category")?.scrollIntoView?.({behavior:"smooth",block:"start"});
+  });
+ };
  const unknown=t("Not entered","غير مدخل");
  const shown=(n:number|null)=>n===null?unknown:fmtJOD(n);
  const sorted=forecast.events.filter(e=>e.kind!=="pace").slice(0,5);
@@ -27,7 +34,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
   <OneMoneyDashboardSummary state={state} forecast={forecast}
    onIncome={onIncome} onCash={onCash} onSavings={onSavings}
    onBills={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})} onExpense={onQuickAdd}
-   onTimeline={()=>onArea("timeline")}/>
+   onTimeline={()=>onArea("timeline")} onOpenCategory={openCategoryFromMix}/>
   <FamilySpendingGroups state={state} setState={setState}
    activeCategory={activeCategory} onClose={()=>setActiveCategory(null)}
    onManage={manage} onEditCategory={onEditCategory}/>
