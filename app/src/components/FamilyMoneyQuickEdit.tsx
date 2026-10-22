@@ -50,7 +50,10 @@ export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
    const value=savings.trim()===""?null:parseHouseholdAmount(savings);
    if(savings.trim()!==""&&value===null){setError(t("Enter a valid monthly savings target, or leave it blank for no target.","أدخل هدف ادخار شهري صحيحاً أو اتركه فارغاً بدون هدف."));return;}
    if(!confirmed())return;
-   setState(old=>({...base(old),savingsTargetAmount:value===null?undefined:value,savingsPct:0}));
+   setState(old=>{
+    const {savingsTargetAmount:previousGoal,...rest}=base(old);
+    return {...rest,savingsPct:0,...(value!==null?{savingsTargetAmount:value}:{})};
+   });
    onClose();return;
   }
   if(kind==="cash"){
