@@ -16,8 +16,9 @@ const files=(dir)=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(item=>{
  return item.isDirectory()?files(name):[name];
 });
 const all=files(sourceRoot).filter(p=>extensions.some(e=>p.endsWith(e)));
-const appFiles=files(app).filter(p=>!p.includes("/node_modules/")&&!p.includes("/.git/")&&
- !p.includes("/bun.lock")&&p.split(path.sep).length-path.join(app,"x").split(path.sep).length<=3);
+const appFiles=[...fs.readdirSync(app,{withFileTypes:true})
+ .filter(entry=>entry.isFile()&&/\.(mjs|js|ts|tsx)$/.test(entry.name))
+ .map(entry=>path.join(app,entry.name)),...files(path.join(app,"scripts"))];
 const imports=(text)=>{
  const refs=[];
  const patterns=[
