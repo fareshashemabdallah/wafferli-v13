@@ -16,7 +16,7 @@ export function displaySpendingRole(category:Category):{role:SpendingRole;sugges
  const v=category.name.toLocaleLowerCase();
  if(/school|tuition|nanny|helper|rent|mortgage|insurance|property tax|رسوم|مدرس|مربية|عاملة|إيجار|تأمين|قسط|ضريبة/.test(v))
   return {role:"committed",suggested:true};
- if(/outing|restaurant|leisure|travel|holiday|vacation|entertain|trip|gift|party|طلعات|مطعم|سفر|عطل|ترفيه|رحلة|هدايا/.test(v))
+ if(/outing|restaurant|leisure|travel|holiday|vacation|entertain|trip|gift|party|activit|sport|dance|club|birthday|طلعات|مطعم|سفر|عطل|ترفيه|رحلة|هدايا|أنشط|نشاط|رياضة/.test(v))
   return {role:"flexible",suggested:true};
  return {role:"necessary",suggested:true};
 }
