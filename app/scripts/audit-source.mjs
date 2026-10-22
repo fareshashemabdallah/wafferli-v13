@@ -38,7 +38,8 @@ function resolveModule(from,id){
  else if(id.startsWith("./")||id.startsWith("../"))target=path.resolve(path.dirname(from),id);
  else return null;
  const candidates=[target,...extensions.map(e=>target+e),...extensions.map(e=>path.join(target,"index"+e))];
- return candidates.find(c=>known.has(path.resolve(c)))??null;
+ return candidates.find(c=>known.has(path.resolve(c)))??
+  candidates.find(c=>path.resolve(c).startsWith(app+path.sep)&&fs.existsSync(c)&&fs.statSync(c).isFile())??null;
 }
 function visit(p){
  p=path.resolve(p);if(seen.has(p)||!known.has(p))return;
@@ -78,7 +79,7 @@ const unreferenced=allDeclared.filter(d=>!anyRefs.has(d));
 const allRouteFiles=all.filter(p=>/[/\\]routes[/\\].*\.[tj]sx?$/.test(p));
 console.log("DABBERNA SOURCE AUDIT — static import inventory; candidate lists are NOT deletion instructions");
 console.log(JSON.stringify({
- scannedSourceFiles:all.length,shippedSourceFiles:runtime.length,
+ scannedSourceFiles:all.length,staticReachableSourceFiles:runtime.length,
  routeFiles:allRouteFiles.length,reachableRoutes:allRouteFiles.filter(p=>seen.has(p)).length,
  unreachableNonTestSources:orphan.length,
  unreferencedDeclaredPackages:unreferenced.length,
@@ -107,4 +108,5 @@ console.log("\nPACKAGES NOT REFERENCED BY SOURCE IMPORTS (review scripts/toolcha
 for(const p of unreferenced)console.log("  "+p);
 console.log("\nDIRECT IMPORTED PACKAGES FOUND IN SOURCE:");
 for(const p of usedPackages)console.log("  "+p);
-console.log("\nNOTE: all file routes are reachable by direct URL even if not in main navigation. Do not automatically remove routes, database migrations, live-AI server code, backups or public assets.");
+console.log("\nNOTE: 'staticReachableSourceFiles' is an import-graph count, NOT the number of modules emitted in the final minified JS. Some imports are tree-shaken.");
+console.log("All file routes are reachable by direct URL even if absent from main navigation. Do not automatically remove routes, database migrations, live-AI server code, backups or public assets.");
