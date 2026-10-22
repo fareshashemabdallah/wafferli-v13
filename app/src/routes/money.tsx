@@ -90,14 +90,6 @@ function MoneyPage() {
            </summary>
            <div className="mt-3"><HouseholdPresencePanel members={members} money={s} setMoney={setS}/></div>
           </details>
-          {!s.demo&&s.financialInputsPartial===true&&<button type="button"
-            className="min-h-11 text-start text-xs font-semibold text-[#397B57] underline"
-            onClick={()=>{if(window.confirm(ar?
-             "هل راجعت المصاريف الأساسية والمهمة في الفئات؟ هذا لا يؤكد رصيد البنك.":
-             "Have you reviewed your family's essential and important costs in the categories? This does not verify your bank balance."))
-             setS(prev=>({...prev,financialInputsPartial:false}));}}>
-            {ar?"راجعت مصاريف عائلتي المعتادة":"I've reviewed our regular household costs"}
-          </button>}
           <details className="rounded-xl border border-[#E3EBE0] p-3">
            <summary className="min-h-10 cursor-pointer text-xs font-bold text-[#3F805B]">
             {ar?"تحليل مالي إضافي (اختياري)":"Additional financial analysis (optional)"}
