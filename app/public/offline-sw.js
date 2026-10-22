@@ -2,7 +2,7 @@
  * shopping/provider responses, POST requests or external origins.
  * User data remains in browser storage only and is not copied here.
  */
-const CACHE="dabberna-static-shell-20261015-v1";
+const CACHE="dabberna-static-shell-20261022-v2";
 const PREFIX="dabberna-static-shell-";
 const SCOPE=new URL("./",self.registration.scope).pathname;
 const SHELL=SCOPE;
