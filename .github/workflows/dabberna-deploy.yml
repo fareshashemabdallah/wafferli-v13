@@ -51,33 +51,56 @@ jobs:
           test -s react-dist/explore/weekend/index.html
           grep -Fq '/wafferli-v13/#/explore/weekend' react-dist/explore/weekend/index.html
           grep -qi 'Dabberna' react-dist/index.html
-      - name: Build isolated redesign preview (PR #131)
+      - name: Stamp release revision and reject obsolete amount toggles
+        run: |
+          printf '%s\n' "$GITHUB_SHA" > react-dist/build-revision.txt
+          if grep -RlE 'Hide private amounts|Reveal amounts|Show private amounts' react-dist/assets; then
+            echo "::error::Production assets still contain an old hide/reveal amounts control."
+            exit 1
+          fi
+      - name: Build isolated redesign preview (optional)
+        id: preview_checkout
+        continue-on-error: true
         uses: actions/checkout@v4
         with:
           ref: design/clean-slate-single-category-2026-10-21
           path: redesign-preview
           persist-credentials: false
       - name: Install preview dependencies
+        id: preview_install
+        if: steps.preview_checkout.outcome == 'success'
+        continue-on-error: true
         working-directory: redesign-preview/app
         run: bun install --frozen-lockfile
       - name: Verify preview TypeScript
+        id: preview_types
+        if: steps.preview_install.outcome == 'success'
+        continue-on-error: true
         working-directory: redesign-preview/app
         run: bun run typecheck
       - name: Verify preview regression tests
+        id: preview_tests
+        if: steps.preview_types.outcome == 'success'
+        continue-on-error: true
         working-directory: redesign-preview/app
         run: bun run test
       - name: Build redesign under isolated /preview/ path
+        id: preview_build
+        if: steps.preview_tests.outcome == 'success'
+        continue-on-error: true
         working-directory: redesign-preview/app
         env:
           VITE_ENABLE_LIVE_AI: "false"
         run: bunx vite build --base=/wafferli-v13/preview/
-      - name: Assemble production and preview pages
+      - name: Assemble production and optional preview pages
         run: |
-          mkdir -p react-dist/preview
-          cp -a redesign-preview/react-dist/. react-dist/preview/
-          rm -f react-dist/preview/offline-sw.js
-          test -s react-dist/preview/index.html
-          grep -Fq '/wafferli-v13/preview/assets/' react-dist/preview/index.html
+          if test -s redesign-preview/react-dist/index.html && grep -Fq '/wafferli-v13/preview/assets/' redesign-preview/react-dist/index.html; then
+            mkdir -p react-dist/preview
+            cp -a redesign-preview/react-dist/. react-dist/preview/
+            rm -f react-dist/preview/offline-sw.js
+          else
+            echo "Optional redesign preview unavailable; publishing current main app without blocking."
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
