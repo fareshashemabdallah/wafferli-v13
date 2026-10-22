@@ -24,7 +24,8 @@ describe("Calm contextual Today redesign",()=>{
   expect(screen.queryByText("Understand, protect and prepare—so we can live well together.")).not.toBeInTheDocument();
   expect(screen.queryByText("More family options (optional)")).not.toBeInTheDocument();
   expect(screen.getByRole("region",{name:"Quick family actions"})).toBeInTheDocument();
-  expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("••••");
+  expect(screen.getByRole("region",{name:"Money at a glance"})).not.toHaveTextContent("••••");
+  expect(screen.queryByRole("button",{name:/Show private amounts|Hide private amounts/})).not.toBeInTheDocument();
  });
  it("never presents invented sample currency or urgency without real saved records",async()=>{
   draw();
@@ -32,10 +33,9 @@ describe("Calm contextual Today redesign",()=>{
   expect(screen.queryByTestId("today-one-action")).not.toBeInTheDocument();
   expect(screen.queryByText("Sophia's birthday")).not.toBeInTheDocument();
   expect(screen.queryByText("70 JOD")).not.toBeInTheDocument();
-  expect(screen.getByRole("region",{name:"Money at a glance"})).not.toHaveTextContent("1,200 JOD");
-  expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("Only sample money is saved");
+  expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("Sample Money amounts are examples only");
  });
- it("reuses the exact birthday gift plan with one click and only reveals private amounts on request",async()=>{
+ it("shows saved gift plan amounts without requiring a reveal action",async()=>{
   const date=dateKey(shiftDays(new Date(),6));
   const sourceRef="occasion:bday@"+date.slice(0,4);
   const plan:FamilyPlan={id:"plan1",title:"Family birthday",kind:"occasion",status:"planning",
@@ -48,19 +48,16 @@ describe("Calm contextual Today redesign",()=>{
   draw();
   const action=await screen.findByTestId("today-one-action");
   expect(action).toHaveTextContent("Birthday from calendar");
-  expect(action).toHaveTextContent("Planned gift: Hidden");
+  expect(action).toHaveTextContent("Planned gift: 70 JOD");
   const continueLink=screen.getByRole("link",{name:/Compare gift options/});
   expect(continueLink).toHaveAttribute("href","/explore/smartbuy");
   fireEvent.click(continueLink);
   expect(JSON.parse(localStorage.getItem("wafferli.v13.activeFamilyPlanId")??"null")).toBe("plan1");
   expect(localStorage.getItem("wafferli.v13.money")).toContain('"expenses":[]');
-  fireEvent.click(screen.getByRole("button",{name:"Show private amounts"}));
+  expect(screen.queryByRole("button",{name:/Show private amounts|Hide private amounts/})).not.toBeInTheDocument();
   expect(action).toHaveTextContent("70 JOD");
-  expect(screen.getByRole("button",{name:"Hide private amounts"})).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Hide private amounts"}));
-  expect(action).toHaveTextContent("Planned gift: Hidden");
  });
- it("presents essential shortfalls as the main task without exposing money amounts",async()=>{
+ it("presents essential shortfalls with visible recorded amounts",async()=>{
   const money={...emptyRealMoney(),income:400,incomeKnown:true,categories:[
    {id:"rent",name:"Sensitive essential",type:"fixed" as const,planned:800,priority:"essential" as const}]};
   put("money",money);
@@ -68,6 +65,6 @@ describe("Calm contextual Today redesign",()=>{
   const action=await screen.findByTestId("today-one-action");
   expect(action).toHaveTextContent("Review your family's money picture");
   expect(screen.getByRole("link",{name:/Review essentials and options/})).toHaveAttribute("href","/money");
-  expect(screen.getByRole("region",{name:"Money at a glance"})).toHaveTextContent("••••");
+  expect(screen.getByRole("region",{name:"Money at a glance"})).not.toHaveTextContent("••••");
  });
 });
