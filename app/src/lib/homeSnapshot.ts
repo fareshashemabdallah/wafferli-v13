@@ -51,10 +51,9 @@ export function homeSnapshot(input:{
  const upcoming=upcomingFamilyPlans(resolvedPlans,now,5).map(p=>({
   id:"plan:"+p.id,title:p.title,...(p.date?{date:p.date}:{}),kind:"plan" as const
  }));
- const plannedDates=new Set(upcoming.map(p=>p.date+"|"+p.title.toLowerCase()));
  const linked=linkedOccasionKeys(resolvedPlans);
  const plans:HomePlanItem[]=[...upcoming,...nextOccasions.filter(e=>
-  !isOccasionAlreadyPlanned(e,linked)&&!plannedDates.has(e.occursOn+"|"+e.title.toLowerCase()))
+  !isOccasionAlreadyPlanned(e,linked))
   .map(e=>({id:"moment:"+e.id+":"+e.occursOn,title:e.title,date:e.occursOn,kind:"moment" as const}))]
   .sort((a,b)=>(a.date??"9999-12-31").localeCompare(b.date??"9999-12-31")).slice(0,4);
  const basket=input.basket.filter(item=>!isSampleBasketEntry(item)&&!!item.name.trim()).slice(0,3).map(item=>({
