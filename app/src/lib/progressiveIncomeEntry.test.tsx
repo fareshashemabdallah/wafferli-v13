@@ -72,7 +72,7 @@ describe("Income and payday progressive entry",()=>{
  });
  it("keeps savings editable without a parallel budget form",()=>{
   render(<App kind="savings"/>);
-  fireEvent.change(screen.getByLabelText("Savings target each month (JOD), optional"),{target:{value:"١٥٠"}});
+  fireEvent.change(screen.getByLabelText(/Savings target each month/),{target:{value:"١٥٠"}});
   fireEvent.click(screen.getByRole("button",{name:"Save and update outlook"}));
   expect(saved().savingsTargetAmount).toBe(150);
   expect(saved().savingsPct).toBe(0);
