@@ -87,6 +87,22 @@ console.log(JSON.stringify({
 },null,2));
 console.log("\nUNREACHABLE PRODUCTION SOURCE CANDIDATES:");
 for(const p of orphan)console.log("  "+slashes(path.relative(app,p)));
+const incoming=new Map();
+for(const from of all){
+ for(const id of imports(fs.readFileSync(from,"utf8"))){
+  const target=resolveModule(from,id);
+  if(!target)continue;
+  const refs=incoming.get(target)??[];
+  refs.push(slashes(path.relative(app,from)));
+  incoming.set(target,refs);
+ }
+}
+console.log("\nUNREACHABLE SOURCES WITH INCOMING LINKS (tests or other dormant files):");
+for(const p of orphan){
+ const links=incoming.get(p)??[];
+ console.log("  "+slashes(path.relative(app,p))+" <- "+
+  (links.length?links.slice(0,4).join(", ")+(links.length>4?" +"+(links.length-4):""):"NO LOCAL IMPORTS"));
+}
 console.log("\nPACKAGES NOT REFERENCED BY SOURCE IMPORTS (review scripts/toolchains):");
 for(const p of unreferenced)console.log("  "+p);
 console.log("\nDIRECT IMPORTED PACKAGES FOUND IN SOURCE:");
