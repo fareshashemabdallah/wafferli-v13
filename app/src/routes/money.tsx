@@ -351,7 +351,7 @@ function CategoryForm({ initial, minimumAllocation, onSave, onCancel }: { initia
 }
 
 function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expenses, onChange, onRecord, onDelete, onConfirmPlanned, cashBalance }: {
-  cats: Category[]; demo:boolean; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];
+  cats: Category[]; retiredCategoryNames:Record<string,string>; demo:boolean; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];
   onChange: (apply: (existing:Expense[])=>Expense[]) => void; onRecord:(e:Expense)=>void; onDelete: (e:Expense)=>void;
   onConfirmPlanned:(id:string,actual:number,mode:"already"|"deduct"|"untracked")=>void;
   cashBalance:number|null;
