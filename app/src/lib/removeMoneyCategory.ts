@@ -7,10 +7,10 @@ export function removeMoneyCategory(state:MoneyState,categoryId:string):MoneySta
  const category=state.categories.find(c=>c.id===categoryId);
  if(!category||state.demo)return state;
  const group=visualGroupOf(category);
- const isStarter=STARTER_PICTURES.some(p=>p.key===group);
+ const starter=STARTER_PICTURES.find(p=>p.key===group)?.key;
  const lastOfGroup=!state.categories.some(c=>c.id!==categoryId&&visualGroupOf(c)===group);
- const hiddenStarterGroups=isStarter&&lastOfGroup?
-  [...new Set([...(state.hiddenStarterGroups??[]),group])]:state.hiddenStarterGroups??[];
+ const hiddenStarterGroups=starter&&lastOfGroup?
+  [...new Set([...(state.hiddenStarterGroups??[]),starter])]:state.hiddenStarterGroups??[];
  const keepItems=new Set(state.expenses.map(e=>e.budgetItemId).filter((v):v is string=>!!v));
  const monthPlans=Object.fromEntries(Object.entries(state.categoryMonthlyPlans??{}).map(([month,items])=>
   [month,Object.fromEntries(Object.entries(items).filter(([id])=>id!==categoryId))])
