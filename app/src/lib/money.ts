@@ -13,6 +13,8 @@ export type MoneyState = {
   income:number; savingsPct:number; categories:Category[]; expenses:Expense[]; demo:boolean;
   /** Optional item detail. Category planned totals remain canonical; never sum both. */
   budgetItems?:BudgetItem[];
+  /** Names of removed categories retained only to label previous payment history. */
+  retiredCategoryNames?:Record<string,string>;
   /** Explicitly distinguishes a parent-entered zero income from unknown income. */
   incomeKnown?:boolean; incomeConfidence?:"estimate"|"confirmed";
   /** A one-fact-at-a-time estimate does NOT describe the entire household budget. */
