@@ -42,13 +42,14 @@ describe("Money dashboard compact spending mix",()=>{
   const panel=screen.getByTestId("money-spending-mix");
   expect(panel).toHaveTextContent("Your family's spending mix");
   expect(panel).toHaveTextContent("1,600 JOD");
-  expect(within(panel).getByTestId("mix-stat-committed")).toHaveTextContent("835 JOD");
-  expect(within(panel).getByTestId("mix-stat-necessary")).toHaveTextContent("665 JOD");
+  expect(within(panel).getByTestId("mix-stat-committed")).toHaveTextContent("855 JOD");
+  expect(within(panel).getByTestId("mix-stat-necessary")).toHaveTextContent("650 JOD");
   expect(within(panel).getByTestId("mix-stat-cushion")).toHaveTextContent("95 JOD");
   expect(within(panel).queryByTestId("mix-stat-unclassified")).not.toBeInTheDocument();
   expect(within(panel).getByTestId("money-spending-mix-bar").children).toHaveLength(3);
   expect(within(panel).getByTestId("mix-expanded-lines")).toHaveTextContent("Utilities · Water");
   expect(within(panel).getByTestId("mix-expanded-lines")).toHaveTextContent("Utilities · Cushion");
+  fireEvent.click(within(panel).getByText("Explore spending mix"));
   fireEvent.click(within(panel).getByRole("button",{name:/Utilities · Water/}));
   expect(open).toHaveBeenCalledWith("utilities");
   expect(sample().budgetItems).toHaveLength(8);
