@@ -45,14 +45,14 @@ describe("Plan → Money setup is precise and contextual",()=>{
  it("makes the hidden review confirmation visible and preserves existing categories",()=>{
   vi.spyOn(window,"confirm").mockReturnValue(true);
   // Controlled harness checks the parent would receive a partial-flag update.
-  let next:MoneyState|null=null;
+  const changed:{current:MoneyState|null}={current:null};
   const state=money();
   render(<I18nProvider><FamilyMoneyRhythm state={state} setState={change=>{
-    next=typeof change==="function"?change(state):change;
+    changed.current=typeof change==="function"?change(state):change;
    }} onBills={()=>{}} onSpending={()=>{}} onCategories={()=>{}} requestedSetupStep="review"/></I18nProvider>);
   fireEvent.click(screen.getByRole("button",{name:"Confirm review"}));
-  expect(next?.financialInputsPartial).toBe(false);
-  expect(next?.categories).toEqual(state.categories);
+  expect(changed.current?.financialInputsPartial).toBe(false);
+  expect(changed.current?.categories).toEqual(state.categories);
   expect(window.confirm).toHaveBeenCalledTimes(1);
  });
 });
