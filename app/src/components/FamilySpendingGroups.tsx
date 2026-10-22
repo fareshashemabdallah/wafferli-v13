@@ -109,7 +109,7 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
       <span className="mt-1 block text-xs tabular-nums text-[#466E52]">{money(line.planned)} {t("monthly","شهرياً")}
        {" · "}{t("Paid","مدفوع")} {money(line.paid)}</span>
       {line.needsReview&&<span className="mt-1 block text-[10px] text-[#A07846]">{t("Suggested nature · confirm in this line","تصنيف مقترح · أكده داخل البند")}</span>}
-      {line.isRemainder&&<span className="mt-1 block text-[10px] text-[#69836B]">{t("Uses your category classification; no extra budget is created","يستخدم تصنيف الفئة، دون إنشاء ميزانية إضافية")}</span>
+      {line.isRemainder&&<span className="mt-1 block text-[10px] text-[#69836B]">{t("Uses your category classification; no extra budget is created","يستخدم تصنيف الفئة، دون إنشاء ميزانية إضافية")}</span>}
       {line.priority==="protected"&&<span className="mt-1 block text-[10px] text-[#3D7B5C]">{t("Protected family priority","أولوية محمية للعيلة")}</span>}
      </button>)}
     </div>:<p className="mt-3 text-xs text-[#7A907E]">{t(
