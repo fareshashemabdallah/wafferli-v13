@@ -5,19 +5,19 @@ import {oneMoneyDashboard} from "@/lib/oneMoneyDashboard";
 import {fmtJOD} from "@/lib/storage";
 import {localToday} from "@/lib/cashflow";
 
-type Props={state:MoneyState;forecast:RhythmForecast;revealed:boolean;
+type Props={state:MoneyState;forecast:RhythmForecast;
  onIncome:()=>void;onCash:()=>void;onSavings:()=>void;onBills:()=>void;onExpense:()=>void;
  onTimeline:()=>void;};
-export function OneMoneyDashboardSummary({state,forecast,revealed,onIncome,onCash,onSavings,onBills,onExpense,onTimeline}:Props){
+export function OneMoneyDashboardSummary({state,forecast,onIncome,onCash,onSavings,onBills,onExpense,onTimeline}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const overview=oneMoneyDashboard(state,forecast,localToday());
- const money=(value:number|null)=>value===null||state.demo?t("Not entered","غير مدخل"):revealed?fmtJOD(value):"••••";
+ const money=(value:number|null)=>value===null?t("Not entered","غير مدخل"):fmtJOD(value);
  const values=[
   {id:"income",emoji:"💵",label:t("Monthly income","الدخل الشهري"),value:money(overview.monthlyIncome),
    subtitle:t("Expected; confirmed received this month: ","متوقع؛ المستلم المؤكد هالشهر: ")+money(overview.receivedIncome),bg:"#EAF5E8",action:onIncome},
   {id:"plan",emoji:"🧺",label:t("Monthly spending plan","خطة مصروف الشهر"),value:money(overview.planned),
    subtitle:t("Usual + confirmed adjustments","المعتاد والتعديلات المؤكدة"),bg:"#EDF3FF",action:()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"})},
-  {id:"paid",emoji:"✅",label:t("Paid so far","المدفوع لليوم"),value:state.demo?t("Demo","تجريبي"):money(overview.paid),
+  {id:"paid",emoji:"✅",label:t("Paid so far","المدفوع لليوم"),value:money(overview.paid),
    subtitle:t("Confirmed expenses only","مصاريف مدفوعة فعلياً فقط"),bg:"#FFF0F5",action:onExpense},
   {id:"bills",emoji:"📅",label:t("Bills due · next 30 days","فواتير تستحق خلال ٣٠ يوم"),value:money(overview.billsDue),
    subtitle:t("Unpaid scheduled commitments","التزامات مجدولة غير مدفوعة"),bg:"#FFF6E6",action:onBills}
