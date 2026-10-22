@@ -1,5 +1,6 @@
 import {describe,it,expect} from "vitest";
 import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
 const base=(file:string)=>readFileSync(new URL("../../public/"+file,import.meta.url),"utf8");
 describe("repository-scoped static-only offline shell",()=>{
  it("keeps manifest under GitHub Pages and provides usable brand icon metadata",()=>{
@@ -32,7 +33,7 @@ describe("repository-scoped static-only offline shell",()=>{
   expect(code).toContain("if(url.pathname!==SCOPE)return;");
  });
  it("publishes preview from the current source, not an older masked-amount branch",()=>{
-  const deploy=readFileSync(new URL("../../../.github/workflows/dabberna-deploy.yml",import.meta.url),"utf8");
+  const deploy=readFileSync(resolve(process.cwd(),"../.github/workflows/dabberna-deploy.yml"),"utf8");
   expect(deploy).not.toContain("ref: design/clean-slate-single-category-2026-10-21");
   expect(deploy).toContain("bunx vite build --base=/wafferli-v13/preview/ --outDir ../preview-dist");
   expect(deploy).toContain("build-revision.txt");
