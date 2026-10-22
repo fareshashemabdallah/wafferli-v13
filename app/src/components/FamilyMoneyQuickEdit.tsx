@@ -27,7 +27,8 @@ export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
  const [variable,setVariable]=useState(false);
  const [balance,setBalance]=useState(state.cashOnHand==null?"":String(state.cashOnHand));
  const [reserve,setReserve]=useState(String(state.cashReserve??0));
- const [savings,setSavings]=useState(state.savingsTargetAmount===undefined?"":String(state.savingsTargetAmount));
+ const [savings,setSavings]=useState(state.savingsTargetAmount!==undefined?String(state.savingsTargetAmount):
+  state.savingsPct>0&&monthlyTotal(source)>0?String(roundJod(monthlyTotal(source)*state.savingsPct/100)):"");
  const [error,setError]=useState("");
  useEffect(()=>{
   const current=kind==="income"?source.find(x=>x.id===picked):kind==="bill"?bills.find(x=>x.id===picked):undefined;
@@ -49,7 +50,7 @@ export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
    const value=savings.trim()===""?null:parseHouseholdAmount(savings);
    if(savings.trim()!==""&&value===null){setError(t("Enter a valid monthly savings target, or leave it blank for no target.","أدخل هدف ادخار شهري صحيحاً أو اتركه فارغاً بدون هدف."));return;}
    if(!confirmed())return;
-   setState(old=>({...base(old),savingsTargetAmount:value??0,savingsPct:0}));
+   setState(old=>({...base(old),savingsTargetAmount:value===null?undefined:value,savingsPct:0}));
    onClose();return;
   }
   if(kind==="cash"){
@@ -107,6 +108,7 @@ export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
       <h2 className="mt-1 text-lg font-black text-[#2F6548]">{heading}</h2>
       <p className="mt-1 text-xs text-[#778779]">{kind==="cash"?
        t("This balance is entered by you; it is not verified by a bank.","هذا الرصيد أنت مدخله، مش مؤكد من البنك."):
+       kind==="savings"?t("Your target is optional and is not actual cash set aside.","هدفك اختياري وليس سيولة ادخرتها فعلاً."):
        t("A date in your plan is not confirmation of payment or receipt.","التاريخ بالخطة ما بيأكد استلام أو دفع أي مبلغ.")}</p></div>
      <button aria-label={t("Close","إغلاق")} className="grid size-10 shrink-0 place-items-center rounded-full bg-[#EBF2E9] text-[#356349]"
       onClick={onClose} type="button"><X className="size-5"/></button>
