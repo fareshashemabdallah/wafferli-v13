@@ -1,7 +1,7 @@
 import {useState,type FormEvent} from "react";
 import {useI18n} from "@/lib/i18n";
 import {uid,fmtJOD} from "@/lib/storage";
-import {localToday,futureDate,scheduleDates,roundJod,type Frequency} from "@/lib/cashflow";
+import {localToday,futureDate,scheduleDates,roundJod} from "@/lib/cashflow";
 import {computeMoney,type MoneyState} from "@/lib/money";
 import {categoryItemTotal,monthlyItemCost,recordedItemSpending,type BudgetItem,type ItemFrequency} from "@/lib/householdBudgetBuilder";
 import {addCategoryItem,disableCategoryItem,recordCategoryPayment,undoCategoryPayment,
