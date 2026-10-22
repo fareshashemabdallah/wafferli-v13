@@ -45,6 +45,7 @@ describe("one category, three independent spending behaviours",()=>{
   expect(displaySpendingRole(legacy)).toEqual({role:"committed",suggested:true});
   expect(displaySpendingRole({id:"g",name:"Car",type:"variable",planned:100})).toEqual({role:"necessary",suggested:true});
   expect(displaySpendingRole({id:"l",name:"Travel",type:"variable",planned:100})).toEqual({role:"flexible",suggested:true});
+  expect(displaySpendingRole({id:"kid",name:"Children Activities",type:"variable",planned:300})).toEqual({role:"flexible",suggested:true});
   const initial={...s,categories:[...s.categories,legacy]};
   const saved=saveFamilyCategory(initial,{id:"old",name:"School fees",planned:750,type:"fixed",
    visualGroup:"custom",visualIcon:"education",spendingRole:"flexible",expectedCadence:"yearly"},"unused");
