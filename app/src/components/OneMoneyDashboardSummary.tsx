@@ -6,9 +6,9 @@ import {fmtJOD} from "@/lib/storage";
 import {localToday} from "@/lib/cashflow";
 
 type Props={state:MoneyState;forecast:RhythmForecast;revealed:boolean;
- onIncome:()=>void;onCash:()=>void;onBills:()=>void;onExpense:()=>void;
+ onIncome:()=>void;onCash:()=>void;onSavings:()=>void;onBills:()=>void;onExpense:()=>void;
  onTimeline:()=>void;};
-export function OneMoneyDashboardSummary({state,forecast,revealed,onIncome,onCash,onBills,onExpense,onTimeline}:Props){
+export function OneMoneyDashboardSummary({state,forecast,revealed,onIncome,onCash,onSavings,onBills,onExpense,onTimeline}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const overview=oneMoneyDashboard(state,forecast,localToday());
  const money=(value:number|null)=>value===null||state.demo?t("Not entered","غير مدخل"):revealed?fmtJOD(value):"••••";
@@ -64,6 +64,7 @@ export function OneMoneyDashboardSummary({state,forecast,revealed,onIncome,onCas
     <strong className="mt-1 block text-sm font-black text-[#347C54]">{state.savingsTargetAmount!==undefined||state.savingsPct>0?
      money(state.savingsTargetAmount??Math.round((overview.monthlyIncome??0)*state.savingsPct)/100):t("Not set","غير محدد")}</strong>
     <p className="text-[10px] text-[#79897E]">{t("A target, not money already saved","هدف مش مبلغ مدّخر فعلياً")}</p>
+    <button type="button" onClick={onSavings} className="mt-2 min-h-10 rounded-xl border border-[#C9E0CD] bg-white px-3 text-xs font-bold text-[#347B56]">{t("Edit savings goal","تعديل هدف الادخار")}</button>
    </div>
    <button type="button" className="min-h-11 rounded-xl border border-[#C9E0CD] bg-white px-3 text-xs font-bold text-[#347B56]"
     onClick={onCash}>{t("Edit cash","عدّل السيولة")}</button>
