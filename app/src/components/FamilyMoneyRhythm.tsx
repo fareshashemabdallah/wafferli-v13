@@ -1,4 +1,4 @@
-import {useState,type FormEvent} from "react";
+import {useEffect,useState,type FormEvent} from "react";
 import {Eye,EyeOff,Plus,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,fmtJOD,uid} from "@/lib/storage";
@@ -34,6 +34,12 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
  const {lang}=useI18n(),ar=lang==="ar",t=(e:string,a:string)=>ar?a:e;
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [screen,setScreen]=useState<"map"|"timeline"|"pace"|"annual">("map");
+ const [scrollToCategories,setScrollToCategories]=useState(false);
+ const focusCategories=()=>{setScreen("map");setScrollToCategories(true);};
+ useEffect(()=>{
+  if(screen!=="map"||!scrollToCategories)return;
+  onCategories();setScrollToCategories(false);
+ },[screen,scrollToCategories,onCategories]);
  const [days,setDays]=useState<7|30|90>(30);
  const [includeExpected,setIncludeExpected]=useState(true);
  const [showMoney,setShowMoney]=useState(false);
@@ -149,7 +155,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
 
   {screen!=="map"&&<button type="button" className="min-h-11 rounded-xl border border-[#C7DEC9] bg-white px-4 text-sm font-bold text-[#3B7958]" onClick={()=>setScreen("map")}>
    ← {t("Back to the Money dashboard","ارجع للوحة المال")}</button>}
-  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} setState={setState} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onCash={()=>setQuickEdit("cash")} onSavings={()=>setQuickEdit("savings")} onBills={()=>setQuickEdit("bill")} onQuickAdd={()=>setQuickExpenseOpen(true)} onSpending={onSpending} onCategories={onCategories}
+  {screen==="map"&&<FamilyMoneyPrototypeHome state={state} setState={setState} forecast={buildFamilyMoneyRhythm(state,plansReady?plans:[],now,30,true)} revealed={showMoney} onArea={setScreen} onIncome={()=>setQuickEdit("income")} onCash={()=>setQuickEdit("cash")} onSavings={()=>setQuickEdit("savings")} onBills={()=>setQuickEdit("bill")} onQuickAdd={()=>setQuickExpenseOpen(true)} onSpending={onSpending} onCategories={focusCategories}
    onEditCategory={setEditingCategory}/>}
 
   {screen==="timeline"&&<>
@@ -233,7 +239,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
      </div>;
     })}
     {!categories.length&&<div className={soft}><p className="text-sm">{t("Start with a spending category, such as groceries or fuel.","ابدأ بفئة مثل المونة أو البنزين.")}</p>
-     <button type="button" className="mt-3 min-h-10 text-xs font-bold text-[#397B58] underline" onClick={onCategories}>{t("Set a monthly allowance","حدّد مخصصاً شهرياً")}</button></div>}
+     <button type="button" className="mt-3 min-h-10 text-xs font-bold text-[#397B58] underline" onClick={focusCategories}>{t("Set a monthly allowance","حدّد مخصصاً شهرياً")}</button></div>}
    </div>
    {editingPace&&<form className={soft} onSubmit={registerPace} aria-label={t("Edit spending pace","تعديل وتيرة الصرف")}>
     <h3 className="font-extrabold">{t("Spending rhythm: ","وتيرة صرف: ")+categories.find(c=>c.id===editingPace)?.name}</h3>
@@ -241,7 +247,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
      <div className="mt-2 rounded-xl bg-[#F4F8ED] p-3 text-xs text-[#617C66]">
       {t("This category's allowance comes from detailed budget items. Edit that budget to change the amount; you can still set the spending interval here.",
        "مخصص هالفئة من بنود الميزانية التفصيلية. عدّل الميزانية لتغيير المبلغ، وفيك تحدد وتيرة الصرف هون.")}
-      <button type="button" onClick={onCategories} className="ms-2 font-bold underline">{t("Edit budget","عدّل الميزانية")}</button>
+      <button type="button" onClick={focusCategories} className="ms-2 font-bold underline">{t("Edit budget","عدّل الميزانية")}</button>
      </div>:
      <label className="mt-3 block text-xs font-bold">{t("Monthly allowance (JOD)","المخصص الشهري (دينار)")}
       <input className="mt-1 min-h-11 w-full rounded-xl border bg-white p-2" type="number" step=".01" min=".01"
@@ -319,7 +325,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
   {editingCategory&&<FamilyCategoryEditor key={editingCategory.id??editingCategory.starter??"new"} state={state} setState={setState}
    {...(editingCategory.id?{categoryId:editingCategory.id}:{})}
    {...(editingCategory.starter?{starter:editingCategory.starter}:{})}
-   onMonthPlan={setAdjustingMonthCategory} onAdvanced={onCategories}
+   onMonthPlan={setAdjustingMonthCategory} onAdvanced={focusCategories}
    onClose={()=>setEditingCategory(null)}/>}
   {success&&<p role="status" className="rounded-xl bg-[#EDF7EC] p-3 text-xs font-bold text-[#387954]">{success}</p>}
   <p className="flex items-start gap-2 px-2 text-[11px] leading-relaxed text-[#77877D]"><ShieldCheck className="mt-0.5 size-4 shrink-0"/>
