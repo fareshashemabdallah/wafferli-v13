@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {Plus} from "lucide-react";
 import {OneMoneyDashboardSummary} from "./OneMoneyDashboardSummary";
+import {UnifiedCategoryDetails} from "./UnifiedCategoryDetails";
 import {useI18n} from "@/lib/i18n";
 import {computeMoney,type MoneyState} from "@/lib/money";
 import {type RhythmForecast} from "@/lib/familyMoneyRhythm";
@@ -11,15 +12,17 @@ import {STARTER_PICTURES,visualGroupOf,iconForCategory,pictureFor,pictureCategor
 
 type Area="timeline"|"pace"|"annual";
 type Props={
- state:MoneyState;forecast:RhythmForecast;revealed:boolean;
+ state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;forecast:RhythmForecast;revealed:boolean;
  onArea:(screen:Area)=>void;onIncome:()=>void;onCash:()=>void;onBills:()=>void;onQuickAdd:()=>void;
  onSpending:()=>void;onCategories:()=>void;
  onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
 const tile="rounded-[1.05rem] border border-[#E3EAE0] bg-white p-3 text-start transition hover:-translate-y-0.5 hover:border-[#91C6A4] focus-visible:ring-2 focus-visible:ring-[#4E9D70]";
-export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncome,onCash,onBills,onQuickAdd,onSpending,onCategories,onEditCategory}:Props){
+export function FamilyMoneyPrototypeHome({state,setState,forecast,revealed,onArea,onIncome,onCash,onBills,onQuickAdd,onSpending,onCategories,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [selected,setSelected]=useState<string|null>(null);
+ const [activeCategory,setActiveCategory]=useState<string|null>(null);
+ const manage=(id:string)=>{setActiveCategory(current=>current===id?null:id);setSelected(null);};
  const m=computeMoney(state),unknown=t("Not entered","غير مدخل");
  const shown=(n:number|null)=>state.demo||n===null?unknown:revealed?fmtJOD(n):"••••";
  const sorted=forecast.events.filter(e=>e.kind!=="pace").slice(0,5);
@@ -43,7 +46,7 @@ export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncom
     const confirmed=cat.some(c=>confirmedMonthPlan(state,c.id,localToday().slice(0,7))!==null);
     return <button key={g.key} type="button" data-testid={"category-picture-"+g.key}
       onClick={()=>cat.length===0?onEditCategory({starter:g.key}):
-       cat.length===1?onEditCategory({id:cat[0]!.id}):setSelected(selected===g.key?null:g.key)}
+       cat.length===1?manage(cat[0]!.id):setSelected(selected===g.key?null:g.key)}
       aria-pressed={selected===g.key} className={tile+" min-h-36 "+(selected===g.key?"!border-[#51A277] !bg-[#F5FFF5]":"")}>
      <span className="grid size-11 place-items-center rounded-2xl text-2xl" style={{background:g.bg}} aria-hidden="true">{g.icon}</span>
      <strong className="mt-2 block text-xs text-[#385C48]">{cat.length===1?cat[0]!.name:t(g.en,g.ar)}</strong>
@@ -51,21 +54,21 @@ export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncom
      {confirmed&&<span className="mt-1 block text-[10px] font-bold text-[#438567]">{t("Adjusted this month","معدّل هالشهر")}</span>}
      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#EEF0EA]"><div className="h-full rounded-full bg-[#63B387]" style={{width:pct+"%"}}/></div>
      <span className="mt-2 block text-[10px] font-semibold text-[#42845F]">{cat.length===0?t("Tap to set amount","اضغط لتحدد المبلغ"):
-       cat.length===1?t("Tap to edit","اضغط للتعديل"):t("Manage "+cat.length+" categories","إدارة "+cat.length+" فئات")}</span>
+       cat.length===1?t("Tap for costs & payments","اضغط للبنود والدفعات"):t("Manage "+cat.length+" categories","إدارة "+cat.length+" فئات")}</span>
     </button>;
    })}
    {state.categories.filter(c=>visualGroupOf(c)==="custom").map(cat=>{
     const info=pictureFor(iconForCategory(cat)),target=m.plannedBy(cat.id);
     const spent=m.spentBy(cat.id),pct=target>0?Math.min(100,spent/target*100):0;
     return <button key={cat.id} type="button" data-testid={"category-custom-"+cat.id}
-      onClick={()=>onEditCategory({id:cat.id})} className={tile+" min-h-36"}>
+      onClick={()=>manage(cat.id)} className={tile+" min-h-36"}>
      <span className="grid size-11 place-items-center rounded-2xl text-2xl" style={{background:info.bg}} aria-hidden="true">{info.icon}</span>
      <strong className="mt-2 block truncate text-xs text-[#385C48]">{cat.name}</strong>
      <small className="mt-1 block text-[11px] text-[#839085]">{shown(target)}</small>
      {confirmedMonthPlan(state,cat.id,localToday().slice(0,7))!==null&&
       <span className="mt-1 block text-[10px] font-bold text-[#438567]">{t("Adjusted this month","معدّل هالشهر")}</span>}
      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#EEF0EA]"><div className="h-full rounded-full bg-[#63B387]" style={{width:pct+"%"}}/></div>
-     <span className="mt-2 block text-[10px] font-semibold text-[#42845F]">{t("Tap to edit","اضغط للتعديل")}</span>
+     <span className="mt-2 block text-[10px] font-semibold text-[#42845F]">{t("Tap for costs & payments","اضغط للبنود والدفعات")}</span>
     </button>;
    })}
    <button type="button" onClick={()=>onEditCategory({})} className="flex min-h-36 flex-col items-start justify-center gap-2 rounded-[1.05rem] border-2 border-dashed border-[#A9D4B8] bg-[#F4FAF1] p-3 text-start text-[#3D825B]">
@@ -81,13 +84,16 @@ export function FamilyMoneyPrototypeHome({state,forecast,revealed,onArea,onIncom
       className="flex items-center justify-between gap-2 rounded-xl border border-[#D7E6D8] bg-white p-2">
       <div className="min-w-0"><strong className="block truncate text-xs text-[#3A6348]">{c.name}</strong>
        <span className="text-[11px] text-[#7E907D]">{shown(m.plannedBy(c.id))}</span></div>
-      <button type="button" onClick={()=>onEditCategory({id:c.id})}
-       className="min-h-10 shrink-0 rounded-xl bg-[#E9F6EB] px-3 text-xs font-bold text-[#397C56]">{t("Edit","عدّل")}</button>
+      <button type="button" onClick={()=>manage(c.id)}
+       className="min-h-10 shrink-0 rounded-xl bg-[#E9F6EB] px-3 text-xs font-bold text-[#397C56]">{t("Costs & payments","البنود والدفعات")}</button>
      </div>)}
     </div>
     <button type="button" onClick={()=>onEditCategory({starter:selected as CategoryPicture})}
       className="mt-3 min-h-11 text-xs font-bold text-[#3A7C59] underline">{t("Add another here","أضف فئة هون")}</button>
    </div>}
+  {activeCategory&&state.categories.some(c=>c.id===activeCategory)&&<UnifiedCategoryDetails key={activeCategory}
+    state={state} setState={setState} categoryId={activeCategory} revealed={revealed}
+    onEdit={()=>onEditCategory({id:activeCategory})} onClose={()=>setActiveCategory(null)}/>}
   <section className="space-y-2" aria-label={t("Next payments and income","الدفعات والدخل القادم")}>
    <div className="flex flex-wrap items-center justify-between gap-2">
     <h3 className="text-sm font-black text-[#305D44]">{t("Coming up next","المواعيد الجاية")}</h3>
