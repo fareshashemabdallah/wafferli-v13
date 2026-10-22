@@ -33,7 +33,8 @@ export function getMoneyOverview(state:MoneyState,now=new Date(),familyPlans:rea
   const cash=validMoney(state.cashOnHand)?state.cashOnHand:null;
   const forecast=buildForecast({
     incomes, commitments:allScheduled, openingBalance:cash,
-    reserve:validMoney(state.cashReserve)?state.cashReserve:0,today,days:30
+    reserve:validMoney(state.cashReserve)?state.cashReserve:0,today,days:30,
+    billPayments:state.expenses
   });
   const month=computeMoney(state,now);
   const paidExpenses=state.expenses.filter(e=>e.date.startsWith(today.slice(0,7))&&e.billId);
