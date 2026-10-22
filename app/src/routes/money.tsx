@@ -22,6 +22,7 @@ import { useI18n } from "@/lib/i18n";
 import { computeMoney, sampleMembers, sampleMoney, type CatType, type Category, type Expense, type Member } from "@/lib/money";
 import { fmtJOD, parseAmount, uid, useLocalState } from "@/lib/storage";
 import {categoryItemTotal,type BudgetItem} from "@/lib/householdBudgetBuilder";
+import {cleanOldCategoryRoles} from "@/lib/familyCategoryCards";
 
 export const Route = createFileRoute("/money")({
   head: () => ({
@@ -51,6 +52,9 @@ function MoneyPage() {
 
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
+  // One-time backwards-compatible cleanup: old category role fields are no
+  // longer used. This does not alter category budgets, item roles or payments.
+  useEffect(()=>{if(ready)setS(old=>cleanOldCategoryRoles(old));},[ready,setS]);
 
   if (!ready)
     return (
