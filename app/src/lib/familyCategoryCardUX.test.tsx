@@ -38,7 +38,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
   render(<App initial={original}/>);
   fireEvent.click(screen.getByTestId("category-picture-groceries"));
   expect(screen.getByTestId("unified-category-details")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
+  fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
   let dlg=screen.getByRole("dialog",{name:"Edit family category"});
   fireEvent.change(within(dlg).getByLabelText("Category name"),{target:{value:"Supermarket"}});
   fireEvent.change(within(dlg).getByLabelText("Usual monthly allowance (JOD)"),{target:{value:"330"}});
@@ -49,7 +49,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
   expect(records).toHaveTextContent('"2026-12":{"groc":370}');
   expect(screen.getByTestId("category-picture-groceries")).toHaveTextContent("Supermarket");
   // The opened category stays on the same page after editing its amount.
-  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
+  fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
   dlg=screen.getByRole("dialog",{name:"Edit family category"});
   expect(within(dlg).getByLabelText("Category name")).toHaveValue("Supermarket");
   expect(within(dlg).getByLabelText("Usual monthly allowance (JOD)")).toHaveValue(330);
@@ -67,7 +67,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
   const tile=screen.getByTestId("category-custom-"+records.categories[0]!.id);
   expect(tile).toHaveTextContent("School Fees");
   fireEvent.click(tile);
-  fireEvent.click(screen.getByRole("button",{name:"Edit category amount"}));
+  fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
   expect(within(screen.getByRole("dialog",{name:"Edit family category"})).getByLabelText("Category name")).toHaveValue("School Fees");
  });
  it("blocks duplicate names rather than creating a second category",()=>{
