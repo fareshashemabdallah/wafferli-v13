@@ -8,6 +8,8 @@ export type ItemFrequency="monthly"|"weekly"|"quarterly"|"yearly";
 export type BudgetItem={
  id:string;categoryId:string;name:string;enabled:boolean;
  amountJod:number;frequency:ItemFrequency;
+ /** Nature of this one line, never the entire category. */
+ spendingRole?:import("./spendingGroups").SpendingRole;
  behaviour:"fixed"|"variable";priority:"essential"|"protected"|"flexible";
  quantity?:number;unitPriceJod?:number;unitLabel?:string;
  priceSource?:string;priceCheckedMonth?:string;
