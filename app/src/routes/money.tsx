@@ -4,7 +4,6 @@ import { CashFlowPlanner } from "@/components/CashFlowPlanner";
 import {FamilyMoneyRhythm} from "@/components/FamilyMoneyRhythm";
 import { MoneyGuidance } from "@/components/MoneyGuidance";
 import {reverseVarianceAllocation} from "@/lib/financeAlignment";
-import { MoneyOverviewPanel } from "@/components/MoneyOverviewPanel";
 import {emptyRealMoney} from "@/lib/moneyOverview";
 import {PLAN_MONEY_FOCUS_KEY,type PlanSetupStep} from "@/lib/planBudgetSetup";
 import {FinancialIntelligencePanel} from "@/components/FinancialIntelligencePanel";
