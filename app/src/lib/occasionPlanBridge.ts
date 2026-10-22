@@ -25,8 +25,9 @@ export function upsertOccasionFamilyPlan(
   const next=idea?setPlanChoice(made,{label:language==="ar"?idea.ar:idea.en,source:"occasion"},now):made;
   return {plans:[next,...existing],activeId:next.id,changed:true,created:true};
  }
- const nextBase:FamilyPlan={...old,date:event.occursOn,
-  updatedAt:now.toISOString(),
+ // Only the moment/profile owns the occasion title and date. This legacy
+ // plan snapshot stays untouched; all readers project the authoritative fact.
+ const nextBase:FamilyPlan={...old,updatedAt:now.toISOString(),
   ...(allowed!==undefined&&!old.occasionPreparation?{budgetJod:allowed}:{})};
  // Do not remove an earlier budget or a recorded choice if this local planner
  // has no replacement. A completed plan must never be reopened.

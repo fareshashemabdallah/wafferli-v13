@@ -5,20 +5,25 @@ import {useI18n} from "@/lib/i18n";
 import {fmtJOD,readLocal,useLocalState,writeLocal} from "@/lib/storage";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {familyFinancialCommitments,familyFinancialSummary,recordFamilyCommitmentPayment} from "@/lib/familyFinancialCommitments";
-import type {MoneyState} from "@/lib/money";
+import {sampleMembers,type Member,type MoneyState} from "@/lib/money";
+import type {FamilyMoment} from "@/lib/familyCalendar";
+import {canonicalPlanViews} from "@/lib/canonicalFamilyFacts";
 
 export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{money:MoneyState;compact?:boolean;withinBills?:boolean}){
  const {lang}=useI18n(),ar=lang==="ar";
  const t=(en:string,arabic:string)=>ar?arabic:en;
  const [plans,,ready]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+ const [members]=useLocalState<Member[]>("members",sampleMembers());
+ const [events]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const projectedPlans=canonicalPlanViews(plans,events,members,ar);
  const [confirmId,setConfirmId]=useState<string|null>(null);
  const [paidAmount,setPaidAmount]=useState("");
  const [categoryId,setCategoryId]=useState("");
  const [message,setMessage]=useState("");
  if(!ready)return null;
- const entries=familyFinancialCommitments(plans,money).filter(item=>!withinBills||(!item.paid&&item.certainty!=="idea"));
+ const entries=familyFinancialCommitments(projectedPlans,money).filter(item=>!withinBills||(!item.paid&&item.certainty!=="idea"));
  if(!entries.length)return null;
- const totals=familyFinancialSummary(plans,money);
+ const totals=familyFinancialSummary(projectedPlans,money);
  const amountOk=paidAmount.trim()!==""&&Number.isFinite(Number(paidAmount))&&Number(paidAmount)>0&&
   Number(paidAmount)<=100000&&Math.abs(Number(paidAmount)*100-Math.round(Number(paidAmount)*100))<0.00001;
  const record=(entry:typeof entries[number])=>{

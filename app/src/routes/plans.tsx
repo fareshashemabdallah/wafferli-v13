@@ -7,7 +7,9 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {useI18n} from "@/lib/i18n";
 import {uid,fmtJOD,useLocalState} from "@/lib/storage";
-import {sampleMoney,type MoneyState} from "@/lib/money";
+import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
+import type {FamilyMoment} from "@/lib/familyCalendar";
+import {canonicalFamilyMoments,canonicalPlanViews,occasionLink,canonicalOccasionForPlan} from "@/lib/canonicalFamilyFacts";
 import {ACTIVE_PLAN_KEY,FAMILY_PLANS_KEY,makeFamilyPlan,markPlanComplete,moneyAmount,setPlanChoice,upcomingFamilyPlans,type FamilyPlan,type PlanKind} from "@/lib/familyPlans";
 import {PlanDecisionPanel} from "@/components/PlanDecisionPanel";
 import {checkFamilyPlan,postponeFlexiblePlan,markPlanDoneWithoutCost,addPlanActualCost} from "@/lib/familyPlanCheckIn";
@@ -27,13 +29,25 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
  const [plans,setPlans,ready]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [active,setActive]=useLocalState<string|null>(ACTIVE_PLAN_KEY,null);
  const [money,setMoney,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
+ const [members]=useLocalState<Member[]>("members",sampleMembers());
+ const [moments]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+ const resolvedPlans=canonicalPlanViews(plans,moments,members,ar);
  const [newOpen,setNewOpen]=useState(false);
  const [title,setTitle]=useState(""),[kind,setKind]=useState<PlanKind>("purchase"),[date,setDate]=useState(""),[budget,setBudget]=useState("");
  const [err,setErr]=useState("");
  const [chosen,setChosen]=useState(""),[price,setPrice]=useState(""),[actual,setActual]=useState(""),[category,setCategory]=useState("");
- const selected=plans.find(p=>p.id===active)??null;
- const currentPlan=selected??upcomingFamilyPlans(plans)[0]??plans[0]??null;
- const update=(next:FamilyPlan)=>setPlans(prev=>prev.map(p=>p.id===next.id?next:p));
+ const selected=resolvedPlans.find(p=>p.id===active)??null;
+ const currentPlan=selected??upcomingFamilyPlans([...resolvedPlans])[0]??resolvedPlans[0]??null;
+ const currentLinked=currentPlan?occasionLink(currentPlan):null;
+ const originalOccasion=currentPlan&&currentLinked?
+  canonicalOccasionForPlan(currentPlan,canonicalFamilyMoments(moments,members,ar)):null;
+ const update=(next:FamilyPlan)=>setPlans(prev=>prev.map(p=>{
+  if(p.id!==next.id)return p;
+  // Only status, gifts and costs belong to the plan. An occasion's
+  // title/date are derived on read from its linked profile/calendar record.
+  return p.sourceRef?.startsWith("occasion:")?
+   {...next,title:p.title,...(p.date?{date:p.date}:{})}:next;
+ }));
  const completeSimply=()=>{
   if(!currentPlan||currentPlan.status==="completed")return;
   if(!window.confirm(ar?"هل اكتملت الخطة فعلاً؟ لن نسجّل مبلغاً أو دفعة، ويمكن إضافة التكلفة لاحقاً.":
@@ -137,7 +151,7 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
    {ready&&plans.length>0&&<section className="mt-6">
     <h2 className="text-lg font-semibold">{ar?"خطط العائلة":"Family plans"} <span className="text-sm text-muted-foreground">({plans.length})</span></h2>
     <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-     {plans.map(p=><button key={p.id} type="button" onClick={()=>{setActive(p.id);setErr("");setChosen("");setActual("");}}
+     {resolvedPlans.map(p=><button key={p.id} type="button" onClick={()=>{setActive(p.id);setErr("");setChosen("");setActual("");}}
        className={"min-w-39 max-w-56 shrink-0 rounded-2xl border p-3 text-start "+(currentPlan?.id===p.id?"border-brand bg-[#EAF1E7]":"border-border bg-white")}>
        <p className="truncate text-sm font-semibold">{p.title}</p>
        <p className="mt-1 text-xs text-muted-foreground">{ar?kinds.find(k=>k.id===p.kind)?.ar:kinds.find(k=>k.id===p.kind)?.en} · {p.status==="completed"?(ar?"مكتملة":"Completed"):p.status==="decided"?(ar?"تم الاختيار":"Decided"):(ar?"تخطيط":"Planning")}</p>
@@ -176,7 +190,7 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
         "This is a check-in on your saved plan only. No booking, payment or provider monitoring is assumed."}</p>
       </div>;
     })()}
-        {moneyReady&&currentPlan.status!=="completed"&&<PlanDecisionPanel key={currentPlan.id} plan={currentPlan} money={money} plans={plans} onUpdate={update} setMoney={setMoney}/>}
+        {moneyReady&&currentPlan.status!=="completed"&&<PlanDecisionPanel key={currentPlan.id} plan={currentPlan} money={money} plans={resolvedPlans} onUpdate={update} setMoney={setMoney}/>}
     {!money.demo&&(money.savingsGoals??[]).length>0&&currentPlan.status!=="completed"&&<div className="mt-3 rounded-2xl border border-[#D8E5D8] bg-[#F7FAF5] p-4">
       <label className="block text-sm font-semibold">{ar?"هل تدّخر لهذا الهدف؟":"Saving up for this plan?"}
        <select className="mt-2 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm" value={currentPlan.savingsGoalId??""}
@@ -195,6 +209,13 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
        </div>;
       })}
     </div>}
+    {currentLinked&&!originalOccasion&&<p role="status" className="mt-2 rounded-xl bg-[#FFF3DF] p-3 text-xs text-[#8A673A]">
+     {ar?"المناسبة الأصلية غير موجودة حالياً. الخطة والمدفوعات السابقة محفوظة؛ راجع ملف العيلة أو التقويم.":"The original date is missing from your family profile or Calendar. Your saved plan and payments remain; please review the source."}
+    </p>}
+    {originalOccasion&&currentPlan.occasionPreparation&&Object.values(currentPlan.occasionPreparation).some(cost=>cost.dueDate>originalOccasion.occursOn)&&
+     <p role="status" className="mt-2 rounded-xl bg-[#FFF3DF] p-3 text-xs text-[#8A673A]">
+      {ar?"تغير موعد المناسبة. راجع مواعيد الهدية والاحتفال؛ لن نغير الدفعات تلقائياً.":"The occasion date changed. Review gift and celebration deadlines; confirmed payment dates won't move automatically."}
+     </p>}
     {currentPlan.kind==="occasion"&&<OccasionPreparationSection planId={currentPlan.id}/>}
     {currentPlan.status!=="completed"&&<>
       <div className="mt-5 rounded-xl bg-[#F4F7F0] p-4">

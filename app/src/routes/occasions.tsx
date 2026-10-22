@@ -2,13 +2,13 @@ import {createFileRoute,Link} from "@tanstack/react-router";
 import {useMemo,useState} from "react";
 import {AppShell} from "@/components/AppShell";
 import {OccasionPreparationSection} from "@/components/OccasionPreparationSection";
-import {FamilyWishlistPanel} from "@/components/FamilyWishlistPanel";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,writeLocal} from "@/lib/storage";
 import {type FamilyMoment,formatMomentDate} from "@/lib/familyCalendar";
-import {sampleMembers,sampleMoney,type Member,type MoneyState} from "@/lib/money";
+import {sampleMembers,type Member} from "@/lib/money";
 import {chooseOccasion,planKey,upcomingPlanEvents,type OccasionPlans} from "@/lib/occasionAdvisor";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan} from "@/lib/familyPlans";
+import {canonicalPlanView,canonicalFamilyMoments} from "@/lib/canonicalFamilyFacts";
 
 export const Route=createFileRoute("/occasions")({
  head:()=>({meta:[
@@ -27,14 +27,14 @@ export function OccasionPlanner(){
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [oldPlans,,oldReady]=useLocalState<OccasionPlans>("occasionPlans",{});
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
- const [money]=useLocalState<MoneyState>("money",sampleMoney());
  const [chosen,setChosen]=useState("");
  const [focused,setFocused]=useLocalState<string>("focusedOccasionKey","");
  const now=useMemo(()=>new Date(),[]);
  const upcoming=useMemo(()=>upcomingPlanEvents(events,members,now,180,ar).slice(0,24),[events,members,now,ar]);
  const active=chooseOccasion(upcoming,chosen,focused);
  const key=active?planKey(active):"";
- const plan=plans.find(p=>p.sourceRef==="occasion:"+key);
+ const storedPlan=plans.find(p=>p.sourceRef==="occasion:"+key);
+ const plan=storedPlan?canonicalPlanView(storedPlan,canonicalFamilyMoments(events,members,ar)):undefined;
  const legacy=oldPlans[key];
  const ready=eventsReady&&membersReady&&oldReady&&plansReady;
  return <AppShell title={t("Plan a family moment","حضّر لمناسبة عائلية")}>
@@ -84,12 +84,10 @@ export function OccasionPlanner(){
       {legacy.chosenIdea&&<p className="text-sm">{t("Earlier idea reference: ","الفكرة السابقة: ")}{legacy.chosenIdea}</p>}
      </details>}
     </>}
-   <details className="rounded-xl border bg-white p-4">
-    <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
-     {t("Optional: gift wishlist and price notes","اختياري: قائمة الهدايا والأسعار المسجّلة")}
-    </summary>
-    <FamilyWishlistPanel mode="gifts"/>
-   </details>
+   <p className="rounded-xl border border-[#DDE8DA] bg-[#F7FBF6] p-3 text-xs text-[#5F7C67]">
+    {t("Keep this occasion's gift and budget in its single linked plan above. General shopping wishlists remain available in Shopping, without creating a second birthday or gift cost.",
+       "خلي هدية المناسبة وميزانيتها ضمن خطتها الواحدة فوق. قوائم الرغبات العامة بتبقى في التسوق دون إنشاء عيد ميلاد أو كلفة هدية ثانية.")}
+   </p>
    <div className="rounded-xl bg-[#F1F7EF] p-3 text-sm">
     <span>{t("Want to compare a price before buying? ","بدك تقارن السعر قبل الشراء؟ ")}</span>
     <Link to="/explore/smartbuy" onClick={()=>{if(plan)writeLocal(ACTIVE_PLAN_KEY,plan.id);}} className="font-semibold text-brand underline">{t("Compare and choose","قارن واختر")}</Link>

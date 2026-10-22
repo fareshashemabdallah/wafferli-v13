@@ -10,6 +10,7 @@ import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import type {FamilyMoment} from "@/lib/familyCalendar";
 import {buildFamilyMoneyJourney,type MoneyJourneyFocus} from "@/lib/familyMoneyJourney";
+import {canonicalPlanViews} from "@/lib/canonicalFamilyFacts";
 
 const pillars=[
  {id:"understand",icon:Eye},
@@ -28,7 +29,7 @@ export function FamilyMoneyJourneyCard(){
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [prefs,setPrefs,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
  const ready=moneyReady&&membersReady&&momentsReady&&plansReady&&prefsReady;
- const journey=ready?buildFamilyMoneyJourney({money,members,moments,plans,preferences:prefs}):null;
+ const journey=ready?buildFamilyMoneyJourney({money,members,moments,plans:canonicalPlanViews(plans,moments,members,ar),preferences:prefs}):null;
  const selected=prefs.moneyJourneyFocus??"prepare";
  const checked=!!journey&&prefs.moneyJourneyLastReviewedWeek===journey.weekKey;
  return <section className="overflow-hidden rounded-[1.8rem] border border-[#C7DCD0] bg-white shadow-[0_16px_35px_-30px_rgba(24,69,54,.35)]" aria-label={t("Your family's money story","حكاية مال عيلتك")}>

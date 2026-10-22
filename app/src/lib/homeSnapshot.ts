@@ -1,6 +1,7 @@
 import {allFamilyMoments,dateKey,occurrencesForDate,shiftDays,upcomingMoments,type FamilyMoment} from "./familyCalendar";
 import {realFamilyMembers} from "./familySetup";
 import {upcomingFamilyPlans,type FamilyPlan} from "./familyPlans";
+import {canonicalPlanViews,linkedOccasionKeys,isOccasionAlreadyPlanned} from "./canonicalFamilyFacts";
 import {spendingBreakdown,type SpendingBreakdown} from "./spendingBreakdown";
 import {scheduleDates} from "./cashflow";
 import {isSampleBasketEntry,type BasketEntry} from "./basketRecording";
@@ -31,6 +32,7 @@ export function homeSnapshot(input:{
  const end=dateKey(shiftDays(now,7));
  const members=realFamilyMembers(input.members);
  const moments=allFamilyMoments(input.moments,members,!!input.arabic);
+ const resolvedPlans=canonicalPlanViews(input.plans,input.moments,members,!!input.arabic);
  const nextOccasions=upcomingMoments(moments,now,50);
  const tasks=input.tasks.filter(task=>task.status==="open"&&task.dueDate<=end).map(task=>({
   id:"task:"+task.id,title:task.title,date:task.dueDate,kind:"task" as const,destination:"/space" as const
@@ -46,11 +48,12 @@ export function homeSnapshot(input:{
   kind:"moment" as const,destination:"/calendar" as const
  }));
  const agenda=[...tasks,...bills,...events].sort((a,b)=>a.date.localeCompare(b.date)||("time" in a?a.time??"":"").localeCompare("time" in b?b.time??"":"")).slice(0,5);
- const upcoming=upcomingFamilyPlans(input.plans,now,5).map(p=>({
+ const upcoming=upcomingFamilyPlans(resolvedPlans,now,5).map(p=>({
   id:"plan:"+p.id,title:p.title,...(p.date?{date:p.date}:{}),kind:"plan" as const
  }));
- const plannedDates=new Set(upcoming.map(p=>p.date+"|"+p.title.toLowerCase()));
- const plans:HomePlanItem[]=[...upcoming,...nextOccasions.filter(e=>!plannedDates.has(e.occursOn+"|"+e.title.toLowerCase()))
+ const linked=linkedOccasionKeys(resolvedPlans);
+ const plans:HomePlanItem[]=[...upcoming,...nextOccasions.filter(e=>
+  !isOccasionAlreadyPlanned(e,linked))
   .map(e=>({id:"moment:"+e.id+":"+e.occursOn,title:e.title,date:e.occursOn,kind:"moment" as const}))]
   .sort((a,b)=>(a.date??"9999-12-31").localeCompare(b.date??"9999-12-31")).slice(0,4);
  const basket=input.basket.filter(item=>!isSampleBasketEntry(item)&&!!item.name.trim()).slice(0,3).map(item=>({

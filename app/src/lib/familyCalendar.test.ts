@@ -66,6 +66,22 @@ describe("Family calendar",()=>{
   expect(occurrencesForDate(combined,"2027-08-16")).toHaveLength(2);
   expect(combined.some(e=>e.id==="arabic")).toBe(false);
  });
+ it("a changed profile birth date suppresses the old manually copied birthday",()=>{
+  const person:Member={id:"sophia",name:"Sophia",role:"child",ageGroup:"",
+   prefs:"",birthdayMonthDay:"11-20"};
+  const previouslyCopied:FamilyMoment={id:"old-copy",kind:"birthday",
+   title:"Sophia Birthday",annual:true,date:"2026-11-12"};
+  const combined=allFamilyMoments([previouslyCopied],[person]);
+  expect(combined).toHaveLength(1);
+  expect(combined[0]?.id).toBe("member-birthday:sophia");
+  expect(occurrencesForDate(combined,"2026-11-12")).toHaveLength(0);
+  expect(occurrencesForDate(combined,"2026-11-20")).toHaveLength(1);
+ });
+ it("a profile's updated month/day takes precedence over any stale legacy full birthday",()=>{
+  const person:Member={id:"faris",name:"Faris",role:"child",ageGroup:"",
+   prefs:"",birthday:"2021-10-15",birthdayMonthDay:"11-12"};
+  expect(memberBirthdayMoments([person])[0]?.date).toBe("2021-11-12");
+ });
  it("combines anniversaries and profile birthdays without persisting two versions of the birthday",()=>{
   const member:Member={id:"parent",name:"Parent",role:"adult",ageGroup:"30–44",prefs:"",birthday:"1988-02-12"};
   const anniversary:FamilyMoment={id:"anniversary",title:"Our wedding anniversary",date:"2018-10-22",kind:"anniversary",annual:true};
