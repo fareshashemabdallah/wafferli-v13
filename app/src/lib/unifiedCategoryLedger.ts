@@ -6,7 +6,7 @@ import {monthlyItemCost,upsertBudgetItem} from "./householdBudgetBuilder";
 
 /** A category is a budget envelope, not an additional expense. Payments live
  * only in the existing expenses ledger and retain stable bill/item links. */
-const moneyOk=(n:number)=>Number.isFinite(n)&&n>0&&n<=100000&&Math.round(n*100)===n*100;
+const moneyOk=(n:number)=>Number.isFinite(n)&&n>0&&n<=100000&&Math.abs(n*100-Math.round(n*100))<0.00001;
 const dateOk=(d:string)=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&
  !Number.isNaN(Date.parse(d+"T12:00:00Z"))&&new Date(d+"T12:00:00Z").toISOString().slice(0,10)===d;
 export function billPaidTotal(state:MoneyState,billId:string,dueDate:string){
