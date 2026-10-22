@@ -9,7 +9,7 @@ export type IncomeSource = {
 };
 export type Commitment = {
   id:string; name:string; amount:number; frequency:Frequency; dueDate:string;
-  endDate?:string; categoryId?:string; paidDates?:string[];
+  endDate?:string; categoryId?:string; budgetItemId?:string; paidDates?:string[];
 };
 export const frequencyNames: Record<Frequency,string> = {
   daily:"Daily", weekly:"Weekly", biweekly:"Every 2 weeks", monthly:"Monthly",
@@ -81,7 +81,9 @@ export type Forecast = {
 };
 export function buildForecast(input:{
   incomes:IncomeSource[]; commitments:Commitment[]; openingBalance:number|null; reserve:number;
-  today:string; days?:number
+  today:string; days?:number;
+  /** Recorded partial instalments for the specific scheduled due date. */
+  billPayments?:readonly {billId?:string;dueDate?:string;amount:number;status?:"paid"|"planned"}[];
 }):Forecast {
   const horizon=Math.min(90,Math.max(7,input.days??30));
   const today=input.today,end=futureDate(today,horizon);
@@ -101,10 +103,14 @@ export function buildForecast(input:{
     if(!parse(bill.dueDate))continue;
     for(const dueDate of scheduleDates(bill.dueDate,bill.frequency,since,end,bill.endDate)){
       if(bill.paidDates?.includes(dueDate))continue;
+      const alreadyPaid=roundJod((input.billPayments??[]).filter(p=>p.billId===bill.id&&p.dueDate===dueDate&&p.status!=="planned")
+       .reduce((sum,p)=>sum+(Number.isFinite(p.amount)&&p.amount>0?p.amount:0),0));
+      const remaining=roundJod(Math.max(0,bill.amount-alreadyPaid));
+      if(remaining<=0)continue;
       const overdue=dueDate<today;
       events.push({key:"bill:"+bill.id+":"+dueDate,sourceId:bill.id,
         date:overdue?today:dueDate,displayDate:dueDate,name:bill.name,
-        kind:"bill",amount:bill.amount,overdue});
+        kind:"bill",amount:remaining,overdue});
     }
   }
   events.sort((a,b)=>a.date.localeCompare(b.date)|| (a.kind==="bill"?-1:1)-(b.kind==="bill"?-1:1));
