@@ -6,6 +6,8 @@ import { Field, NativeSelect, inputCls } from "./Field";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { type Member, type MoneyState } from "@/lib/money";
+import type {FamilyMoment} from "@/lib/familyCalendar";
+import {canonicalPlanViews} from "@/lib/canonicalFamilyFacts";
 import {
   type IncomeSource, type Commitment, type Frequency,
   buildForecast, frequencyNames, futureDate, legacyIncome,
@@ -39,8 +41,10 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const incomes=state.incomeSources ?? legacyIncome(state.income);
   const bills=state.commitments ?? [];
    const [familyPlans]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
-   const financialCommitments=familyForecastCommitments(familyPlans,state);
-   const familyBills=familyFinancialCommitments(familyPlans,state).filter(item=>!item.paid);
+   const [events]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
+   const canonicalPlans=canonicalPlanViews(familyPlans,events,members,ar);
+   const financialCommitments=familyForecastCommitments(canonicalPlans,state);
+   const familyBills=familyFinancialCommitments(canonicalPlans,state).filter(item=>!item.paid);
   const forecast=buildForecast({incomes,commitments:[...bills,...financialCommitments],openingBalance:state.cashOnHand??null,
     reserve:state.cashReserve??0,today,days:30});
   const [cash,setCash]=useState(state.cashOnHand===null||state.cashOnHand===undefined?"":String(state.cashOnHand));
