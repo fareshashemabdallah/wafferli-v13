@@ -1,5 +1,6 @@
 import type {MoneyState} from "./money";
 import {monthlyTotal} from "./cashflow";
+export const PLAN_MONEY_FOCUS_KEY="dabberna:plan-money-focus";
 export type PlanSetupStep="demo"|"income"|"categories"|"review";
 /** Required to interpret the monthly plan; savings and bank cash are optional.
  * Missing payday only limits dated cash-flow estimates, not monthly income. */
