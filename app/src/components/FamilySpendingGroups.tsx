@@ -1,4 +1,4 @@
-import {Plus} from "lucide-react";
+import {Pencil,Plus} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {computeMoney,type Category,type MoneyState} from "@/lib/money";
 import {fmtJOD} from "@/lib/storage";
@@ -39,7 +39,8 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
   const id=first?"category-picture-"+group:group==="custom"?"category-custom-"+cat.id:"category-id-"+cat.id;
   const total=m.plannedBy(cat.id),paid=m.spentBy(cat.id);
   const pct=total>0?Math.min(100,paid/total*100):0;
-  return <button type="button" key={cat.id} data-testid={id} className={tile+" min-h-36 text-start"}
+  return <div key={cat.id} className="flex min-w-0 flex-col gap-1.5">
+   <button type="button" data-testid={id} className={tile+" min-h-36 w-full flex-1 text-start"}
     onClick={()=>onManage(cat.id)} aria-label={cat.name+" · "+t("Costs and payments","بنود ودفعات")}>
     <span className="grid size-11 place-items-center rounded-2xl text-2xl" style={{background:pic.bg}} aria-hidden="true">{pic.icon}</span>
     <strong className="mt-2 block truncate text-xs text-[#385C48]">{cat.name}</strong>
@@ -49,7 +50,15 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
     {confirmedMonthPlan(state,cat.id,month)!==null&&<span className="mt-1 block text-[10px] font-bold text-[#438567]">{t("Adjusted this month","معدل هذا الشهر")}</span>}
     <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-[#EEF0EA]"><span className="block h-full rounded-full bg-[#63B387]" style={{width:pct+"%"}}/></span>
     <span className="mt-2 block text-[10px] font-semibold text-[#42845F]">{t("Tap for costs & payments","اضغط للبنود والدفعات")}</span>
-   </button>;
+   </button>
+   <button type="button" data-testid={"edit-category-"+cat.id}
+    aria-label={t("Edit amount & classification for ","تعديل المبلغ والتصنيف لفئة ")+cat.name}
+    onClick={()=>onEditCategory({id:cat.id})}
+    className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-[#B8DABE] bg-[#F6FBF3] px-2 py-2 text-center text-[11px] font-extrabold leading-tight text-[#347D52] hover:border-[#86C3A0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#38865B]">
+    <Pencil className="size-3.5 shrink-0" aria-hidden="true"/>
+    {t("Edit amount & classification","تعديل المبلغ والتصنيف")}
+   </button>
+  </div>;
  };
  const emptyStarters=STARTER_PICTURES.filter(p=>!(state.hiddenStarterGroups??[]).includes(p.key)&&
   !state.categories.some(c=>visualGroupOf(c)===p.key));
@@ -57,8 +66,8 @@ export function FamilySpendingGroups({state,setState,activeCategory,onClose,onMa
   <div className="flex flex-wrap items-start justify-between gap-3">
    <div><h3 className="text-sm font-black text-[#2B5944]">{t("Where our money goes","وين بتروح مصاريف العيلة")}</h3>
     <p className="mt-1 text-[11px] leading-relaxed text-[#7A8A7B]">{t(
-     "One category per part of family life. Split costs inside it, without adding another budget.",
-     "فئة واحدة لكل جانب من حياة العيلة. قسّم مصاريفها من الداخل، دون ميزانية إضافية.")}</p></div>
+     "Select Edit amount & classification on a category card to classify it immediately. Subcategories remain optional.",
+     "اختر تعديل المبلغ والتصنيف من بطاقة الفئة مباشرة. البنود الفرعية اختيارية.")}</p></div>
    <button type="button" onClick={()=>onEditCategory({})}
     className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-[#B5D8BD] bg-white px-3 text-xs font-bold text-[#387F58]">
     <Plus className="size-4"/>{t("Add category","أضف فئة")}</button>
