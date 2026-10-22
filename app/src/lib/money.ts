@@ -15,6 +15,8 @@ export type MoneyState = {
   budgetItems?:BudgetItem[];
   /** Names of removed categories retained only to label previous payment history. */
   retiredCategoryNames?:Record<string,string>;
+  /** User-removed starter illustrations should not reappear as empty budget prompts. */
+  hiddenStarterGroups?:import("./familyCategoryCards").CategoryPicture[];
   /** Explicitly distinguishes a parent-entered zero income from unknown income. */
   incomeKnown?:boolean; incomeConfidence?:"estimate"|"confirmed";
   /** A one-fact-at-a-time estimate does NOT describe the entire household budget. */
