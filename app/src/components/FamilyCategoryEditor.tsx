@@ -5,7 +5,6 @@ import {emptyRealMoney} from "@/lib/moneyOverview";
 import {removeMoneyCategory} from "@/lib/removeMoneyCategory";
 import {categoryItemTotal} from "@/lib/householdBudgetBuilder";
 import type {Category,MoneyState} from "@/lib/money";
-import {displaySpendingRole,type SpendingRole,type ExpenseCadence} from "@/lib/spendingGroups";
 import {CATEGORY_PICTURES,pictureFor,saveFamilyCategory,visualGroupOf,iconForCategory,
  type CategoryPicture,type CategoryVisualGroup,type CategoryEditResult} from "@/lib/familyCategoryCards";
 
@@ -23,8 +22,6 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
  const suggested=starter?pictureFor(starter):null;
  const [name,setName]=useState(existing?.name??(suggested?t(suggested.en,suggested.ar):""));
  const [amount,setAmount]=useState(existing?String(existing.planned):"");
- const [role,setRole]=useState<SpendingRole>(existing?displaySpendingRole(existing).role:"necessary");
- const [cadence,setCadence]=useState<ExpenseCadence>(existing?.expectedCadence??"monthly");
  const [priority,setPriority]=useState<Category["priority"]>(existing?.priority);
  const [visualIcon,setVisualIcon]=useState<CategoryPicture>(existing?iconForCategory(existing):(starter??"other"));
  const [visualGroup,setVisualGroup]=useState<CategoryVisualGroup>(existing?visualGroupOf(existing):starter??"custom");
@@ -54,8 +51,7 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
   event.preventDefault();setError("");
   if(!amountValid(amount)){setError(reason("amount"));return;}
   const result=saveFamilyCategory(state,{
-   ...(existing?{id:existing.id}:{}),name,planned:Number(amount),type:existing?.type??(role==="committed"?"fixed":"variable"),
-   spendingRole:role,expectedCadence:cadence,
+   ...(existing?{id:existing.id}:{}),name,planned:Number(amount),type:existing?.type??"variable",
    ...(priority?{priority}:{}),visualGroup,visualIcon
   },uid());
   if(!result.ok){setError(reason(result.reason));return;}
@@ -115,34 +111,10 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
      <input className={field} type="number" inputMode="decimal" min="0" max="100000" step=".01" value={amount}
       placeholder={t("Enter an amount, e.g. 300","أدخل المبلغ مثلاً ٣٠٠")} onChange={e=>setAmount(e.target.value)}/>
     </label>
-    <fieldset className="space-y-2 rounded-2xl border border-[#DCE8DA] bg-[#F6FAF4] p-3">
-     <legend className="px-1 text-xs font-extrabold text-[#315D45]">{t("What kind of family expense is this?","أي نوع من مصاريف العيلة؟")}</legend>
-     <div className="grid gap-2">
-      {([
-       {id:"committed",en:"Committed · must be paid",ar:"التزام · لازم يندفع",desc:"e.g. school fees, nanny or rent",descAr:"مثل أقساط المدرسة أو المربية أو الإيجار"},
-       {id:"necessary",en:"Necessary · amount varies",ar:"ضروري · المبلغ بيتغير",desc:"e.g. groceries, fuel or utilities",descAr:"مثل المونة والبنزين والخدمات"},
-       {id:"flexible",en:"Flexible · we choose what to spend",ar:"مرن · نحن بنقرر قديش نصرف",desc:"e.g. outings, gifts or travel",descAr:"مثل الطلعات والهدايا والسفر"}
-      ] as const).map(x=><label key={x.id} className={"flex min-h-12 cursor-pointer items-start gap-3 rounded-xl border p-3 "+(role===x.id?"border-[#83C4A0] bg-white":"border-[#DFE8DF] bg-[#FBFCFA]")}>
-       <input type="radio" name="family-spending-role" className="mt-1 size-4 accent-[#3C885E]" checked={role===x.id}
-        onChange={()=>setRole(x.id)}/>
-       <span><strong className="block text-xs text-[#335F46]">{t(x.en,x.ar)}</strong>
-        <span className="mt-1 block text-[11px] text-[#798C7D]">{t(x.desc,x.descAr)}</span></span>
-      </label>)}
-     </div>
-     {existing&&!existing.spendingRole&&<p className="text-[11px] text-[#956E40]">{t("Suggested placement from your old category; confirm or change it here.","تصنيف مقترح من فئتك القديمة؛ أكّده أو غيّره هون.")}</p>}
-    </fieldset>
-    <label className={label}>{t("How often is this expense expected?","كل قديش بتتوقع هالمصروف؟")}
-     <select className={field} value={cadence} onChange={e=>setCadence(e.target.value as ExpenseCadence)}>
-      <option value="weekly">{t("Weekly","أسبوعياً")}</option>
-      <option value="monthly">{t("Monthly","شهرياً")}</option>
-      <option value="quarterly">{t("Every few months","كل عدة أشهر")}</option>
-      <option value="yearly">{t("Yearly","سنوياً")}</option>
-      <option value="once">{t("One-time","مرة واحدة")}</option>
-     </select>
-     <span className="mt-1 block text-[11px] font-normal text-[#7C8C80]">{t(
-      "Frequency is a reminder only. Your amount above is still the usual monthly budget. Add actual due dates and payments inside the category.",
-      "التكرار للتوضيح فقط. المبلغ فوق هو المخصص الشهري المعتاد. أضف المواعيد والدفعات الفعلية من داخل الفئة.")}</span>
-    </label>
+    <p className="rounded-xl bg-[#F2F8EF] p-3 text-xs leading-relaxed text-[#5C7E68]">
+     {t("Each cost inside this category can be committed, necessary or flexible. Choose its nature when you break down the category—Car can contain both fuel and instalments.",
+      "كل بند داخل الفئة يمكن أن يكون التزاماً أو ضرورياً أو مرناً. اختر طبيعته عند تقسيم الفئة؛ السيارة قد تحتوي على بنزين وأقساط.")}
+    </p>
     {amountMinimum>0&&<p className="rounded-xl bg-[#F1F7ED] p-3 text-xs text-[#647967]">
       {t("This category contains itemized budget entries totalling ","هذه الفئة فيها بنود تفصيلية بمجموع ")}
       <strong>{amountMinimum} JOD</strong>. {t("Keep the monthly allowance at least this high, or edit those items in Detailed budget.",
