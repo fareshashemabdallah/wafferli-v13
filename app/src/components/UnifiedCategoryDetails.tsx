@@ -4,8 +4,8 @@ import {uid,fmtJOD} from "@/lib/storage";
 import {localToday,futureDate,scheduleDates,roundJod} from "@/lib/cashflow";
 import {computeMoney,type MoneyState} from "@/lib/money";
 import {categoryItemTotal,monthlyItemCost,recordedItemSpending,type BudgetItem,type ItemFrequency} from "@/lib/householdBudgetBuilder";
-import {addCategoryItem,disableCategoryItem,recordCategoryPayment,undoCategoryPayment,
- billPaidTotal,billOutstanding,saveCategoryDueDate,removeCategoryBill} from "@/lib/unifiedCategoryLedger";
+import {addCategoryItem,recordCategoryPayment,undoCategoryPayment,
+ billPaidTotal,billOutstanding,saveCategoryDueDate,removeCategoryBill,stopCategoryItem} from "@/lib/unifiedCategoryLedger";
 import {pictureFor,iconForCategory} from "@/lib/familyCategoryCards";
 
 type Props={state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;
@@ -67,7 +67,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
   if(!paymentTarget||!amountOk(payAmount)){setError(t("Enter a valid amount.","أدخل مبلغاً صحيحاً."));return;}
   const p={id:uid(),categoryId,amount:Number(payAmount),date:payDate,
    ...(paymentTarget.itemId?{budgetItemId:paymentTarget.itemId}:{}),
-   ...(paymentTarget.billId?{billId:paymentTarget.billId,dueDate:paymentTarget.dueDate}:{}),
+   ...(paymentTarget.billId?{billId:paymentTarget.billId,dueDate:paymentTarget.dueDate!}:{}),
   };
   const next=recordCategoryPayment(state,p);
   if(next===state){setError(t("Payment could not be recorded. Check the remaining amount, date and linked bill.",
@@ -173,7 +173,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,revealed,onEdi
        {!linked&&<button type="button" className={btn} disabled={state.demo} onClick={()=>startPayment(item.id)}>{t("Record payment","تسجيل دفعة")}</button>}
        <button type="button" className="min-h-10 px-2 text-xs font-bold text-[#985E61]" disabled={state.demo}
         onClick={()=>{if(window.confirm(t("Remove this line from future budgets? Recorded payments will remain in history.",
-         "إيقاف هذا البند من الميزانية القادمة؟ الدفعات السابقة محفوظة.")))setState(s=>disableCategoryItem(s,item.id));}}>
+         "إيقاف هذا البند من الميزانية القادمة؟ الدفعات السابقة محفوظة.")))setState(s=>stopCategoryItem(s,item.id));}}>
          {t("Remove","إزالة")}</button>
       </div>
      </div>
