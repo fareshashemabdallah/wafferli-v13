@@ -1,5 +1,6 @@
 import {computeMoney,type MoneyState} from "./money";
 import {monthlyPlanReady} from "./planBudgetSetup";
+import {spendingBreakdown} from "./spendingGroups";
 import {getMoneyOverview} from "./moneyOverview";
 import {roundJod,futureDate,scheduleDates} from "./cashflow";
 import type {FamilyPlan} from "./familyPlans";
@@ -29,11 +30,16 @@ export function evaluatePlan(plan:FamilyPlan,money:MoneyState,all:FamilyPlan[]=[
   money.categories.every(c=>valid(c.planned))&&finance.savingsTarget>=0;
  const gap=roundJod(finance.monthlyIncome+finance.carryover.net-finance.savingsTarget-finance.planned);
  const monthlyGap=cost!==null&&validBudget?roundJod(gap-cost):null;
- // Consider only explicitly flexible choices for adjustment recommendations.
- const monthlyFlexible=validBudget?money.categories.filter(c=>c.priority!=="protected"&&c.priority!=="essential"&&
-   (c.spendingRole==="flexible"||(!c.spendingRole&&c.priority==="flexible"))).map(c=>({
-  name:c.name,room:roundJod(Math.max(0,finance.plannedBy(c.id)-finance.spentBy(c.id)))
- })).filter(c=>c.room>0).sort((a,b)=>b.room-a.room).slice(0,3):[];
+ // Only explicitly flexible *lines* that aren't protected may be suggested.
+ // A mixed category such as Car never authorizes cutting fuel or instalments.
+ const flexibleLines=spendingBreakdown(money,month).groups.find(g=>g.role==="flexible")?.lines??[];
+ const monthlyFlexible=validBudget?flexibleLines.filter(line=>{
+  const parent=money.categories.find(c=>c.id===line.categoryId);
+  return !line.needsReview&&line.priority!=="protected"&&line.priority!=="essential"&&
+   parent?.priority!=="protected"&&parent?.priority!=="essential";
+ }).map(line=>({name:line.categoryName+" · "+line.name,
+  room:roundJod(Math.max(0,line.planned-line.paid))}))
+ .filter(line=>line.room>0).sort((a,b)=>b.room-a.room).slice(0,3):[];
  const overview=getMoneyOverview(money,now);
  // Monthly income without a receipt date cannot be included as expected cash,
  // but it must not make a separately recorded cash-after-bills check unusable.
