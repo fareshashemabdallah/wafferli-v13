@@ -52,7 +52,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
   fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
   expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("General category costs (no subcategory)");
   expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("Nanny");
-  expect(screen.getByTestId("spending-unassigned")).not.toHaveTextContent("Nanny");
+  expect(screen.queryByTestId("spending-unassigned")?.textContent??"").not.toContain("Nanny");
   let state=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
   expect(state.categories.find(c=>c.id==="n")?.remainderRole).toBe("committed");
   expect(state.budgetItems).toHaveLength(3);
