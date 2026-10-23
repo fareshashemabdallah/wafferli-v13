@@ -40,8 +40,12 @@ describe("Prototype-faithful Money experience",()=>{
    expect(within(home).getAllByRole("button",{name:new RegExp(name)}).length).toBeGreaterThan(0);
   }
   expect(home).not.toHaveTextContent("••••");
-  fireEvent.click(screen.getByText("Cash & savings options (optional)"));
-  expect(home).toHaveTextContent("520 JOD");
+  expect(within(dashboard).queryByText(/What matters now/)).not.toBeInTheDocument();
+  expect(within(dashboard).queryByText(/Category amounts automatically enter/)).not.toBeInTheDocument();
+  expect(home).not.toHaveTextContent("520 JOD");
+  fireEvent.click(screen.getByText("More planning tools (optional)"));
+  expect(screen.getByRole("button",{name:"Edit cash"})).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"Edit savings goal"})).toBeInTheDocument();
   expect(screen.queryByRole("button",{name:/Reveal amounts|Hide private amounts/i})).not.toBeInTheDocument();
   expect(within(home).getByText("Where our money goes")).toBeInTheDocument();
   expect(within(home).getAllByRole("button",{name:/Add category/}).length).toBeGreaterThan(0);
@@ -64,6 +68,7 @@ describe("Prototype-faithful Money experience",()=>{
  });
  it("can edit manual cash and an existing category pace without creating a second paid expense",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByText("More planning tools (optional)"));
   fireEvent.click(screen.getByRole("button",{name:"Review upcoming cash flow"}));
   fireEvent.click(screen.getByRole("button",{name:"Edit starting cash & reserve"}));
   const dialog=screen.getByRole("dialog",{name:"Cash and safety reserve"});

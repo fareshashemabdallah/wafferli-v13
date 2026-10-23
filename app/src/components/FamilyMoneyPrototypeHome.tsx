@@ -33,9 +33,8 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
  const openAll=()=>{setAllCategories(true);setActiveCategory(null);};
  return <div className="space-y-3" data-testid="prototype-money-home">
   <OneMoneyDashboardSummary state={state} forecast={forecast}
-   onIncome={onIncome} onCash={onCash} onSavings={onSavings}
-   onBills={onBills} onExpense={onQuickAdd}
-   onTimeline={()=>onArea("timeline")} onOpenCategory={openCategory}/>
+   onIncome={onIncome} onBills={onBills} onExpense={onQuickAdd}
+   onOpenCategory={openCategory}/>
   {!allCategories?<section id="money-category-cards" className="scroll-mt-4 space-y-3"
    aria-label={t("Where our money goes","وين بتروح مصاريف العيلة")}>
    <div className="flex flex-wrap items-center justify-between gap-2">
@@ -88,6 +87,14 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
     {t("More planning tools (optional)","أدوات تخطيط إضافية (اختيارية)")}
    </summary>
    <div className="flex flex-wrap gap-2 border-t border-[#EDF1EA] py-3">
+    <button type="button" onClick={()=>onArea("timeline")} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
+     {t("Review upcoming cash flow","راجع السيولة الجاية")}</button>
+    <button type="button" onClick={onCash} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
+     {t("Edit cash","عدّل السيولة")}</button>
+    <button type="button" onClick={onSavings} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
+     {t("Edit savings goal","تعديل هدف الادخار")}</button>
+    <button type="button" onClick={onIncome} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
+     {t("Edit paydays","عدّل الرواتب")}</button>
     <button type="button" onClick={onBills} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
      {t("Bills and payments","الفواتير والدفعات")}</button>
     <button type="button" onClick={()=>onArea("annual")} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
@@ -98,8 +105,5 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
      {t("Payment history","سجل المصاريف")}</button>
    </div>
   </details>
-  <p className="text-[11px] leading-relaxed text-[#768678]">{t(
-   "All amounts come from your existing records. Forecasts are estimates, not confirmed cash or automatic payments.",
-   "كل الأرقام من السجلات نفسها. التوقعات تقديرات، مش سيولة مؤكدة أو دفعات تلقائية.")}</p>
  </div>;
 }
