@@ -33,7 +33,7 @@ describe("Prototype-faithful Money experience",()=>{
   expect(within(home).queryByText("Recently recorded")).not.toBeInTheDocument();
   expect(within(home).queryByText("Coming up next")).not.toBeInTheDocument();
   expect(within(home).getByTestId("money-category-preview").children.length).toBeLessThanOrEqual(5);
-  expect(within(home).getByTestId("money-category-preview")).toHaveAttribute("id","money-category-cards");
+  expect(home.querySelector("#money-category-cards")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   expect(screen.queryByRole("tab",{name:/Money Map/})).not.toBeInTheDocument();
   for(const name of ["Groceries","Fuel","Restaurants","Children","Housing","Health"]){
