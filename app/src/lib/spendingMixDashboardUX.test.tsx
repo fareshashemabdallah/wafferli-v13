@@ -55,12 +55,13 @@ describe("Money dashboard compact spending mix",()=>{
   expect(open).toHaveBeenCalledWith("utilities");
   expect(sample().budgetItems).toHaveLength(8);
  });
- it("is inserted immediately under the original four financial cards in the actual Money journey",()=>{
+ it("is inserted immediately under the relevant summary cards in the uncluttered Money journey",()=>{
   render(<I18nProvider><FamilyMoneyRhythm state={sample()} setState={()=>{}} onBills={()=>{}} onSpending={()=>{}} onCategories={()=>{}}/></I18nProvider>);
   const dashboard=screen.getByTestId("unified-money-dashboard");
-  const fourth=within(dashboard).getByTestId("money-summary-bills");
+  const lastSummary=within(dashboard).getByTestId("money-summary-paid");
+  expect(within(dashboard).queryByTestId("money-summary-bills")).not.toBeInTheDocument();
   const mix=within(dashboard).getByTestId("money-spending-mix");
-  expect(fourth.compareDocumentPosition(mix)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  expect(lastSummary.compareDocumentPosition(mix)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   expect(within(dashboard).getByTestId("money-summary-income")).toHaveTextContent("5,000 JOD");
   expect(within(dashboard).getByTestId("money-summary-plan")).toHaveTextContent("1,600 JOD");
   expect(mix).toHaveTextContent("Budget cushions");

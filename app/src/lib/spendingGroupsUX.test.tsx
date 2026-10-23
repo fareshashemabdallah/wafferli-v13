@@ -30,6 +30,7 @@ afterEach(()=>{cleanup();localStorage.clear()});
 describe("Expense-line nature inside a single illustrated family category",()=>{
  it("shows exactly one Car card while its Instalment and Fuel lines appear in different groups",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   const groups=["committed","necessary","flexible"].map(g=>screen.getByTestId("spending-group-"+g));
   expect(groups[0]).toHaveTextContent("Car");
   expect(groups[0]).toHaveTextContent("Instalment");
@@ -43,6 +44,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
  });
  it("offers Edit amount & classification visibly on the category card, without first opening cost details",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   const tiles=screen.getByTestId("unique-category-cards");
   const edit=within(tiles).getByRole("button",{name:"Edit amount & classification for Nanny"});
   expect(edit).toBeVisible();
@@ -61,6 +63,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
  });
  it("lets parents classify Nanny without any subcategory, then change or clear it",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getByTestId("category-custom-n"));
   fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
   let dialog=screen.getByRole("dialog",{name:"Edit family category"});
@@ -88,6 +91,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
  });
  it("classifies Groceries or Nanny right inside the expanded category, without finding Edit or adding a subcategory",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   const before=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
   fireEvent.click(screen.getByTestId("category-custom-n"));
   const details=screen.getByTestId("unified-category-details");
@@ -104,6 +108,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
  });
  it("a category with detailed cost lines shows a cushion but no second classification selector",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getByTestId("category-custom-car"));
   const details=screen.getByTestId("unified-category-details");
   expect(within(details).queryByRole("combobox",{name:"Category spending classification"})).not.toBeInTheDocument();
@@ -129,6 +134,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
    return <I18nProvider><FamilyMoneyRhythm state={state} setState={setState} onBills={()=>{}} onSpending={()=>{}} onCategories={()=>{}}/></I18nProvider>;
   }
   render(<Utilities/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("Monthly budget cushion");
   expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("95 JOD");
   expect(screen.getByTestId("spending-unassigned")).not.toHaveTextContent("Still to split within categories");
@@ -143,6 +149,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
  });
  it("edits a line from necessary to flexible without changing parent category or payment history",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getByTestId("category-custom-car"));
   fireEvent.click(within(screen.getByTestId("unified-category-details")).getAllByRole("button",{name:"Edit"})[0]!);
   const form=screen.getByRole("form",{name:"Add subcategory"});

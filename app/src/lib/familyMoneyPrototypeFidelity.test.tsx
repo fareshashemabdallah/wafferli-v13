@@ -29,14 +29,17 @@ describe("Prototype-faithful Money experience",()=>{
   const home=screen.getByTestId("prototype-money-home");
   const dashboard=screen.getByTestId("unified-money-dashboard");
   for(const id of ["income","plan","paid","bills"])expect(within(dashboard).getByTestId("money-summary-"+id)).toBeInTheDocument();
-  expect(within(dashboard).getByText("Monthly plan vs paid")).toBeInTheDocument();
-  expect(within(home).getByText("Recently recorded")).toBeInTheDocument();
-  expect(within(home).getByText("Coming up next")).toBeInTheDocument();
+  expect(within(dashboard).queryByText("Monthly plan vs paid")).not.toBeInTheDocument();
+  expect(within(home).queryByText("Recently recorded")).not.toBeInTheDocument();
+  expect(within(home).queryByText("Coming up next")).not.toBeInTheDocument();
+  expect(within(home).getByTestId("money-category-preview").children.length).toBeLessThanOrEqual(5);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   expect(screen.queryByRole("tab",{name:/Money Map/})).not.toBeInTheDocument();
   for(const name of ["Groceries","Fuel","Restaurants","Children","Housing","Health"]){
    expect(within(home).getAllByRole("button",{name:new RegExp(name)}).length).toBeGreaterThan(0);
   }
   expect(home).not.toHaveTextContent("••••");
+  fireEvent.click(screen.getByText("Cash & savings options (optional)"));
   expect(home).toHaveTextContent("520 JOD");
   expect(screen.queryByRole("button",{name:/Reveal amounts|Hide private amounts/i})).not.toBeInTheDocument();
   expect(within(home).getByText("Where our money goes")).toBeInTheDocument();
@@ -67,7 +70,7 @@ describe("Prototype-faithful Money experience",()=>{
   fireEvent.click(within(dialog).getByRole("button",{name:"Save and update outlook"}));
   expect(screen.getByTestId("money-state")).toHaveTextContent('"cash":650');
   fireEvent.click(screen.getByRole("button",{name:/Back to the Money dashboard/}));
-  fireEvent.click(screen.getByText("More planning options (optional)"));
+  fireEvent.click(screen.getByText("More planning tools (optional)"));
   fireEvent.click(screen.getByRole("button",{name:"Customize spending timing"}));
   fireEvent.click(screen.getByRole("button",{name:"Spread this budget"}));
   fireEvent.change(screen.getByLabelText("Monthly allowance (JOD)"),{target:{value:"450"}});
