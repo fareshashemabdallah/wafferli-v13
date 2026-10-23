@@ -5,6 +5,7 @@ import {I18nProvider} from "./i18n";
 import {FamilyMoneyRhythm} from "@/components/FamilyMoneyRhythm";
 import {emptyRealMoney} from "./moneyOverview";
 import type {MoneyState} from "./money";
+
 const sample=():MoneyState=>({
  ...emptyRealMoney(),categories:[
   {id:"car",name:"Car",type:"variable",planned:700,visualGroup:"custom",visualIcon:"fuel"},
@@ -27,142 +28,62 @@ function App(){
 }
 beforeEach(()=>localStorage.clear());
 afterEach(()=>{cleanup();localStorage.clear()});
-describe("Expense-line nature inside a single illustrated family category",()=>{
- it("shows exactly one Car card while its Instalment and Fuel lines appear in different groups",()=>{
+describe("A family-first Money page using the same classified financial records",()=>{
+ it("keeps classified spending visible in one compact dashboard without repeating all cost lines",()=>{
   render(<App/>);
-  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
-  const groups=["committed","necessary","flexible"].map(g=>screen.getByTestId("spending-group-"+g));
-  expect(groups[0]).toHaveTextContent("Car");
-  expect(groups[0]).toHaveTextContent("Instalment");
-  expect(groups[1]).toHaveTextContent("Fuel");
-  expect(groups[1]).toHaveTextContent("Maintenance");
-  expect(groups[2]).not.toHaveTextContent("Car");
-  expect(groups[0]!.compareDocumentPosition(groups[1]!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-  expect(within(screen.getByTestId("unique-category-cards")).getAllByText("Car")).toHaveLength(1);
-  expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("Nanny");
-  expect(screen.getByTestId("saved-group-state")).toHaveTextContent('"amount":90');
+  const mix=screen.getByTestId("money-spending-mix");
+  expect(mix).toHaveTextContent("Committed");
+  expect(mix).toHaveTextContent("Necessary, variable");
+  expect(mix).toHaveTextContent("Budget cushions");
+  expect(screen.queryByText("What each cost means for our money")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("spending-group-committed")).not.toBeInTheDocument();
+  expect(screen.queryByText("More planning tools (optional)")).not.toBeInTheDocument();
+  expect(screen.getByTestId("money-category-preview").children).toHaveLength(2);
+  expect(screen.queryByRole("button",{name:/View all categories/})).not.toBeInTheDocument();
  });
- it("offers Edit amount & classification visibly on the category card, without first opening cost details",()=>{
+ it("opens only the selected category and exposes budget, spent and the two primary actions",()=>{
   render(<App/>);
-  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
-  const tiles=screen.getByTestId("unique-category-cards");
-  const edit=within(tiles).getByRole("button",{name:"Edit amount & classification for Nanny"});
-  expect(edit).toBeVisible();
-  expect(screen.queryByTestId("unified-category-details")).not.toBeInTheDocument();
-  fireEvent.click(edit);
-  const dialog=screen.getByRole("dialog",{name:"Edit family category"});
-  expect(within(dialog).getByLabelText("Usual monthly allowance (JOD)")).toHaveValue(400);
-  expect(within(dialog).getByLabelText("Category spending classification")).toHaveValue("");
-  fireEvent.change(within(dialog).getByLabelText("Category spending classification"),{target:{value:"committed"}});
-  fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
-  expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("Nanny");
-  const money=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
-  expect(money.categories.find(c=>c.id==="n")).toMatchObject({planned:400,remainderRole:"committed"});
-  expect(money.budgetItems).toHaveLength(3);
-  expect(money.expenses).toHaveLength(1);
+  fireEvent.click(screen.getByTestId("category-custom-car"));
+  const details=screen.getByTestId("unified-category-details");
+  expect(details).toHaveTextContent("Car");
+  expect(details).toHaveTextContent("Monthly budget");
+  expect(details).toHaveTextContent("Spent");
+  expect(details).toHaveTextContent("Remaining");
+  expect(within(details).getAllByRole("button",{name:"Record spending"})[0]!).toBeInTheDocument();
+  expect(within(details).getByRole("button",{name:"Edit budget"})).toBeInTheDocument();
+  expect(screen.queryByText("More planning tools (optional)")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("category-custom-n")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:/Back to categories/}));
+  expect(screen.getByTestId("category-custom-n")).toBeInTheDocument();
  });
- it("lets parents classify Nanny without any subcategory, then change or clear it",()=>{
+ it("classifies a category without adding a separate line or financial entry",()=>{
   render(<App/>);
-  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
-  fireEvent.click(screen.getByTestId("category-custom-n"));
-  fireEvent.click(within(screen.getByTestId("unified-category-details")).getByRole("button",{name:"Edit budget"}));
-  let dialog=screen.getByRole("dialog",{name:"Edit family category"});
-  const classification=within(dialog).getByLabelText("Category spending classification");
-  expect(classification).toHaveValue("");
-  fireEvent.change(classification,{target:{value:"committed"}});
-  fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
-  expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("General category costs (no subcategory)");
-  expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("Nanny");
-  expect(screen.queryByTestId("spending-unassigned")?.textContent??"").not.toContain("Nanny");
-  let state=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
-  expect(state.categories.find(c=>c.id==="n")?.remainderRole).toBe("committed");
-  expect(state.budgetItems).toHaveLength(3);
-  fireEvent.click(screen.getByTestId("category-custom-n"));
-  // Click again if the category panel was already open.
-  if(!screen.queryByTestId("unified-category-details"))fireEvent.click(screen.getByTestId("category-custom-n"));
-  fireEvent.click(within(screen.getByTestId("unified-category-details")).getByRole("button",{name:"Edit budget"}));
-  dialog=screen.getByRole("dialog",{name:"Edit family category"});
-  fireEvent.change(within(dialog).getByLabelText("Category spending classification"),{target:{value:"flexible"}});
-  fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
-  expect(screen.getByTestId("spending-group-flexible")).toHaveTextContent("Nanny");
-  state=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
-  expect(state.budgetItems).toHaveLength(3);
-  expect(state.expenses).toHaveLength(1);
- });
- it("classifies Nanny from a single Edit budget dialog without creating subcategories or expenses",()=>{
-  render(<App/>);
-  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   const before=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
   fireEvent.click(screen.getByTestId("category-custom-n"));
-  const details=screen.getByTestId("unified-category-details");
-  expect(within(details).queryByTestId("category-inline-classification")).not.toBeInTheDocument();
-  fireEvent.click(within(details).getByRole("button",{name:"Edit budget"}));
-  const dialog=screen.getByRole("dialog",{name:"Edit family category"});
-  const select=within(dialog).getByRole("combobox",{name:"Category spending classification"});
-  fireEvent.change(select,{target:{value:"committed"}});
-  fireEvent.click(within(dialog).getByRole("button",{name:"Save category"}));
-  expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("Nanny");
+  fireEvent.click(within(screen.getByTestId("unified-category-details")).getByRole("button",{name:"Edit budget"}));
+  const dlg=screen.getByRole("dialog",{name:"Edit family category"});
+  fireEvent.change(within(dlg).getByLabelText("Category spending classification"),{target:{value:"committed"}});
+  fireEvent.click(within(dlg).getByRole("button",{name:"Save category"}));
   const after=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
   expect(after.categories.find(c=>c.id==="n")?.remainderRole).toBe("committed");
   expect(after.budgetItems).toEqual(before.budgetItems);
   expect(after.expenses).toEqual(before.expenses);
   expect(after.commitments).toEqual(before.commitments);
+  expect(screen.getByTestId("mix-stat-committed")).toHaveTextContent("750 JOD");
  });
- it("a category with detailed cost lines shows a cushion but no second classification selector",()=>{
+ it("edits a detailed cost line without losing other category data or paid transactions",()=>{
   render(<App/>);
-  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
-  fireEvent.click(screen.getByTestId("category-custom-car"));
-  const details=screen.getByTestId("unified-category-details");
-  expect(within(details).queryByRole("combobox",{name:"Category spending classification"})).not.toBeInTheDocument();
-  expect(within(details).getByTestId("category-breakdown-details")).toBeInTheDocument();
-  expect(within(details).getByRole("button",{name:"Edit budget"})).toBeInTheDocument();
-  expect(screen.getByTestId("spending-group-committed")).toHaveTextContent("Instalment");
-  expect(screen.getByTestId("spending-group-necessary")).toHaveTextContent("Fuel");
-  const saved=JSON.parse(screen.getByTestId("saved-group-state").textContent??"{}") as MoneyState;
-  expect(saved.categories.find(c=>c.id==="car")?.remainderRole).toBeUndefined();
- });
- it("Utilities with five classified lines and 95 JOD spare displays it as a cushion, not a classification task",()=>{
-  function Utilities(){
-   const base=sample();
-   const [state,setState]=useState<MoneyState>({...base,
-    categories:[{id:"util",name:"Utilities",planned:500,type:"variable"}],
-    budgetItems:[
-     {id:"water",categoryId:"util",name:"Water",amountJod:150,frequency:"monthly",enabled:true,spendingRole:"necessary",behaviour:"variable",priority:"essential"},
-     {id:"electric",categoryId:"util",name:"Electricity",amountJod:150,frequency:"monthly",enabled:true,spendingRole:"necessary",behaviour:"variable",priority:"essential"},
-     {id:"internet",categoryId:"util",name:"Internet",amountJod:35,frequency:"monthly",enabled:true,spendingRole:"committed",behaviour:"fixed",priority:"essential"},
-     {id:"building",categoryId:"util",name:"Building",amountJod:50,frequency:"monthly",enabled:true,spendingRole:"committed",behaviour:"fixed",priority:"essential"},
-     {id:"phone",categoryId:"util",name:"Phone",amountJod:20,frequency:"monthly",enabled:true,spendingRole:"committed",behaviour:"fixed",priority:"essential"}
-    ],expenses:[]});
-   return <I18nProvider><FamilyMoneyRhythm state={state} setState={setState} onBills={()=>{}} onSpending={()=>{}} onCategories={()=>{}}/></I18nProvider>;
-  }
-  render(<Utilities/>);
-  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
-  expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("Monthly budget cushion");
-  expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("95 JOD");
-  expect(screen.getByTestId("spending-unassigned")).not.toHaveTextContent("Still to split within categories");
-  fireEvent.click(screen.getByRole("button",{name:/Utilities · Costs and payments/}));
-  const details=screen.getByTestId("unified-category-details");
-  expect(screen.getByTestId("spending-unassigned")).toHaveTextContent("95 JOD");
-  expect(within(details).queryByTestId("category-inline-classification")).not.toBeInTheDocument();
-  fireEvent.click(within(details).getByRole("button",{name:"Edit budget"}));
-  const dialog=screen.getByRole("dialog",{name:"Edit family category"});
-  expect(within(dialog).queryByRole("combobox",{name:"Category spending classification"})).not.toBeInTheDocument();
-  expect(within(dialog).getByTestId("editor-category-cushion")).toHaveTextContent("Individual cost lines");
- });
- it("edits a line from necessary to flexible without changing parent category or payment history",()=>{
-  render(<App/>);
-  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getByTestId("category-custom-car"));
   fireEvent.click(within(screen.getByTestId("unified-category-details")).getByText(/Budget breakdown/));
-  fireEvent.click(within(screen.getByTestId("unified-category-details")).getAllByRole("button",{name:"Edit"})[0]!);
+  const details=screen.getByTestId("unified-category-details");
+  fireEvent.click(within(details).getAllByRole("button",{name:"Edit"})[0]!);
   const form=screen.getByRole("form",{name:"Add subcategory"});
   expect(within(form).getByLabelText("Spending behaviour")).toHaveValue("committed");
   fireEvent.change(within(form).getByLabelText("Spending behaviour"),{target:{value:"flexible"}});
   fireEvent.click(within(form).getByRole("button",{name:"Save changes"}));
-  expect(screen.getByTestId("spending-group-flexible")).toHaveTextContent("Instalment");
-  const output=screen.getByTestId("saved-group-state");
-  expect(output).toHaveTextContent('"spendingRole":"flexible"');
-  expect(output).toHaveTextContent('"amount":90');
-  expect(output).toHaveTextContent('"planned":700');
+  const json=screen.getByTestId("saved-group-state").textContent??"";
+  expect(json).toContain('"spendingRole":"flexible"');
+  expect(json).toContain('"amount":90');
+  expect(json).toContain('"planned":700');
  });
 });

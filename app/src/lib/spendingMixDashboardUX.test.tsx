@@ -1,5 +1,5 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from "vitest";
-import {cleanup,fireEvent,render,screen,within} from "@testing-library/react";
+import {cleanup,render,screen,within} from "@testing-library/react";
 import {I18nProvider} from "./i18n";
 import type {MoneyState} from "./money";
 import {emptyRealMoney} from "./moneyOverview";
@@ -48,11 +48,10 @@ describe("Money dashboard compact spending mix",()=>{
   expect(within(panel).getByTestId("mix-stat-cushion")).toHaveTextContent("95 JOD");
   expect(within(panel).queryByTestId("mix-stat-unclassified")).not.toBeInTheDocument();
   expect(within(panel).getByTestId("money-spending-mix-bar").children).toHaveLength(3);
-  expect(within(panel).getByTestId("mix-expanded-lines")).toHaveTextContent("Utilities · Water");
-  expect(within(panel).getByTestId("mix-expanded-lines")).toHaveTextContent("Utilities · Cushion");
-  fireEvent.click(within(panel).getByText("Explore spending mix"));
-  fireEvent.click(within(panel).getByRole("button",{name:/Utilities · Water/}));
-  expect(open).toHaveBeenCalledWith("utilities");
+  expect(within(panel).queryByTestId("mix-expanded-lines")).not.toBeInTheDocument();
+  expect(within(panel).queryByText("Explore spending mix")).not.toBeInTheDocument();
+  expect(within(panel).getByTestId("mix-stat-necessary")).toHaveTextContent("650 JOD");
+  expect(open).not.toHaveBeenCalled();
   expect(sample().budgetItems).toHaveLength(8);
  });
  it("is inserted immediately under the relevant summary cards in the uncluttered Money journey",()=>{

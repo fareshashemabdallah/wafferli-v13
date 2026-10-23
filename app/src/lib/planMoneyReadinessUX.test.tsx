@@ -40,7 +40,7 @@ describe("Plan → Money setup is precise and contextual",()=>{
  it("shows the income dialog automatically on the Money page when routed from Plan",()=>{
   render(<I18nProvider><FamilyMoneyRhythm state={emptyRealMoney()} setState={()=>{}} onBills={()=>{}} onSpending={()=>{}} onCategories={()=>{}} requestedSetupStep="income"/></I18nProvider>);
   expect(screen.getByRole("dialog",{name:"Income and paydays"})).toBeInTheDocument();
-  expect(screen.getByTestId("money-plan-setup")).toHaveTextContent("Monthly income");
+  expect(screen.getByTestId("money-plan-setup")).toHaveTextContent("Enter income");
  });
  it("makes the hidden review confirmation visible and preserves existing categories",()=>{
   vi.spyOn(window,"confirm").mockReturnValue(true);
@@ -50,7 +50,7 @@ describe("Plan → Money setup is precise and contextual",()=>{
   render(<I18nProvider><FamilyMoneyRhythm state={state} setState={change=>{
     changed.current=typeof change==="function"?change(state):change;
    }} onBills={()=>{}} onSpending={()=>{}} onCategories={()=>{}} requestedSetupStep="review"/></I18nProvider>);
-  fireEvent.click(screen.getByRole("button",{name:"Confirm review"}));
+  fireEvent.click(screen.getByRole("button",{name:"Confirm budget review"}));
   expect(changed.current?.financialInputsPartial).toBe(false);
   expect(changed.current?.categories).toEqual(state.categories);
   expect(window.confirm).toHaveBeenCalledTimes(1);
