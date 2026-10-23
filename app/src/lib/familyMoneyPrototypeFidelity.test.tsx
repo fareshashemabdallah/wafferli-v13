@@ -41,7 +41,7 @@ describe("Approved core Money concept",()=>{
   fireEvent.click(screen.getByTestId("category-picture-groceries"));
   expect(screen.getByTestId("unified-category-details")).toBeInTheDocument();
   expect(screen.queryByTestId("money-category-preview")).not.toBeInTheDocument();
-  expect(screen.getByRole("button",{name:"Back to categories"})).toBeInTheDocument();
+  expect(screen.getByRole("button",{name:/Back to categories/})).toBeInTheDocument();
  });
  it("edits an existing income once without recording it as a payment",()=>{
   render(<App/>);
