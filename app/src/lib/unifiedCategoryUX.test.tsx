@@ -26,7 +26,8 @@ describe("one-page illustrated category to partial payments",()=>{
   fireEvent.click(screen.getByTestId("category-custom-school"));
   const section=screen.getByTestId("unified-category-details");
   expect(within(section).getByText("Education")).toBeInTheDocument();
-  fireEvent.click(within(section).getByRole("button",{name:/Break down this category/}));
+  fireEvent.click(within(section).getByText("Budget breakdown (optional)"));
+  fireEvent.click(within(section).getByRole("button",{name:/Add expense line/}));
   fireEvent.change(within(section).getByLabelText("Name"),{target:{value:"School fees"}});
   fireEvent.change(within(section).getByLabelText("Amount (JOD)"),{target:{value:"300"}});
   fireEvent.click(within(section).getByLabelText("This is a bill with a due date"));
@@ -47,6 +48,7 @@ describe("one-page illustrated category to partial payments",()=>{
   expect(state().expenses).toHaveLength(2);
   expect(state().commitments?.[0]?.paidDates).toEqual([localToday()]);
   vi.spyOn(window,"confirm").mockReturnValue(true);
+  fireEvent.click(within(section).getByText(/Recent spending/));
   fireEvent.click(within(section).getAllByRole("button",{name:"Undo"})[0]!);
   expect(state().expenses).toHaveLength(1);
   expect(state().commitments?.[0]?.paidDates).toEqual([]);

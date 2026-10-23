@@ -67,7 +67,7 @@ describe("Line-level classification is the only canonical Money classification",
   expect(view.totalPaid).toBe(180);
   expect(view.due).toEqual([]);
  });
- it("an itemized category ignores a stale parent role and keeps the difference as a neutral cushion",()=>{
+ it("an explicitly classified unitemized remainder stays classified without duplicating cost lines",()=>{
   const s=car();
   s.categories[0]={...s.categories[0]!,remainderRole:"flexible"};
   const view=spendingBreakdown(s,month);
@@ -75,8 +75,8 @@ describe("Line-level classification is the only canonical Money classification",
   expect(view.unassigned).toEqual([]);
   s.categories[0]!.planned=900;
   const part=spendingBreakdown(s,month);
-  expect(part.groups.map(g=>g.planned)).toEqual([350,350,0]);
-  expect(part.unassigned).toMatchObject([{categoryId:"car",planned:200,kind:"cushion"}]);
+  expect(part.groups.map(g=>g.planned)).toEqual([350,350,200]);
+  expect(part.unassigned).toEqual([]);
   expect(part.groups.reduce((n,g)=>n+g.planned,0)+part.unassigned.reduce((n,x)=>n+x.planned,0)).toBe(part.totalPlanned);
   expect(part.groups[0]?.paid).toBe(100);
   expect(part.groups[1]?.paid).toBe(90);
@@ -89,7 +89,7 @@ describe("Line-level classification is the only canonical Money classification",
   },"unused");
   expect(first.ok).toBe(true);
   if(!first.ok)return;
-  expect(first.state.categories[0]?.remainderRole).toBeUndefined();
+  expect(first.state.categories[0]?.remainderRole).toBe("committed");
   expect(first.state.budgetItems).toEqual(original.budgetItems);
   expect(first.state.commitments).toEqual(original.commitments);
   expect(first.state.expenses).toEqual(original.expenses);
@@ -115,7 +115,7 @@ describe("Line-level classification is the only canonical Money classification",
  });
  it("Utilities five categorized lines total 405 JOD and leave a 95 JOD cushion, not an unclassified expense",()=>{
   const s=car();s.expenses=[];s.commitments=[];
-  s.categories=[{id:"util",name:"Utilities",type:"variable",planned:500,remainderRole:"necessary"}];
+  s.categories=[{id:"util",name:"Utilities",type:"variable",planned:500}];
   s.budgetItems=[
    {id:"water",categoryId:"util",name:"Water",enabled:true,amountJod:150,frequency:"monthly",behaviour:"variable",priority:"essential",spendingRole:"necessary"},
    {id:"elec",categoryId:"util",name:"Electricity",enabled:true,amountJod:150,frequency:"monthly",behaviour:"variable",priority:"essential",spendingRole:"necessary"},
@@ -134,14 +134,16 @@ describe("Line-level classification is the only canonical Money classification",
   expect(clean.categories[0]?.remainderRole).toBeUndefined();
   expect(clean.budgetItems).toEqual(s.budgetItems);
  });
- it("adding a first expense line retires the old direct category classification without changing its amount",()=>{
+ it("adding a first expense line preserves the original category classification on the remaining allowance",()=>{
   const s=car();s.budgetItems=[];s.categories[0]={...s.categories[0]!,remainderRole:"committed"};
   const added=addCategoryItem(s,{id:"fuel",categoryId:"car",name:"Fuel",enabled:true,amountJod:250,
    frequency:"monthly",behaviour:"variable",priority:"essential",spendingRole:"necessary"});
-  expect(added.categories[0]?.remainderRole).toBeUndefined();
+  expect(added.categories[0]?.remainderRole).toBe("committed");
   expect(added.categories[0]?.planned).toBe(700);
   expect(added.budgetItems).toHaveLength(1);
-  expect(spendingBreakdown(added,month).unassigned).toMatchObject([{planned:450,kind:"cushion"}]);
+  expect(spendingBreakdown(added,month).groups[0]?.planned).toBe(450);
+  expect(spendingBreakdown(added,month).groups[1]?.planned).toBe(250);
+  expect(spendingBreakdown(added,month).unassigned).toEqual([]);
  });
  it("a lower month-specific allowance reconciles grouped item amounts to the actual budget",()=>{
   const s=car();

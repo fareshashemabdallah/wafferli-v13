@@ -47,6 +47,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
   .slice().sort((a,b)=>b.date.localeCompare(a.date));
  const spending=recordedItemSpending(state,categoryId,month),overview=computeMoney(state);
  const plan=overview.plannedBy(categoryId),paid=overview.spentBy(categoryId);
+ const difference=roundJod(plan-paid);
  const itemized=categoryItemTotal(state.budgetItems??[],categoryId);
  const free=roundJod(category.planned-itemized);
  const show=(n:number)=>money(n);
@@ -62,7 +63,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
     paid:billPaidTotal(state,b.id,d)}));
  });
  const startPayment=(itemId?:string,billId?:string,dueDate?:string)=>{
-  setError("");setPaymentTarget({...(itemId?{itemId}:{}),...(billId&&dueDate?{billId,dueDate}:{})});
+  setError("");window.requestAnimationFrame?.(()=>document.getElementById("category-payment-form")?.scrollIntoView?.({behavior:"smooth",block:"nearest"}));setPaymentTarget({...(itemId?{itemId}:{}),...(billId&&dueDate?{billId,dueDate}:{})});
   if(billId&&dueDate)setPayAmount(String(billOutstanding(state,billId,dueDate)));
   else setPayAmount("");
   setPayDate(localToday());
@@ -153,59 +154,52 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    <div className="flex min-w-0 items-center gap-2">
     <span className="grid size-11 shrink-0 place-items-center rounded-xl text-2xl" style={{background:illustration.bg}} aria-hidden="true">{illustration.icon}</span>
     <div className="min-w-0"><h3 className="truncate text-base font-extrabold text-[#315B42]">{category.name}</h3>
-     <p className="text-xs text-[#738A78]">{t("Manage every cost and payment here","كل التكاليف والدفعات بنفس المكان")}</p></div>
+     <p className="text-xs text-[#738A78]">{t("Your monthly budget at a glance","ميزانية الشهر بنظرة سريعة")}</p></div>
    </div>
    <button type="button" onClick={onClose} className={btn} aria-label={t("Close category","إغلاق الفئة")}>×</button>
   </div>
   <div className="grid grid-cols-3 gap-2">
-   {([{en:"Monthly plan",ar:"خطة الشهر",value:plan},{en:"Paid this month",ar:"مدفوع هذا الشهر",value:paid},
-      {en:"Plan left",ar:"المتبقي من الخطة",value:Math.max(0,roundJod(plan-paid))}]).map(x=>
-    <div key={x.en} className="rounded-xl bg-white p-2"><p className="text-[10px] text-[#698470]">{t(x.en,x.ar)}</p>
-     <strong className="mt-1 block break-words text-xs tabular-nums text-[#397E5A] sm:text-base">{show(x.value)}</strong></div>)}
+   {([{en:"Monthly budget",ar:"ميزانية الشهر",value:plan},{en:"Spent",ar:"المصروف",value:paid},
+      {en:difference<0?"Over budget":"Remaining",ar:difference<0?"تجاوز الميزانية":"المتبقي",value:Math.abs(difference)}]).map(x=>
+    <div key={x.en} className="rounded-xl bg-white p-2.5">
+     <p className="text-[10px] text-[#698470]">{t(x.en,x.ar)}</p>
+     <strong className={"mt-1 block break-words text-xs tabular-nums sm:text-base "+(difference<0&&x.value===Math.abs(difference)?"text-[#B15B47]":"text-[#397E5A]")}>{show(x.value)}</strong>
+    </div>)}
   </div>
-  <div className="flex flex-wrap gap-2">
-   <button type="button" className={btn} onClick={onEdit}>{items.length===0?t("Edit amount & classification","تعديل المبلغ والتصنيف"):t("Edit category amount","تعديل مخصص الفئة")}</button>
-   <button type="button" disabled={state.demo} className={btn+" disabled:opacity-50"}
+  <div className="h-2 overflow-hidden rounded-full bg-[#EAF0E8]" role="progressbar"
+   aria-label={t("Monthly budget used","المصروف من ميزانية الشهر")} aria-valuemin={0} aria-valuemax={100}
+   aria-valuenow={plan>0?Math.min(100,Math.round(paid/plan*100)):paid>0?100:0}>
+   <div className={"h-full rounded-full "+(difference<0?"bg-[#CB7865]":"bg-[#59A781]")}
+    style={{width:(plan>0?Math.min(100,paid/plan*100):paid>0?100:0)+"%"}}/>
+  </div>
+  <p className="text-xs text-[#698270]">{items.length===0?
+   t(category.remainderRole==="committed"?"Committed":category.remainderRole==="necessary"?"Necessary · Variable":category.remainderRole==="flexible"?"Flexible":"Classification optional",
+    category.remainderRole==="committed"?"التزام":category.remainderRole==="necessary"?"ضروري · متغير":category.remainderRole==="flexible"?"مرن":"التصنيف اختياري"):
+   t("Cost lines have their own classifications","لكل بند تصنيفه")}{" · "}{t("Remaining budget is not available bank cash","المتبقي بالميزانية مش رصيد بنك مؤكّد")}</p>
+  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+   <button type="button" disabled={state.demo} className="min-h-11 rounded-xl bg-[#3D9066] px-4 text-sm font-extrabold text-white disabled:opacity-50"
+    onClick={()=>{
+     const upcoming=dueRows.filter(r=>r.remaining>0);
+     if(upcoming.length===1){
+      const row=upcoming[0]!;
+      startPayment(row.bill.budgetItemId,row.bill.id,row.date);
+     }else startPayment();
+    }}>{t(dueRows.filter(r=>r.remaining>0).length===1?"Record payment":"Record spending",
+      dueRows.filter(r=>r.remaining>0).length===1?"سجّل دفعة":"سجّل مصروف")}</button>
+   <button type="button" className={btn+" min-h-11"} onClick={onEdit}>
+    {t("Edit budget","تعديل الميزانية")}</button>
+  </div>
+  <details className="rounded-xl border border-[#DDE9DD] bg-white p-3" data-testid="category-breakdown-details">
+   <summary className="min-h-10 cursor-pointer text-sm font-bold text-[#3B7657]">
+    {t("Budget breakdown (optional)","تفاصيل الميزانية (اختيارية)")}
+    {items.length>0?" · "+items.length:""}
+   </summary>
+   <div className="mt-2 space-y-3">
+    <button type="button" disabled={state.demo} className={btn+" disabled:opacity-50"}
      onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
-     + {t("Break down this category","قسّم الفئة إلى بنود")}</button>
-  </div>
-  {items.length===0?<label className="block rounded-xl border border-[#CEE2D1] bg-white p-3 text-xs font-bold text-[#397654]" data-testid="category-inline-classification">
-   {t("Classify this category without subcategories","صنّف هذه الفئة دون بنود فرعية")}
-   <select aria-label={t("Category spending classification","تصنيف مصروف الفئة")} className={field}
-    disabled={state.demo} value={category.remainderRole??""}
-    onChange={event=>{
-     const role=event.target.value as SpendingRole|"";
-     setState(previous=>({
-      ...previous,
-      categories:previous.categories.map(entry=>{
-       if(entry.id!==categoryId)return entry;
-       const next={...entry};
-       if(role)next.remainderRole=role;
-       else delete next.remainderRole;
-       return next;
-      })
-     }));
-    }}>
-    <option value="">{t("Not classified yet","لم يصنّف بعد")}</option>
-    <option value="committed">{t("Committed · fixed obligation","التزام · مبلغ واجب الدفع")}</option>
-    <option value="necessary">{t("Necessary but variable","ضروري لكنه متغير")}</option>
-    <option value="flexible">{t("Flexible family choice","اختيار عائلي مرن")}</option>
-   </select>
-   <span className="mt-2 block text-[11px] font-normal leading-relaxed text-[#708672]">{t(
-    "Saved automatically. No subcategory or new budget is created.",
-    "يُحفظ تلقائياً دون إضافة بنود أو ميزانيات أخرى.")}</span>
-  </label>:<div data-testid="category-monthly-cushion" className="rounded-xl border border-[#DAE8D8] bg-white p-3 text-xs leading-relaxed text-[#587661]">
-   <strong>{t("Your expense lines are already classified.","بنود المصاريف مصنّفة بالفعل.")}</strong>
-   <span className="mt-1 block">{free>0?t(
-    "The remaining "+show(free)+" is an optional monthly budget cushion, not an extra cost. No other classification needed.",
-    "المبلغ المتبقي "+show(free)+" هامش اختياري في ميزانية الشهر، وليس مصروفاً إضافياً. لا حاجة لتصنيف آخر."):
-    t("Your category is covered by its cost lines. No other classification needed.",
-      "الفئة موزعة على البنود. لا حاجة لتصنيف إضافي.")}</span>
-  </div>}
-  {items.length>0&&<p className="text-xs leading-relaxed text-[#768B7D]">{t(
-   "Itemized monthly costs: ","مجموع البنود الشهرية: ")}{show(itemized)}. {t(
-   "They belong to this category's single budget; the difference is an optional cushion.",
-   "كلها ضمن ميزانية الفئة الواحدة؛ والفرق هامش اختياري.")}</p>}
+     + {t("Add expense line","إضافة بند مصروف")}</button>
+    {items.length>0&&<p className="text-xs text-[#708675]">{t("Detailed monthly total","مجموع البنود شهرياً")}: {show(itemized)}. {t(
+     "Other spending remains inside this same category budget.","باقي المصاريف ضمن نفس ميزانية الفئة.")}</p>}
   {showNewItem&&<form onSubmit={addItem} className="space-y-2 rounded-xl border border-[#D7E7D9] bg-white p-3"
     aria-label={t("Add subcategory","إضافة بند")}>
    <h4 className="text-sm font-bold">{editingItemId?t("Edit subcategory","تعديل البند"):t("New subcategory","بند جديد")}</h4>
@@ -249,8 +243,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    <div className="flex gap-2"><button type="submit" className="min-h-10 rounded-xl bg-[#3C8E62] px-4 text-xs font-bold text-white">{editingItemId?t("Save changes","حفظ التعديلات"):t("Save line","حفظ البند")}</button>
     <button type="button" className={btn} onClick={()=>{setShowNewItem(false);setEditingItemId(null);}}>{t("Cancel","إلغاء")}</button></div>
   </form>}
-  <div className="space-y-2">
-   <h4 className="text-sm font-extrabold text-[#3D7957]">{t("Your costs","بنود المصاريف")}</h4>
+  {items.length>0&&<div className="space-y-2">
    {items.map(item=>{
     const value=monthlyItemCost(item),actual=itemPaid(item.id);
     const linked=bills.some(b=>b.budgetItemId===item.id);
@@ -284,13 +277,17 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
     </div>
     {spending.unassigned>0&&<p className="mt-1 text-xs text-[#687D6E]">{t("Paid this month without subcategory: ","مدفوع هذا الشهر بدون بند: ")}{show(spending.unassigned)}</p>}
    </div>
+  </div>}
   </div>
-  <div className="space-y-2">
+  </details>
+  <details key={bills.length>0?"dated-bills":"no-bills"} open={bills.length>0} className="rounded-xl border border-[#E0EADF] bg-white p-3">
+   <summary className="min-h-10 cursor-pointer text-sm font-semibold text-[#447D60]">
+    {bills.length>0?t("Due payments","الدفعات المستحقة"):t("Schedule a payment (optional)","جدولة دفعة (اختياري)")}
+   </summary>
+  <div className="mt-2 space-y-2">
    <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-extrabold text-[#3D7957]">{t("Due payments","الدفعات المستحقة")}</h4>
     <button type="button" disabled={state.demo} className={btn} onClick={()=>{setEditingBillId(null);setBillName("");setBillAmount("");setBillForm(x=>!x);setShowNewItem(false);setError("");}}>
      + {t("Set a due date","إضافة موعد دفع")}</button></div>
-   <p className="text-xs text-[#778776]">{t("A dated bill stays inside its category. It is not added a second time to your monthly plan.",
-    "الفاتورة المؤرخة تبقى ضمن الفئة، ولا تضاف مرة ثانية لخطة الشهر.")}</p>
    {billForm&&<form className="space-y-2 rounded-xl border bg-white p-3" onSubmit={addBill}>
     <label className="block text-xs">{t("Payment name","اسم الدفعة")}
      <input className={field} value={billName} maxLength={60} onChange={e=>setBillName(e.target.value)} placeholder={t("Rent, school fees","الإيجار، الرسوم المدرسية")}/></label>
@@ -325,12 +322,12 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
      </div>
     </div>
    </div>)}
-   {!bills.length&&<p className="rounded-xl bg-white p-3 text-xs text-[#748879]">{t("No dated commitments in this category. This is optional.",
-    "لا توجد دفعات مؤرخة بهذه الفئة، وهي اختيارية.")}</p>}
    {bills.length>0&&dueRows.length===0&&<p className="rounded-xl bg-white p-3 text-xs text-[#748879]">{t("No unpaid dates in the next year. Your saved bill records are retained.",
      "لا توجد مواعيد غير مدفوعة خلال السنة المقبلة. السجلات محفوظة.")}</p>}
   </div>
-  {paymentTarget&&<form className="space-y-2 rounded-xl border-2 border-[#9FCDB0] bg-white p-3" onSubmit={pay} aria-label={t("Record payment","تسجيل الدفعة")}>
+
+  </details>
+  {paymentTarget&&<form id="category-payment-form" className="scroll-mt-4 space-y-2 rounded-xl border-2 border-[#9FCDB0] bg-white p-3" onSubmit={pay} aria-label={t("Record payment","تسجيل الدفعة")}>
    <h4 className="text-sm font-extrabold text-[#377E57]">{t("Record a full or partial payment","تسجيل دفعة كاملة أو جزئية")}</h4>
    <div className="grid grid-cols-2 gap-2">
     <label className="text-xs">{t("Paid amount (JOD)","المبلغ المدفوع")}
@@ -344,8 +341,11 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    <div className="flex gap-2"><button type="submit" className="min-h-10 rounded-xl bg-[#398A60] px-4 text-xs font-bold text-white">{t("Confirm payment","تأكيد الدفعة")}</button>
     <button type="button" className={btn} onClick={()=>{setPaymentTarget(null);setError("");}}>{t("Cancel","إلغاء")}</button></div>
   </form>}
-  <div className="space-y-2">
-   <h4 className="text-sm font-extrabold text-[#3D7957]">{t("Payment history","سجل الدفعات")}</h4>
+  {recent.length>0&&<details className="rounded-xl border border-[#E0EADF] bg-white p-3">
+   <summary className="min-h-10 cursor-pointer text-sm font-bold text-[#3D7957]">
+    {t("Recent spending","المصاريف الأخيرة")} · {recent.length}
+   </summary>
+     <div className="mt-2 space-y-2">
    {(showAllHistory?recent:recent.slice(0,6)).map(e=><div key={e.id} className="flex items-center justify-between gap-2 rounded-xl bg-white p-3">
     <div className="min-w-0"><p className="truncate text-xs font-bold">{e.note??items.find(i=>i.id===e.budgetItemId)?.name??pastDue(e.billId??"")?.name??category.name}</p>
      <p className="text-[11px] text-[#76897B]">{e.date}{e.billId?" · "+t("Scheduled payment","دفعة مجدولة"):""}</p></div>
@@ -357,8 +357,8 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    {!recent.length&&<p className="rounded-xl bg-white p-3 text-xs text-[#728675]">{t("No payments recorded in this category yet.","لم تُسجل دفعات بهذه الفئة بعد.")}</p>}
    {recent.length>6&&<button type="button" className={btn} onClick={()=>setShowAllHistory(x=>!x)}>{showAllHistory?t("Show less","عرض أقل"):t("Show all payments","عرض كل الدفعات")}</button>}
   </div>
+
+  </details>}
   {error&&<p role="alert" className="rounded-xl bg-[#FFF0EE] p-3 text-xs font-bold text-[#A2535A]">{error}</p>}
-  <p className="text-[11px] leading-relaxed text-[#788A7C]">{t("A monthly budget is not a bill. Remaining allowance is not necessarily a debt. All amounts are device-entered, not bank-verified.",
-    "ميزانية الشهر ليست فاتورة؛ المتبقي من المخصص ليس دائماً ديناً. الأرقام مدخلة يدوياً وغير مؤكدة من البنك.")}</p>
  </section>;
 }

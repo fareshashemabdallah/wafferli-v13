@@ -55,7 +55,7 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
   if(!amountValid(amount)){setError(reason("amount"));return;}
   const result=saveFamilyCategory(state,{
    ...(existing?{id:existing.id}:{}),name,planned:Number(amount),type:existing?.type??"variable",
-   ...(priority?{priority}:{}),...(!hasLines&&remainderRole?{remainderRole}:{}),visualGroup,visualIcon
+   ...(priority?{priority}:{}),...(remainderRole?{remainderRole}:{}),visualGroup,visualIcon
   },uid());
   if(!result.ok){setError(reason(result.reason));return;}
   setState(result.state);
@@ -114,7 +114,7 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
      <input className={field} type="number" inputMode="decimal" min="0" max="100000" step=".01" value={amount}
       placeholder={t("Enter an amount, e.g. 300","أدخل المبلغ مثلاً ٣٠٠")} onChange={e=>setAmount(e.target.value)}/>
     </label>
-    {!hasLines?<label className={label}>{t("How should this category be classified?","كيف تصنّف مصاريف هذه الفئة؟")}
+    {!hasLines&&<label className={label}>{t("How should this category be classified?","كيف تصنّف مصاريف هذه الفئة؟")}
      <select className={field} value={remainderRole} aria-label={t("Category spending classification","تصنيف مصروف الفئة")}
       onChange={e=>setRemainderRole(e.target.value as SpendingRole|"")}>
       <option value="">{t("Not classified yet","لم يُصنّف بعد")}</option>
@@ -122,12 +122,10 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
       <option value="necessary">{t("Necessary but variable","ضروري لكنه متغير")}</option>
       <option value="flexible">{t("Flexible family choice","اختيار مرن للعيلة")}</option>
      </select>
-     <span className="mt-1 block text-[11px] font-normal text-[#718878]">{t(
-      "This applies directly when no expense lines have been entered.",
-      "التصنيف مباشر عندما لا توجد بنود مصاريف تفصيلية.")}</span>
-    </label>:<p data-testid="editor-category-cushion" className="rounded-xl border border-[#DBE9D9] bg-[#F4FAF1] p-3 text-xs leading-relaxed text-[#62826A]">
-     {t("This category is already classified through its individual cost lines. Any allowance beyond those lines is an optional monthly cushion, not an extra expense.",
-      "هذه الفئة مصنّفة من خلال بنودها. أي مخصص زائد عن مجموع البنود هو هامش شهري اختياري وليس مصروفاً إضافياً.")}
+    </label>}
+    {hasLines&&<p data-testid="editor-category-cushion" className="rounded-xl border border-[#DBE9D9] bg-[#F4FAF1] p-3 text-xs leading-relaxed text-[#62826A]">
+     {t("Individual cost lines keep their own classifications. The unsplit part of this one budget uses the classification you previously chose, if any.",
+      "لكل بند تصنيفه الخاص. المبلغ الذي لم تقسمه يستخدم التصنيف الذي اخترته سابقاً إن وجد.")}
     </p>}
     {amountMinimum>0&&<p className="rounded-xl bg-[#F1F7ED] p-3 text-xs text-[#647967]">
       {t("This category contains itemized budget entries totalling ","هذه الفئة فيها بنود تفصيلية بمجموع ")}
@@ -136,6 +134,15 @@ export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,
     <details open={more} onToggle={e=>setMore(e.currentTarget.open)} className="rounded-xl border border-[#E0E8DB] bg-white p-3">
      <summary className="min-h-9 cursor-pointer text-xs font-bold text-[#488063]">{t("Picture & optional details","الصورة وتفاصيل اختيارية")}</summary>
      <div className="mt-3 space-y-3">
+      {hasLines&&<label className={label}>{t("Unsplit budget classification (optional)","تصنيف المصاريف غير المفصلة (اختياري)")}
+       <select className={field} value={remainderRole} aria-label={t("Unsplit budget classification","تصنيف المخصص غير المفصل")}
+        onChange={e=>setRemainderRole(e.target.value as SpendingRole|"")}>
+        <option value="">{t("Leave as unallocated budget cushion","اتركه كهامش ميزانية غير موزع")}</option>
+        <option value="committed">{t("Committed","التزامات")}</option>
+        <option value="necessary">{t("Necessary, variable","ضروري ومتغير")}</option>
+        <option value="flexible">{t("Flexible","مرن")}</option>
+       </select>
+      </label>}
       <label className={label}>{t("Category picture","صورة الفئة")}
        <select className={field} value={visualIcon} onChange={e=>setVisualIcon(e.target.value as CategoryPicture)}>
         {CATEGORY_PICTURES.map(p=><option key={p.key} value={p.key}>{p.icon} {t(p.en,p.ar)}</option>)}

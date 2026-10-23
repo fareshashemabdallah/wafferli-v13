@@ -66,12 +66,10 @@ export function addCategoryItem(state:MoneyState,item:BudgetItem):MoneyState{
  const allocated=others.reduce((sum,i)=>sum+monthlyItemCost(i),0)+monthlyItemCost(item);
  // Do not silently raise a parent's original category plan or double-count items.
  if(roundJod(allocated)>cat.planned)return state;
- const updated=upsertBudgetItem(state,item);
- if(updated===state||!cat.remainderRole)return updated;
- // Once the parent has detailed lines, those lines own the classification.
- // The difference between line totals and the category allowance is a cushion.
- return {...updated,categories:updated.categories.map(c=>c.id===cat.id?
-  (()=>{const {remainderRole:_old,...rest}=c;return rest;})():c)};
+ // Detailed lines and the original unitemized remainder share ONE envelope.
+ // Preserve a parent's explicit original classification for spending not broken
+ // into lines; adding a line must not silently turn essential costs into a cushion.
+ return upsertBudgetItem(state,item);
 }
 export function disableCategoryItem(state:MoneyState,itemId:string):MoneyState{
  if(state.demo)return state;

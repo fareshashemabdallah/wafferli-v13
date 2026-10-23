@@ -109,7 +109,6 @@ export function buildFamilyMoneyRhythm(state:MoneyState,plans:readonly FamilyPla
   ...(e.overdue?{overdue:true}:{})
  }));
  const excludedPaces:string[]=[];
- const scheduledCategoryIds=new Set(commitments.map(x=>x.categoryId).filter((x):x is string=>!!x));
  const pacedIds=new Set<string>();
  for(const pace of state.spendingPaces??[]){
   const cat=state.categories.find(c=>c.id===pace.categoryId);
@@ -119,7 +118,7 @@ export function buildFamilyMoneyRhythm(state:MoneyState,plans:readonly FamilyPla
   pacedIds.add(pace.categoryId);
   events.push(...predictedCategoryEvents({...state,commitments},pace,today,end));
  }
- events.push(...autoCategoryForecast(state,today,end,new Set([...scheduledCategoryIds,...pacedIds])));
+ events.push(...autoCategoryForecast(state,today,end,pacedIds,commitments));
  // Opening cash is current as of the selected start date, so never subtract
  // historic paid expenses again. No automatic receipts/debits take place.
  events=events.sort((a,b)=>a.date.localeCompare(b.date)||

@@ -40,7 +40,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
   fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getByTestId("category-picture-groceries"));
   expect(screen.getByTestId("unified-category-details")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
+  fireEvent.click(within(screen.getByTestId("unified-category-details")).getByRole("button",{name:"Edit budget"}));
   let dlg=screen.getByRole("dialog",{name:"Edit family category"});
   fireEvent.change(within(dlg).getByLabelText("Category name"),{target:{value:"Supermarket"}});
   fireEvent.change(within(dlg).getByLabelText("Usual monthly allowance (JOD)"),{target:{value:"330"}});
@@ -51,7 +51,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
   expect(records).toHaveTextContent('"2026-12":{"groc":370}');
   expect(screen.getByTestId("category-picture-groceries")).toHaveTextContent("Supermarket");
   // The opened category stays on the same page after editing its amount.
-  fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
+  fireEvent.click(within(screen.getByTestId("unified-category-details")).getByRole("button",{name:"Edit budget"}));
   dlg=screen.getByRole("dialog",{name:"Edit family category"});
   expect(within(dlg).getByLabelText("Category name")).toHaveValue("Supermarket");
   expect(within(dlg).getByLabelText("Usual monthly allowance (JOD)")).toHaveValue(330);
@@ -70,7 +70,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
   const tile=screen.getByTestId("category-custom-"+records.categories[0]!.id);
   expect(tile).toHaveTextContent("School Fees");
   fireEvent.click(tile);
-  fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
+  fireEvent.click(within(screen.getByTestId("unified-category-details")).getByRole("button",{name:"Edit budget"}));
   expect(within(screen.getByRole("dialog",{name:"Edit family category"})).getByLabelText("Category name")).toHaveValue("School Fees");
  });
  it("blocks duplicate names rather than creating a second category",()=>{
