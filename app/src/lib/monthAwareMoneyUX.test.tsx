@@ -23,6 +23,7 @@ afterEach(()=>{cleanup();localStorage.clear();});
 describe("Month-aware guidance embedded in existing illustrated Money Map",()=>{
  it("uses an existing pictured category card and optional confirmation; no extra tab, bill or paid expense",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   const home=screen.getByTestId("prototype-money-home");
   expect(within(home).getByText("Where our money goes")).toBeInTheDocument();
   fireEvent.click(within(home).getByTestId("category-picture-groceries"));
@@ -40,6 +41,7 @@ describe("Month-aware guidance embedded in existing illustrated Money Map",()=>{
  });
  it("restores the usual plan with one click without deleting expenses or modifying core categories",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   const home=screen.getByTestId("prototype-money-home");
   const groceries=()=>within(home).getByTestId("category-picture-groceries");
   fireEvent.click(groceries());
