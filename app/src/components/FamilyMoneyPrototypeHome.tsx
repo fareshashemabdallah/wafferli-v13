@@ -1,12 +1,11 @@
 import {useState} from "react";
-import {Plus} from "lucide-react";
 import {OneMoneyDashboardSummary} from "./OneMoneyDashboardSummary";
 import {FamilySpendingGroups} from "./FamilySpendingGroups";
 import {useI18n} from "@/lib/i18n";
-import {type MoneyState} from "@/lib/money";
+import {computeMoney,type MoneyState} from "@/lib/money";
 import {type RhythmForecast} from "@/lib/familyMoneyRhythm";
 import {fmtJOD} from "@/lib/storage";
-import {type CategoryPicture} from "@/lib/familyCategoryCards";
+import {iconForCategory,pictureFor,type CategoryPicture} from "@/lib/familyCategoryCards";
 
 type Area="timeline"|"pace"|"annual";
 type Props={
@@ -15,76 +14,92 @@ type Props={
  onSpending:()=>void;onCategories:()=>void;
  onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
-export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncome,onCash,onSavings,onBills,onQuickAdd,onSpending,onCategories,onEditCategory}:Props){
+/** One concise Money home. Detail is mounted only when requested; the
+ * original category editor, paid ledger and grouped cost lines stay intact. */
+export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncome,onCash,onSavings,onBills,onQuickAdd,onSpending,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const [allCategories,setAllCategories]=useState(false);
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
- const manage=(id:string)=>setActiveCategory(current=>current===id?null:id);
- const openCategoryFromMix=(id:string)=>{
+ const totals=computeMoney(state);
+ const topCategories=[...state.categories].sort((a,b)=>totals.plannedBy(b.id)-totals.plannedBy(a.id)).slice(0,5);
+ const scrollToDetails=()=>window.requestAnimationFrame?.(()=>{
+  document.getElementById("active-money-category")?.scrollIntoView?.({behavior:"smooth",block:"start"});
+ });
+ const openCategory=(id:string)=>{
+  setAllCategories(true);
   setActiveCategory(id);
-  // Open the exact original category record, not a second dashboard editor.
-  window.requestAnimationFrame?.(()=>{
-   document.getElementById("active-money-category")?.scrollIntoView?.({behavior:"smooth",block:"start"});
-  });
+  scrollToDetails();
  };
- const unknown=t("Not entered","غير مدخل");
- const shown=(n:number|null)=>n===null?unknown:fmtJOD(n);
- const sorted=forecast.events.filter(e=>e.kind!=="pace").slice(0,5);
- const recent=state.expenses.filter(e=>e.status!=="planned").sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
+ const openAll=()=>{setAllCategories(true);setActiveCategory(null);};
  return <div className="space-y-3" data-testid="prototype-money-home">
   <OneMoneyDashboardSummary state={state} forecast={forecast}
    onIncome={onIncome} onCash={onCash} onSavings={onSavings}
-   onBills={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})} onExpense={onQuickAdd}
-   onTimeline={()=>onArea("timeline")} onOpenCategory={openCategoryFromMix}/>
-  <FamilySpendingGroups state={state} setState={setState}
-   activeCategory={activeCategory} onClose={()=>setActiveCategory(null)}
-   onManage={manage} onEditCategory={onEditCategory}/>
-  <section className="space-y-2" aria-label={t("Next payments and income","الدفعات والدخل القادم")}>
+   onBills={onBills} onExpense={onQuickAdd}
+   onTimeline={()=>onArea("timeline")} onOpenCategory={openCategory}/>
+  {!allCategories?<section id="money-category-preview" className="scroll-mt-4 space-y-3"
+   aria-label={t("Where our money goes","وين بتروح مصاريف العيلة")}>
    <div className="flex flex-wrap items-center justify-between gap-2">
-    <h3 className="text-sm font-black text-[#305D44]">{t("Coming up next","المواعيد الجاية")}</h3>
-    <button type="button" onClick={()=>onArea("timeline")}
-     className="min-h-11 text-xs font-bold text-[#3E855E] underline">{t("Full timeline · 7 / 30 / 90 days","الجدول الكامل · ٧ / ٣٠ / ٩٠ يوم")}</button>
+    <div><h3 className="text-base font-extrabold text-[#2B5944]">{t("Where our money goes","وين بتروح مصاريف العيلة")}</h3>
+     <p className="mt-1 text-xs text-[#718675]">{t("Your main spending categories. Open one to manage its costs and payments.",
+      "فئات المصاريف الأساسية. افتح أي فئة لإدارة بنودها ودفعاتها.")}</p></div>
+    <button type="button" onClick={openAll}
+     className="min-h-11 rounded-xl border border-[#B6D8BD] bg-white px-4 text-xs font-bold text-[#347D56]">
+     {t("View all categories","شوف كل الفئات")} →
+    </button>
    </div>
-   <div className="divide-y divide-[#EDF1EB] overflow-hidden rounded-2xl border border-[#E4EAE1] bg-white">
-    {sorted.length?sorted.map(e=><div key={e.id} className="flex items-center gap-3 p-3">
-      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#F2F8EE] text-xl" aria-hidden="true">{e.kind==="income"?"💵":e.kind==="annual"?"🚘":"🏠"}</span>
-      <div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-[#355943]">{e.label}</p>
-       <p className="text-[11px] text-[#78897C]">{e.date} · {e.kind==="income"?t("Expected, not received","متوقع مش مستلم"):t("Unpaid commitment","التزام غير مدفوع")}</p></div>
-      <strong className="text-xs tabular-nums text-[#3E7B5C]">{e.amountJod>0?"+":"−"}{shown(Math.abs(e.amountJod))}</strong>
-     </div>):<p className="p-4 text-xs text-[#829082]">{t("No dated income or bills entered yet.","ما في دخل أو فواتير مؤرخة بعد.")}</p>}
-   </div>
-   <button type="button" onClick={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})}
-    className="min-h-11 rounded-xl border border-[#BAD7C0] bg-white px-3 text-xs font-bold text-[#397B55]">{t("Manage due payments in categories","إدارة الدفعات من داخل الفئات")}</button>
-   {(state.commitments??[]).some(b=>!b.categoryId||!state.categories.some(c=>c.id===b.categoryId))&&
-    <button type="button" onClick={onBills} className="min-h-11 text-xs font-bold text-[#397B55] underline">{t("Review older uncategorized bills","مراجعة فواتير قديمة بلا فئة")}</button>}
-  </section>
-  <section className="space-y-2" aria-label={t("Recent paid expenses","آخر المصاريف المدفوعة")}>
-   <div className="flex flex-wrap items-center justify-between gap-2">
-    <h3 className="text-sm font-black text-[#305D44]">{t("Recently recorded","المصاريف المسجلة مؤخراً")}</h3>
-    <button type="button" onClick={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth"})}
-      className="min-h-11 text-xs font-bold text-[#3E855E] underline">{t("Edit payments by category","عدّل الدفعات من الفئة")}</button>
-   </div>
-   <div className="divide-y divide-[#EDF1EB] overflow-hidden rounded-2xl border border-[#E4EAE1] bg-white">
-    {recent.length?recent.map(x=><div key={x.id} className="flex items-center gap-3 p-3">
-      <span className="text-xl" aria-hidden="true">🧾</span>
-      <div className="min-w-0 flex-1"><strong className="block truncate text-xs text-[#365C44]">{state.categories.find(c=>c.id===x.categoryId)?.name??t("Uncategorized","غير مصنف")}</strong>
-       <p className="text-[11px] text-[#839082]">{x.date}{x.note?" · "+x.note:""}</p></div>
-      <strong className="text-xs text-[#3A8058]">{shown(x.amount)}</strong>
-    </div>):<p className="p-4 text-xs text-[#7B8C7E]">{t("No paid expenses recorded yet.","ما في مصاريف مدفوعة مسجلة بعد.")}</p>}
-   </div>
-  </section>
-  <div className="flex flex-wrap gap-2">
-   <button type="button" onClick={onQuickAdd} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#3C9266] px-4 text-xs font-bold text-white"><Plus className="size-4"/>{t("Add an expense","سجّل مصروف")}</button>
-   <button type="button" onClick={onIncome} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#BBDAC4] bg-white px-4 text-xs font-bold text-[#397B59]">{t("Edit payday","عدّل موعد الراتب")}</button>
-  </div>
-  <details className="rounded-2xl border border-[#E4EADF] bg-white p-3">
-   <summary className="min-h-11 cursor-pointer text-xs font-bold text-[#4F7E60]">{t("More planning options (optional)","خيارات تخطيط إضافية (اختيارية)")}</summary>
-   <div className="mt-2 flex flex-wrap gap-2">
-    <button type="button" onClick={()=>onArea("annual")} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Annual insurance, tax & property costs","التأمين والضرائب والمصاريف السنوية")}</button>
-    <button type="button" onClick={()=>onArea("pace")} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Customize spending timing","خصّص مواعيد توزيع الصرف")}</button>
-    <button type="button" onClick={onCategories} className="min-h-11 rounded-xl border border-[#D0E3D1] px-3 text-xs font-bold text-[#397C56]">{t("Open category breakdown","تفاصيل المصاريف ضمن الفئات")}</button>
+   {topCategories.length>0?<div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5" data-testid="money-category-preview">
+    {topCategories.map(cat=>{
+     const pic=pictureFor(iconForCategory(cat));
+     const total=totals.plannedBy(cat.id),paid=totals.spentBy(cat.id);
+     const pct=total>0?Math.max(0,Math.min(100,paid/total*100)):0;
+     return <button key={cat.id} type="button" data-testid={"money-preview-category-"+cat.id}
+      aria-label={cat.name+" · "+t("Manage costs and payments","إدارة البنود والدفعات")}
+      className="min-w-0 rounded-2xl border border-[#E1E9DE] bg-white p-3 text-start transition hover:border-[#83BA9B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#38865B]"
+      onClick={()=>openCategory(cat.id)}>
+      <span className="grid size-10 place-items-center rounded-xl text-xl" aria-hidden="true" style={{background:pic.bg}}>{pic.icon}</span>
+      <strong className="mt-2 block truncate text-sm text-[#315B43]">{cat.name}</strong>
+      <span className="mt-1 block text-sm font-bold tabular-nums text-[#315B43]">{fmtJOD(total)}</span>
+      <span className="mt-1 block text-[11px] text-[#708675]">{t("Paid","مدفوع")}: {fmtJOD(paid)}</span>
+      <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-[#EAF0E8]">
+       <span className="block h-full rounded-full bg-[#58A981]" style={{width:pct+"%"}}/>
+      </span>
+     </button>;
+    })}
+   </div>:<div className="rounded-2xl border border-[#E1E9DE] bg-white p-4">
+    <p className="text-sm text-[#6C8070]">{t("No categories entered yet. Add only the ones your family needs.",
+     "ما في فئات مسجلة بعد. أضف فقط اللي بتحتاجه العيلة.")}</p>
+    <button type="button" onClick={()=>onEditCategory({})} className="mt-2 min-h-11 rounded-xl bg-[#39875F] px-4 text-xs font-bold text-white">
+     {t("Add a category","أضف فئة")}
+    </button>
+   </div>}
+  </section>:
+  <div className="space-y-3" data-testid="money-categories-expanded">
+   <button type="button" onClick={()=>{setAllCategories(false);setActiveCategory(null)}}
+    className="min-h-11 rounded-xl border border-[#B6D8BD] bg-white px-4 text-xs font-bold text-[#347D56]">
+    ← {t("Back to category overview","رجوع لمختصر الفئات")}
+   </button>
+   <FamilySpendingGroups state={state} setState={setState}
+    activeCategory={activeCategory} onClose={()=>setActiveCategory(null)}
+    onManage={id=>setActiveCategory(current=>current===id?null:id)}
+    onEditCategory={onEditCategory}/>
+  </div>}
+  <details className="rounded-2xl border border-[#E1E9DE] bg-white px-4 py-2">
+   <summary className="flex min-h-11 cursor-pointer items-center text-xs font-bold text-[#467D5D]">
+    {t("More planning tools (optional)","أدوات تخطيط إضافية (اختيارية)")}
+   </summary>
+   <div className="flex flex-wrap gap-2 border-t border-[#EDF1EA] py-3">
+    <button type="button" onClick={onBills} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
+     {t("Bills and payments","الفواتير والدفعات")}</button>
+    <button type="button" onClick={()=>onArea("annual")} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
+     {t("Annual costs","المصاريف السنوية")}</button>
+    <button type="button" onClick={()=>onArea("pace")} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
+     {t("Spending timing","توزيع مواعيد الصرف")}</button>
+    <button type="button" onClick={onSpending} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
+     {t("Payment history","سجل المصاريف")}</button>
    </div>
   </details>
-  <p className="text-[11px] leading-relaxed text-[#768678]">{t("This is an estimate using the records you entered. There is no bank connection; a plan never becomes a payment automatically.",
-    "هذه توقعات من معلوماتك المدخلة. ما في ربط بنكي؛ الخطة مش دفعة فعلية إلا بعد تأكيدها.")}</p>
+  <p className="text-[11px] leading-relaxed text-[#768678]">{t(
+   "All amounts come from your existing records. Forecasts are estimates, not confirmed cash or automatic payments.",
+   "كل الأرقام من السجلات نفسها. التوقعات تقديرات، مش سيولة مؤكدة أو دفعات تلقائية.")}</p>
  </div>;
 }
