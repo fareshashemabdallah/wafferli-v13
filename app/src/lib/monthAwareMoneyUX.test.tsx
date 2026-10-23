@@ -36,7 +36,7 @@ describe("Month-aware guidance embedded in existing illustrated Money Map",()=>{
   expect(screen.getByTestId("finance-json")).toHaveTextContent('"' + localToday().slice(0,7) + '":{"groc":550}');
   expect(screen.getByTestId("finance-json")).toHaveTextContent('"expenses":[]');
   expect(screen.getByTestId("finance-json")).toHaveTextContent('"commitments":[]');
-  fireEvent.click(screen.getByRole("button",{name:"Back to categories"}));
+  fireEvent.click(screen.getByRole("button",{name:/Back to categories/}));
   expect(within(home).getByText("Adjusted this month")).toBeInTheDocument();
  });
  it("restores the usual plan with one click without deleting expenses or modifying core categories",()=>{
