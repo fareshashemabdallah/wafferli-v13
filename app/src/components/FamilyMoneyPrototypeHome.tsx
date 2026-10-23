@@ -9,12 +9,9 @@ import {STARTER_PICTURES,iconForCategory,pictureFor,visualGroupOf,type CategoryP
 import {OneMoneyDashboardSummary} from "./OneMoneyDashboardSummary";
 import {UnifiedCategoryDetails} from "./UnifiedCategoryDetails";
 
-type Area="timeline"|"pace"|"annual";
 type Props={
  state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;forecast:RhythmForecast;
- onArea:(screen:Area)=>void;onIncome:()=>void;onCash:()=>void;onSavings:()=>void;onBills:()=>void;onQuickAdd:()=>void;
- onSpending:()=>void;onCategories:()=>void;
- onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
+ onIncome:()=>void;onQuickAdd:()=>void;onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
 /** The approved Money foundation: monthly numbers, spending mix, categories.
  * Money facts are read from canonical state and the existing category editor.
@@ -35,7 +32,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onBil
  const back=()=>setActiveCategory(null);
  return <div className="space-y-4" data-testid="prototype-money-home">
   <OneMoneyDashboardSummary state={state} forecast={forecast}
-   onIncome={onIncome} onBills={onBills} onExpense={onQuickAdd} onOpenCategory={openCategory}/>
+   onIncome={onIncome} onExpense={onQuickAdd} onOpenCategory={openCategory}/>
   <section id="money-category-cards" className="scroll-mt-4 space-y-3"
    aria-label={t("Where our money goes","وين بتروح مصاريف العيلة")}>
    {activeCategory&&state.categories.some(c=>c.id===activeCategory)?<div className="space-y-3">
