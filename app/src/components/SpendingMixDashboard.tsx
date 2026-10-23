@@ -18,7 +18,6 @@ const palette={
  unclassified:{color:"#D6C9B2",en:"Not yet classified",ar:"غير مصنفة بعد",
   explanation:"Categories without detailed lines",arExplanation:"فئات لم تُفصّل بعد",icon:Wallet}
 } as const;
-type SegmentKey=keyof typeof palette;
 const segmentKeys=["committed","necessary","flexible","cushion","unclassified"] as const;
 
 export function SpendingMixDashboard({state}:Props){
