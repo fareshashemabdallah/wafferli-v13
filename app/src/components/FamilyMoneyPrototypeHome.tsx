@@ -17,7 +17,7 @@ type Props={
  * Money facts are read from canonical state and the existing category editor.
  * No second category breakdown, savings intake, or planning-tools menu.
  */
-export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onBills,onQuickAdd,onEditCategory}:Props){
+export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQuickAdd,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [showAll,setShowAll]=useState(false);
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
