@@ -154,7 +154,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    <div className="flex min-w-0 items-center gap-2">
     <span className="grid size-11 shrink-0 place-items-center rounded-xl text-2xl" style={{background:illustration.bg}} aria-hidden="true">{illustration.icon}</span>
     <div className="min-w-0"><h3 className="truncate text-base font-extrabold text-[#315B42]">{category.name}</h3>
-     <p className="text-xs text-[#738A78]">{t("Manage every cost and payment here","كل التكاليف والدفعات بنفس المكان")}</p></div>
+     <p className="text-xs text-[#738A78]">{t("Your monthly budget at a glance","ميزانية الشهر بنظرة سريعة")}</p></div>
    </div>
    <button type="button" onClick={onClose} className={btn} aria-label={t("Close category","إغلاق الفئة")}>×</button>
   </div>
@@ -277,19 +277,17 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
     </div>
     {spending.unassigned>0&&<p className="mt-1 text-xs text-[#687D6E]">{t("Paid this month without subcategory: ","مدفوع هذا الشهر بدون بند: ")}{show(spending.unassigned)}</p>}
    </div>
-  </div>
+  </div>}
   </div>
   </details>
-  {bills.length===0?<details className="rounded-xl border border-[#E0EADF] bg-white p-3">
+  <details key={bills.length>0?"dated-bills":"no-bills"} open={bills.length>0} className="rounded-xl border border-[#E0EADF] bg-white p-3">
    <summary className="min-h-10 cursor-pointer text-sm font-semibold text-[#447D60]">
-    {t("Schedule a payment (optional)","جدولة دفعة (اختياري)")}
+    {bills.length>0?t("Due payments","الدفعات المستحقة"):t("Schedule a payment (optional)","جدولة دفعة (اختياري)")}
    </summary>
-     <div className="mt-2 space-y-2">
+  <div className="mt-2 space-y-2">
    <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-extrabold text-[#3D7957]">{t("Due payments","الدفعات المستحقة")}</h4>
     <button type="button" disabled={state.demo} className={btn} onClick={()=>{setEditingBillId(null);setBillName("");setBillAmount("");setBillForm(x=>!x);setShowNewItem(false);setError("");}}>
      + {t("Set a due date","إضافة موعد دفع")}</button></div>
-   <p className="text-xs text-[#778776]">{t("A dated bill stays inside its category. It is not added a second time to your monthly plan.",
-    "الفاتورة المؤرخة تبقى ضمن الفئة، ولا تضاف مرة ثانية لخطة الشهر.")}</p>
    {billForm&&<form className="space-y-2 rounded-xl border bg-white p-3" onSubmit={addBill}>
     <label className="block text-xs">{t("Payment name","اسم الدفعة")}
      <input className={field} value={billName} maxLength={60} onChange={e=>setBillName(e.target.value)} placeholder={t("Rent, school fees","الإيجار، الرسوم المدرسية")}/></label>
@@ -324,58 +322,11 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
      </div>
     </div>
    </div>)}
-   {!bills.length&&<p className="rounded-xl bg-white p-3 text-xs text-[#748879]">{t("No dated commitments in this category. This is optional.",
-    "لا توجد دفعات مؤرخة بهذه الفئة، وهي اختيارية.")}</p>}
    {bills.length>0&&dueRows.length===0&&<p className="rounded-xl bg-white p-3 text-xs text-[#748879]">{t("No unpaid dates in the next year. Your saved bill records are retained.",
      "لا توجد مواعيد غير مدفوعة خلال السنة المقبلة. السجلات محفوظة.")}</p>}
   </div>
 
-  </details>:  <div className="space-y-2">
-   <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-extrabold text-[#3D7957]">{t("Due payments","الدفعات المستحقة")}</h4>
-    <button type="button" disabled={state.demo} className={btn} onClick={()=>{setEditingBillId(null);setBillName("");setBillAmount("");setBillForm(x=>!x);setShowNewItem(false);setError("");}}>
-     + {t("Set a due date","إضافة موعد دفع")}</button></div>
-   <p className="text-xs text-[#778776]">{t("A dated bill stays inside its category. It is not added a second time to your monthly plan.",
-    "الفاتورة المؤرخة تبقى ضمن الفئة، ولا تضاف مرة ثانية لخطة الشهر.")}</p>
-   {billForm&&<form className="space-y-2 rounded-xl border bg-white p-3" onSubmit={addBill}>
-    <label className="block text-xs">{t("Payment name","اسم الدفعة")}
-     <input className={field} value={billName} maxLength={60} onChange={e=>setBillName(e.target.value)} placeholder={t("Rent, school fees","الإيجار، الرسوم المدرسية")}/></label>
-    <div className="grid grid-cols-2 gap-2">
-     <label className="text-xs">{t("Amount (JOD)","المبلغ")}<input className={field} type="number" step=".01" min=".01" value={billAmount} onChange={e=>setBillAmount(e.target.value)}/></label>
-     <label className="text-xs">{t("Due date","موعد الدفع")}<input className={field} type="date" value={billDate} onChange={e=>setBillDate(e.target.value)}/></label>
-    </div>
-    <label className="block text-xs">{t("Repeats","يتكرر")}
-     <select className={field} value={billFrequency} onChange={e=>setBillFrequency(e.target.value as typeof billFrequency)}>
-      <option value="once">{t("Once","مرة")}</option><option value="monthly">{t("Monthly","شهري")}</option>
-      <option value="quarterly">{t("Quarterly","ربع سنوي")}</option><option value="yearly">{t("Yearly","سنوي")}</option>
-     </select></label>
-    <div className="flex gap-2"><button type="submit" className="min-h-10 rounded-xl bg-[#3C8E62] px-4 text-xs font-bold text-white">{editingBillId?t("Save bill changes","حفظ تعديل الفاتورة"):t("Save due date","حفظ الموعد")}</button>
-     <button type="button" onClick={()=>{setBillForm(false);setEditingBillId(null);}} className={btn}>{t("Cancel","إلغاء")}</button></div>
-   </form>}
-   {dueRows.map(row=><div key={row.bill.id+":"+row.date} className="rounded-xl border border-[#E0EADD] bg-white p-3">
-    <div className="flex flex-wrap items-center justify-between gap-2">
-     <div><strong className="block text-sm">{row.bill.name}</strong>
-      <p className="mt-1 text-xs text-[#718574]">{t("Due","مستحق")}: {row.date}
-       {" · "}{t("Total","الإجمالي")}: {show(row.bill.amount)}
-       {" · "}{t("Paid","مدفوع")}: {show(row.paid)}</p>
-      <p className="mt-1 text-xs font-bold text-[#388159]">{row.remaining===0?t("Paid in full","مدفوع بالكامل"):
-       row.paid>0?t("Partially paid · outstanding ","مدفوع جزئياً · المتبقي ")+show(row.remaining):
-        t("Unpaid · outstanding ","غير مدفوع · المتبقي ")+show(row.remaining)}</p>
-     </div>
-     <div className="flex flex-wrap gap-1">
-      {row.remaining>0&&<button type="button" disabled={state.demo} className={btn}
-       onClick={()=>startPayment(row.bill.budgetItemId,row.bill.id,row.date)}>{t("Pay full / partial","دفع كامل / جزئي")}</button>}
-      <button type="button" disabled={state.demo} className={btn} onClick={()=>beginEditBill(row.bill.id)}>{t("Edit due date","تعديل الموعد")}</button>
-      <button type="button" disabled={state.demo} className="min-h-10 px-2 text-xs font-bold text-[#98666A]" onClick={()=>stopBill(row.bill.id)}>
-       {t("Stop bill","إيقاف")}</button>
-     </div>
-    </div>
-   </div>)}
-   {!bills.length&&<p className="rounded-xl bg-white p-3 text-xs text-[#748879]">{t("No dated commitments in this category. This is optional.",
-    "لا توجد دفعات مؤرخة بهذه الفئة، وهي اختيارية.")}</p>}
-   {bills.length>0&&dueRows.length===0&&<p className="rounded-xl bg-white p-3 text-xs text-[#748879]">{t("No unpaid dates in the next year. Your saved bill records are retained.",
-     "لا توجد مواعيد غير مدفوعة خلال السنة المقبلة. السجلات محفوظة.")}</p>}
-  </div>
-}
+  </details>
   {paymentTarget&&<form id="category-payment-form" className="scroll-mt-4 space-y-2 rounded-xl border-2 border-[#9FCDB0] bg-white p-3" onSubmit={pay} aria-label={t("Record payment","تسجيل الدفعة")}>
    <h4 className="text-sm font-extrabold text-[#377E57]">{t("Record a full or partial payment","تسجيل دفعة كاملة أو جزئية")}</h4>
    <div className="grid grid-cols-2 gap-2">
