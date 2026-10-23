@@ -301,7 +301,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
      <label className="text-xs">{t("Due date","موعد الدفع")}<input className={field} type="date" value={billDate} onChange={e=>setBillDate(e.target.value)}/></label>
     </div>
     <label className="block text-xs">{t("Repeats","يتكرر")}
-     <select className={field} value={billFrequency} onChange={e=>setBillFrequency(e.target.value as typeof billFrequency)}>
+     <select className={field} aria-label={t("Repeats","يتكرر")} value={billFrequency} onChange={e=>setBillFrequency(e.target.value as typeof billFrequency)}>
       <option value="once">{t("Once","مرة")}</option><option value="monthly">{t("Monthly","شهري")}</option>
       <option value="quarterly">{t("Quarterly","ربع سنوي")}</option><option value="yearly">{t("Yearly","سنوي")}</option>
      </select>
