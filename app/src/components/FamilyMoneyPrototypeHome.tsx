@@ -36,7 +36,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
    onIncome={onIncome} onCash={onCash} onSavings={onSavings}
    onBills={onBills} onExpense={onQuickAdd}
    onTimeline={()=>onArea("timeline")} onOpenCategory={openCategory}/>
-  {!allCategories?<section id="money-category-preview" className="scroll-mt-4 space-y-3"
+  {!allCategories?<section id="money-category-cards" className="scroll-mt-4 space-y-3"
    aria-label={t("Where our money goes","وين بتروح مصاريف العيلة")}>
    <div className="flex flex-wrap items-center justify-between gap-2">
     <div><h3 className="text-base font-extrabold text-[#2B5944]">{t("Where our money goes","وين بتروح مصاريف العيلة")}</h3>
