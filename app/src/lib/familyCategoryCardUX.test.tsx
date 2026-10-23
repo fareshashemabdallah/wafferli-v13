@@ -20,6 +20,7 @@ afterEach(()=>{cleanup();localStorage.clear();});
 describe("direct category editing in the pictured Family Money Map",()=>{
  it("first-time groceries opens name and monthly amount directly, then card updates",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   expect(screen.getByTestId("category-picture-groceries")).toHaveTextContent("Not entered");
   fireEvent.click(screen.getByTestId("category-picture-groceries"));
   const dlg=screen.getByRole("dialog",{name:"Add family category"});
@@ -36,6 +37,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
    expenses:[{id:"paid",categoryId:"groc",date:"2026-10-19",amount:25,status:"paid",shared:false}],
    categoryMonthlyPlans:{"2026-12":{groc:370}}};
   render(<App initial={original}/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getByTestId("category-picture-groceries"));
   expect(screen.getByTestId("unified-category-details")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"Edit amount & classification"}));
@@ -56,6 +58,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
  });
  it("adds a custom school fees category as an independent illustrated tile and allows edits",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getAllByRole("button",{name:/Add category/})[0]!);
   const dlg=screen.getByRole("dialog",{name:"Add family category"});
   fireEvent.change(within(dlg).getByLabelText("Category name"),{target:{value:"School Fees"}});
@@ -72,6 +75,7 @@ describe("direct category editing in the pictured Family Money Map",()=>{
  });
  it("blocks duplicate names rather than creating a second category",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getByTestId("category-picture-groceries"));
   fireEvent.change(screen.getByLabelText("Usual monthly allowance (JOD)"),{target:{value:"100"}});
   fireEvent.click(screen.getByRole("button",{name:"Save category"}));
