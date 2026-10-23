@@ -79,12 +79,11 @@ export function spendingBreakdown(state:MoneyState,month:string):SpendingBreakdo
   // Month-specific parent adjustments can be below the usual sum of items.
   // Keep the signed difference visible as an adjustment rather than inflate the month total.
   const rest=roundJod(categoryTotal-itemTotal);
-  // A category is classified as a whole only if it has no active cost lines.
-  // For itemized categories any difference is a neutral budget cushion,
-  // not a new expense needing a second classification.
+  // Only the unitemized part inherits an explicitly entered category role.
+  // Individual line roles stay authoritative; no additional budget is made.
   // A negative month-specific override stays a signed adjustment, not a
   // negative committed/necessary/flexible budget.
-  if(items.length===0&&category.remainderRole&&rest>=0){
+  if(category.remainderRole&&rest>0){
    lines.push({
     itemId:"remainder:"+category.id,categoryId:category.id,
     categoryName:category.name,name:category.name,role:category.remainderRole,
