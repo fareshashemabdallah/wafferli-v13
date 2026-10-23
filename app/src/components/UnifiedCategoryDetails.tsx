@@ -27,13 +27,13 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
  const [newProtected,setNewProtected]=useState(false);
  const [newDue,setNewDue]=useState(false);
  const [newDueDate,setNewDueDate]=useState(localToday());
- const [newDueFrequency,setNewDueFrequency]=useState<"once"|"monthly"|"quarterly"|"yearly">("monthly");
+ const [newDueFrequency,setNewDueFrequency]=useState<"once"|"monthly"|"quarterly"|"yearly">("once");
  const [billForm,setBillForm]=useState(false);
  const [editingBillId,setEditingBillId]=useState<string|null>(null);
  const [billName,setBillName]=useState("");
  const [billAmount,setBillAmount]=useState("");
  const [billDate,setBillDate]=useState(localToday());
- const [billFrequency,setBillFrequency]=useState<"once"|"monthly"|"quarterly"|"yearly">("monthly");
+ const [billFrequency,setBillFrequency]=useState<"once"|"monthly"|"quarterly"|"yearly">("once");
  const [paymentTarget,setPaymentTarget]=useState<{billId?:string;dueDate?:string;itemId?:string}|null>(null);
  const [payAmount,setPayAmount]=useState("");
  const [payDate,setPayDate]=useState(localToday());
@@ -57,8 +57,9 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
   const dates=scheduleDates(b.dueDate,b.frequency,futureDate(localToday(),-45),futureDate(localToday(),365),b.endDate);
   const upcoming=dates.filter(d=>billOutstanding(state,b.id,d)>0);
   const completed=dates.filter(d=>billOutstanding(state,b.id,d)===0);
-  // Keep one most recent paid occurrence visible, as well as next 2 unpaid.
-  return [...upcoming.slice(0,2),...(completed.length?[completed[completed.length-1]!]:[])]
+  // A monthly/annual schedule is ONE saved bill; display only the next due
+  // occurrence, not multiple future instances that look like duplicate bills.
+  return [...upcoming.slice(0,1),...(!upcoming.length&&completed.length?[completed[completed.length-1]!]:[])]
    .sort().map(d=>({bill:b,date:d,remaining:billOutstanding(state,b.id,d),
     paid:billPaidTotal(state,b.id,d)}));
  });
@@ -83,7 +84,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
  const beginEditItem=(item:BudgetItem)=>{
   setEditingItemId(item.id);setNewName(item.name);setNewAmount(String(item.amountJod));
   setNewFrequency(item.frequency);setNewRole(displayItemRole(item).role);
-  setNewProtected(item.priority==="protected");setNewDue(false);setShowNewItem(true);setBillForm(false);setError("");
+  setNewProtected(item.priority==="protected");setNewDue(false);setNewDueFrequency("once");setShowNewItem(true);setBillForm(false);setError("");
  };
  const addItem=(ev:FormEvent)=>{
   ev.preventDefault();setError("");
@@ -110,14 +111,14 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    if(n===next){setError(t("Choose a valid due date.","اختر تاريخ استحقاق صحيحاً."));return;}
    setState(n);
   }else setState(next);
-  setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setShowNewItem(false);setNewDue(false);setEditingItemId(null);
+  setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setShowNewItem(false);setNewDue(false);setNewDueFrequency("once");setEditingItemId(null);
  };
  const beginEditBill=(id:string)=>{
   const old=(state.commitments??[]).find(b=>b.id===id);
   if(!old)return;
   setEditingBillId(id);setBillName(old.name);setBillAmount(String(old.amount));
   setBillDate(old.dueDate);setBillFrequency(["once","monthly","quarterly","yearly"].includes(old.frequency)?
-   old.frequency as typeof billFrequency:"monthly");setBillForm(true);setShowNewItem(false);setError("");
+   old.frequency as typeof billFrequency:"once");setBillForm(true);setShowNewItem(false);setError("");
  };
  const addBill=(ev:FormEvent)=>{
   ev.preventDefault();setError("");
@@ -196,7 +197,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    </summary>
    <div className="mt-2 space-y-3">
     <button type="button" disabled={state.demo} className={btn+" disabled:opacity-50"}
-     onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
+     onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setNewDueFrequency("once");setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
      + {t("Add expense line","إضافة بند مصروف")}</button>
     {items.length>0&&<p className="text-xs text-[#708675]">{t("Detailed monthly total","مجموع البنود شهرياً")}: {show(itemized)}. {t(
      "Other spending remains inside this same category budget.","باقي المصاريف ضمن نفس ميزانية الفئة.")}</p>}
@@ -240,6 +241,10 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
       <option value="quarterly">{t("Quarterly","ربع سنوي")}</option><option value="yearly">{t("Yearly","سنوي")}</option>
      </select></label>
    </div>}
+   {newDue&&!editingItemId&&<p className="text-[11px] text-[#708675]">{t(
+    "One-time by default. Select a frequency only for repeating bills.",
+    "الافتراضي مرة واحدة. اختر تكراراً فقط للفواتير المتكررة."
+   )}</p>}
    <div className="flex gap-2"><button type="submit" className="min-h-10 rounded-xl bg-[#3C8E62] px-4 text-xs font-bold text-white">{editingItemId?t("Save changes","حفظ التعديلات"):t("Save line","حفظ البند")}</button>
     <button type="button" className={btn} onClick={()=>{setShowNewItem(false);setEditingItemId(null);}}>{t("Cancel","إلغاء")}</button></div>
   </form>}
@@ -285,8 +290,8 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
     {bills.length>0?t("Due payments","الدفعات المستحقة"):t("Schedule a payment (optional)","جدولة دفعة (اختياري)")}
    </summary>
   <div className="mt-2 space-y-2">
-   <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-extrabold text-[#3D7957]">{t("Due payments","الدفعات المستحقة")}</h4>
-    <button type="button" disabled={state.demo} className={btn} onClick={()=>{setEditingBillId(null);setBillName("");setBillAmount("");setBillForm(x=>!x);setShowNewItem(false);setError("");}}>
+   <div className="flex flex-wrap items-center justify-end gap-2">
+    <button type="button" disabled={state.demo} className={btn} onClick={()=>{setEditingBillId(null);setBillName("");setBillAmount("");setBillFrequency("once");setBillForm(x=>!x);setShowNewItem(false);setError("");}}>
      + {t("Set a due date","إضافة موعد دفع")}</button></div>
    {billForm&&<form className="space-y-2 rounded-xl border bg-white p-3" onSubmit={addBill}>
     <label className="block text-xs">{t("Payment name","اسم الدفعة")}
@@ -296,10 +301,14 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
      <label className="text-xs">{t("Due date","موعد الدفع")}<input className={field} type="date" value={billDate} onChange={e=>setBillDate(e.target.value)}/></label>
     </div>
     <label className="block text-xs">{t("Repeats","يتكرر")}
-     <select className={field} value={billFrequency} onChange={e=>setBillFrequency(e.target.value as typeof billFrequency)}>
+     <select className={field} aria-label={t("Repeats","يتكرر")} value={billFrequency} onChange={e=>setBillFrequency(e.target.value as typeof billFrequency)}>
       <option value="once">{t("Once","مرة")}</option><option value="monthly">{t("Monthly","شهري")}</option>
       <option value="quarterly">{t("Quarterly","ربع سنوي")}</option><option value="yearly">{t("Yearly","سنوي")}</option>
-     </select></label>
+     </select>
+     <span className="mt-1 block text-[11px] font-normal text-[#708675]">{t(
+      "One-time by default. Choose a repeating frequency only if this payment recurs.",
+      "الافتراضي مرة واحدة. اختر تكراراً فقط إذا كانت هذه الدفعة تتكرر."
+     )}</span></label>
     <div className="flex gap-2"><button type="submit" className="min-h-10 rounded-xl bg-[#3C8E62] px-4 text-xs font-bold text-white">{editingBillId?t("Save bill changes","حفظ تعديل الفاتورة"):t("Save due date","حفظ الموعد")}</button>
      <button type="button" onClick={()=>{setBillForm(false);setEditingBillId(null);}} className={btn}>{t("Cancel","إلغاء")}</button></div>
    </form>}
@@ -307,6 +316,10 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
     <div className="flex flex-wrap items-center justify-between gap-2">
      <div><strong className="block text-sm">{row.bill.name}</strong>
       <p className="mt-1 text-xs text-[#718574]">{t("Due","مستحق")}: {row.date}
+       {" · "}{t("Repeats","التكرار")}: {t(
+        row.bill.frequency==="once"?"One-time":row.bill.frequency==="monthly"?"Monthly":row.bill.frequency==="quarterly"?"Quarterly":row.bill.frequency==="yearly"?"Yearly":"As scheduled",
+        row.bill.frequency==="once"?"مرة واحدة":row.bill.frequency==="monthly"?"شهري":row.bill.frequency==="quarterly"?"كل ٣ أشهر":row.bill.frequency==="yearly"?"سنوي":"حسب الجدول"
+       )}
        {" · "}{t("Total","الإجمالي")}: {show(row.bill.amount)}
        {" · "}{t("Paid","مدفوع")}: {show(row.paid)}</p>
       <p className="mt-1 text-xs font-bold text-[#388159]">{row.remaining===0?t("Paid in full","مدفوع بالكامل"):
