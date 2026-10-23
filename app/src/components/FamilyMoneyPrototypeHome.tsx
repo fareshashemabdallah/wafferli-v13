@@ -93,7 +93,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onArea,onIncom
     <button type="button" onClick={()=>onArea("annual")} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
      {t("Annual costs","المصاريف السنوية")}</button>
     <button type="button" onClick={()=>onArea("pace")} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
-     {t("Spending timing","توزيع مواعيد الصرف")}</button>
+     {t("Customize spending timing","خصّص مواعيد توزيع الصرف")}</button>
     <button type="button" onClick={onSpending} className="min-h-11 rounded-xl border border-[#C7DFC9] px-3 text-xs font-semibold text-[#347D56]">
      {t("Payment history","سجل المصاريف")}</button>
    </div>
