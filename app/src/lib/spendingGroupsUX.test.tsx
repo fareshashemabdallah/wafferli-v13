@@ -49,7 +49,7 @@ describe("A family-first Money page using the same classified financial records"
   expect(details).toHaveTextContent("Monthly budget");
   expect(details).toHaveTextContent("Spent");
   expect(details).toHaveTextContent("Remaining");
-  expect(within(details).getByRole("button",{name:"Record spending"})).toBeInTheDocument();
+  expect(within(details).getAllByRole("button",{name:"Record spending"})[0]!).toBeInTheDocument();
   expect(within(details).getByRole("button",{name:"Edit budget"})).toBeInTheDocument();
   expect(screen.queryByText("More planning tools (optional)")).not.toBeInTheDocument();
   expect(screen.queryByTestId("category-custom-n")).not.toBeInTheDocument();
