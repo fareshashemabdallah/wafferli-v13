@@ -153,7 +153,7 @@ describe("Expense-line nature inside a single illustrated family category",()=>{
   render(<App/>);
   fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getByTestId("category-custom-car"));
-  fireEvent.click(within(screen.getByTestId("unified-category-details")).getByText("Budget breakdown (optional)"));
+  fireEvent.click(within(screen.getByTestId("unified-category-details")).getByText(/Budget breakdown/));
   fireEvent.click(within(screen.getByTestId("unified-category-details")).getAllByRole("button",{name:"Edit"})[0]!);
   const form=screen.getByRole("form",{name:"Add subcategory"});
   expect(within(form).getByLabelText("Spending behaviour")).toHaveValue("committed");
