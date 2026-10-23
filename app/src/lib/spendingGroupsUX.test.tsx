@@ -53,7 +53,7 @@ describe("A family-first Money page using the same classified financial records"
   expect(within(details).getByRole("button",{name:"Edit budget"})).toBeInTheDocument();
   expect(screen.queryByText("More planning tools (optional)")).not.toBeInTheDocument();
   expect(screen.queryByTestId("category-custom-n")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Back to categories"}));
+  fireEvent.click(screen.getByRole("button",{name:/Back to categories/}));
   expect(screen.getByTestId("category-custom-n")).toBeInTheDocument();
  });
  it("classifies a category without adding a separate line or financial entry",()=>{
