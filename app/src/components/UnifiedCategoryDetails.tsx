@@ -84,7 +84,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
  const beginEditItem=(item:BudgetItem)=>{
   setEditingItemId(item.id);setNewName(item.name);setNewAmount(String(item.amountJod));
   setNewFrequency(item.frequency);setNewRole(displayItemRole(item).role);
-  setNewProtected(item.priority==="protected");setNewDue(false);setShowNewItem(true);setBillForm(false);setError("");
+  setNewProtected(item.priority==="protected");setNewDue(false);setNewDueFrequency("once");setShowNewItem(true);setBillForm(false);setError("");
  };
  const addItem=(ev:FormEvent)=>{
   ev.preventDefault();setError("");
@@ -111,14 +111,14 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    if(n===next){setError(t("Choose a valid due date.","اختر تاريخ استحقاق صحيحاً."));return;}
    setState(n);
   }else setState(next);
-  setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setShowNewItem(false);setNewDue(false);setEditingItemId(null);
+  setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setShowNewItem(false);setNewDue(false);setNewDueFrequency("once");setEditingItemId(null);
  };
  const beginEditBill=(id:string)=>{
   const old=(state.commitments??[]).find(b=>b.id===id);
   if(!old)return;
   setEditingBillId(id);setBillName(old.name);setBillAmount(String(old.amount));
   setBillDate(old.dueDate);setBillFrequency(["once","monthly","quarterly","yearly"].includes(old.frequency)?
-   old.frequency as typeof billFrequency:"monthly");setBillForm(true);setShowNewItem(false);setError("");
+   old.frequency as typeof billFrequency:"once");setBillForm(true);setShowNewItem(false);setError("");
  };
  const addBill=(ev:FormEvent)=>{
   ev.preventDefault();setError("");
@@ -197,7 +197,7 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
    </summary>
    <div className="mt-2 space-y-3">
     <button type="button" disabled={state.demo} className={btn+" disabled:opacity-50"}
-     onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
+     onClick={()=>{setEditingItemId(null);setNewName("");setNewAmount("");setNewRole("necessary");setNewProtected(false);setNewDue(false);setNewDueFrequency("once");setShowNewItem(x=>!x);setBillForm(false);setError("");}}>
      + {t("Add expense line","إضافة بند مصروف")}</button>
     {items.length>0&&<p className="text-xs text-[#708675]">{t("Detailed monthly total","مجموع البنود شهرياً")}: {show(itemized)}. {t(
      "Other spending remains inside this same category budget.","باقي المصاريف ضمن نفس ميزانية الفئة.")}</p>}
