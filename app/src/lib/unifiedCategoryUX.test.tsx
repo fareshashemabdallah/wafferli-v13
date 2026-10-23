@@ -22,6 +22,7 @@ afterEach(()=>{cleanup();localStorage.clear();vi.restoreAllMocks();});
 describe("one-page illustrated category to partial payments",()=>{
  it("adds optional breakdown and a due date, records instalments, and reverses only one",()=>{
   render(<App/>);
+  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
   fireEvent.click(screen.getByTestId("category-custom-school"));
   const section=screen.getByTestId("unified-category-details");
   expect(within(section).getByText("Education")).toBeInTheDocument();
