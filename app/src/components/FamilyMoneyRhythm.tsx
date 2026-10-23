@@ -171,7 +171,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"} alt="" aria-hidden="true" loading="lazy"
     className="pointer-events-none absolute bottom-[-12px] end-0 h-[145px] w-[43%] object-contain object-bottom sm:h-[176px]"/>
   </div>
-  {(!!requestedSetupStep||setupSteps.length>0)&&<section id="money-plan-setup" data-testid="money-plan-setup"
+  {!!requestedSetupStep&&<section id="money-plan-setup" data-testid="money-plan-setup"
    className="scroll-mt-5 rounded-2xl border border-[#D9E6D8] bg-[#F5FAF2] p-4 sm:p-5" aria-label={t("Your Money readiness checklist","قائمة مراجعة مالية العيلة")}>
    <h3 className="text-base font-extrabold text-[#285E46]">{t("What your plan needs from Money","ما تحتاجه خطتك من المالية")}</h3>
    <p className="mt-1 text-xs leading-relaxed text-[#64816B]">{t(
