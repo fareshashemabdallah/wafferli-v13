@@ -31,7 +31,14 @@ export function autoCategoryForecast(state:MoneyState,today:string,end:string,ex
       .reduce((sum,e)=>sum+e.amount,0);
      return total+Math.max(0,c.amount-paidHere);
     },0);
-   const remaining=Math.max(0,roundJod(effectiveCategoryAllowance(state,cat.id,monthKey(cursor))-paid-coveredByBills));
+   // If the FIRST monthly invoice begins early next month, its usual amount
+   // still replaces the matching recurring cost in this month's envelope.
+   // Otherwise rent due on 1 November can appear as fictitious late-October
+   // envelope spending PLUS its real dated payment a few days later.
+   const upcomingRecurring=commitments.filter(c=>c.categoryId===cat.id&&c.frequency==="monthly"&&
+    c.dueDate>last&&c.dueDate<=futureDate(last,32)&&(!c.endDate||c.endDate>=c.dueDate))
+    .reduce((sum,c)=>sum+c.amount,0);
+   const remaining=Math.max(0,roundJod(effectiveCategoryAllowance(state,cat.id,monthKey(cursor))-paid-coveredByBills-upcomingRecurring));
    if(!remaining)continue;
    const dates:string[]=[];
    for(let step=7;step<=35;step+=7){
