@@ -8,7 +8,7 @@ import {SpendingMixDashboard} from "./SpendingMixDashboard";
 
 type Props={state:MoneyState;forecast:RhythmForecast;
  onIncome:()=>void;onBills:()=>void;onExpense:()=>void;onOpenCategory:(categoryId:string)=>void;};
-export function OneMoneyDashboardSummary({state,forecast,onIncome,onBills,onExpense,onOpenCategory}:Props){
+export function OneMoneyDashboardSummary({state,forecast,onIncome,onExpense,onOpenCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const overview=oneMoneyDashboard(state,forecast,localToday());
  const money=(value:number|null)=>value===null?t("Not entered","غير مدخل"):fmtJOD(value);
