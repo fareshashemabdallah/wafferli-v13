@@ -27,7 +27,7 @@ describe("one-page illustrated category to partial payments",()=>{
   const section=screen.getByTestId("unified-category-details");
   expect(within(section).getByText("Education")).toBeInTheDocument();
   fireEvent.click(within(section).getByText("Budget breakdown (optional)"));
-  fireEvent.click(within(section).getByRole("button",{name:"Add expense line"}));
+  fireEvent.click(within(section).getByRole("button",{name:/Add expense line/}));
   fireEvent.change(within(section).getByLabelText("Name"),{target:{value:"School fees"}});
   fireEvent.change(within(section).getByLabelText("Amount (JOD)"),{target:{value:"300"}});
   fireEvent.click(within(section).getByLabelText("This is a bill with a due date"));
