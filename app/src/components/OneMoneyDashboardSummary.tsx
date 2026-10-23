@@ -7,7 +7,7 @@ import {localToday} from "@/lib/cashflow";
 import {SpendingMixDashboard} from "./SpendingMixDashboard";
 
 type Props={state:MoneyState;forecast:RhythmForecast;
- onIncome:()=>void;onBills:()=>void;onExpense:()=>void;onOpenCategory:(categoryId:string)=>void;};
+ onIncome:()=>void;onExpense:()=>void;onOpenCategory:(categoryId:string)=>void;};
 export function OneMoneyDashboardSummary({state,forecast,onIncome,onExpense,onOpenCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const overview=oneMoneyDashboard(state,forecast,localToday());
