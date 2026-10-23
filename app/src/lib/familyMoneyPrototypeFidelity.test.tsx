@@ -23,37 +23,28 @@ function App(){
 }
 beforeEach(()=>localStorage.clear());
 afterEach(()=>{cleanup();localStorage.clear();});
-describe("Prototype-faithful Money experience",()=>{
- it("opens a single unified dashboard while preserving illustrated category editing",()=>{
+describe("Approved core Money concept",()=>{
+ it("shows monthly overview, classified spending mix and categories, without parallel planning modules",()=>{
   render(<App/>);
   const home=screen.getByTestId("prototype-money-home");
   const dashboard=screen.getByTestId("unified-money-dashboard");
-  for(const id of ["income","plan","paid","bills"])expect(within(dashboard).getByTestId("money-summary-"+id)).toBeInTheDocument();
-  expect(within(dashboard).queryByText("Monthly plan vs paid")).not.toBeInTheDocument();
-  expect(within(home).queryByText("Recently recorded")).not.toBeInTheDocument();
-  expect(within(home).queryByText("Coming up next")).not.toBeInTheDocument();
-  expect(within(home).getByTestId("money-category-preview").children.length).toBeLessThanOrEqual(5);
-  expect(home.querySelector("#money-category-cards")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:/View all categories/}));
-  expect(screen.queryByRole("tab",{name:/Money Map/})).not.toBeInTheDocument();
-  for(const name of ["Groceries","Fuel","Restaurants","Children","Housing","Health"]){
-   expect(within(home).getAllByRole("button",{name:new RegExp(name)}).length).toBeGreaterThan(0);
-  }
-  expect(home).not.toHaveTextContent("••••");
-  expect(within(dashboard).queryByText(/What matters now/)).not.toBeInTheDocument();
-  expect(within(dashboard).queryByText(/Category amounts automatically enter/)).not.toBeInTheDocument();
-  expect(home).not.toHaveTextContent("520 JOD");
-  fireEvent.click(screen.getByText("More planning tools (optional)"));
-  expect(screen.getByRole("button",{name:"Edit cash"})).toBeInTheDocument();
-  expect(screen.getByRole("button",{name:"Edit savings goal"})).toBeInTheDocument();
-  expect(screen.queryByRole("button",{name:/Reveal amounts|Hide private amounts/i})).not.toBeInTheDocument();
+  for(const id of ["income","plan","paid"])expect(within(dashboard).getByTestId("money-summary-"+id)).toBeInTheDocument();
+  expect(within(dashboard).queryByTestId("money-summary-bills")).not.toBeInTheDocument();
+  expect(within(dashboard).getByTestId("money-spending-mix")).toBeInTheDocument();
   expect(within(home).getByText("Where our money goes")).toBeInTheDocument();
-  expect(within(home).getAllByRole("button",{name:/Add category/}).length).toBeGreaterThan(0);
-
+  expect(within(home).getByTestId("money-category-preview").children).toHaveLength(1);
+  expect(screen.queryByText("More planning tools (optional)")).not.toBeInTheDocument();
+  expect(screen.queryByText("Explore spending mix")).not.toBeInTheDocument();
+  expect(screen.queryByText("What each cost means for our money")).not.toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:/View all categories/})).not.toBeInTheDocument();
+  expect(screen.getByRole("button",{name:/Add category/})).toBeInTheDocument();
+  fireEvent.click(screen.getByTestId("category-picture-groceries"));
+  expect(screen.getByTestId("unified-category-details")).toBeInTheDocument();
+  expect(screen.queryByTestId("money-category-preview")).not.toBeInTheDocument();
+  expect(screen.getByRole("button",{name:"Back to categories"})).toBeInTheDocument();
  });
- it("edits the same dated income source without inventing a payment or duplicating it",()=>{
+ it("edits an existing income once without recording it as a payment",()=>{
   render(<App/>);
-  const home=screen.getByTestId("prototype-money-home");
   fireEvent.click(screen.getByTestId("money-summary-income"));
   const dialog=screen.getByRole("dialog",{name:"Income and paydays"});
   fireEvent.change(within(dialog).getByLabelText("Choose an existing entry or add new"),
@@ -66,23 +57,15 @@ describe("Prototype-faithful Money experience",()=>{
   expect(screen.getByTestId("income-records").textContent?.match(/"id":"salary"/g)?.length).toBe(1);
   expect(screen.getByTestId("money-state")).toHaveTextContent('"expenses":[]');
  });
- it("can edit manual cash and an existing category pace without creating a second paid expense",()=>{
+ it("preserves existing historical cash, commitments and savings facts while removing their additional UI",()=>{
   render(<App/>);
-  fireEvent.click(screen.getByText("More planning tools (optional)"));
-  fireEvent.click(screen.getByRole("button",{name:"Review upcoming cash flow"}));
-  fireEvent.click(screen.getByRole("button",{name:"Edit starting cash & reserve"}));
-  const dialog=screen.getByRole("dialog",{name:"Cash and safety reserve"});
-  fireEvent.change(within(dialog).getByLabelText("Cash available now (JOD)"),{target:{value:"650"}});
-  fireEvent.click(within(dialog).getByRole("button",{name:"Save and update outlook"}));
-  expect(screen.getByTestId("money-state")).toHaveTextContent('"cash":650');
-  fireEvent.click(screen.getByRole("button",{name:/Back to the Money dashboard/}));
-  fireEvent.click(screen.getByText("More planning tools (optional)"));
-  fireEvent.click(screen.getByRole("button",{name:"Customize spending timing"}));
-  fireEvent.click(screen.getByRole("button",{name:"Spread this budget"}));
-  fireEvent.change(screen.getByLabelText("Monthly allowance (JOD)"),{target:{value:"450"}});
-  fireEvent.click(screen.getByRole("button",{name:"Save pace"}));
-  expect(screen.getByTestId("money-state")).toHaveTextContent('"planned":450');
-  expect(screen.getByTestId("money-state")).toHaveTextContent('"intervalDays":7');
-  expect(screen.getByTestId("money-state")).toHaveTextContent('"expenses":[]');
+  expect(screen.queryByText("More planning tools (optional)")).not.toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Edit cash"})).not.toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Edit savings goal"})).not.toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Customize spending timing"})).not.toBeInTheDocument();
+  const json=screen.getByTestId("money-state").textContent??"";
+  expect(json).toContain('"cash":520');
+  expect(json).toContain('"name":"Housing payment"');
+  expect(json).toContain('"expenses":[]');
  });
 });
