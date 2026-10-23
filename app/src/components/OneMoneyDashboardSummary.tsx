@@ -43,7 +43,7 @@ export function OneMoneyDashboardSummary({state,forecast,onIncome,onCash,onSavin
    <button type="button" onClick={onExpense}
     className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#408F64] px-4 text-xs font-extrabold text-white">＋ {t("Add expense","سجّل مصروف")}</button>
   </div>
-  <div className={"grid grid-cols-1 gap-2 sm:grid-cols-"+(values.length===4?"4":"3")}>{values.map(v=>
+  <div className={values.length===4?"grid grid-cols-1 gap-2 sm:grid-cols-4":"grid grid-cols-1 gap-2 sm:grid-cols-3"}>{values.map(v=>
    <button type="button" key={v.id} onClick={v.action} data-testid={"money-summary-"+v.id}
     className="min-w-0 rounded-2xl border border-white p-3 text-start transition hover:ring-2 hover:ring-[#AED6B5]"
     style={{background:v.bg}}>
