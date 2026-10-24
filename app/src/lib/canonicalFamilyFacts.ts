@@ -42,11 +42,20 @@ export function canonicalPlanView(plan:FamilyPlan,moments:readonly FamilyMoment[
  if(plan.title===occurrence.title&&plan.date===occurrence.occursOn)return plan;
  return {...plan,title:occurrence.title,date:occurrence.occursOn};
 }
+/** Shared read model for all active surfaces. In particular, Today, Family,
+ * advisor and Money must resolve the same source identities before advising.
+ * This never changes original records and must not be saved into localStorage.
+ */
+export function canonicalFamilyReadModel(
+ plans:readonly FamilyPlan[],authored:readonly FamilyMoment[],members:readonly Member[],arabic=false
+):{moments:FamilyMoment[];plans:FamilyPlan[]}{
+ const moments=canonicalFamilyMoments(authored,members,arabic);
+ return {moments,plans:plans.map(plan=>canonicalPlanView(plan,moments))};
+}
 export function canonicalPlanViews(
  plans:readonly FamilyPlan[],authored:readonly FamilyMoment[],members:readonly Member[],arabic=false
 ):FamilyPlan[]{
- const moments=canonicalFamilyMoments(authored,members,arabic);
- return plans.map(plan=>canonicalPlanView(plan,moments));
+ return canonicalFamilyReadModel(plans,authored,members,arabic).plans;
 }
 /** A resolved occurrence is not reintroduced as an extra "moment" card when
  * its single linked plan is already shown in the home planning area. */
