@@ -1,5 +1,5 @@
 import {Link} from "@tanstack/react-router";
-import {ChevronDown,Languages,MessageCircle,MoreHorizontal,Settings2,UsersRound} from "lucide-react";
+import {Languages,MessageCircle,Settings2,UsersRound} from "lucide-react";
 import type {CSSProperties,ReactNode} from "react";
 import {useI18n} from "@/lib/i18n";
 import {areaFromRoute,currentRoutePath,familyDestinations,type FamilyArea} from "@/lib/familyNavigation";
@@ -9,17 +9,8 @@ import {RhythmPageHeader} from "./RhythmPageHeader";
 import "./adventureWorldSkin.css";
 import {LocalSaveNotice} from "./LocalSaveNotice";
 
-// Exactly three primary destinations; Ask remains persistent and contextual.
-// Shopping and specialist tools remain accessible under one optional menu.
-// Page-specific links are reserved for tasks that actually need the next tool.
-const tools=[
- {to:"/explore/smartbuy" as const,en:"Shopping & Wishlist",ar:"المشتريات والرغبات"},
- {to:"/explore/weekend" as const,en:"Outings & places",ar:"الطلعات والأماكن"},
- {to:"/explore/market" as const,en:"Find products",ar:"البحث عن المنتجات"},
- {to:"/explore/shopping" as const,en:"Shopping basket",ar:"سلّة المشتريات"},
- {to:"/community" as const,en:"Family & Friends Circles",ar:"دوائر العائلة والأصحاب"},
- {to:"/about" as const,en:"About & privacy",ar:"حول دبّرنا والخصوصية"}
-];
+// Exactly three approved destinations; unfinished discovery and circles
+// experiences are retired, not kept behind an overflow menu.
 export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=false}:{
  children:ReactNode;title?:string;homeLayout?:boolean;shopping?:boolean
 }){
@@ -58,17 +49,8 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
    <Link to="/advisor" className="mt-4 flex min-h-12 items-center gap-3 rounded-2xl border border-[#E3DBEC] bg-[#F9F4FE] px-3 text-sm font-semibold text-[#6D528A] focus-visible:ring-2">
     <MessageCircle className="size-5"/>{text("Ask Dabberna","اسأل دبّرنا")}
    </Link>
-   <details className="group mt-5 border-t border-[#DAECDF] pt-3">
-    <summary className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-xs font-semibold text-[#637084] hover:bg-[#F9F2F5]">
-     {text("Other tools","أدوات أخرى")}<ChevronDown className="ms-auto size-4 transition group-open:rotate-180"/>
-    </summary>
-    <div className="mt-1 space-y-0.5">
-     {tools.map(x=><Link key={x.to} to={x.to}
-      className="flex min-h-10 items-center rounded-xl px-3 text-xs font-medium text-[#657083] hover:bg-[#FAF1F5] focus-visible:ring-2">
-      {ar?x.ar:x.en}</Link>)}
-    </div>
-   </details>
-   <Link to="/space" className="mt-auto flex min-h-12 items-center gap-2 rounded-2xl border border-[#DCEADF] bg-white/80 px-3 text-xs font-semibold text-[#386E57] focus-visible:ring-2">
+   <Link to="/about" className="mt-auto mb-2 px-3 py-2 text-xs text-[#637F73] underline underline-offset-2">{text("About & privacy","حول دبّرنا والخصوصية")}</Link>
+   <Link to="/space" className="flex min-h-12 items-center gap-2 rounded-2xl border border-[#DCEADF] bg-white/80 px-3 text-xs font-semibold text-[#386E57] focus-visible:ring-2">
     <UsersRound className="size-[18px] text-[#288966]"/>{text("Family & settings","العائلة والإعدادات")}
    </Link>
   </aside>
@@ -84,15 +66,6 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
        className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#E6D6ED] bg-[#F6EEFC] px-3 text-xs font-bold text-[#79569A] focus-visible:ring-2">
        <MessageCircle className="size-4"/><span className="hidden min-[370px]:inline">{text("Ask","اسأل")}</span>
      </Link>
-     <details className="group relative lg:hidden">
-      <summary aria-label={text("More features","مميزات أخرى")} className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-full border border-[#F0E4E9] bg-white text-[#536277] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]">
-       <MoreHorizontal className="size-5"/>
-      </summary>
-      <div className="absolute end-0 top-12 z-50 w-[min(85vw,265px)] max-h-[65dvh] space-y-0.5 overflow-y-auto rounded-2xl border border-[#F0E4E9] bg-white p-2 shadow-xl">
-       {tools.map(x=><Link key={x.to} to={x.to} className="flex min-h-11 items-center rounded-xl px-3 text-xs font-semibold text-[#536277] hover:bg-[#FFF0F4] focus-visible:ring-2">
-        {ar?x.ar:x.en}</Link>)}
-      </div>
-     </details>
      <button type="button" onClick={()=>setLang(ar?"en":"ar")} aria-label={text("Switch to Arabic","Switch to English")}
       className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#F0E4E9] bg-white px-3 text-xs font-bold text-[#39475F] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]">
       <Languages className="size-4"/>{ar?"English":"العربية"}
@@ -110,6 +83,9 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
     {homeLayout&&title&&<h1 className="sr-only">{title}</h1>}
     {children}
    </main>
+   <footer className="pb-24 text-center text-xs text-[#678576] lg:hidden">
+    <Link to="/about" className="inline-block min-h-10 px-3 py-3 underline underline-offset-2">{text("About & privacy","حول دبّرنا والخصوصية")}</Link>
+   </footer>
   </div>
   <nav aria-label={mobileName}
    className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-[#D1E9D8] bg-[#F9FFF9]/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,91,60,.16)] backdrop-blur-xl lg:hidden">
