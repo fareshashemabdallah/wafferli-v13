@@ -14,23 +14,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as OccasionsRouteImport } from './routes/occasions'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as FamilyRouteImport } from './routes/family'
-import { Route as ExperienceRouteImport } from './routes/experience'
-import { Route as CommunityRouteImport } from './routes/community'
 import { Route as AdvisorRouteImport } from './routes/advisor'
 import { Route as MoneyRouteImport } from './routes/money'
 import { Route as PlansRouteImport } from './routes/plans'
 import { Route as SpaceRouteImport } from './routes/space'
 import { Route as HouseholdRouteImport } from './routes/household'
-import { Route as ExploreIndexRouteImport } from './routes/explore.index'
-import { Route as ExploreRestaurantsRouteImport } from './routes/explore.restaurants'
-import { Route as ExploreServicesRouteImport } from './routes/explore.services'
-import { Route as ExploreShoppingRouteImport } from './routes/explore.shopping'
-import { Route as ExploreSmartbuyRouteImport } from './routes/explore.smartbuy'
-import { Route as ExploreMarketRouteImport } from './routes/explore.market'
-import { Route as ExploreTogetherRouteImport } from './routes/explore.together'
-import { Route as ExploreWeekendRouteImport } from './routes/explore.weekend'
-import { Route as TogetherAdminTokenRouteImport } from './routes/together.$adminToken'
-import { Route as VoteTokenRouteImport } from './routes/vote.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,16 +28,6 @@ const IndexRoute = IndexRouteImport.update({
 const AdvisorRoute = AdvisorRouteImport.update({
   id: '/advisor',
   path: '/advisor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExperienceRoute = ExperienceRouteImport.update({
-  id: '/experience',
-  path: '/experience',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarRoute = CalendarRouteImport.update({
@@ -92,63 +70,11 @@ const HouseholdRoute = HouseholdRouteImport.update({
   path: '/household',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ExploreIndexRoute = ExploreIndexRouteImport.update({
-  id: '/explore/',
-  path: '/explore/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExploreServicesRoute = ExploreServicesRouteImport.update({
-  id: '/explore/services',
-  path: '/explore/services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExploreRestaurantsRoute = ExploreRestaurantsRouteImport.update({
-  id: '/explore/restaurants',
-  path: '/explore/restaurants',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExploreShoppingRoute = ExploreShoppingRouteImport.update({
-  id: '/explore/shopping',
-  path: '/explore/shopping',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExploreMarketRoute = ExploreMarketRouteImport.update({
-  id: '/explore/market',
-  path: '/explore/market',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExploreSmartbuyRoute = ExploreSmartbuyRouteImport.update({
-  id: '/explore/smartbuy',
-  path: '/explore/smartbuy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExploreWeekendRoute = ExploreWeekendRouteImport.update({
-  id: '/explore/weekend',
-  path: '/explore/weekend',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExploreTogetherRoute = ExploreTogetherRouteImport.update({
-  id: '/explore/together',
-  path: '/explore/together',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TogetherAdminTokenRoute = TogetherAdminTokenRouteImport.update({
-  id: '/together/$adminToken',
-  path: '/together/$adminToken',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VoteTokenRoute = VoteTokenRouteImport.update({
-  id: '/vote/$token',
-  path: '/vote/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/plans': typeof PlansRoute
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
-  '/community': typeof CommunityRoute
-  '/experience': typeof ExperienceRoute
   '/calendar': typeof CalendarRoute
   '/family': typeof FamilyRoute
   '/occasions': typeof OccasionsRoute
@@ -156,23 +82,11 @@ export interface FileRoutesByFullPath {
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
   '/household': typeof HouseholdRoute
-  '/explore/services': typeof ExploreServicesRoute
-  '/explore/restaurants': typeof ExploreRestaurantsRoute
-  '/explore/shopping': typeof ExploreShoppingRoute
-  '/explore/market': typeof ExploreMarketRoute
-  '/explore/smartbuy': typeof ExploreSmartbuyRoute
-  '/explore/weekend': typeof ExploreWeekendRoute
-  '/explore/together': typeof ExploreTogetherRoute
-  '/together/$adminToken': typeof TogetherAdminTokenRoute
-  '/vote/$token': typeof VoteTokenRoute
-  '/explore/': typeof ExploreIndexRoute
 }
 export interface FileRoutesByTo {
   '/plans': typeof PlansRoute
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
-  '/community': typeof CommunityRoute
-  '/experience': typeof ExperienceRoute
   '/calendar': typeof CalendarRoute
   '/family': typeof FamilyRoute
   '/occasions': typeof OccasionsRoute
@@ -180,24 +94,12 @@ export interface FileRoutesByTo {
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
   '/household': typeof HouseholdRoute
-  '/explore/services': typeof ExploreServicesRoute
-  '/explore/restaurants': typeof ExploreRestaurantsRoute
-  '/explore/shopping': typeof ExploreShoppingRoute
-  '/explore/market': typeof ExploreMarketRoute
-  '/explore/smartbuy': typeof ExploreSmartbuyRoute
-  '/explore/weekend': typeof ExploreWeekendRoute
-  '/explore/together': typeof ExploreTogetherRoute
-  '/together/$adminToken': typeof TogetherAdminTokenRoute
-  '/vote/$token': typeof VoteTokenRoute
-  '/explore': typeof ExploreIndexRoute
 }
 export interface FileRoutesById {
   '/plans': typeof PlansRoute
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
-  '/community': typeof CommunityRoute
-  '/experience': typeof ExperienceRoute
   '/calendar': typeof CalendarRoute
   '/family': typeof FamilyRoute
   '/occasions': typeof OccasionsRoute
@@ -205,16 +107,6 @@ export interface FileRoutesById {
   '/money': typeof MoneyRoute
   '/space': typeof SpaceRoute
   '/household': typeof HouseholdRoute
-  '/explore/services': typeof ExploreServicesRoute
-  '/explore/restaurants': typeof ExploreRestaurantsRoute
-  '/explore/shopping': typeof ExploreShoppingRoute
-  '/explore/market': typeof ExploreMarketRoute
-  '/explore/smartbuy': typeof ExploreSmartbuyRoute
-  '/explore/weekend': typeof ExploreWeekendRoute
-  '/explore/together': typeof ExploreTogetherRoute
-  '/together/$adminToken': typeof TogetherAdminTokenRoute
-  '/vote/$token': typeof VoteTokenRoute
-  '/explore/': typeof ExploreIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -222,8 +114,6 @@ export interface FileRouteTypes {
     | '/'
     | '/plans'
     | '/advisor'
-    | '/community'
-    | '/experience'
     | '/calendar'
     | '/family'
     | '/occasions'
@@ -231,23 +121,11 @@ export interface FileRouteTypes {
     | '/money'
     | '/space'
     | '/household'
-    | '/explore/services'
-    | '/explore/restaurants'
-    | '/explore/shopping'
-    | '/explore/market'
-    | '/explore/smartbuy'
-    | '/explore/weekend'
-    | '/explore/together'
-    | '/together/$adminToken'
-    | '/vote/$token'
-    | '/explore/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/plans'
     | '/advisor'
-    | '/community'
-    | '/experience'
     | '/calendar'
     | '/family'
     | '/occasions'
@@ -255,23 +133,11 @@ export interface FileRouteTypes {
     | '/money'
     | '/space'
     | '/household'
-    | '/explore/services'
-    | '/explore/restaurants'
-    | '/explore/shopping'
-    | '/explore/market'
-    | '/explore/smartbuy'
-    | '/explore/weekend'
-    | '/explore/together'
-    | '/together/$adminToken'
-    | '/vote/$token'
-    | '/explore'
   id:
     | '__root__'
     | '/plans'
     | '/'
     | '/advisor'
-    | '/community'
-    | '/experience'
     | '/calendar'
     | '/family'
     | '/occasions'
@@ -279,23 +145,11 @@ export interface FileRouteTypes {
     | '/money'
     | '/space'
     | '/household'
-    | '/explore/services'
-    | '/explore/restaurants'
-    | '/explore/shopping'
-    | '/explore/market'
-    | '/explore/smartbuy'
-    | '/explore/weekend'
-    | '/explore/together'
-    | '/together/$adminToken'
-    | '/vote/$token'
-    | '/explore/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdvisorRoute: typeof AdvisorRoute
-  CommunityRoute: typeof CommunityRoute
-  ExperienceRoute: typeof ExperienceRoute
   CalendarRoute: typeof CalendarRoute
   FamilyRoute: typeof FamilyRoute
   OccasionsRoute: typeof OccasionsRoute
@@ -304,16 +158,6 @@ export interface RootRouteChildren {
   PlansRoute: typeof PlansRoute
   SpaceRoute: typeof SpaceRoute
   HouseholdRoute: typeof HouseholdRoute
-  ExploreServicesRoute: typeof ExploreServicesRoute
-  ExploreRestaurantsRoute: typeof ExploreRestaurantsRoute
-  ExploreShoppingRoute: typeof ExploreShoppingRoute
-  ExploreMarketRoute: typeof ExploreMarketRoute
-  ExploreSmartbuyRoute: typeof ExploreSmartbuyRoute
-  ExploreWeekendRoute: typeof ExploreWeekendRoute
-  ExploreTogetherRoute: typeof ExploreTogetherRoute
-  TogetherAdminTokenRoute: typeof TogetherAdminTokenRoute
-  VoteTokenRoute: typeof VoteTokenRoute
-  ExploreIndexRoute: typeof ExploreIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -330,20 +174,6 @@ declare module '@tanstack/react-router' {
       path: '/advisor'
       fullPath: '/advisor'
       preLoaderRoute: typeof AdvisorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/experience': {
-      id: '/experience'
-      path: '/experience'
-      fullPath: '/experience'
-      preLoaderRoute: typeof ExperienceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendar': {
@@ -402,84 +232,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HouseholdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/explore/': {
-      id: '/explore/'
-      path: '/explore'
-      fullPath: '/explore/'
-      preLoaderRoute: typeof ExploreIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/explore/services': {
-      id: '/explore/services'
-      path: '/explore/services'
-      fullPath: '/explore/services'
-      preLoaderRoute: typeof ExploreServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/explore/restaurants': {
-      id: '/explore/restaurants'
-      path: '/explore/restaurants'
-      fullPath: '/explore/restaurants'
-      preLoaderRoute: typeof ExploreRestaurantsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/explore/shopping': {
-      id: '/explore/shopping'
-      path: '/explore/shopping'
-      fullPath: '/explore/shopping'
-      preLoaderRoute: typeof ExploreShoppingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/explore/market': {
-      id: '/explore/market'
-      path: '/explore/market'
-      fullPath: '/explore/market'
-      preLoaderRoute: typeof ExploreMarketRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/explore/smartbuy': {
-      id: '/explore/smartbuy'
-      path: '/explore/smartbuy'
-      fullPath: '/explore/smartbuy'
-      preLoaderRoute: typeof ExploreSmartbuyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/explore/weekend': {
-      id: '/explore/weekend'
-      path: '/explore/weekend'
-      fullPath: '/explore/weekend'
-      preLoaderRoute: typeof ExploreWeekendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/explore/together': {
-      id: '/explore/together'
-      path: '/explore/together'
-      fullPath: '/explore/together'
-      preLoaderRoute: typeof ExploreTogetherRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/together/$adminToken': {
-      id: '/together/$adminToken'
-      path: '/together/$adminToken'
-      fullPath: '/together/$adminToken'
-      preLoaderRoute: typeof TogetherAdminTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/vote/$token': {
-      id: '/vote/$token'
-      path: '/vote/$token'
-      fullPath: '/vote/$token'
-      preLoaderRoute: typeof VoteTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdvisorRoute: AdvisorRoute,
-  CommunityRoute: CommunityRoute,
-  ExperienceRoute: ExperienceRoute,
   CalendarRoute: CalendarRoute,
   FamilyRoute: FamilyRoute,
   OccasionsRoute: OccasionsRoute,
@@ -488,16 +246,6 @@ const rootRouteChildren: RootRouteChildren = {
   PlansRoute: PlansRoute,
   SpaceRoute: SpaceRoute,
   HouseholdRoute: HouseholdRoute,
-  ExploreServicesRoute: ExploreServicesRoute,
-  ExploreRestaurantsRoute: ExploreRestaurantsRoute,
-  ExploreShoppingRoute: ExploreShoppingRoute,
-  ExploreMarketRoute: ExploreMarketRoute,
-  ExploreSmartbuyRoute: ExploreSmartbuyRoute,
-  ExploreWeekendRoute: ExploreWeekendRoute,
-  ExploreTogetherRoute: ExploreTogetherRoute,
-  TogetherAdminTokenRoute: TogetherAdminTokenRoute,
-  VoteTokenRoute: VoteTokenRoute,
-  ExploreIndexRoute: ExploreIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
