@@ -68,7 +68,7 @@ describe("connected, device-only family priorities",()=>{
   const q=nextConnectedFamilyAction(input({preferences:{...prefs,shoppingTips:true},wishlist:[gift]}));
   expect(q.detailEn).toContain("Birthday story");
   expect(q.route).toBe("/occasions");
-  expect(nextConnectedFamilyAction(input({preferences:{...prefs,shoppingTips:true}})).route).toBe("/explore/market");
+  expect(nextConnectedFamilyAction(input({preferences:{...prefs,shoppingTips:true}})).route).toBe("/plans");
  });
  it("only uses family wishlist in cross-module advice when shopping tips are opted in",()=>{
   expect(nextConnectedFamilyAction(input({wishlist:[gift],preferences:{
@@ -103,7 +103,7 @@ describe("connected outing choice with children's needs",()=>{
   expect(advice.detailEn).toContain("Friday family outing");
   expect(advice.detailEn).toContain("45.00 JOD");
   expect(advice.detailEn).toContain("not verified");
-  expect(advice.route).toBe("/explore/together");
+  expect(advice.route).toBe("/plans");
  });
  it("does not recommend an incompatible venue, even when every option fails",()=>{
   const answer=personalOutingAdvice(input({preferences:prefs,outings:[
