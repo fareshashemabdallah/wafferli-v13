@@ -16,7 +16,7 @@ export type TodayAction={
  id:string;
  titleEn:string;titleAr:string;detailEn:string;detailAr:string;
  actionEn:string;actionAr:string;
- route:"/money"|"/occasions"|"/explore/smartbuy"|"/plans";
+ route:"/money"|"/occasions"|"/plans";
  whyEn:string;whyAr:string;
  date?:string;planId?:string;occasionKey?:string;
  giftEstimateJod?:number;sellerCount?:number;
@@ -140,7 +140,7 @@ export function buildTodayActionPolicy(input:{
      "الهدية وتقدير تكلفتها محفوظان. قارن الأسعار قبل الاختيار؛ لم يُسجل أي دفع.",
     actionEn:gift.selectedQuote?"Review gift choice":"Compare gift options",
     actionAr:gift.selectedQuote?"راجع خيار الهدية":"قارن خيارات الهدية",
-    route:"/explore/smartbuy",date:moment.occursOn,planId:plan!.id,occasionKey:key,
+    route:"/plans",date:moment.occursOn,planId:plan!.id,occasionKey:key,
     giftEstimateJod:gift.amountJod,sellerCount:gift.selectedQuote?1:0,
     whyEn:"Your family's saved occasion is approaching",
     whyAr:"المناسبة المحفوظة لعيلتك اقتربت"
