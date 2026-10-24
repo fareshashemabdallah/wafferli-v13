@@ -4,7 +4,8 @@ import {decideWeekendOuting} from "./weekendOutingDecision";
 import {nextConnectedFamilyAction,personalOutingAdvice} from "./connectedFamilyGuidance";
 import {explicitJodAmount,explainSpecificSpending} from "./specificSpendingAdvice";
 import {realFamilyMembers} from "./familySetup";
-import {allFamilyMoments,upcomingMoments} from "./familyCalendar";
+import {upcomingMoments} from "./familyCalendar";
+import {canonicalFamilyReadModel} from "./canonicalFamilyFacts";
 import {dateKey} from "./familyCalendar";
 import type {FamilyMoment} from "./familyCalendar";
 import type {MoneyState,Member} from "./money";
@@ -74,11 +75,12 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
  const intent=guidedPrompts.find(p=>question===p.en||question===p.ar)?.id??detectAdvisorIntent(question);
  const now=ctx.now??new Date(),day=dateKey(now);
  const m=ctx.money;
- const overview=getMoneyOverview(m,now,ctx.plans);
+ const family=canonicalFamilyReadModel(ctx.plans,ctx.moments,ctx.members);
+ const overview=getMoneyOverview(m,now,family.plans);
  // A weekend affordability question deserves the same source-grounded
  // question-to-answer-to-places journey as the dedicated experience.
  if(intent==="safety"&&explicitJodAmount(question)===null&&/outing|weekend|picnic|نزهة|طلعة|مشوار|ويكند|عائلية.*طلعة/i.test(question)){
-  const outing=decideWeekendOuting(m,ctx.preferences,now,ctx.plans);
+  const outing=decideWeekendOuting(m,ctx.preferences,now,family.plans);
   return answer(intent,outing.headlineEn,outing.headlineAr,
    outing.nextEn+" "+outing.explanationEn,
    outing.nextAr+" "+outing.explanationAr,
@@ -92,12 +94,12 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
    next.sourceEn,next.sourceAr,next.route,next.actionEn,next.actionAr);
  }
  if(intent==="safety"){
-  const reality=assessFinancialReality(m,ctx.plans,now);
+  const reality=assessFinancialReality(m,family.plans,now);
   if(reality.kind==="essentials-gap"||reality.kind==="plan-gap")return answer(intent,reality.titleEn,reality.titleAr,reality.messageEn,reality.messageAr,
    "Money: estimated household priorities and commitments","المالية: أولويات العيلة والالتزامات التقديرية","/money",reality.actionEn,reality.actionAr);
   const jod=explicitJodAmount(question);
   if(jod!==null){
-   const assessment=explainSpecificSpending(m,jod,now,ctx.plans);
+   const assessment=explainSpecificSpending(m,jod,now,family.plans);
    return answer(intent,assessment.titleEn,assessment.titleAr,
     assessment.detailEn,assessment.detailAr,assessment.sourceEn,assessment.sourceAr,
     "/money","Review Money assumptions","راجع أرقام المالية");
@@ -161,8 +163,7 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
    "Money: named goals and monthly allocation","المالية: الأهداف والتخصيص الشهري","/money","Review goals","راجع الأهداف");
  }
  if(intent==="family"){
-  const actual=realFamilyMembers(ctx.members);
-  const occurrences=upcomingMoments(allFamilyMoments([...ctx.moments],actual),now,46);
+  const occurrences=upcomingMoments(family.moments,now,46);
   const next=occurrences[0];
   if(!next)return answer(intent,"Nothing coming up in your saved calendar","ما في مناسبة قريبة بالتقويم المحفوظ",
    "No birthday or calendar event is recorded for the next 45 days. Check that real family profiles and their dates are set up; sample profiles are ignored.",
@@ -176,7 +177,7 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
    "Family calendar and real member profiles","تقويم العائلة والملفات الفعلية","/calendar","Plan the occasion","خطط للمناسبة");
  }
  if(intent==="plans"){
-  const candidates=ctx.plans.filter(p=>p.status!=="completed")
+  const candidates=family.plans.filter(p=>p.status!=="completed")
     .sort((a,b)=>(a.date??"9999-12-31").localeCompare(b.date??"9999-12-31"));
   const p=candidates[0];
   if(!p)return answer(intent,"Start with one meaningful family plan","ابدأ بخطة واحدة بتهم العائلة",
