@@ -11,7 +11,8 @@ import {sampleMembers,type Member} from "@/lib/money";
 import {realFamilyMembers} from "@/lib/familySetup";
 import {FAMILY_TASKS_KEY,type FamilyTask,taskSummary} from "@/lib/familyTasks";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan,upcomingFamilyPlans} from "@/lib/familyPlans";
-import {allFamilyMoments,upcomingMoments,formatMomentDate,type FamilyMoment} from "@/lib/familyCalendar";
+import {upcomingMoments,formatMomentDate,type FamilyMoment} from "@/lib/familyCalendar";
+import {canonicalFamilyReadModel} from "@/lib/canonicalFamilyFacts";
 
 export const Route=createFileRoute("/family")({
  head:()=>({meta:[{title:"Family Life — Dabberna"},{name:"description",content:"One family workspace for dates, plans, children and responsibilities."}]}),
@@ -37,8 +38,9 @@ export function FamilyLifePage(){
  const [tasks,,tasksReady]=useLocalState<FamilyTask[]>(FAMILY_TASKS_KEY,[]);
  const ready=membersReady&&momentsReady&&plansReady&&tasksReady;
  const realMembers=realFamilyMembers(members);
- const upcoming=upcomingMoments(allFamilyMoments(moments,realMembers,ar),new Date(),180);
- const activePlans=upcomingFamilyPlans(plans.filter(p=>p.status!=="completed"),new Date(),5);
+ const family=canonicalFamilyReadModel(plans,moments,members,ar);
+ const upcoming=upcomingMoments(family.moments,new Date(),180);
+ const activePlans=upcomingFamilyPlans(family.plans.filter(p=>p.status!=="completed"),new Date(),5);
  const activeTasks=taskSummary(tasks);
  const card="rounded-[1.55rem] border border-[#DDEBDD] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,82,64,.18)] sm:p-5";
  return <AppShell title={label("Family Life","حياة العيلة")}>
