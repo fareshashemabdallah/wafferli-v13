@@ -20,7 +20,7 @@ const routes=[...new Set([...routeTree.matchAll(/\sfullPath: '([^']+)'/g)]
  .map(match=>match[1])
  .filter(path=>path&&path!=="/"&&!path.includes("$")&&
    /^\/(?:[a-z0-9-]+\/?)+$/i.test(path)))];
-if(!routes.includes("/explore/weekend")||!routes.includes("/advisor"))
+if(!routes.includes("/family")||!routes.includes("/advisor")||!routes.includes("/about"))
  throw Error("Required Dabberna routes missing from generated route tree");
 
 const safeHtml=(value)=>value.replaceAll("&","&amp;").replaceAll("<","&lt;")
@@ -62,10 +62,12 @@ const fallback=`<!doctype html>
  var base="/wafferli-v13/";
  var pathname=location.pathname;
  var rest=pathname.indexOf(base)===0?pathname.slice(base.length):"";
- // Never attempt to treat a missing .js/.css/image file as an app screen.
+ // Never treat a missing .js/.css/image as an app screen.
  if(rest.indexOf("assets/")===0 || /\\.[a-z0-9]+$/i.test(rest))return;
  var route=rest.replace(/^\\/+|\\/+$/g,"");
- location.replace(base+(route?"#/"+route+location.search:""));
+ // Retired discovery/community URLs must not resurrect unfinished UI.
+ var retired=/^(?:explore(?:\\/|$)|community(?:\\/|$)|experience(?:\\/|$)|vote(?:\\/|$)|together(?:\\/|$))/i.test(route);
+ location.replace(base+(retired?"#/family":route?"#/"+route+location.search:""));
 })();
 </script></head>
 <body><p>Opening Dabberna… <a href="/wafferli-v13/">Open the app</a></p></body></html>
@@ -74,9 +76,9 @@ writeFileSync(join(dist,"404.html"),fallback);
 
 // Deployment smoke checks: compilation passed and original mistaken deep link
 // will open the correct app route after GitHub Pages' directory redirect.
-const weekendFile=join(dist,"explore/weekend/index.html");
-if(!existsSync(weekendFile)||
- !readFileSync(weekendFile,"utf8").includes("/wafferli-v13/#/explore/weekend")||
+const familyFile=join(dist,"family/index.html");
+if(!existsSync(familyFile)||
+ !readFileSync(familyFile,"utf8").includes("/wafferli-v13/#/family")||
  !readFileSync(join(dist,"404.html"),"utf8").includes("location.replace"))
  throw Error("GitHub Pages deep-link recovery is missing");
 process.stdout.write(`Generated ${routes.length} direct-route entry pages and 404 fallback.\n`);
