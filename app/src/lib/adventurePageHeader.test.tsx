@@ -11,14 +11,11 @@ vi.mock("@tanstack/react-router",()=>({
 afterEach(cleanup);
 
 describe("the same family adventure world on every inner page",()=>{
- it("assigns real places to spending, shopping, outings, family, dates and questions",()=>{
+ it("assigns consistent worlds to the approved Money, Family, Calendar, Plans and Ask pages",()=>{
   expect(adventureChapter("/money").place).toBe("home");
   expect(adventureChapter("/plans").place).toBe("moments");
   expect(adventureChapter("/calendar").place).toBe("moments");
   expect(adventureChapter("/family").place).toBe("park");
-  expect(adventureChapter("/explore/weekend").place).toBe("park");
-  expect(adventureChapter("/explore/smartbuy").place).toBe("market");
-  expect(adventureChapter("/explore/market").place).toBe("market");
   expect(adventureChapter("/advisor").place).toBe("home");
  });
  it("shows an accessible world location and a working onward path, not a decorative dead end",()=>{
@@ -29,9 +26,9 @@ describe("the same family adventure world on every inner page",()=>{
   expect(screen.getByRole("link",{name:/Our plans/})).toHaveAttribute("href","/plans");
   expect(screen.getByRole("img",{name:"Illustrated cake, presents and celebration"})).toBeInTheDocument();
  });
- it("never substitutes a made-up shopping offer or fake money snapshot",()=>{
-  render(<I18nProvider><AdventurePageHeader path="/explore/smartbuy"/></I18nProvider>);
-  expect(screen.getByRole("heading",{name:"Smart Shopping"})).toBeInTheDocument();
+ it("keeps the About and privacy screen free from fabricated financial balances",()=>{
+  render(<I18nProvider><AdventurePageHeader path="/about"/></I18nProvider>);
+  expect(screen.getByRole("heading",{name:"About Dabberna"})).toBeInTheDocument();
   expect(screen.queryByText(/JOD/)).not.toBeInTheDocument();
  });
 });
