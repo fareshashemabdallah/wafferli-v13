@@ -22,7 +22,7 @@ export type GuidedAnswer={
  titleEn:string;titleAr:string;
  textEn:string;textAr:string;
  sourceEn:string;sourceAr:string;
- route:"/money"|"/calendar"|"/plans"|"/explore/weekend"|"/explore/market"|"/explore/smartbuy"|"/explore/together"|"/space"|"/occasions"|"/explore/services";
+ route:"/money"|"/calendar"|"/plans"|"/plans"|"/plans"|"/plans"|"/plans"|"/space"|"/occasions"|"/family";
  actionEn:string;actionAr:string;
 };
 export type AdvisorContext={
@@ -85,7 +85,7 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
    outing.nextAr+" "+outing.explanationAr,
    "Saved monthly plan, cash, dated bills and chosen cushion (device only)",
    "خطة الشهر والرصيد والفواتير المؤرخة والاحتياطي المسجل على الجهاز",
-   "/explore/weekend","See an outing plan and real places","شوف خطة طلعة وأماكن حقيقية");
+   "/plans","See an outing plan and real places","شوف خطة طلعة وأماكن حقيقية");
  }
  if(intent==="priorities"){
   const next=nextConnectedFamilyAction(ctx);
@@ -237,7 +237,7 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
   if(!saved.length)return answer(intent,"Compare providers with independent evidence","قارن الخدمات بأدلة واضحة",
    "No provider is on your private list. Search independently, check official credentials and service terms, then record source links and costs. Dabberna cannot verify providers or diagnose conditions.",
    "ما في مزود خدمة محفوظ. ابحث وتأكد من التراخيص والشروط من مصادر رسمية ثم سجل الروابط والأسعار. دبّرنا لا يتحقق من الجهات ولا يشخّص الأمراض.",
-   "Family Services: private comparison checklist","خدمات العائلة: قائمة مقارنة خاصة","/explore/services","Review service options","راجع خيارات الخدمات");
+   "Family Services: private comparison checklist","خدمات العائلة: قائمة مقارنة خاصة","/family","Review service options","راجع خيارات الخدمات");
   const incomplete=saved.filter(x=>x.category==="doctor"&&!x.credentialsConfirmedByParent).length;
   return answer(intent,"Review your own provider comparisons","راجع مقارنات الخدمات الخاصة",
    saved.length+" providers saved in your private list. "+
@@ -246,13 +246,13 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
    saved.length+" مزودي خدمات محفوظين في قائمتك. "+
    (incomplete?incomplete+" سجلات لأطباء تحتاج لتدقيق المؤهلات من جانبك. ":"")+
    "هذه ملاحظات شخصية وليست مراجعات موثقة أو تأكيداً على الترخيص أو التوفر.",
-   "Family Services: entered provider notes","خدمات العائلة: ملاحظاتك المسجلة","/explore/services","Review providers","راجع الجهات");
+   "Family Services: entered provider notes","خدمات العائلة: ملاحظاتك المسجلة","/family","Review providers","راجع الجهات");
  }
  if(intent==="shopping")
   return answer(intent,"First find the actual product and seller","أول شي فتّش على المنتج والبائع",
    "Search current public listings from Jordanian retailers using the product name or exact model. Check actual prices, size, delivery and stock on seller pages. Dabberna's in-app live price feed is not connected yet; manual comparison is optional afterward.",
    "فتّش بالمنتج أو الموديل على مواقع متاجر أردنية حقيقية. تأكد من السعر والحجم والتوصيل والتوفر من موقع البائع. عرض الأسعار مباشرة داخل دبّرنا ليس متصلاً بعد، والمقارنة اليدوية اختيارية.",
-   "External Jordan retailer product listings (not live in-app prices)","صفحات منتجات المتاجر الأردنية الخارجية، بلا أسعار مباشرة داخل التطبيق","/explore/market","Find seller listings","ابحث عن عروض المتاجر");
+   "External Jordan retailer product listings (not live in-app prices)","صفحات منتجات المتاجر الأردنية الخارجية، بلا أسعار مباشرة داخل التطبيق","/plans","Find seller listings","ابحث عن عروض المتاجر");
  return answer("unsupported","Here are the questions I can answer safely","هذه الأسئلة التي يمكنني الإجابة عليها",
   "I can review cash risks, bills, tasks, gifts, local service notes, outings and shopping. I cannot verify providers, diagnose conditions, access bank accounts or hold a free-form AI conversation in this pilot.",
   "بقدر أساعدك بمراجعة الرصيد والفواتير والادخار والمناسبات والخطط والشراء. ما بقدر أتحقق من الحسابات البنكية أو أشخّص مشاكل صحية أو أقدّم محادثة ذكاء اصطناعي حرّة بهالنسخة.",
