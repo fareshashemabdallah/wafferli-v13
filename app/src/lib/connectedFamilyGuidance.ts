@@ -17,7 +17,7 @@ export type ConnectedContext={
 export type ConnectedAdvice={
  titleEn:string;titleAr:string;detailEn:string;detailAr:string;
  sourceEn:string;sourceAr:string;
- route:"/plans"|"/occasions"|"/plans"|"/plans"|"/explore/smartbuy"|"/space";
+ route:"/plans"|"/occasions"|"/space";
  actionEn:string;actionAr:string
 };
 const d=(now:Date)=>dateKey(now);
