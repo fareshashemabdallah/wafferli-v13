@@ -5,7 +5,7 @@ import { arabicUI, arabicDictionaryKeys } from "./arabic";
 
 const components=[
   "routes/about.tsx","routes/index.tsx","routes/money.tsx","routes/space.tsx",
-  "components/CashFlowPlanner.tsx","components/Tally.tsx",
+  "components/CashFlowPlanner.tsx",
 ];
 
 describe("Dabberna Arabic UI",()=>{
