@@ -85,12 +85,12 @@ export function OccasionPlanner(){
      </details>}
     </>}
    <p className="rounded-xl border border-[#DDE8DA] bg-[#F7FBF6] p-3 text-xs text-[#5F7C67]">
-    {t("Keep this occasion's gift and budget in its single linked plan above. General shopping wishlists remain available in Shopping, without creating a second birthday or gift cost.",
-       "خلي هدية المناسبة وميزانيتها ضمن خطتها الواحدة فوق. قوائم الرغبات العامة بتبقى في التسوق دون إنشاء عيد ميلاد أو كلفة هدية ثانية.")}
+    {t("Keep this occasion's gift and budget in its linked family plan. Older shopping records remain in your device backup but are not an active feature.",
+       "خلي هدية المناسبة وميزانيتها ضمن خطتها المرتبطة. سجلات التسوق القديمة تبقى في نسخة بيانات الجهاز ولا تمثل ميزة نشطة.")}
    </p>
    <div className="rounded-xl bg-[#F1F7EF] p-3 text-sm">
     <span>{t("Want to compare a price before buying? ","بدك تقارن السعر قبل الشراء؟ ")}</span>
-    <Link to="/explore/smartbuy" onClick={()=>{if(plan)writeLocal(ACTIVE_PLAN_KEY,plan.id);}} className="font-semibold text-brand underline">{t("Compare and choose","قارن واختر")}</Link>
+    <Link to="/plans" onClick={()=>{if(plan)writeLocal(ACTIVE_PLAN_KEY,plan.id);}} className="font-semibold text-brand underline">{t("Review family plan","راجع خطة العائلة")}</Link>
     <p className="mt-1 text-xs text-muted-foreground">{t(
      "A wish, a comparison or a planned gift never deducts cash. Financial advice uses only entered facts.",
      "الرغبة أو المقارنة أو التخطيط لهدية لا تخصم من الرصيد. الإرشاد المالي يعتمد فقط على ما أدخلته.")}</p>
