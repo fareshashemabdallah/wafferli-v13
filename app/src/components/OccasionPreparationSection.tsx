@@ -228,7 +228,7 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
   </form>}
   {saved&&<p role="status" className="mt-2 rounded-lg bg-[#EDF8F0] p-2 text-xs font-semibold text-[#26765A]">{saved}</p>}
   {prep&&prep.gift.amountJod>0&&<div className="mt-3 rounded-xl border border-[#E5D9E4] bg-white p-3">
-   <p className="text-sm font-bold text-[#9C4679]">{t("Gift shopping — connected to this occasion","تسوق الهدية — مرتبط بهذه المناسبة")}</p>
+   <p className="text-sm font-bold text-[#9C4679]">{t("Gift planning — connected to this occasion","تخطيط الهدية — مرتبط بهذه المناسبة")}</p>
    <p className="mt-1 text-xs text-[#697588]">{prep.gift.description?
     t("Compare prices for: ","قارن أسعار: ")+prep.gift.description:
     t("Describe the gift above, then save before comparing prices.","اكتب وصف الهدية أعلاه واحفظه قبل مقارنة الأسعار.")}</p>
@@ -236,10 +236,10 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
     {t("Chosen seller (parent-entered): ","المتجر المختار (حسب إدخالك): ")}
     {prep.gift.selectedQuote.store} · {fmtJOD(prep.gift.selectedQuote.totalJod)}
    </p>}
-   {prep.gift.description.trim().length>=2&&<Link to="/explore/smartbuy"
+   {prep.gift.description.trim().length>=2&&<Link to="/plans"
     onClick={()=>writeLocal(ACTIVE_PLAN_KEY,plan.id)}
     className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-[#E8F4EC] px-3 text-xs font-bold text-[#2D7859]">
-    {t("Compare, choose or record this gift","قارن أو اختر أو سجّل هذه الهدية")} →
+    {t("Review this gift in its family plan","راجع هذه الهدية في خطة العائلة")} →
    </Link>}
   </div>}
 
