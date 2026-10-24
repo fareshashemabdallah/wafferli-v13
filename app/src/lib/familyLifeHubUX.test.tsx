@@ -88,9 +88,8 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
  });
  it("keeps specialist family experiences available but not as extra global tabs",()=>{
   draw();
-  fireEvent.click(screen.getByText("More family experiences"));
-  expect(screen.getByRole("link",{name:"Outings"})).toHaveAttribute("href","/explore/weekend");
+  fireEvent.click(screen.getByText("Family celebrations"));
   expect(screen.getByRole("link",{name:"Celebrations"})).toHaveAttribute("href","/occasions");
-  expect(screen.getByRole("link",{name:"Family & Friends Circles"})).toHaveAttribute("href","/community");
+  expect(screen.queryByRole("link",{name:"Family & Friends Circles"})).not.toBeInTheDocument();
  });
 });

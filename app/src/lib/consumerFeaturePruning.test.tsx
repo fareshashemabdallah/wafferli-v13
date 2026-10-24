@@ -3,7 +3,6 @@ import {cleanup,render,screen,fireEvent} from "@testing-library/react";
 import type {ReactNode,AnchorHTMLAttributes} from "react";
 import {I18nProvider} from "@/lib/i18n";
 import {About} from "@/routes/about";
-import {Explore} from "@/routes/explore.index";
 import {Advisor} from "@/routes/advisor";
 
 vi.mock("@tanstack/react-router",()=>({
@@ -38,14 +37,6 @@ describe("remove distractions, not parent decision support",()=>{
   expect(screen.queryByText(/Free and Dabberna Plus — future concept/)).not.toBeInTheDocument();
   expect(screen.queryByText(/Fictional merchant and offer-review workflow/)).not.toBeInTheDocument();
   expect(screen.getByRole("link",{name:/Ask Dabberna/})).toHaveAttribute("href","/advisor");
- });
- it("Discover helps pick practical family outcomes but doesn't promote social networks",()=>{
-  draw(<Explore/>);
-  expect(screen.getByRole("link",{name:/A family outing/})).toHaveAttribute("href","/explore/weekend");
-  expect(screen.getByRole("link",{name:/Find a product/})).toHaveAttribute("href","/explore/market");
-  expect(screen.getByRole("link",{name:/My shopping list/})).toHaveAttribute("href","/explore/shopping");
-  expect(screen.queryByRole("link",{name:/Family & Friends Circles/})).not.toBeInTheDocument();
-  expect(screen.queryByRole("link",{name:/Community experiences/})).not.toBeInTheDocument();
  });
  it("starts with the parent's question and keeps additional decision flows optional",()=>{
   draw(<Advisor/>);

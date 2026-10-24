@@ -1,7 +1,6 @@
 import {getMoneyOverview} from "./moneyOverview";
 import {assessFinancialReality} from "./financialReality";
-import {decideWeekendOuting} from "./weekendOutingDecision";
-import {nextConnectedFamilyAction,personalOutingAdvice} from "./connectedFamilyGuidance";
+import {buildTodayActionPolicy} from "./todayActionPolicy";
 import {explicitJodAmount,explainSpecificSpending} from "./specificSpendingAdvice";
 import {upcomingMoments} from "./familyCalendar";
 import {canonicalFamilyReadModel} from "./canonicalFamilyFacts";
@@ -11,8 +10,7 @@ import type {MoneyState,Member} from "./money";
 import type {FamilyPlan} from "./familyPlans";
 import type {FamilyPreferences} from "./familyPreferences";
 import {taskSummary,type FamilyTask} from "./familyTasks";
-import {nextWishlistReminder} from "./wishlistAttention";
-import {summarizeWishlistPrice,type WishlistItem} from "./familyWishlist";
+import type {WishlistItem} from "./familyWishlist";
 import type {ServiceEntry} from "./serviceShortlist";
 import type {OutingOption} from "./childAwareOutingCompare";
 
@@ -22,7 +20,7 @@ export type GuidedAnswer={
  titleEn:string;titleAr:string;
  textEn:string;textAr:string;
  sourceEn:string;sourceAr:string;
- route:"/money"|"/calendar"|"/plans"|"/explore/weekend"|"/explore/market"|"/explore/smartbuy"|"/explore/together"|"/space"|"/occasions"|"/explore/services";
+ route:"/money"|"/calendar"|"/plans"|"/space"|"/occasions";
  actionEn:string;actionAr:string;
 };
 export type AdvisorContext={
@@ -37,11 +35,8 @@ export const guidedPrompts=[
  {id:"savings" as const,en:"How are our savings goals?",ar:"كيف ماشيين بأهداف الادخار؟"},
  {id:"family" as const,en:"What's coming up for the children?",ar:"شو في مناسبات للأطفال قريباً؟"},
  {id:"priorities" as const,en:"What matters most for our family this week?",ar:"شو أهم خطوة للعيلة هالأسبوع؟"},
- {id:"shopping" as const,en:"How can we buy more wisely?",ar:"كيف نشتري بذكاء؟"},
  {id:"tasks" as const,en:"What family tasks are due?",ar:"شو مهام العائلة المستحقة؟"},
- {id:"gifts" as const,en:"Are any gifts coming up?",ar:"عنا هدايا لازم نجهزها؟"},
- {id:"outings" as const,en:"What outings suit our family?",ar:"شو الطلعات المناسبة للعائلة؟"},
- {id:"services" as const,en:"How can we compare family services?",ar:"كيف نقارن خدمات العائلة؟"}
+ {id:"gifts" as const,en:"Are any gifts coming up?",ar:"عنا هدايا لازم نجهزها؟"}
 ];
 const hit=(q:string,words:RegExp)=>words.test(q);
 export function detectAdvisorIntent(question:string):AdvisorIntent{
@@ -76,21 +71,17 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
  const m=ctx.money;
  const family=canonicalFamilyReadModel(ctx.plans,ctx.moments,ctx.members);
  const overview=getMoneyOverview(m,now,family.plans);
- // A weekend affordability question deserves the same source-grounded
- // question-to-answer-to-places journey as the dedicated experience.
- if(intent==="safety"&&explicitJodAmount(question)===null&&/outing|weekend|picnic|نزهة|طلعة|مشوار|ويكند|عائلية.*طلعة/i.test(question)){
-  const outing=decideWeekendOuting(m,ctx.preferences,now,family.plans);
-  return answer(intent,outing.headlineEn,outing.headlineAr,
-   outing.nextEn+" "+outing.explanationEn,
-   outing.nextAr+" "+outing.explanationAr,
-   "Saved monthly plan, cash, dated bills and chosen cushion (device only)",
-   "خطة الشهر والرصيد والفواتير المؤرخة والاحتياطي المسجل على الجهاز",
-   "/explore/weekend","See an outing plan and real places","شوف خطة طلعة وأماكن حقيقية");
- }
  if(intent==="priorities"){
-  const next=nextConnectedFamilyAction(ctx);
-  return answer(intent,next.titleEn,next.titleAr,next.detailEn,next.detailAr,
-   next.sourceEn,next.sourceAr,next.route,next.actionEn,next.actionAr);
+  const brief=buildTodayActionPolicy({money:m,members:ctx.members,moments:ctx.moments,
+   plans:family.plans,preferences:ctx.preferences,now});
+  const action=brief.action;
+  if(action)return answer(intent,action.titleEn,action.titleAr,action.detailEn,action.detailAr,
+   action.whyEn,action.whyAr,action.route,action.actionEn,action.actionAr);
+  return answer(intent,"No urgent family action in your saved records","ما في خطوة عاجلة بحسب سجلات العيلة",
+   "Review Money or add a meaningful family plan when needed; Dabberna will not invent deadlines.",
+   "راجع المال أو أضف خطة مهمة عند الحاجة؛ دبّرنا لن يخترع مواعيد.",
+   "Existing family facts and payments","السجلات العائلية والمدفوعات المحفوظة",
+   "/plans","Review plans","راجع الخطط");
  }
  if(intent==="safety"){
   const reality=assessFinancialReality(m,family.plans,now);
@@ -209,52 +200,26 @@ export function answerFamilyQuestion(question:string,ctx:AdvisorContext):GuidedA
    "My Family: local task dates and status","عائلتي: تواريخ وحالة المهام","/space","Review tasks","راجع المهام");
  }
  if(intent==="gifts"){
-  const wishlist=(ctx.wishlist??[]).filter(x=>x.kind==="gift"&&x.status==="considering");
-  if(!wishlist.length)return answer(intent,"Start a thoughtful gift list","أنشئ قائمة هدايا للعائلة",
-   "No unpurchased gift is recorded yet. Save a gift idea and target date, then check prices yourself.",
-   "ما في هدايا مخططة مسجلة. احفظ فكرة وموعدها، وقارن الأسعار بنفسك.",
-   "Gifts: saved private wishlist","الهدايا: القائمة الخاصة","/occasions","Open gifts","افتح الهدايا");
-  const next=nextWishlistReminder(wishlist,now);
-  const gift=next?.item??[...wishlist].sort((a,b)=>(a.targetDate??"9999").localeCompare(b.targetDate??"9999"))[0]!;
-  const latest=summarizeWishlistPrice(gift).latest;
-  return answer(intent,"Review an upcoming gift before spending","راجع الهدية قبل الشراء",
-   gift.name+(gift.targetDate?" · needed by "+gift.targetDate:" · no deadline recorded")+
-   ". "+(latest?"Your last recorded price is "+latest.amountJod.toFixed(2)+" JOD; verify it again with the retailer.":"You have not entered a checked price.")+
-   " Marking a gift purchased does not create a payment.",
-   gift.name+(gift.targetDate?" · مطلوبة قبل "+gift.targetDate:" · بلا موعد مسجل")+
-   ". "+(latest?"آخر سعر سجلته "+latest.amountJod.toFixed(2)+" د.أ؛ تأكد منه مع المحل.":"لم تدخل سعراً بعد.")+
-   " اعتبار الهدية مشتراة لا ينشئ عملية دفع.",
-   "Gifts: private wishlist and user-checked prices","الهدايا: قائمة خاصة وأسعار أدخلتها","/occasions","Review gift ideas","راجع أفكار الهدايا");
+  const candidates=family.plans.filter(p=>p.kind==="occasion"&&p.status!=="completed"&&
+   p.occasionPreparation?.gift&&p.occasionPreparation.gift.amountJod>0)
+   .sort((a,b)=>(a.date??"9999").localeCompare(b.date??"9999"));
+  const next=candidates[0];
+  if(!next)return answer(intent,"No planned gift recorded","ما في هدية مخططة مسجلة",
+   "When you plan a birthday or occasion, record its gift once in that same family plan.",
+   "عند تخطيط عيد ميلاد أو مناسبة، سجل الهدية مرة واحدة ضمن نفس خطة العيلة.",
+   "Family Calendar and linked Plans","تقويم العيلة والخطط المرتبطة",
+   "/occasions","Review occasions","راجع المناسبات");
+  const gift=next.occasionPreparation!.gift;
+  return answer(intent,"Your next planned family gift","الهدية العائلية القادمة",
+   next.title+" · "+(gift.description||"Gift")+" · "+gift.amountJod.toFixed(2)+" JOD. "+
+   "This is a plan, not a paid expense; check its chosen deadline and real price.",
+   next.title+" · "+(gift.description||"هدية")+" · "+gift.amountJod.toFixed(2)+" د.أ. "+
+   "هذه خطة وليست مصروفاً مدفوعاً؛ راجع موعدها وسعرها الفعلي.",
+   "One linked Family Plan; actual payments live in Money","خطة عائلية واحدة؛ المدفوعات الفعلية في المال",
+   "/plans","Review gift plan","راجع خطة الهدية");
  }
- if(intent==="outings"){
-  const guidance=personalOutingAdvice(ctx);
-  return answer(intent,guidance.titleEn,guidance.titleAr,guidance.detailEn,
-   guidance.detailAr,guidance.sourceEn,guidance.sourceAr,guidance.route,
-   guidance.actionEn,guidance.actionAr);
- }
- if(intent==="services"){
-  const saved=ctx.services??[];
-  if(!saved.length)return answer(intent,"Compare providers with independent evidence","قارن الخدمات بأدلة واضحة",
-   "No provider is on your private list. Search independently, check official credentials and service terms, then record source links and costs. Dabberna cannot verify providers or diagnose conditions.",
-   "ما في مزود خدمة محفوظ. ابحث وتأكد من التراخيص والشروط من مصادر رسمية ثم سجل الروابط والأسعار. دبّرنا لا يتحقق من الجهات ولا يشخّص الأمراض.",
-   "Family Services: private comparison checklist","خدمات العائلة: قائمة مقارنة خاصة","/explore/services","Review service options","راجع خيارات الخدمات");
-  const incomplete=saved.filter(x=>x.category==="doctor"&&!x.credentialsConfirmedByParent).length;
-  return answer(intent,"Review your own provider comparisons","راجع مقارنات الخدمات الخاصة",
-   saved.length+" providers saved in your private list. "+
-   (incomplete?incomplete+" clinician entries still lack your credentials check. ":"")+
-   "These are personal notes, not verified provider reviews, licensing records or availability.",
-   saved.length+" مزودي خدمات محفوظين في قائمتك. "+
-   (incomplete?incomplete+" سجلات لأطباء تحتاج لتدقيق المؤهلات من جانبك. ":"")+
-   "هذه ملاحظات شخصية وليست مراجعات موثقة أو تأكيداً على الترخيص أو التوفر.",
-   "Family Services: entered provider notes","خدمات العائلة: ملاحظاتك المسجلة","/explore/services","Review providers","راجع الجهات");
- }
- if(intent==="shopping")
-  return answer(intent,"First find the actual product and seller","أول شي فتّش على المنتج والبائع",
-   "Search current public listings from Jordanian retailers using the product name or exact model. Check actual prices, size, delivery and stock on seller pages. Dabberna's in-app live price feed is not connected yet; manual comparison is optional afterward.",
-   "فتّش بالمنتج أو الموديل على مواقع متاجر أردنية حقيقية. تأكد من السعر والحجم والتوصيل والتوفر من موقع البائع. عرض الأسعار مباشرة داخل دبّرنا ليس متصلاً بعد، والمقارنة اليدوية اختيارية.",
-   "External Jordan retailer product listings (not live in-app prices)","صفحات منتجات المتاجر الأردنية الخارجية، بلا أسعار مباشرة داخل التطبيق","/explore/market","Find seller listings","ابحث عن عروض المتاجر");
  return answer("unsupported","Here are the questions I can answer safely","هذه الأسئلة التي يمكنني الإجابة عليها",
-  "I can review cash risks, bills, tasks, gifts, local service notes, outings and shopping. I cannot verify providers, diagnose conditions, access bank accounts or hold a free-form AI conversation in this pilot.",
-  "بقدر أساعدك بمراجعة الرصيد والفواتير والادخار والمناسبات والخطط والشراء. ما بقدر أتحقق من الحسابات البنكية أو أشخّص مشاكل صحية أو أقدّم محادثة ذكاء اصطناعي حرّة بهالنسخة.",
+  "I can review recorded cash risks, bills, tasks, family plans and occasion gifts. Shopping, venue discovery and circles are not active. I cannot verify providers, access bank accounts or hold a free-form AI conversation in this pilot.",
+  "بقدر أساعدك بمراجعة الرصيد والفواتير والادخار والمناسبات والخطط. ما بقدر أتحقق من الحسابات البنكية أو أشخّص مشاكل صحية أو أقدّم محادثة ذكاء اصطناعي حرّة بهالنسخة.",
   "Device-only guided rules · no external AI","إرشادات محلية فقط دون ذكاء اصطناعي خارجي","/plans","See your plans","افتح الخطط");
 }

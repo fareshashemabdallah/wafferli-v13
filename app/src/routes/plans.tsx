@@ -219,11 +219,11 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
     {currentPlan.kind==="occasion"&&<OccasionPreparationSection planId={currentPlan.id}/>}
     {currentPlan.status!=="completed"&&<>
       <div className="mt-5 rounded-xl bg-[#F4F7F0] p-4">
-       <h3 className="font-semibold">{ar?"الخطوة التالية: قارن الخيارات":"Next step: compare suitable options"}</h3>
-       <p className="mt-1 text-xs text-muted-foreground">{ar?"بعد مقارنة أرقام الخطة بالميزانية أعلاه، افتح الخيارات المتاحة وقارن كلفتها قبل اتخاذ القرار.":"After checking the figures above, compare real options by cost and suitability before choosing."}</p>
+       <h3 className="font-semibold">{ar?"الخطوة التالية: راجع خطتك":"Next step: review your plan"}</h3>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?"راجع التكاليف والتوقيت. يمكنك حفظ خيارك داخل هذه الخطة من دون فتح أداة تسوق ثانية.":"Review costs and timing. You can save your choice in this plan without opening another shopping tool."}</p>
        <div className="mt-3 flex flex-wrap gap-2">
-        <Link to={currentPlan.kind==="purchase"?"/explore/market":currentPlan.kind==="outing"?"/explore/weekend":currentPlan.kind==="occasion"?"/occasions":"/advisor"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
-         <Compass className="size-4"/>{ar?"استكشف الخيارات":"Explore options"}
+        <Link to={currentPlan.kind==="occasion"?"/occasions":"/advisor"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
+         <Compass className="size-4"/>{ar?"تابع خطتك":"Continue plan"}
         </Link>
        </div>
       </div>
@@ -234,7 +234,7 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
        <div className="mt-4">
        <p className="text-sm font-semibold">{ar?"الاختيار الذي تفضّله":"Your preferred option"}</p>
        {currentPlan.choice&&<p className="mt-2 rounded-xl bg-[#EAF1E8] p-3 text-sm">{currentPlan.choice.label}{currentPlan.choice.estimatedJod!==undefined&&" · "+fmtJOD(currentPlan.choice.estimatedJod)}</p>}
-       <p className="mt-2 text-xs text-muted-foreground">{ar?"يمكنك حفظ خيار يدوي، أو اختياره من صفحة مقارنة المشتريات.":"Save a choice here, or select an option from Compare & Choose."}</p>
+       <p className="mt-2 text-xs text-muted-foreground">{ar?"احفظ اختيارك هنا في نفس الخطة.":"Save your choice here in this same plan."}</p>
        <Input maxLength={120} className="mt-2" value={chosen} onChange={e=>setChosen(e.target.value)} placeholder={ar?"اسم الخيار أو المكان":"Option or venue name"}/>
        <Input className="mt-2 max-w-48" type="number" inputMode="decimal" step=".01" min={0} max={100000} value={price} onChange={e=>setPrice(e.target.value)} placeholder={ar?"سعر تقريبي (اختياري)":"Estimated cost (optional)"}/>
        <Button variant="outline" className="mt-3" onClick={decide} disabled={!chosen.trim()}>{ar?"احفظ اختياري":"Save my choice"}</Button>

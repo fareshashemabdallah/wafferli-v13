@@ -137,12 +137,10 @@ export function FamilyLifePage(){
     </section>
     <details className={card}>
      <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 text-sm font-semibold text-[#58667A]">
-      <MapPinned className="size-5 text-[#B66B92]"/>{label("More family experiences","أنشطة عائلية إضافية")}
+      <MapPinned className="size-5 text-[#B66B92]"/>{label("Family celebrations","مناسبات العائلة")}
      </summary>
      <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
-      <Link to="/explore/weekend" className="rounded-xl bg-[#FCECF2] px-4 py-3 text-[#965477]">{label("Outings","الطلعات")}</Link>
       <Link to="/occasions" className="rounded-xl bg-[#FCECF2] px-4 py-3 text-[#965477]">{label("Celebrations","المناسبات")}</Link>
-      <Link to="/community" className="rounded-xl bg-[#FCECF2] px-4 py-3 text-[#965477]">{label("Family & Friends Circles","دوائر العائلة والأصحاب")}</Link>
      </div>
     </details>
    </div>}
