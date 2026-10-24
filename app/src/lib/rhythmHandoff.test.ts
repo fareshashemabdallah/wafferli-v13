@@ -2,7 +2,7 @@ import {beforeEach,afterEach,describe,expect,it} from "vitest";
 import {CALENDAR_FOCUS_SESSION_KEY,rememberCalendarDate,takeCalendarDate,focusSavedPlan} from "./rhythmHandoff";
 import {attachVenueToOuting} from "./familyPlanContinuity";
 import {makeFamilyPlan} from "./familyPlans";
-import {buildFamilyMoneyJourney} from "./familyMoneyJourney";
+import {buildTodayActionPolicy} from "./todayActionPolicy";
 import {defaultFamilyPreferences} from "./familyPreferences";
 import {sampleMembers,sampleMoney} from "./money";
 const now=new Date(2026,9,19,12);
@@ -49,15 +49,16 @@ describe("one meaningful click, one existing family record",()=>{
   expect(merged.note).toContain("Prepare snacks");
   expect(merged.choice?.estimatedJod).toBeUndefined();
  });
- it("the journey carries exact plan focus to Plans and date focus to Calendar",()=>{
+ it("the current Today journey uses one plan identifier and one occasion reference",()=>{
   const plan=makeFamilyPlan({id:"outing-88",title:"Family park",date:"2026-10-22",kind:"outing"},now)!;
-  const before=buildFamilyMoneyJourney({money:sampleMoney(),members:sampleMembers(),moments:[],
+  const before=buildTodayActionPolicy({money:sampleMoney(),members:sampleMembers(),moments:[],
    plans:[plan],preferences:{...defaultFamilyPreferences,lifestyle:true},now});
-  expect(before.next).toMatchObject({route:"/plans",planId:"outing-88"});
-  expect(before.nextMilestones[0]).toMatchObject({kind:"plan",planId:"outing-88"});
-  const after=buildFamilyMoneyJourney({money:sampleMoney(),members:sampleMembers(),plans:[],
+  expect(before.action).toMatchObject({kind:"plan",route:"/plans",planId:"outing-88"});
+  expect(before.week).toEqual(expect.arrayContaining([expect.objectContaining({type:"plan",planId:"outing-88"})]));
+  const after=buildTodayActionPolicy({money:sampleMoney(),members:sampleMembers(),plans:[],
    moments:[{id:"event",title:"School play",date:"2026-10-22",kind:"school",annual:false}],
    preferences:{...defaultFamilyPreferences,lifestyle:true},now});
-  expect(after.next).toMatchObject({route:"/calendar",focusDate:"2026-10-22"});
+  expect(after.action).toMatchObject({kind:"occasion",route:"/occasions",occasionKey:"event@2026"});
+  expect(after.week).toEqual(expect.arrayContaining([expect.objectContaining({type:"moment",occasionKey:"event@2026"})]));
  });
 });
