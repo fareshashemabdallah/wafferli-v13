@@ -86,11 +86,11 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
   expect(localStorage.getItem("wafferli.v13.familyPlans")).toBe(JSON.stringify([stale]));
   expect(localStorage.getItem("wafferli.v13.familyCalendar")).toBeNull();
  });
- it("keeps specialist family experiences available but not as extra global tabs",()=>{
+ it("retains linked celebration planning without exposing retired outings or circles",()=>{
   draw();
   fireEvent.click(screen.getByText("More family experiences"));
-  expect(screen.getByRole("link",{name:"Outings"})).toHaveAttribute("href","/explore/weekend");
   expect(screen.getByRole("link",{name:"Celebrations"})).toHaveAttribute("href","/occasions");
-  expect(screen.getByRole("link",{name:"Family & Friends Circles"})).toHaveAttribute("href","/community");
+  expect(screen.queryByRole("link",{name:"Outings"})).not.toBeInTheDocument();
+  expect(screen.queryByRole("link",{name:"Family & Friends Circles"})).not.toBeInTheDocument();
  });
 });
