@@ -222,7 +222,7 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
        <h3 className="font-semibold">{ar?"الخطوة التالية: قارن الخيارات":"Next step: compare suitable options"}</h3>
        <p className="mt-1 text-xs text-muted-foreground">{ar?"بعد مقارنة أرقام الخطة بالميزانية أعلاه، افتح الخيارات المتاحة وقارن كلفتها قبل اتخاذ القرار.":"After checking the figures above, compare real options by cost and suitability before choosing."}</p>
        <div className="mt-3 flex flex-wrap gap-2">
-        <Link to={currentPlan.kind==="purchase"?"/explore/market":currentPlan.kind==="outing"?"/explore/weekend":currentPlan.kind==="occasion"?"/occasions":"/advisor"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
+        <Link to={currentPlan.kind==="occasion"?"/occasions":"/advisor"} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
          <Compass className="size-4"/>{ar?"استكشف الخيارات":"Explore options"}
         </Link>
        </div>
