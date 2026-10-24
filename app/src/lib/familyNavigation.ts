@@ -14,12 +14,7 @@ export function areaFromRoute(path:string):FamilyArea{
  if(path.startsWith("/advisor"))return "today";
  if(path.startsWith("/family")||path.startsWith("/plans")||
   path.startsWith("/calendar")||path.startsWith("/occasions")||
-  path.startsWith("/space")||path.startsWith("/explore/together")||
-  path.startsWith("/together/")||path.startsWith("/explore/weekend")||
-  path.startsWith("/community")||path.startsWith("/experience")||
-  path.startsWith("/vote/"))return "family";
- // Shopping is preserved as an optional specialist tool, not a main tab.
- if(path.startsWith("/explore"))return "today";
+  path.startsWith("/space"))return "family";
  return "today";
 }
 export function currentRoutePath(){
