@@ -15,19 +15,6 @@ export function rhythmChapter(path:string){
  if(path==="/space"||path.startsWith("/household"))return {en:"Know our family",ar:"تعرّف على عيلتنا",
   sentenceEn:"Add only details that improve guidance. Profiles and birthdays are optional; manage them once here.",
   sentenceAr:"ضيف بس المعلومات المفيدة للنصيحة؛ الملفات وأعياد الميلاد اختيارية ومن مكان واحد."};
- if(path.startsWith("/explore/weekend")||path.startsWith("/explore/restaurants")||path.startsWith("/explore/services"))
-  return {en:"Discover",ar:"اكتشف",sentenceEn:"Explore first, check suitability and sources, then choose whether to attach a place to a plan.",
-   sentenceAr:"استكشف أولاً، تحقّق من المناسبة والمصادر، وبعدها اختَر إذا بدك تربط المكان بخطة."};
- if(path.startsWith("/explore/shopping"))return {en:"Record",ar:"سجّل",
-  sentenceEn:"A shopping list is not a paid expense. Record the actual cost only when you confirm.",
-  sentenceAr:"قائمة المشتريات مش مصروف مدفوع؛ سجّل التكلفة الفعلية بس وقت تأكّد."};
- if(path.startsWith("/explore"))return {en:"Compare",ar:"قارن",
-  sentenceEn:"Look at relevant alternatives and independently verify seller prices before choosing.",
-  sentenceAr:"قارن البدائل وتأكد من أسعار المتاجر من مصدرها قبل ما تختار."};
- if(path.startsWith("/explore/together")||path.startsWith("/community")||path.startsWith("/experience")||path.startsWith("/together/")||path.startsWith("/vote/"))
-  return {en:"Share carefully",ar:"شارك بخصوصية",
-   sentenceEn:"Share only the choices and details you approve—not private family finances.",
-   sentenceAr:"شارك بس الخيارات والتفاصيل اللي بتوافق عليها، مش مالية العيلة الخاصة."};
  if(path==="/about")return {en:"Trust",ar:"الثقة",
   sentenceEn:"Understand what Dabberna can verify, what remains optional and who controls your information.",
   sentenceAr:"اعرف شو دبّرنا بتقدر تتأكد منه، وشو اختياري، وكيف تتحكّم بمعلوماتك."};
