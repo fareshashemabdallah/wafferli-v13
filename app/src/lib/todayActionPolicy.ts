@@ -2,9 +2,9 @@ import {assessFinancialReality} from "./financialReality";
 import {getMoneyOverview} from "./moneyOverview";
 import {buildFamilyMoneyRhythm} from "./familyMoneyRhythm";
 import {confirmedAdjustmentsInWindow} from "./monthAwareMoney";
-import {allFamilyMoments,dateKey,shiftDays,upcomingMoments,type FamilyMoment} from "./familyCalendar";
-import {realFamilyMembers} from "./familySetup";
+import {dateKey,shiftDays,upcomingMoments,type FamilyMoment} from "./familyCalendar";
 import {planKey} from "./occasionAdvisor";
+import {canonicalFamilyReadModel,occasionSourceRef} from "./canonicalFamilyFacts";
 import type {MoneyState,Member} from "./money";
 import type {FamilyPlan} from "./familyPlans";
 import type {FamilyPreferences} from "./familyPreferences";
@@ -42,14 +42,16 @@ export function buildTodayActionPolicy(input:{
  plans:readonly FamilyPlan[];preferences:FamilyPreferences;now?:Date;
 }):TodayBrief{
  const now=input.now??new Date(),today=dateKey(now);
- const {money,plans,preferences}=input;
+ const {money,preferences}=input;
+ const family=canonicalFamilyReadModel(input.plans,input.moments,input.members);
+ const {plans}=family;
  const overview=getMoneyOverview(money,now,plans);
  const reality=assessFinancialReality(money,plans,now);
  const bills=money.demo?[]:overview.forecast.events
   .filter(e=>e.kind==="bill"&&e.displayDate<=dateKey(shiftDays(now,14)))
   .sort((a,b)=>a.displayDate.localeCompare(b.displayDate));
  const moments=preferences.lifestyle?upcomingMoments(
-  allFamilyMoments([...input.moments],realFamilyMembers(input.members)),now,22):[];
+  family.moments,now,22):[];
  const upcomingPlans=plans.filter(p=>p.status!=="completed"&&p.date&&
   p.date>=today&&p.date<=dateKey(shiftDays(now,21)))
   .slice().sort((a,b)=>a.date!.localeCompare(b.date!));
@@ -119,7 +121,7 @@ export function buildTodayActionPolicy(input:{
  }
  for(const moment of moments){
   const key=planKey(moment);
-  const plan=plans.find(p=>p.sourceRef==="occasion:"+key);
+  const plan=plans.find(p=>p.sourceRef===occasionSourceRef(moment.id,moment.occursOn.slice(0,4)));
   if(plan?.status==="completed")continue;
   const gift=plan?.occasionPreparation?.gift;
   const paid=!!plan&&money.expenses.some(e=>e.status!=="planned"&&
