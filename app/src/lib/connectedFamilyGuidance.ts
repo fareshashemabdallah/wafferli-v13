@@ -1,4 +1,5 @@
-import {allFamilyMoments,dateKey,upcomingMoments} from "./familyCalendar";
+import {dateKey,upcomingMoments} from "./familyCalendar";
+import {canonicalFamilyReadModel,occasionSourceRef} from "./canonicalFamilyFacts";
 import {realFamilyMembers} from "./familySetup";
 import {planKey} from "./occasionAdvisor";
 import {compareOutingOptions,type OutingOption,type OutingConstraints} from "./childAwareOutingCompare";
@@ -32,6 +33,7 @@ const inNext=(date:string,now:Date,days:number)=>{
  */
 export function nextConnectedFamilyAction(ctx:ConnectedContext):ConnectedAdvice{
  const now=ctx.now??new Date(),prefs=ctx.preferences;
+ const family=canonicalFamilyReadModel(ctx.plans,ctx.moments,ctx.members);
  if(!prefs.lifestyle&&!prefs.shoppingTips)
   return {
    titleEn:"Choose what you'd like help with",titleAr:"حدّد كيف بتحب نساعد عيلتك",
@@ -40,20 +42,19 @@ export function nextConnectedFamilyAction(ctx:ConnectedContext):ConnectedAdvice{
    sourceEn:"Your device-only family preferences",sourceAr:"تفضيلات العائلة على جهازك",
    route:"/space",actionEn:"Review preferences",actionAr:"راجع التفضيلات"
   };
- const plans=prefs.lifestyle?ctx.plans.filter(x=>x.status!=="completed"&&x.date&&inNext(x.date,now,30))
+ const plans=prefs.lifestyle?family.plans.filter(x=>x.status!=="completed"&&x.date&&inNext(x.date,now,30))
   .slice().sort((a,b)=>a.date!.localeCompare(b.date!)):[];
- const soonEvents=prefs.lifestyle?upcomingMoments(allFamilyMoments(
-  [...ctx.moments],realFamilyMembers(ctx.members)),now,31):[];
+ const soonEvents=prefs.lifestyle?upcomingMoments(family.moments,now,31):[];
  const earliestPlan=plans[0],earliestEvent=soonEvents[0];
  // Avoid presenting the event and its linked Plan as different household jobs.
- const eventHasPlan=earliestEvent&&earliestPlan?.sourceRef==="occasion:"+planKey(earliestEvent);
+ const eventHasPlan=earliestEvent&&earliestPlan?.sourceRef===occasionSourceRef(earliestEvent.id,earliestEvent.occursOn.slice(0,4));
  const usePlan=!!earliestPlan&&(
   !earliestEvent||earliestPlan.date!<=earliestEvent.occursOn||!!eventHasPlan
  );
  if(usePlan&&earliestPlan){
   const cost=earliestPlan.choice?.estimatedJod??earliestPlan.budgetJod;
   const assessment=prefs.financeTips&&typeof cost==="number"&&cost>0?
-   assessImmediateSpending(ctx.money,cost,now,ctx.plans.filter(p=>p.id!==earliestPlan.id)):null;
+   assessImmediateSpending(ctx.money,cost,now,family.plans.filter(p=>p.id!==earliestPlan.id)):null;
   const en=assessment?.outcome==="review"?
    " Your recorded bills/cash may be pressured; review Money before committing.":
    assessment?.outcome==="unknown"?
@@ -83,7 +84,7 @@ export function nextConnectedFamilyAction(ctx:ConnectedContext):ConnectedAdvice{
   };
  }
  if(earliestEvent){
-  const hasLinked=ctx.plans.some(p=>p.sourceRef==="occasion:"+planKey(earliestEvent));
+  const hasLinked=family.plans.some(p=>p.sourceRef===occasionSourceRef(earliestEvent.id,earliestEvent.occursOn.slice(0,4)));
   return {
    titleEn:"Prepare for your next family occasion",titleAr:"حضّر للمناسبة العائلية القادمة",
    detailEn:earliestEvent.title+" is recorded for "+earliestEvent.occursOn+
