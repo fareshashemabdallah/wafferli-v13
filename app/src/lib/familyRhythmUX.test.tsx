@@ -20,8 +20,8 @@ describe("Dabberna one rhythm across pages",()=>{
   expect(familyDestinations.map(x=>x.to)).toEqual(["/","/money","/family"]);
   expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Family"]);
  });
- it("gives Money, Decide, Calendar and shopping the same compact title treatment",()=>{
-  for(const route of ["/money","/advisor","/calendar","/explore/smartbuy"]){
+ it("gives Money, Decide, Calendar and About the same compact title treatment",()=>{
+  for(const route of ["/money","/advisor","/calendar","/about"]){
    const {unmount}=render(<I18nProvider><RhythmPageHeader path={route} title="Chapter title"/></I18nProvider>);
    expect(screen.getByRole("heading",{name:"Chapter title",level:1})).toBeInTheDocument();
    expect(screen.getByRole("link",{name:"Today's story"})).toHaveAttribute("href","/");
