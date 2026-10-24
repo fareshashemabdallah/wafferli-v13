@@ -4,10 +4,7 @@ import { resolve } from "node:path";
 import { arabicUI, arabicDictionaryKeys } from "./arabic";
 
 const components=[
-  "routes/about.tsx","routes/explore.index.tsx","routes/explore.restaurants.tsx",
-  "routes/explore.shopping.tsx","routes/explore.smartbuy.tsx",
-  "routes/explore.together.tsx","routes/index.tsx","routes/money.tsx",
-  "routes/space.tsx","routes/together.$adminToken.tsx","routes/vote.$token.tsx",
+  "routes/about.tsx","routes/index.tsx","routes/money.tsx","routes/space.tsx",
   "components/CashFlowPlanner.tsx","components/Tally.tsx",
 ];
 
