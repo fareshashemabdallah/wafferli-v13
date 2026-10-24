@@ -6,7 +6,7 @@ import {useI18n} from "@/lib/i18n";
 
 type Chapter={
  place:AdventurePlace;eyebrowEn:string;eyebrowAr:string;introEn:string;introAr:string;
- fallbackEn:string;fallbackAr:string;next?:{to:"/money"|"/plans"|"/calendar"|"/explore/smartbuy"|"/explore/weekend"|"/explore/shopping"|"/advisor"|"/family"|"/space";en:string;ar:string};
+ fallbackEn:string;fallbackAr:string;next?:{to:"/money"|"/plans"|"/calendar"|"/advisor"|"/family"|"/space";en:string;ar:string};
 };
 /** The same world-and-robot design across ALL native pages. Context is
  * descriptive only: never fabricates financial progress, merchant prices
@@ -17,7 +17,7 @@ export function adventureChapter(path:string):Chapter{
   fallbackEn:"Ask Dabberna",fallbackAr:"اسأل دبّرنا",next:{to:"/money",en:"Explore your money",ar:"اكتشف مال العيلة"}};
  if(path==="/family")return {place:"park",eyebrowEn:"FAMILY ADVENTURES",eyebrowAr:"مغامرات العيلة",
   introEn:"Choose a path: moments, plans or family responsibilities.",introAr:"اختَر طريقك: مناسبات وخطط ومسؤوليات العيلة.",
-  fallbackEn:"Family Life",fallbackAr:"حياة العيلة",next:{to:"/explore/weekend",en:"Find an outing",ar:"اكتشف طلعة"}};
+  fallbackEn:"Family Life",fallbackAr:"حياة العيلة",next:{to:"/plans",en:"Family plans",ar:"خطط العيلة"}};
  if(path==="/calendar")return {place:"moments",eyebrowEn:"FAMILY MOMENTS",eyebrowAr:"لحظات العيلة",
   introEn:"Discover your next special date and prepare together.",introAr:"اكتشف المناسبة الجاية وجهّزولها سوا.",
   fallbackEn:"Family Calendar",fallbackAr:"تقويم العيلة",next:{to:"/plans",en:"Our plans",ar:"خططنا"}};
@@ -33,18 +33,6 @@ export function adventureChapter(path:string):Chapter{
  if(path==="/household")return {place:"home",eyebrowEn:"FAMILY PRIVACY",eyebrowAr:"خصوصية العيلة",
   introEn:"Manage who belongs to your private household safely.",introAr:"حدّد أفراد البيت وخصوصيتهم بأمان.",
   fallbackEn:"Household accounts",fallbackAr:"حسابات العيلة",next:{to:"/space",en:"Family settings",ar:"إعدادات العيلة"}};
- if(path.startsWith("/explore/weekend")||path.startsWith("/explore/together")||path.startsWith("/explore/restaurants"))
- return {place:"park",eyebrowEn:"OUTING ADVENTURE",eyebrowAr:"مغامرة الطلعة",
-  introEn:"Find a family-friendly option and check what it really costs.",introAr:"اكتشف طلعة مناسبة للعيلة وافهم تكلفتها.",
-  fallbackEn:"Outings & Places",fallbackAr:"الطلعات والأماكن",next:{to:"/plans",en:"Plan an outing",ar:"خطّط لطلعة"}};
- if(path.startsWith("/explore")||path.startsWith("/shopping"))
- return {place:"market",eyebrowEn:"THE FAMILY MARKET",eyebrowAr:"سوق العيلة",
-  introEn:"Explore what you need, compare choices, and shop wisely.",introAr:"اكتشف حاجات البيت، قارن الخيارات، وتسوّق بذكاء.",
-  fallbackEn:"Smart Shopping",fallbackAr:"تسوّق بذكاء",next:{to:"/explore/shopping",en:"Our basket",ar:"سلّتنا"}};
- if(path==="/community"||path==="/experience")
- return {place:"park",eyebrowEn:"FAMILY & FRIENDS",eyebrowAr:"العيلة والأصحاب",
-  introEn:"Share ideas and experiences at your own pace.",introAr:"شاركوا الأفكار والتجارب على راحتكم.",
-  fallbackEn:"Family & Friends",fallbackAr:"العيلة والأصحاب",next:{to:"/family",en:"Family adventures",ar:"حياة العيلة"}};
  if(path==="/about")return {place:"home",eyebrowEn:"YOUR WORLD, YOUR RULES",eyebrowAr:"عالمك، قرارك",
   introEn:"Explore how Dabberna works and keeps your choices private.",introAr:"اكتشف كيف دبّرنا بيساعدك وبيحترم خصوصيتك.",
   fallbackEn:"About Dabberna",fallbackAr:"عن دبّرنا",next:{to:"/space",en:"Family settings",ar:"إعدادات العيلة"}};
