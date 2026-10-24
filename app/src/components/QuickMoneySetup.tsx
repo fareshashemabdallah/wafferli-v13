@@ -101,7 +101,7 @@ export function QuickMoneySetup({money,setMoney,compact=false}:Props){
   <p className="mt-3 flex gap-2 text-xs leading-relaxed text-muted-foreground"><LockKeyhole className="mt-0.5 size-4 shrink-0"/>
    {tr("Private in this browser. No bank connection. One entered figure cannot prove that your family can afford a new commitment.",
     "محفوظة بهالمتصفح، بلا ربط بنك. رقم واحد ما بيكفي للتأكد أن العيلة قادرة على التزام جديد.")}</p>
-  <Link to="/explore/weekend" className="mt-2 inline-flex min-h-10 items-center text-xs font-semibold text-brand underline">
+  <Link to="/plans" className="mt-2 inline-flex min-h-10 items-center text-xs font-semibold text-brand underline">
    {tr("Explore without entering more numbers","استكشف بدون إدخال أرقام إضافية")}</Link>
  </section>;
 }
