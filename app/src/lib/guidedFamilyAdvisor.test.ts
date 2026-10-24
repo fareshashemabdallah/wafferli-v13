@@ -67,7 +67,7 @@ describe("family question advisor",()=>{
   const a=answerFamilyQuestion("How can we buy more wisely?",args());
   expect(a.textEn).toContain("Search current public listings");
   expect(a.textEn).toContain("not connected yet");
-  expect(a.route).toBe("/explore/market");
+  expect(a.route).toBe("/plans");
  });
 
  it("answers actual due family responsibilities without inventing sent assignments",()=>{
@@ -94,7 +94,7 @@ describe("family question advisor",()=>{
   expect(a.intent).toBe("outings");
   expect(a.textEn).toContain("1 venues saved");
   expect(a.textEn).toContain("not verified");
-  expect(a.route).toBe("/explore/together");
+  expect(a.route).toBe("/plans");
  });
  it("guides parent to independent provider verification, not doctor ranking",()=>{
   const svc=makeServiceEntry({id:"doc",category:"doctor",name:"Clinic Test",city:"Amman",
@@ -103,7 +103,7 @@ describe("family question advisor",()=>{
   expect(a.intent).toBe("services");
   expect(a.textEn).toContain("credentials check");
   expect(a.textEn).toContain("not verified");
-  expect(a.route).toBe("/explore/services");
+  expect(a.route).toBe("/family");
  });
  it("clearly discloses unsupported open questions and no connected AI",()=>{
   const a=answerFamilyQuestion("Can you guarantee the stock market will rise",args());
