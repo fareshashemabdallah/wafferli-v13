@@ -33,7 +33,7 @@ describe("Today: one contextual next action",()=>{
   const money=emptyRealMoney();
   const b=buildTodayActionPolicy(data(money,[gift]));
   expect(b.action).toMatchObject({
-   kind:"gift",route:"/explore/smartbuy",planId:"occasion1",
+   kind:"gift",route:"/plans",planId:"occasion1",
    occasionKey:"sophia-bday@2026",giftEstimateJod:70,sellerCount:0
   });
   expect(money.expenses).toHaveLength(0);
