@@ -50,7 +50,7 @@ describe("Calm contextual Today redesign",()=>{
   expect(action).toHaveTextContent("Birthday from calendar");
   expect(action).toHaveTextContent("Planned gift: 70 JOD");
   const continueLink=screen.getByRole("link",{name:/Compare gift options/});
-  expect(continueLink).toHaveAttribute("href","/explore/smartbuy");
+  expect(continueLink).toHaveAttribute("href","/plans");
   fireEvent.click(continueLink);
   expect(JSON.parse(localStorage.getItem("wafferli.v13.activeFamilyPlanId")??"null")).toBe("plan1");
   expect(localStorage.getItem("wafferli.v13.money")).toContain('"expenses":[]');

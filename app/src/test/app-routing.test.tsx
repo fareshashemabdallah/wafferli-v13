@@ -1,4 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
 import { createRouter, rootRouteId } from "@tanstack/react-router";
 import { describe, expect, it } from "vitest";
 
@@ -14,4 +16,17 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
+ it("publishes only finalized family and information routes, not retired commerce or social prototypes",()=>{
+  const content=readFileSync(resolve(process.cwd(),"src/routeTree.gen.ts"),"utf8");
+  for(const route of ["/","/advisor","/family","/money","/calendar","/plans","/occasions","/about"]){
+   expect(content).toContain("fullPath: '"+route+"'");
+  }
+  for(const route of ["/explore/","/explore/shopping","/explore/smartbuy",
+   "/explore/market","/explore/weekend","/explore/together",
+   "/explore/restaurants","/explore/services","/community","/experience",
+   "/vote/$token","/together/$adminToken"]){
+   expect(content).not.toContain("fullPath: '"+route+"'");
+  }
+ });
+
 });

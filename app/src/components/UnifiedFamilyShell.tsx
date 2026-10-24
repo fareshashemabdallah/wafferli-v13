@@ -10,14 +10,8 @@ import "./adventureWorldSkin.css";
 import {LocalSaveNotice} from "./LocalSaveNotice";
 
 // Exactly three primary destinations; Ask remains persistent and contextual.
-// Shopping and specialist tools remain accessible under one optional menu.
-// Page-specific links are reserved for tasks that actually need the next tool.
+// Only essential information remains in this menu; unfinished discovery tools are retired.
 const tools=[
- {to:"/explore/smartbuy" as const,en:"Shopping & Wishlist",ar:"المشتريات والرغبات"},
- {to:"/explore/weekend" as const,en:"Outings & places",ar:"الطلعات والأماكن"},
- {to:"/explore/market" as const,en:"Find products",ar:"البحث عن المنتجات"},
- {to:"/explore/shopping" as const,en:"Shopping basket",ar:"سلّة المشتريات"},
- {to:"/community" as const,en:"Family & Friends Circles",ar:"دوائر العائلة والأصحاب"},
  {to:"/about" as const,en:"About & privacy",ar:"حول دبّرنا والخصوصية"}
 ];
 export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=false}:{
@@ -27,7 +21,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
  const location=currentRoutePath();
  const area:FamilyArea=homeLayout?"today":areaFromRoute(location);
  // Shopping is an optional contextual tool, not a primary area.
- const secondaryShopping=shopping||(location.startsWith("/explore/")&&!location.startsWith("/explore/weekend")&&!location.startsWith("/explore/together"));
+ const secondaryShopping=false;
  const text=(en:string,arabic:string)=>ar?arabic:en;
  const accent=familyDestinations.find(x=>x.id===area)!;
  const colors={"--family-accent":accent.accent,"--family-soft":accent.soft} as CSSProperties;
@@ -60,7 +54,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
    </Link>
    <details className="group mt-5 border-t border-[#DAECDF] pt-3">
     <summary className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-xs font-semibold text-[#637084] hover:bg-[#F9F2F5]">
-     {text("Other tools","أدوات أخرى")}<ChevronDown className="ms-auto size-4 transition group-open:rotate-180"/>
+     {text("About & privacy","حول دبّرنا والخصوصية")}<ChevronDown className="ms-auto size-4 transition group-open:rotate-180"/>
     </summary>
     <div className="mt-1 space-y-0.5">
      {tools.map(x=><Link key={x.to} to={x.to}

@@ -48,8 +48,10 @@ jobs:
           test -s react-dist/index.html
           test -s react-dist/landing-family-characters.avif
           test -s react-dist/404.html
-          test -s react-dist/explore/weekend/index.html
-          grep -Fq '/wafferli-v13/#/explore/weekend' react-dist/explore/weekend/index.html
+          test -s react-dist/family/index.html
+          test -s react-dist/about/index.html
+          grep -Fq '/wafferli-v13/#/family' react-dist/family/index.html
+          if test -e react-dist/explore/weekend/index.html; then echo "::error::Retired outing route was included in production"; exit 1; fi
           grep -qi 'Dabberna' react-dist/index.html
       - name: Stamp release revision and reject obsolete amount toggles
         run: |

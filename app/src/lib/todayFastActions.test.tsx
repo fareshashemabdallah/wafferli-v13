@@ -19,34 +19,10 @@ describe("Today speed actions without another navigation layer",()=>{
   const ask=vi.fn();draw(ask);
   expect(screen.getByRole("region",{name:"Quick family actions"})).toBeInTheDocument();
   expect(screen.getByRole("button",{name:"Add expense"})).toBeInTheDocument();
-  expect(screen.getByRole("button",{name:"Add shopping item"})).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Jump to Ask Dabberna"}));
+  expect(screen.queryByRole("button",{name:"Add shopping item"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Ask Dabberna"}));
   expect(ask).toHaveBeenCalledOnce();
   expect(screen.queryByRole("link",{name:"Ask Dabberna"})).not.toBeInTheDocument();
- });
- it("saves a real shopping need to the existing family basket, with no invented price",async()=>{
-  draw();
-  fireEvent.click(screen.getByRole("button",{name:"Add shopping item"}));
-  fireEvent.change(screen.getByRole("textbox",{name:"What do you need?"}),{target:{value:"Milk"}});
-  fireEvent.click(screen.getByRole("button",{name:"Save item"}));
-  await screen.findByText("Saved to your family basket.");
-  expect(JSON.parse(localStorage.getItem("wafferli.v13.shopping")??"[]")).toEqual([
-   expect.objectContaining({name:"Milk",qty:1,price:0,done:false})
-  ]);
-  fireEvent.change(screen.getByRole("textbox",{name:"What do you need?"}),{target:{value:"milk"}});
-  fireEvent.click(screen.getByRole("button",{name:"Save item"}));
-  expect(screen.getByRole("alert")).toHaveTextContent("already on your open shopping list");
-  expect(JSON.parse(localStorage.getItem("wafferli.v13.shopping")??"[]")).toHaveLength(1);
- });
- it("does not claim success if the browser refuses to save a shopping item",async()=>{
-  draw();
-  fireEvent.click(screen.getByRole("button",{name:"Add shopping item"}));
-  fireEvent.change(screen.getByRole("textbox",{name:"What do you need?"}),{target:{value:"Bread"}});
-  const spy=vi.spyOn(Storage.prototype,"setItem").mockImplementation(()=>{throw new Error("Quota exceeded")});
-  fireEvent.click(screen.getByRole("button",{name:"Save item"}));
-  expect(screen.getByRole("alert")).toHaveTextContent("Unable to save on this device");
-  expect(screen.queryByText("Saved to your family basket.")).not.toBeInTheDocument();
-  spy.mockRestore();
  });
  it("records an expense once and updates Today recorded-month figure from the same local Money key",async()=>{
   localStorage.setItem("wafferli.v13.money",JSON.stringify(realMoney()));

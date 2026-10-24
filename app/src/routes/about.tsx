@@ -16,8 +16,8 @@ export function About(){
   <section className="rounded-2xl border border-[#DDE8D9] bg-[#F3F8EF] p-5">
    <h2 className="text-lg font-semibold">{ar?"دبّرنا بيساعدك تقرّر، مش تعبي استمارات":"Family support, not more forms"}</h2>
    <p className="mt-2 text-sm leading-relaxed">{ar?
-    "ابدأ بسؤال عن الميزانية أو نشاط عائلي أو شراء. دبّرنا يقدر يستفيد من البيانات اللي اخترت تحفظها، ويوضح شو بيعرف وشو بحاجة لتأكيد.":
-    "Start with a question about money, a family outing or a purchase. Dabberna can use records you've chosen to save, identify missing details and suggest the next useful step."}</p>
+    "ابدأ بسؤال عن مصاريف البيت أو التزامات العيلة أو مناسبة قادمة. دبّرنا يستخدم المعلومات اللي اخترت تحفظها، ويبيّن شو بحاجة لتأكيد.":
+    "Start with a question about family Money, an upcoming occasion or a plan. Dabberna uses records you've chosen to save, identifies missing details and suggests a useful next step."}</p>
    <Link to="/advisor" className="mt-3 inline-flex min-h-11 items-center font-semibold text-brand underline">
     {ar?"اسأل دبّرنا":"Ask Dabberna"} →
    </Link>
@@ -29,15 +29,15 @@ export function About(){
      "Show planned fixed, variable and periodic costs next to expenses recorded on this device."}</li>
     <li>{ar?"مراجعة التزامات وطلعات العيلة وتجهيز خطة أو تعديلها بموافقتك.":
      "Help review family dates, upcoming commitments and plans you explicitly approve or adjust."}</li>
-    <li>{ar?"إرشاد محلي حول المصاريف، وروابط للمصادر والمنتجات والأماكن التي تراجعها أنت.":
-     "Provide device-based financial guidance and source links for products, services and mapped places."}</li>
+    <li>{ar?"إرشاد محلي حول المصاريف ومواعيد العيلة وخططها المحفوظة دون تكرار البيانات.":
+     "Provide device-based financial guidance using your recorded family dates and plans, without duplicating facts or financial transactions."}</li>
    </ul>
   </section>
   <section className="mt-4 rounded-2xl border border-[#E8DDD0] bg-[#FFF9F1] p-5">
    <h2 className="text-base font-semibold">{ar?"ما بعده مش متاح":"Not connected or verified"}</h2>
    <p className="mt-2 text-sm leading-relaxed">{ar?
-    "المحادثة الذكية المباشرة، الأسعار المؤكدة، الحجز والدفع والمزامنة البنكية ومتابعة المعلومات بالخلفية بحاجة لخدمات مؤمنة ومصادر موثوقة. لا تتعامل مع التقديرات كرصيد بنك.":
-    "Live generative AI, verified retailer prices, bookings, payments, bank sync and reliable background monitoring require separate authorized integrations. Planning estimates are not bank-verified funds."}</p>
+    "المحادثة الذكية المباشرة والبحث عن المنتجات والأماكن ومزايا التسوّق والمجموعات غير متاحة حالياً. الحجز والدفع والمزامنة البنكية تحتاج خدمات موثوقة ومصرّحاً بها. التقديرات ليست رصيد بنك.":
+    "Product discovery, shopping lists, outing discovery, and family circles have been retired from this pilot for a future clean redesign. Live AI, bookings, payments and bank synchronization require separate authorized integrations. Planning estimates are not bank-verified funds."}</p>
   </section>
   <details className="mt-4 rounded-2xl border border-[#DEE8DC] bg-white p-4">
    <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">

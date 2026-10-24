@@ -179,7 +179,7 @@ export function SixPillarDecisionStudio(){
    {brief.scenario==="outing"&&<div className="rounded-xl border border-[#D9E7D9] bg-white p-3">
     <p className="text-xs font-semibold">{t("Want friends or relatives to vote on the options?","بدك الأقارب أو الأصحاب يصوّتوا على الخيارات؟")}</p>
     <p className="mt-1 text-[11px] text-muted-foreground">{t("Create an optional separate outing poll. No private decision data or financial details are sent automatically; you choose what to enter in the poll.","فيك تعمل تصويت مستقل للطلعة. لا نرسل بيانات القرار الخاصة أو التفاصيل المالية تلقائياً؛ أنت تختار شو تدخل في التصويت.")}</p>
-    <Link to="/explore/together" className="mt-2 inline-flex min-h-10 items-center gap-1 text-xs font-semibold text-brand underline">{t("Create an outing poll","أنشئ تصويت طلعة")}<ArrowRight className="size-4"/></Link>
+    <Link to="/plans" className="mt-2 inline-flex min-h-10 items-center gap-1 text-xs font-semibold text-brand underline">{t("Create an outing poll","أنشئ تصويت طلعة")}<ArrowRight className="size-4"/></Link>
    </div>}
    <div className="flex flex-wrap items-center gap-3 text-xs">
     <span className="font-semibold">{t("Was this approach helpful?","هل هالخيار ساعدك؟")}</span>

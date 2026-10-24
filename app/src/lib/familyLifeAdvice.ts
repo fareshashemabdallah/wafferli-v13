@@ -11,7 +11,7 @@ export type FamilyLifeAdvice={
  id:"plans-over-budget"|"plan-cash-review"|"plan-needs-cost"|"plan-coming-up"|"child-outing"|"family-outing";
  titleEn:string;titleAr:string;detailEn:string;detailAr:string;
  actionEn:string;actionAr:string;
- link:"/plans"|"/explore/together";
+ link:"/plans"|"/plans";
  urgency:"attention"|"gentle";
 };
 /** Read-only recommendations, never checked-out offers or guaranteed affordability.
@@ -114,7 +114,7 @@ export function selectFamilyLifeAdvice(input:{
    detailAr:"بناءً على تفضيلاتك، الأطفال عادة بيشاركوا. اكتشف نشاطاً مناسباً لأعمارهم"+
      (limit!==null?" ضمن سقف "+limit+" د.أ":"")+
      (distance!==null?" ومسافة مفضلة "+distance+" كم":"")+". تأكد من الحضور والملاءمة والأسعار الفعلية قبل القرار.",
-   actionEn:"Plan with children",actionAr:"خطّط مع الأطفال",link:"/explore/together"
+   actionEn:"Plan with children",actionAr:"خطّط مع الأطفال",link:"/plans"
  };
  return {
    id:"family-outing",urgency:"gentle",
@@ -125,6 +125,6 @@ export function selectFamilyLifeAdvice(input:{
      (limit!==null?" بميزانية "+limit+" د.أ":"")+
      (distance!==null?" ولمسافة "+distance+" كم":"")+
      ". سنسألك بكل مرة إن كان الأطفال معنا؛ ما في حجز أو ضمان قدرة مالية.",
-   actionEn:"Explore an outing",actionAr:"استكشف طلعة",link:"/explore/together"
+   actionEn:"Explore an outing",actionAr:"استكشف طلعة",link:"/plans"
  };
 }

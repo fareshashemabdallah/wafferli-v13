@@ -36,7 +36,7 @@ export const DECISION_SCENARIOS:readonly {id:DecisionScenario;en:string;ar:strin
  {id:"purchase",en:"An important family purchase",ar:"شراء مهم للعيلة",planKind:"purchase"}
 ] as const;
 export type DecisionOption={id:DecisionApproach;titleEn:string;titleAr:string;
- detailEn:string;detailAr:string;actionEn:string;actionAr:string;route:"/explore/weekend"|"/money"|"/calendar"|"/explore/market"|"/plans"};
+ detailEn:string;detailAr:string;actionEn:string;actionAr:string;route:"/money"|"/calendar"|"/plans"};
 export type DecisionBrief={
  scenario:DecisionScenario;titleEn:string;titleAr:string;
  familyEn:string;familyAr:string;upcomingEn:string;upcomingAr:string;
@@ -111,7 +111,7 @@ export function decideFamilyNextSteps(scenario:DecisionScenario,ctx:DecisionCont
   occasion:["celebration ideas, gifts and dates","أفكار المناسبة والهدايا والمواعيد","Compare celebration and gift options, and include preparation time.","قارن الخيارات وتكاليف الهدايا ووقت التحضير."],
   purchase:["products, quality and credible seller prices","المنتجات والجودة وأسعار المتاجر","Compare actual seller quotes, durability, extras and delivery.","قارن أسعار المتاجر وجودة المنتج والإضافات والتوصيل."]
  } as const;
- const subject=subjects[scenario],go:DecisionOption["route"]=scenario==="outing"||scenario==="activity"?"/explore/weekend":scenario==="occasion"?"/calendar":"/explore/market";
+ const subject=subjects[scenario],go:DecisionOption["route"]=scenario==="occasion"?"/calendar":"/plans";
  const options:DecisionOption[]=[
   {id:"compare",titleEn:"Compare suitable options",titleAr:"قارن خيارات مناسبة",
    detailEn:subject[2]+" Choose based on family preferences and real, independently checked facts—not an advertisement.",
