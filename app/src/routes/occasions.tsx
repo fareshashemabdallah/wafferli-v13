@@ -86,10 +86,10 @@ export function OccasionPlanner(){
     </>}
    <p className="rounded-xl border border-[#DDE8DA] bg-[#F7FBF6] p-3 text-xs text-[#5F7C67]">
     {t("Keep this occasion's gift and budget in its single linked plan above. No separate shopping entry is needed.",
-       "خلي هدية المناسبة وميزانيتها ضمن خطتها الواحدة فوق. قوائم الرغبات العامة بتبقى في التسوق دون إنشاء عيد ميلاد أو كلفة هدية ثانية.")}
+       "خلي هدية المناسبة وميزانيتها ضمن خطتها الواحدة فوق، من دون إدخال تسوق منفصل.")}
    </p>
    <div className="rounded-xl bg-[#F1F7EF] p-3 text-sm">
-    <span>{t("Want to compare a price before buying? ","بدك تقارن السعر قبل الشراء؟ ")}</span>
+    <span>{t("Continue the gift in your family plan: ","تابع الهدية في خطة العيلة: ")}</span>
     <Link to="/plans" onClick={()=>{if(plan)writeLocal(ACTIVE_PLAN_KEY,plan.id);}} className="font-semibold text-brand underline">{t("Review the saved gift plan","راجع خطة الهدية المحفوظة")}</Link>
     <p className="mt-1 text-xs text-muted-foreground">{t(
      "A wish, a comparison or a planned gift never deducts cash. Financial advice uses only entered facts.",
