@@ -64,6 +64,28 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
   expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-focus",localDate);
   expect(screen.queryByTestId("embedded-plans")).not.toBeInTheDocument();
  });
+ it("reads one corrected birthday across Family dates and linked plan buttons without rewriting stored financial decisions",async()=>{
+  const local=(d:Date)=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+  const original=new Date();original.setDate(original.getDate()+3);
+  const corrected=new Date();corrected.setDate(corrected.getDate()+8);
+  const oldDate=local(original),newDate=local(corrected);
+  localStorage.setItem("wafferli.v13.members",JSON.stringify([
+   {id:"child-1",name:"Sophie",role:"child",ageGroup:"",prefs:"",
+    birthdayMonthDay:newDate.slice(5)}
+  ]));
+  const stale={
+   id:"gift-1",kind:"occasion",title:"Sophia's birthday",status:"planning",
+   date:oldDate,sourceRef:"occasion:member-birthday:child-1@"+newDate.slice(0,4),
+   budgetJod:85,createdAt:"2026-01-01T12:00:00Z",updatedAt:"2026-01-01T12:00:00Z"
+  };
+  localStorage.setItem("wafferli.v13.familyPlans",JSON.stringify([stale]));
+  draw();
+  await waitFor(()=>expect(screen.getByRole("button",{name:"Continue plan: Sophie's birthday"})).toBeInTheDocument());
+  expect(screen.getByRole("button",{name:"Prepare Sophie's birthday"})).toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Continue plan: Sophia's birthday"})).not.toBeInTheDocument();
+  expect(localStorage.getItem("wafferli.v13.familyPlans")).toBe(JSON.stringify([stale]));
+  expect(localStorage.getItem("wafferli.v13.familyCalendar")).toBeNull();
+ });
  it("keeps specialist family experiences available but not as extra global tabs",()=>{
   draw();
   fireEvent.click(screen.getByText("More family experiences"));
