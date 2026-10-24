@@ -3,46 +3,32 @@ import {cleanup,render,screen,within} from "@testing-library/react";
 import type {AnchorHTMLAttributes,ReactNode} from "react";
 import {I18nProvider} from "@/lib/i18n";
 import {AppShell} from "@/components/AppShell";
-import {ShoppingExperienceShell} from "@/components/ShoppingExperienceShell";
-
 vi.mock("@tanstack/react-router",()=>({
  Link:({to,activeOptions:_,children,...props}:{to:string;activeOptions?:unknown;children?:ReactNode}&AnchorHTMLAttributes<HTMLAnchorElement>)=>
  <a href={to} {...props}>{children}</a>
 }));
 afterEach(()=>{cleanup();localStorage.clear();vi.restoreAllMocks();});
-describe("one Dabberna navigation, no automatic link clutter",()=>{
- it("uses one three-area navigation and keeps specialist tools optional",()=>{
+describe("one Dabberna navigation and no retired feature entry points",()=>{
+ it("keeps just Today, Money and Family as primary destinations with contextual Ask",()=>{
   render(<I18nProvider><AppShell title="Our Plans"><p>Saved plan details</p></AppShell></I18nProvider>);
   const navs=screen.getAllByRole("navigation",{name:"Main"});
   expect(navs).toHaveLength(2);
-  for(const nav of navs){
-   expect(within(nav).getAllByRole("link")).toHaveLength(3);
-  }
-  expect(screen.getByText("Other tools").closest("details")).not.toHaveAttribute("open");
-  expect(screen.queryByRole("navigation",{name:"Related family actions"})).not.toBeInTheDocument();
-  expect(screen.queryByRole("link",{name:"Discover"})).not.toBeInTheDocument();
+  for(const nav of navs)expect(within(nav).getAllByRole("link")).toHaveLength(3);
   expect(screen.getByRole("heading",{level:1,name:"Our Plans"})).toBeInTheDocument();
-  expect(screen.getByText("Saved plan details")).toBeInTheDocument();
+  expect(screen.getByRole("link",{name:"Ask Dabberna anywhere"})).toHaveAttribute("href","/advisor");
   expect(localStorage.getItem("wafferli.v13.money")).toBeNull();
  });
- it("keeps Shopping discoverable on both desktop and mobile without a fifth main tab",()=>{
+ it("offers About & Privacy but no shopping, outings, product finding or circles links in either overflow menu",()=>{
   render(<I18nProvider><AppShell><p>Family content</p></AppShell></I18nProvider>);
-  const navs=screen.getAllByRole("navigation",{name:"Main"});
-  expect(navs).toHaveLength(2);
-  for(const nav of navs)expect(within(nav).queryByRole("link",{name:"Shopping & Wishlist"})).not.toBeInTheDocument();
-  expect(screen.getByText("Other tools").closest("details")).not.toHaveAttribute("open");
-  const more=screen.getByText("Other tools").closest("details");
-  expect(more?.querySelector('a[href="/explore/smartbuy"]')).toBeTruthy();
-  const mobileMore=screen.getByLabelText("More features").closest("details");
-  expect(mobileMore?.querySelector('a[href="/explore/smartbuy"]')).toBeTruthy();
- });
- it("shares exactly the same primary destinations in Shopping",()=>{
-  render(<I18nProvider><ShoppingExperienceShell><p>Wishlist data</p></ShoppingExperienceShell></I18nProvider>);
-  const [desktop,mobile]=screen.getAllByRole("navigation",{name:"Main"}) as [HTMLElement,HTMLElement];
-  const paths=(node:HTMLElement)=>Array.from(node.querySelectorAll("a")).map(a=>a.getAttribute("href"));
-  expect(paths(desktop)).toEqual(paths(mobile));
-  expect(paths(desktop)).toEqual(["/","/money","/family"]);
-  expect(screen.getByRole("link",{name:"Ask Dabberna anywhere"})).toHaveAttribute("href","/advisor");
-  expect(screen.queryByRole("navigation",{name:"Related family actions"})).not.toBeInTheDocument();
+  const details=document.querySelectorAll("details");
+  expect([...details].some(x=>x.textContent?.includes("About & privacy"))).toBe(true);
+  const mobile=screen.getByLabelText("More features").closest("details");
+  const desktop=[...details].find(x=>x.textContent?.includes("About & privacy")&&x!==mobile);
+  expect(mobile?.querySelectorAll('a[href="/about"]')).toHaveLength(1);
+  expect(desktop?.querySelectorAll('a[href="/about"]')).toHaveLength(1);
+  for(const link of Array.from(document.querySelectorAll("a"))){
+   const href=link.getAttribute("href")??"";
+   expect(href).not.toMatch(/^\/(?:explore|community|experience|vote|together)(?:\/|$)/);
+  }
  });
 });
