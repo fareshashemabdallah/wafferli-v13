@@ -6,7 +6,9 @@ import type {FamilyPlan} from "./familyPlans";
 
 const now=new Date(2026,9,25,12);
 function base():MoneyState{
- return {...emptyRealMoney(),incomeKnown:true,income:1000,incomeSources:undefined,
+ const state=emptyRealMoney();
+ delete state.incomeSources;
+ return {...state,incomeKnown:true,income:1000,
   categories:[
    {id:"housing",name:"Home",type:"fixed",planned:150,priority:"essential"},
    {id:"play",name:"Family fun",type:"variable",planned:100,priority:"protected"}],
