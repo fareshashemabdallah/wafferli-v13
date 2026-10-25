@@ -1,4 +1,8 @@
 import { HouseholdPresencePanel } from "@/components/HouseholdPresencePanel";
+import {MoneyMonthlyReport} from "@/components/MoneyMonthlyReport";
+import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
+import type {FamilyMoment} from "@/lib/familyCalendar";
+import {canonicalPlanViews} from "@/lib/canonicalFamilyFacts";
 import { createFileRoute } from "@tanstack/react-router";
 import { CashFlowPlanner } from "@/components/CashFlowPlanner";
 import {FamilyMoneyRhythm} from "@/components/FamilyMoneyRhythm";
@@ -51,6 +55,9 @@ function MoneyPage() {
 
   const [s, setS, ready] = useLocalState("money", sampleMoney());
   const [members] = useLocalState<Member[]>("members", sampleMembers());
+  const [familyPlans] = useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
+  const [familyMoments] = useLocalState<FamilyMoment[]>("familyCalendar",[]);
+  const reportPlans=useMemo(()=>canonicalPlanViews(familyPlans,familyMoments,members,ar),[familyPlans,familyMoments,members,ar]);
   // One-time backwards-compatible cleanup: old category role fields are no
   // longer used. This does not alter category budgets, item roles or payments.
   useEffect(()=>{if(ready)setS(old=>cleanOldCategoryRoles(old));},[ready,setS]);
@@ -111,6 +118,7 @@ function MoneyPage() {
         </details>
       </div>
 
+      {section==="overview"&&<MoneyMonthlyReport state={s} plans={reportPlans}/>} 
       {section==="overview"&&<FamilyMoneyRhythm state={s} setState={setS}
         onBills={()=>setSection("planning")} onSpending={()=>setSection("spending")}
         onCategories={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"})}
