@@ -46,8 +46,7 @@ export function MoneyMonthlyReport({state,plans}:Props){
    <div className="flex items-center gap-2">
     <FileText className="size-5 text-[#367953]" aria-hidden="true"/>
     <div>
-     <p className="text-sm font-semibold text-[#254D39]">{t("Monthly Money Report","تقرير المال الشهري")}</p>
-     <p className="text-xs text-[#587364]">{t("Detailed, private and based only on your saved Money records.","تفصيلي وخاص ومبني فقط على سجلات المالية المحفوظة.")}</p>
+     <p className="text-sm font-semibold text-[#254D39]">{t("Monthly report","التقرير الشهري")}</p>
     </div>
    </div>
    <button type="button" onClick={()=>setOpen(x=>!x)}
