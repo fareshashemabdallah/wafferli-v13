@@ -1,5 +1,5 @@
 import {Link,useNavigate} from "@tanstack/react-router";
-import {ArrowRight,CalendarDays,ChevronRight,Gift,Heart,Info,ShieldCheck,Wallet} from "lucide-react";
+import {ArrowRight,CalendarDays,ChevronRight,Gift,Heart,ShieldCheck,Wallet} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState,writeLocal,fmtJOD} from "@/lib/storage";
 import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
@@ -42,91 +42,57 @@ export function AdventureFamilyHome(){
  return <div className="mx-auto max-w-[930px] space-y-3 pb-5 text-[#263E36]" data-adventure-home>
   <header className="relative isolate overflow-hidden rounded-[1.7rem] border border-[#D7E8D9] bg-[linear-gradient(120deg,#FAFBF2_5%,#E6F5E8_60%,#FFEFE4_100%)] p-4 sm:p-6" aria-label={t("Dabberna family greeting","ترحيب دبّرنا بالعائلة")}>
    <div className="relative z-10 max-w-[58%] pb-2 sm:max-w-[65%]">
-    <p className="text-xs font-semibold text-[#4F8270]">{t("Welcome to Dabberna","أهلاً في دبّرنا")}</p>
-    <h1 className="mt-1 text-[clamp(1.45rem,5vw,2.4rem)] font-black leading-tight text-[#234E3D]">
+    <h1 className="text-[clamp(1.45rem,5vw,2.4rem)] font-black leading-tight text-[#234E3D]">
      {t("Today, with your family","اليوم مع العيلة")}
     </h1>
-    <p className="mt-2 text-xs leading-relaxed text-[#5B7867] sm:text-sm">
-     {t("One clear next step. More time for what matters.","خطوة واحدة واضحة، ووقت أكتر للي بهم العيلة.")}
-    </p>
    </div>
    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"}
     alt={t("Illustrated family together","رسم عائلة معاً")}
     className="pointer-events-none absolute bottom-[-4px] end-0 z-0 h-[145px] w-[49%] object-contain object-bottom sm:h-[195px]" loading="eager"/>
   </header>
 
-  <section className={panel} aria-label={t("Family briefing","ملخص العيلة")}>
-   <div className="flex items-start gap-3">
-    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#E6F2E6] text-[#3B815D]">
-     <Heart className="size-5" aria-hidden="true"/></span>
-    <div className="min-w-0 flex-1">
-     <h2 className="text-base font-extrabold">{t("How your family is doing","كيف أمور العيلة؟")}</h2>
-     <p className="mt-1 text-sm leading-relaxed text-[#60766A]">
-      {!ready?t("Reading your saved family information…","عم نراجع معلومات العيلة المحفوظة…"):
-       brief?.moneyStatus==="risk"?
-       t("Your entered figures suggest a financial issue to review. This is not a verified bank assessment.",
-        "الأرقام اللي أدخلتها بتشير لموضوع مالي بحاجة لمراجعة، مش تقييم بنكي مؤكّد."):
-       current?t("One saved family matter could use your attention. Everything else can wait.",
-        "في شغلة محفوظة بتستاهل انتباهك، والباقي فيك تتركه لوقت تاني."):
-       t("Nothing in your saved records needs urgent action. Enjoy your day.",
-        "ما في شي عاجل ضمن المعلومات المحفوظة. استمتعوا بيومكم.")}
+  {ready&&(!current||brief?.moneyStatus==="risk")&&
+   <section className={panel} aria-label={t("Family briefing","ملخص العيلة")}>
+    <div className="flex items-center gap-3">
+     <Heart className="size-5 shrink-0 text-[#3B815D]" aria-hidden="true"/>
+     <p className="text-sm font-semibold text-[#3C6050]">
+      {brief?.moneyStatus==="risk"
+       ?t("Your saved money figures need a review. They are not bank-verified.","أرقام المال المسجّلة بحاجة لمراجعة، وهي ليست رصيداً بنكياً مؤكداً.")
+       :t("Nothing urgent in your saved family records.","ما في شي مستعجل حسب سجلات العيلة المحفوظة.")}
      </p>
     </div>
-   </div>
-  </section>
+   </section>}
 
-  {current?<section className="overflow-hidden rounded-[1.7rem] border border-[#F0DAE5] bg-[linear-gradient(135deg,#FFF9FA,#FCEEF3_62%,#FFF5E9)] p-4 shadow-[0_18px_35px_-30px_rgba(146,63,97,.3)] sm:p-6"
+  {current&&<section className="overflow-hidden rounded-[1.7rem] border border-[#F0DAE5] bg-[linear-gradient(135deg,#FFF9FA,#FCEEF3_62%,#FFF5E9)] p-4 shadow-[0_18px_35px_-30px_rgba(146,63,97,.3)] sm:p-6"
     aria-label={t("One next action","الخطوة القادمة")} data-testid="today-one-action">
    <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-[#B2467F]">
     {current.kind==="gift"||current.kind==="occasion"?<Gift className="size-4"/>:
      current.kind==="financial"||current.kind==="bill"?<Wallet className="size-4"/>:<Heart className="size-4"/>}
-    {t("One next action","خطوة واحدة مهمة")}
+    {t("Next for your family","الخطوة الجاية للعيلة")}
    </div>
    <h2 className="mt-3 text-base font-semibold text-[#564256]">{ar?current.titleAr:current.titleEn}</h2>
    <p className="mt-1 text-lg font-black leading-snug text-[#263D37] sm:text-xl">
-    {current.kind==="gift"?t("Choose the right gift option","اختار أنسب خيار للهدية"):
-     current.kind==="bill"?t("Check the recorded payment","راجع الدفعة المسجّلة"):
+    {current.kind==="gift"?t("Choose a gift","اختار هدية"):
+     current.kind==="bill"?t("Check this payment","راجع الدفعة"):
      current.kind==="financial"?t("Review your family's money picture","راجع الوضع المالي للعيلة"):
-     current.kind==="occasion"?t("Prepare this family moment","حضّر هالمناسبة"):
-     t("Continue your family plan","كمل خطة العيلة")}
+     current.kind==="occasion"?t("Get ready together","حضّروا سوا"):
+     t("Continue your plan","كمل خطتك")}
    </p>
-   <p className="mt-2 max-w-[680px] text-sm leading-relaxed text-[#665D62]">
-    {ar?current.detailAr:current.detailEn}
-   </p>
-   {current.kind==="gift"&&<div className="mt-3 flex flex-wrap gap-2 text-xs">
-    <span className="rounded-full border border-[#EDD8E1] bg-white/75 px-3 py-1.5">
-     {t("Planned gift: ","الهدية المخططة: ")}
-     {fmtJOD(current.giftEstimateJod??0)}
-    </span>
-    <span className="rounded-full border border-[#EDD8E1] bg-white/75 px-3 py-1.5">
-     {current.sellerCount?t("Seller option saved","خيار متجر محفوظ"):t("No seller selected yet","ما تم اختيار متجر بعد")}
-    </span>
-    <span className="rounded-full border border-[#EDD8E1] bg-white/75 px-3 py-1.5">
-     {t("Not recorded as paid","لم تُسجل كدفعة")}
-    </span>
-   </div>}
-   <div className="mt-4 flex flex-wrap items-center gap-2">
-    <Link to={current.route} onClick={()=>continueAction(current)}
-     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[linear-gradient(100deg,#D96E7C,#C84381)] px-5 text-sm font-bold text-white shadow-sm transition hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[#B64680]">
-     {actionLabel(current)}<ArrowRight className="size-4 rtl:rotate-180"/>
-    </Link>
-    <Link to="/advisor" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[#E9D4E2] bg-white/80 px-4 text-sm font-semibold text-[#895778]">
-     {t("Ask Dabberna","اسأل دبّرنا")}
-    </Link>
-   </div>
-   <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[#EADBE1] pt-3 text-xs text-[#745E6D]">
-    <Info className="size-4 shrink-0"/><strong>{t("Why now?","ليش هلّق؟")}</strong>
-    <span>{ar?current.whyAr:current.whyEn}</span>
-    {current.date&&<span className="rounded-full bg-white/80 px-2 py-1">{current.date}</span>}
-   </div>
-  </section>:ready?<section className={panel} aria-label={t("No urgent next action","لا توجد خطوة عاجلة")}>
-    <div className="flex items-center gap-3">
-     <Heart className="size-6 shrink-0 text-[#509677]"/>
-     <div><h2 className="font-extrabold">{t("You're free to enjoy your day","خدوا راحتكم اليوم")}</h2>
-      <p className="mt-1 text-sm text-[#677A72]">{t("No need to manufacture a task. Add something only when it matters.",
-       "مش ضروري نختلق مهمة. أضف شي بس وقت يكون مهم.")}</p></div>
-    </div>
-   </section>:null}
+   {current.kind==="gift"&&<p className="mt-3 text-xs font-medium text-[#725B67]">
+    {t("Planned gift: ","هدية مخططة: ")}{fmtJOD(current.giftEstimateJod??0)}
+    {" · "}{t("Not paid","غير مدفوعة")}
+   </p>}
+   <Link to={current.route} onClick={()=>continueAction(current)}
+    className="mt-4 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[linear-gradient(100deg,#D96E7C,#C84381)] px-5 text-sm font-bold text-white shadow-sm transition hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[#B64680]">
+    {actionLabel(current)}<ArrowRight className="size-4 rtl:rotate-180"/>
+   </Link>
+   <details className="mt-3 border-t border-[#EADBE1] pt-3 text-xs text-[#745E6D]">
+    <summary className="min-h-10 cursor-pointer font-semibold">{t("Why this step?","ليش هالخطوة؟")}</summary>
+    <p className="mt-1 leading-relaxed">{ar?current.detailAr:current.detailEn}</p>
+    <p className="mt-1 leading-relaxed">{ar?current.whyAr:current.whyEn}{current.date?" · "+current.date:""}</p>
+    {current.kind==="gift"&&<p className="mt-1">{current.sellerCount?t("Seller option saved","خيار متجر محفوظ"):t("No seller chosen","ما اخترت متجر بعد")}</p>}
+   </details>
+  </section>}
 
   <div className="grid gap-3 md:grid-cols-2">
    <section className={panel} aria-label={t("This week","هذا الأسبوع")}>
@@ -136,8 +102,7 @@ export function AdventureFamilyHome(){
     </div>
     {brief?.week.length?<div className="mt-3 space-y-2">{brief.week.map(makeWeekLink)}</div>:
      <p className="mt-2 text-xs leading-relaxed text-[#738378]">
-      {t("No other scheduled items found in the next seven days. This only reflects saved records.",
-       "ما في مواعيد أخرى مسجلة خلال سبعة أيام. هذا حسب البيانات المحفوظة فقط.")}
+      {t("No saved dates this week.","ما في مواعيد مسجّلة هالأسبوع.")}
      </p>}
    </section>
    <section className={panel} aria-label={t("Money at a glance","لمحة عن المال")}>
@@ -146,11 +111,11 @@ export function AdventureFamilyHome(){
     </div>
     <div className="mt-3 grid grid-cols-2 gap-2">
      <div className="rounded-xl bg-[#F4F9F2] p-3">
-      <p className="text-xs text-[#63776A]">{t("Recorded bills: next 7 days","الفواتير المسجّلة: ٧ أيام")}</p>
+      <p className="text-xs text-[#63776A]">{t("Bills · next 7 days","فواتير · ٧ أيام")}</p>
       <strong className="mt-1 block text-lg text-[#307855]">{ready?fmtJOD(brief?.upcomingBillsJod??0):t("Loading","جار التحميل")}</strong>
      </div>
      <div className="rounded-xl bg-[#FFF5F7] p-3">
-      <p className="text-xs text-[#866874]">{t("Actual recorded spending this month","المصاريف المدفوعة المسجّلة للشهر")}</p>
+      <p className="text-xs text-[#866874]">{t("Paid · this month","المدفوع · هالشهر")}</p>
       <strong className="mt-1 block text-lg text-[#B34D7C]">{ready?fmtJOD(brief?.monthPaidJod??0):t("Loading","جار التحميل")}</strong>
      </div>
     </div>
@@ -170,8 +135,7 @@ export function AdventureFamilyHome(){
 
   <TodayQuickActions onAsk={()=>navigate({to:"/advisor"})}/>
   <p className="px-2 text-[11px] leading-relaxed text-[#789086]">
-   {t("Your family records stay on this device during the pilot. Today only reads existing information; it never creates a purchase, payment or bank transaction.",
-    "سجلات العيلة محفوظة على هالجهاز خلال التجربة. اليوم يعرض معلومات موجودة فقط؛ ما بينشئ شراء أو دفع أو عملية بنكية.")}
+   {t("Pilot: records stay on this device. Today never creates payments.","تجربة خاصة: السجلات على هالجهاز واليوم لا ينشئ دفعات.")}
   </p>
  </div>;
 }
