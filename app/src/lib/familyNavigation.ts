@@ -1,11 +1,11 @@
-import {Home,HeartHandshake,Wallet,Repeat2} from "lucide-react";
+import {Home,HeartHandshake,Wallet,Store} from "lucide-react";
 
 /** Four family areas. Ask is a persistent capability, never a compulsory
  * fourth chapter. The advisor and all specialist URLs remain functional. */
 export const familyDestinations=[
  {id:"today",to:"/" as const,en:"Today",ar:"اليوم",shortEn:"Today",shortAr:"اليوم",icon:Home,accent:"#338C70",soft:"#E5F4E9"},
  {id:"money",to:"/money" as const,en:"Money",ar:"المال",shortEn:"Money",shortAr:"المال",icon:Wallet,accent:"#2D917C",soft:"#E9F7F2"},
- {id:"finds",to:"/finds" as const,en:"Family Finds",ar:"كنوز العيلة",shortEn:"Finds",shortAr:"كنوز",icon:Repeat2,accent:"#C37664",soft:"#FFF3E8"},
+ {id:"finds",to:"/finds" as const,en:"Our Market",ar:"سوقنا",shortEn:"Market",shortAr:"سوقنا",icon:Store,accent:"#C37664",soft:"#FFF3E8"},
  {id:"family",to:"/family" as const,en:"Family",ar:"العيلة",shortEn:"Family",shortAr:"العيلة",icon:HeartHandshake,accent:"#CB6393",soft:"#FCECF2"}
 ] as const;
 export type FamilyArea=(typeof familyDestinations)[number]["id"];
