@@ -53,7 +53,7 @@ export function FamilyLifePage(){
     <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#F8E3EB] text-[#B65F89]"><MessageCircleHeart className="size-6"/></span>
     <span className="min-w-0 flex-1">
      <span className="block text-base font-black text-[#4E4350]">{label("What Parents Say","شو بيقولوا الأهل؟")}</span>
-     <span className="mt-1 block text-xs leading-relaxed text-[#7B6D77]">{label("Explore real experiences about clubs, outings and children's products—and what matters for safety, age and convenience.","اكتشف تجارب الأهل عن النوادي والطلعات ومنتجات الأطفال، واعرف شو بهم من ناحية السلامة والعمر والراحة.")}</span>
+     <span className="mt-1 block text-xs leading-relaxed text-[#7B6D77]">{label("Explore family-focused questions and prepare your own firsthand reviews of clubs, outings and children's products.","اكتشف الأسئلة اللي بتهم الأهل وجهّز تجربتك عن النوادي والطلعات ومنتجات الأطفال.")}</span>
      <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[#986380]"><ShieldCheck className="size-3"/>{label("Private pilot · Experience-focused","تجربة خاصة · من واقع الأهل")}</span>
     </span>
     <ChevronRight className="size-5 shrink-0 text-[#B26B8D] rtl:rotate-180"/>
