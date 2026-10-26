@@ -6,6 +6,7 @@ describe("single Dabberna family navigation",()=>{
   expect(familyDestinations.map(x=>x.id)).toEqual(["today","money","finds","family"]);
   expect(new Set(familyDestinations.map(x=>x.to)).size).toBe(4);
   expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Market","Family"]);
+  expect(familyDestinations.find(x=>x.id==="finds")).toMatchObject({en:"Our Market",ar:"سوقنا",shortEn:"Market",shortAr:"سوقنا",to:"/finds"});
   for(const x of familyDestinations){
    expect(x.en.length).toBeGreaterThan(0);
    expect(x.ar.length).toBeGreaterThan(0);
