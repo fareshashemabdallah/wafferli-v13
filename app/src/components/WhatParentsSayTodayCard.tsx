@@ -1,5 +1,5 @@
 import {Link} from "@tanstack/react-router";
-import {ArrowRight,Baby,HeartHandshake,MessageCircleHeart,ShieldCheck,UtensilsCrossed,Waves} from "lucide-react";
+import {ArrowRight,Baby,HeartHandshake,MessageCircleHeart,ShieldCheck} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {WorldScene} from "./AdventureArtwork";
 
