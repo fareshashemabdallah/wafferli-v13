@@ -20,7 +20,7 @@ export type ParentReview={
 export function createParentPlace(input:{name:string;area:string;category:ReviewCategory},id:string,now:string):ParentPlace|null{
  const name=input.name.trim().replace(/\s+/g," ");
  const area=input.area.trim().replace(/\s+/g," ");
- if(name.length<3||name.length>100||area.length<2||area.length>80||!reviewCategories.includes(input.category))return null;
+ if(name.length<3||name.length>100||(input.category!=="products"&&area.length<2)||area.length>80||!reviewCategories.includes(input.category))return null;
  return {id,name,area,category:input.category,createdAt:now};
 }
 export function sameParentPlace(a:ParentPlace,b:ParentPlace){
