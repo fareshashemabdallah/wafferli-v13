@@ -12,7 +12,7 @@ import {
 } from "@/lib/familyFinds";
 
 export const Route=createFileRoute("/finds")({
- head:()=>({meta:[{title:"Family Finds — Dabberna"},
+ head:()=>({meta:[{title:"Our Market — سوقنا | Dabberna"},
   {name:"description",content:"Sell, exchange or share something loved. Private device-only family marketplace pilot."}]}),
  component:FamilyFindsPage
 });
@@ -100,12 +100,12 @@ export function FamilyFindsPage(){
   if(!wish){setError(t("Describe what you are looking for in at least three characters.","اكتب ماذا تبحث عنه بثلاثة أحرف على الأقل."));return;}
   setWishes(old=>[wish,...old]);setWishText("");setError("");
  };
- return <AppShell title={t("Family Finds","كنوز العيلة")}>
+ return <AppShell title={t("Our Market","سوقنا")}>
   <div className="mx-auto max-w-[950px] space-y-4" data-testid="family-finds">
    <header className="relative overflow-hidden rounded-[1.6rem] border border-[#DCECDD] bg-[linear-gradient(115deg,#F2FAE9,#FFF3E6_66%,#FDEDF3)] p-5 sm:p-6">
     <div className="relative z-10 max-w-[95%] sm:max-w-[75%]">
      <p className="text-[11px] font-bold uppercase tracking-wider text-[#4B896A]">{t("Loved by one family. Ready for another.","من عيلة لعيلة... والفرحة بتكمل.")}</p>
-     <h2 className="mt-1 text-2xl font-black text-[#28543E]">{t("Family Finds","كنوز العيلة")} <Heart className="inline size-5 text-[#C66F86]"/></h2>
+     <h2 className="mt-1 text-2xl font-black text-[#28543E]">{t("Our Market","سوقنا")} <Heart className="inline size-5 text-[#C66F86]"/></h2>
      <p className="mt-2 text-sm text-[#5A7566]">{t(
       "Sell something useful, discover what you could swap it for, or share the joy at no cost.",
       "بيع غرض مفيد، أو بدّله بشي تحتاجه عيلتك، أو شارك الفرحة بدون مقابل.")}</p>
@@ -116,7 +116,7 @@ export function FamilyFindsPage(){
     <p>{t("Private testing space: your listings and wishes are saved ONLY in this browser. No other families can see them, send offers or contact you yet. Do not add addresses, phone numbers, children's names or sensitive details.",
      "مساحة تجريبية خاصة: الإعلانات وما تبحث عنه محفوظة فقط بهذا المتصفح. العائلات الأخرى لا تراها ولا يمكنها إرسال عروض أو التواصل بعد. لا تضف العنوان أو رقم الهاتف أو أسماء الأطفال أو معلومات خاصة.")}</p>
    </div>
-   <div className="grid grid-cols-2 gap-2" role="tablist" aria-label={t("Family Finds sections","أقسام كنوز العيلة")}>
+   <div className="grid grid-cols-2 gap-2" role="tablist" aria-label={t("Our Market sections","أقسام سوقنا")}>
     <button type="button" role="tab" aria-selected={pane==="offers"} onClick={()=>{setPane("offers");setForm(null);setError("");}}
      className={"min-h-12 rounded-xl border px-3 text-sm font-bold "+(pane==="offers"?"border-[#8EBFA2] bg-[#E9F6ED] text-[#28684A]":"border-[#E1EAE0] bg-white text-[#607365]")}>
      <Tag className="me-1 inline size-4"/>{t("My listings","إعلاناتي")} ({listings.length})
