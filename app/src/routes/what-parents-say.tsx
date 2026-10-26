@@ -86,24 +86,22 @@ export function WhatParentsSayPage(){
   <div className="mx-auto max-w-[980px] space-y-4 pb-5" data-testid="what-parents-say">
    <section className="relative isolate overflow-hidden rounded-[1.7rem] border border-[#DBEADC] bg-[linear-gradient(115deg,#EDF8EA_5%,#FFF6EC_65%,#FFF0F5_100%)] p-5 sm:p-7">
     <div className="relative z-10 max-w-[68%] pb-2 sm:max-w-[67%]">
-     <p className="text-[11px] font-bold tracking-wide text-[#428367]">{t("PARENTS HELPING PARENTS","أهل بيساعدوا أهل")}</p>
-     <h2 className="mt-2 text-[clamp(1.5rem,4vw,2.15rem)] font-black leading-tight text-[#25513D]">{t("What Parents Say","شو بيقولوا الأهل؟")}</h2>
-     <p className="mt-2 text-sm leading-relaxed text-[#5D7666]">{t(
-      "Before you choose for your child, hear what matters to other families. Your experience could help another parent—and help places improve.",
-      "قبل ما تختار لأولادك، شوف شو بهم العائلات الثانية. تجربتك ممكن تفيد أهل غيرك وتساعد الأماكن تتحسّن.")}</p>
+     <h2 className="text-[clamp(1.5rem,4vw,2.15rem)] font-black leading-tight text-[#25513D]">{t("What Parents Say","شو بيقولوا الأهل؟")}</h2>
+     <p className="mt-2 text-sm text-[#5D7666]">{t("Remember what worked for your family.","سجّل شو ناسب عيلتك.")}</p>
     </div>
     <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"} alt="" aria-hidden="true"
      className="pointer-events-none absolute bottom-[-2px] end-[-12px] h-[160px] w-[45%] object-contain object-bottom sm:h-[215px]" />
    </section>
-   <div role="status" className="flex items-start gap-2 rounded-xl border border-[#DAE6DC] bg-white p-3 text-xs leading-relaxed text-[#597266]">
-    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#398C67]"/>{localOnly}
-   </div>
+   <details className="rounded-xl border border-[#DAE6DC] bg-white p-3 text-xs text-[#597266]">
+    <summary className="min-h-10 cursor-pointer font-semibold">{t("Private pilot · Only you see your reviews","تجربة خاصة · تقييماتك إلك وحدك")}</summary>
+    <p className="mt-2 leading-relaxed">{localOnly}</p>
+   </details>
 
    {mode==="browse"&&<div className="space-y-4">
     <section className={card+" space-y-3"}>
      <div className="flex items-center justify-between gap-2">
       <h3 className="text-lg font-extrabold text-[#273E35]">{t("Explore experiences","اكتشف التجارب")}</h3>
-      <span className="text-[11px] text-[#78867D]">{t("Around your family","خيارات للعيلة")}</span>
+
      </div>
      <label className="flex items-center gap-2 rounded-xl border border-[#D3E5D7] bg-[#FAFDF9] px-3">
       <Search className="size-4 shrink-0 text-[#6D8A77]"/>
@@ -125,7 +123,7 @@ export function WhatParentsSayPage(){
      <div className="flex flex-wrap items-center justify-between gap-2">
       <div>
        <h3 className="text-base font-extrabold">{t("Places & products you've added","الأماكن والمنتجات اللي أضفتها")}</h3>
-       <p className="mt-1 text-xs text-[#78877C]">{t("Your private testing catalogue—never presented as community reviews.","قائمتك التجريبية الخاصة، وليست مراجعات عامة.")}</p>
+
       </div>
       <button type="button" className={buttonPrimary} onClick={()=>{setError("");setPlaceCategory(category==="all"?"activities":category);setMode("place");}}>
        <Plus className="size-4"/>{t("Add a place or item","أضف مكان أو منتج")}</button>
@@ -133,7 +131,7 @@ export function WhatParentsSayPage(){
      {!ready?<p className="py-5 text-center text-sm text-[#718273]">{t("Loading your saved experiences…","جارٍ تحميل التجارب…")}</p>:
       visible.length===0?<div className="rounded-2xl bg-[#F3F9F1] px-5 py-7 text-center">
        <Compass className="mx-auto size-9 text-[#68A17D]"/>
-       <h4 className="mt-3 font-extrabold text-[#355C43]">{t("Every experience starts somewhere","كل تجربة إلها بداية")}</h4>
+       <h4 className="mt-3 font-extrabold text-[#355C43]">{t("No experiences saved yet","لسا ما في تجارب محفوظة")}</h4>
        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[#61776A]">{query.trim()||category!=="all"?
         t("No matching entries in your private catalogue. Adjust your search or add one.",
          "ما في نتيجة مطابقة في قائمتك الخاصة. غيّر البحث أو أضف مكان."):
