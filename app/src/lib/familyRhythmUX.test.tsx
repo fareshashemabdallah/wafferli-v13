@@ -20,11 +20,11 @@ describe("Dabberna one rhythm across pages",()=>{
   expect(familyDestinations.map(x=>x.to)).toEqual(["/","/money","/what-parents-say","/finds","/family"]);
   expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Parents Say","Market","Family"]);
  });
- it("gives Money, Decide, Calendar and About the same compact title treatment",()=>{
+ it("uses an accessible title without repeated chapter explanations or back buttons",()=>{
   for(const route of ["/money","/advisor","/calendar","/about","/what-parents-say"]){
    const {unmount}=render(<I18nProvider><RhythmPageHeader path={route} title="Chapter title"/></I18nProvider>);
-   expect(screen.getByRole("heading",{name:"Chapter title",level:1})).toBeInTheDocument();
-   expect(screen.getByRole("link",{name:"Today's story"})).toHaveAttribute("href","/");
+   expect(screen.getByRole("heading",{name:"Chapter title",level:1,hidden:true})).toBeInTheDocument();
+   expect(screen.queryByRole("link",{name:"Today's story"})).not.toBeInTheDocument();
    expect(screen.queryByText("Another path")).not.toBeInTheDocument();
    unmount();
   }
