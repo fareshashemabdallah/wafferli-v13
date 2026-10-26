@@ -104,18 +104,15 @@ export function FamilyFindsPage(){
   <div className="mx-auto max-w-[950px] space-y-4" data-testid="family-finds">
    <header className="relative overflow-hidden rounded-[1.6rem] border border-[#DCECDD] bg-[linear-gradient(115deg,#F2FAE9,#FFF3E6_66%,#FDEDF3)] p-5 sm:p-6">
     <div className="relative z-10 max-w-[95%] sm:max-w-[75%]">
-     <p className="text-[11px] font-bold uppercase tracking-wider text-[#4B896A]">{t("Loved by one family. Ready for another.","من عيلة لعيلة... والفرحة بتكمل.")}</p>
-     <h2 className="mt-1 text-2xl font-black text-[#28543E]">{t("Our Market","سوقنا")} <Heart className="inline size-5 text-[#C66F86]"/></h2>
-     <p className="mt-2 text-sm text-[#5A7566]">{t(
-      "Sell something useful, discover what you could swap it for, or share the joy at no cost.",
-      "بيع غرض مفيد، أو بدّله بشي تحتاجه عيلتك، أو شارك الفرحة بدون مقابل.")}</p>
+     <h2 className="text-2xl font-black text-[#28543E]">{t("Our Market","سوقنا")} <Heart className="inline size-5 text-[#C66F86]"/></h2>
+     <p className="mt-2 text-sm font-medium text-[#5A7566]">{t("Sell · Swap · Share the Joy","بيع · بدل · شارك الفرحة")}</p>
     </div>
    </header>
-   <div role="status" className="flex items-start gap-2 rounded-xl border border-[#D7E4DE] bg-white p-3 text-xs text-[#546F61]">
-    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#398A66]"/>
-    <p>{t("Private testing space: your listings and wishes are saved ONLY in this browser. No other families can see them, send offers or contact you yet. Do not add addresses, phone numbers, children's names or sensitive details.",
-     "مساحة تجريبية خاصة: الإعلانات وما تبحث عنه محفوظة فقط بهذا المتصفح. العائلات الأخرى لا تراها ولا يمكنها إرسال عروض أو التواصل بعد. لا تضف العنوان أو رقم الهاتف أو أسماء الأطفال أو معلومات خاصة.")}</p>
-   </div>
+   <details className="rounded-xl border border-[#D7E4DE] bg-white p-3 text-xs text-[#546F61]">
+    <summary className="min-h-10 cursor-pointer font-semibold">{t("Private pilot · Only you see your listings","تجربة خاصة · إعلاناتك إلك وحدك")}</summary>
+    <p className="mt-2 leading-relaxed">{t("Items stay in this browser. Other families cannot see or contact you yet. Do not add addresses, phone numbers, children's names or private details.",
+     "الأغراض محفوظة بهذا المتصفح. العائلات الأخرى لا تراها ولا يمكنها التواصل بعد. لا تضف العناوين أو أرقام الهواتف أو أسماء الأطفال أو معلومات خاصة.")}</p>
+   </details>
    <div className="grid grid-cols-2 gap-2" role="tablist" aria-label={t("Our Market sections","أقسام سوقنا")}>
     <button type="button" role="tab" aria-selected={pane==="offers"} onClick={()=>{setPane("offers");setForm(null);setError("");}}
      className={"min-h-12 rounded-xl border px-3 text-sm font-bold "+(pane==="offers"?"border-[#8EBFA2] bg-[#E9F6ED] text-[#28684A]":"border-[#E1EAE0] bg-white text-[#607365]")}>
