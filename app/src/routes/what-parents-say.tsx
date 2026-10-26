@@ -54,7 +54,7 @@ export function WhatParentsSayPage(){
  const openPlace=(id:string)=>{setSelected(id);setActiveTab("parents");setError("");setMode("detail");};
  const startReview=()=>{setDraft(ownReview?{age:ownReview.age,experience:ownReview.experience,safety:ownReview.safety,convenience:ownReview.convenience,wouldReturn:ownReview.wouldReturn,comment:ownReview.comment,providerSummaryOptIn:ownReview.providerSummaryOptIn,parentQuestionsOptIn:ownReview.parentQuestionsOptIn}:defaultReview);setSaved(false);setError("");setMode("review");};
  const submitPlace=(event:FormEvent)=>{
-  event.preventDefault();const proposed=createParentPlace({name:placeName,area:placeArea,category:placeCategory},uid(),new Date().toISOString());
+  event.preventDefault();const proposed=createParentPlace({name:placeName,area:placeCategory==="products"?"":placeArea,category:placeCategory},uid(),new Date().toISOString());
   if(!proposed){setError(t("Enter a place or product name and a general area.","اكتب اسم المكان أو المنتج ومنطقة عامة."));return;}
   const duplicate=places.find(p=>sameParentPlace(p,proposed));
   if(!duplicate)setPlaces(old=>[proposed,...old]);
@@ -66,6 +66,13 @@ export function WhatParentsSayPage(){
   const created=createParentReview(draft,selectedPlace.id,ownReview?.id??uid(),new Date().toISOString(),ownReview);
   if(!created){setError(t("Please share at least 20 characters of useful firsthand feedback (maximum 1,500).","شارك تجربتك الفعلية في ٢٠ حرفاً على الأقل (الحد الأقصى ١٥٠٠)."));return;}
   setReviews(old=>upsertParentReview(old,created));setError("");setSaved(true);setMode("detail");
+ };
+ const removePlace=()=>{
+  if(!selectedPlace)return;
+  if(typeof window!=="undefined"&&!window.confirm(t("Remove this locally saved entry and its review?","حذف هذا المكان أو المنتج وتجربته المحفوظة محلياً؟")))return;
+  setReviews(old=>old.filter(x=>x.placeId!==selectedPlace.id));
+  setPlaces(old=>old.filter(x=>x.id!==selectedPlace.id));
+  setSelected(null);setMode("browse");setSaved(false);
  };
  const removeReview=()=>{
   if(!ownReview)return;
@@ -139,7 +146,7 @@ export function WhatParentsSayPage(){
         <span className="grid size-14 shrink-0 place-items-center rounded-2xl" style={{background:c.soft,color:c.tone}}><Icon className="size-6"/></span>
         <span className="min-w-0 flex-1">
          <strong className="block truncate text-sm text-[#31493B]">{p.name}</strong>
-         <span className="mt-1 block text-xs text-[#718176]">{p.area} · {ar?c.ar:c.en}</span>
+         <span className="mt-1 block text-xs text-[#718176]">{p.area?p.area+" · ":""}{ar?c.ar:c.en}</span>
          <span className="mt-1 block text-[11px] text-[#4E8667]">{reportedReviewCount(reviews,p.id)===0?t("No saved reviews","لا توجد مراجعات محفوظة"):t("Your saved review","تجربتك المحفوظة")}</span>
         </span>
         <ChevronRight className="size-4 shrink-0 text-[#759481] rtl:rotate-180"/>
@@ -165,8 +172,8 @@ export function WhatParentsSayPage(){
      <label className="block space-y-1 text-sm font-semibold">{t("Category","الفئة")}
       <select className={field} value={placeCategory} onChange={e=>setPlaceCategory(e.target.value as ReviewCategory)}>
        {categoryCards.map(x=><option key={x.id} value={x.id}>{ar?x.ar:x.en}</option>)}</select></label>
-     <label className="block space-y-1 text-sm font-semibold">{t("General city or area (no exact address)","المدينة أو المنطقة العامة (بدون عنوان دقيق)")}
-      <input className={field} maxLength={80} required value={placeArea} onChange={e=>setPlaceArea(e.target.value)}/></label>
+     {placeCategory!=="products"&&<label className="block space-y-1 text-sm font-semibold">{t("General city or area (no exact address)","المدينة أو المنطقة العامة (بدون عنوان دقيق)")}
+      <input className={field} maxLength={80} required value={placeArea} onChange={e=>setPlaceArea(e.target.value)}/></label>}
      <p className="rounded-xl bg-[#F3F8F2] p-3 text-xs leading-relaxed text-[#64796A]">
       {t("Google Maps place selection and verified business matching aren't connected yet. We'll open public searches from the place page without copying reviews.",
        "الاختيار من خرائط جوجل ومطابقة الأماكن مش متصلين حالياً. ممكن تفتح نتائج بحث عامة من صفحة المكان.")}</p>
@@ -183,7 +190,7 @@ export function WhatParentsSayPage(){
        {currentCategory&&<currentCategory.icon className="size-7"/>}</span>
       <div className="min-w-0 flex-1">
        <h3 className="text-xl font-black text-[#294835]">{selectedPlace.name}</h3>
-       <p className="mt-1 flex items-center gap-1 text-xs text-[#708375]"><MapPin className="size-3"/>{selectedPlace.area} · {currentCategory&&(ar?currentCategory.ar:currentCategory.en)}</p>
+       <p className="mt-1 flex items-center gap-1 text-xs text-[#708375]"><MapPin className="size-3"/>{selectedPlace.area?selectedPlace.area+" · ":""}{currentCategory&&(ar?currentCategory.ar:currentCategory.en)}</p>
        <p className="mt-1 text-xs text-[#6B8474]">{t("Added by you · Not externally verified","أضفته أنت · غير موثّق من مصدر خارجي")}</p>
       </div>
      </div>
@@ -239,8 +246,8 @@ export function WhatParentsSayPage(){
       <h4 className="font-extrabold">{t("Explore public sources","شوف المصادر العامة")}</h4>
       <p className="text-sm text-[#64796C]">{t("Open existing information on the original websites. We do not scrape, reprint or invent online reviews in this pilot.",
        "افتح المعلومات الموجودة من مواقعها الأصلية. بهذه النسخة ما بننسخ أو نختلق مراجعات من الإنترنت.")}</p>
-      <a className={buttonSecondary+" w-full justify-between"} href={parentReviewExternalSearch(selectedPlace.name,selectedPlace.area,"maps")} target="_blank" rel="noopener noreferrer">
-       <span className="flex items-center gap-2"><MapPin className="size-4"/>{t("Look up on Google Maps","ابحث على خرائط جوجل")}</span><ExternalLink className="size-4"/></a>
+      {selectedPlace.category!=="products"&&<a className={buttonSecondary+" w-full justify-between"} href={parentReviewExternalSearch(selectedPlace.name,selectedPlace.area,"maps")} target="_blank" rel="noopener noreferrer">
+       <span className="flex items-center gap-2"><MapPin className="size-4"/>{t("Look up on Google Maps","ابحث على خرائط جوجل")}</span><ExternalLink className="size-4"/></a>}
       <a className={buttonSecondary+" w-full justify-between"} href={parentReviewExternalSearch(selectedPlace.name,selectedPlace.area,"web")} target="_blank" rel="noopener noreferrer">
        <span className="flex items-center gap-2"><Search className="size-4"/>{t("Search public reviews","ابحث عن مراجعات عامة")}</span><ExternalLink className="size-4"/></a>
       <div className="rounded-xl border border-[#E6E6D8] bg-[#FFFCF2] p-3">
