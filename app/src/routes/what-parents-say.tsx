@@ -207,6 +207,7 @@ export function WhatParentsSayPage(){
      </div>
      <button type="button" className={buttonPrimary+" w-full"} onClick={startReview}>
       <Plus className="size-4"/>{ownReview?t("Edit your experience","عدّل تجربتك"):t("Share your experience","شارك تجربتك")}</button>
+     <button type="button" onClick={removePlace} className="mt-2 inline-flex min-h-10 items-center gap-1 text-xs font-semibold text-[#A85D6E] underline"><Trash2 className="size-3"/>{t("Remove this private entry","احذف المدخل الخاص")}</button>
     </section>
     <section className={card+" space-y-3"}>
      <div role="tablist" aria-label={t("Review sources","مصادر المراجعات")} className="grid grid-cols-2 gap-2 rounded-xl bg-[#F0F5EF] p-1">
