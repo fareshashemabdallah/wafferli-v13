@@ -36,7 +36,8 @@ describe("Calm contextual Today redesign",()=>{
  });
  it("never presents invented sample currency or urgency without real saved records",async()=>{
   draw();
-  await waitFor(()=>expect(screen.getByRole("region",{name:"No urgent next action"})).toBeInTheDocument());
+  await waitFor(()=>expect(screen.getByRole("region",{name:"Family briefing"})).toHaveTextContent("Nothing urgent in your saved family records."));
+  expect(screen.queryByRole("region",{name:"No urgent next action"})).not.toBeInTheDocument();
   expect(screen.queryByTestId("today-one-action")).not.toBeInTheDocument();
   expect(screen.queryByText("Sophia's birthday")).not.toBeInTheDocument();
   expect(screen.queryByText("70 JOD")).not.toBeInTheDocument();
@@ -56,6 +57,8 @@ describe("Calm contextual Today redesign",()=>{
   const action=await screen.findByTestId("today-one-action");
   expect(action).toHaveTextContent("Birthday from calendar");
   expect(action).toHaveTextContent("Planned gift: 70 JOD");
+  expect(action).toHaveTextContent("Not paid");
+  expect(screen.getByText("Why this step?").closest("details")).not.toHaveAttribute("open");
   const continueLink=screen.getByRole("link",{name:/Compare gift options/});
   expect(continueLink).toHaveAttribute("href","/plans");
   fireEvent.click(continueLink);
