@@ -15,7 +15,7 @@ describe("single Dabberna family navigation",()=>{
  });
  it.each([
   ["/","today"],["/advisor","today"],["/finds","finds"],["/family","family"],["/plans","family"],["/money","money"],["/household","money"],
-  ["/calendar","family"],["/occasions","family"],["/space","family"]
+  ["/calendar","family"],["/occasions","family"],["/space","family"],["/what-parents-say","family"]
  ] as const)("assigns %s to the same visible family frame (%s)",(route,expected)=>{
   expect(areaFromRoute(route)).toBe(expected);
  });
