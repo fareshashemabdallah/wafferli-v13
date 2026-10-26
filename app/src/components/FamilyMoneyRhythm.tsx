@@ -58,11 +58,7 @@ export function FamilyMoneyRhythm({state,setState,onSpending,onCategories,reques
  return <section className="mx-auto max-w-[940px] space-y-3" aria-label={t("Family money rhythm","الإيقاع المالي للعيلة")} data-testid="family-money-rhythm">
   <div className="relative overflow-hidden rounded-[1.5rem] border border-[#DCEADC] bg-[linear-gradient(120deg,#EEF7E8,#FAF7E9_65%,#FFF0F1)] p-4 sm:p-6">
    <div className="relative z-10 max-w-[57%] sm:max-w-[66%]">
-    <p className="text-xs font-extrabold tracking-wide text-[#4C8D68]">{t("OUR MONEY · FAMILY RHYTHM","مال العيلة · الإيقاع المالي")}</p>
-    <h2 className="mt-2 text-xl font-black text-[#24573E] sm:text-2xl">{t("Spend wisely. Live well together.","اصرفوا بذكاء، وعيشوا منيح سوا.")}</h2>
-    <p className="mt-2 text-xs leading-relaxed text-[#688273]">{t(
-     "A clearer picture of what your family planned and actually spent.",
-     "صورة أوضح عن ميزانية العيلة ومصاريفها الفعلية.")}</p>
+    <h2 className="text-xl font-black text-[#24573E] sm:text-2xl">{t("Our Money","مال العيلة")}</h2>
    </div>
    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"} alt="" aria-hidden="true" loading="lazy"
     className="pointer-events-none absolute bottom-[-12px] end-0 h-[145px] w-[43%] object-contain object-bottom sm:h-[176px]"/>
@@ -91,9 +87,11 @@ export function FamilyMoneyRhythm({state,setState,onSpending,onCategories,reques
      className="min-h-11 px-3 text-xs font-bold text-[#397D58] underline">{t("Return to my plan","العودة لخطتي")}</button>
    </div>
   </section>}
-  {state.demo&&<p className="rounded-xl border border-[#E8D9BF] bg-[#FFF7E8] p-3 text-xs text-[#896C43]">
-   {t("These are sample financial figures, not your family's records.",
-    "هذه أرقام مالية تجريبية وليست سجلات العيلة.")}</p>}
+  {state.demo&&<div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#E8D9BF] bg-[#FFF7E8] p-3">
+   <p className="text-xs font-semibold text-[#896C43]">{t("Example figures · not your money","أرقام تجريبية · مش مال عيلتك")}</p>
+   <button type="button" onClick={startOwnMoney} className="min-h-11 rounded-xl bg-[#388A60] px-4 text-xs font-bold text-white">
+    {t("Use my own figures","استخدم أرقامي")}</button>
+  </div>
   <FamilyMoneyPrototypeHome state={state} setState={setState} forecast={forecast}
    onIncome={()=>setQuickEdit("income")} onQuickAdd={()=>setQuickExpenseOpen(true)}
    onEditCategory={setEditingCategory}/>
