@@ -9,7 +9,7 @@ import {RhythmPageHeader} from "./RhythmPageHeader";
 import "./adventureWorldSkin.css";
 import {LocalSaveNotice} from "./LocalSaveNotice";
 
-// Four parent-friendly destinations; Ask remains persistent and contextual.
+// Five independent destinations; Ask remains persistent and contextual.
 // Only essential information remains in this menu; unfinished discovery tools are retired.
 const tools=[
  {to:"/about" as const,en:"About & privacy",ar:"حول دبّرنا والخصوصية"}
@@ -106,14 +106,14 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
    </main>
   </div>
   <nav aria-label={mobileName}
-   className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#D1E9D8] bg-[#F9FFF9]/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,91,60,.16)] backdrop-blur-xl lg:hidden">
+   className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-[#D1E9D8] bg-[#F9FFF9]/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,91,60,.16)] backdrop-blur-xl lg:hidden">
    {familyDestinations.map(item=>{
     const Icon=item.icon,active=!secondaryShopping&&item.id===area;
     return <Link key={item.id} to={item.to} aria-current={active?"page":undefined}
-     className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-xs font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]"
+     className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-xs font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]"
      style={active?{color:"#185D42",background:"#DDF2E2"}:{color:"#678072"}}>
      <Icon className="size-[19px]" aria-hidden="true"/>
-     <span className="text-[10px]">{ar?item.shortAr:item.shortEn}</span>
+     <span className="max-w-full text-center text-[10px] leading-[1.15] break-words">{ar?item.shortAr:item.shortEn}</span>
     </Link>;
    })}
   </nav>
