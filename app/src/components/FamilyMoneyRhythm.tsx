@@ -87,11 +87,11 @@ export function FamilyMoneyRhythm({state,setState,onSpending,onCategories,reques
      className="min-h-11 px-3 text-xs font-bold text-[#397D58] underline">{t("Return to my plan","العودة لخطتي")}</button>
    </div>
   </section>}
-  {state.demo&&<div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#E8D9BF] bg-[#FFF7E8] p-3">
+  {state.demo&&!requestedSetupStep&&<div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#E8D9BF] bg-[#FFF7E8] p-3">
    <p className="text-xs font-semibold text-[#896C43]">{t("Example figures · not your money","أرقام تجريبية · مش مال عيلتك")}</p>
    <button type="button" onClick={startOwnMoney} className="min-h-11 rounded-xl bg-[#388A60] px-4 text-xs font-bold text-white">
     {t("Use my own figures","استخدم أرقامي")}</button>
-  </div>
+  </div>}
   <FamilyMoneyPrototypeHome state={state} setState={setState} forecast={forecast}
    onIncome={()=>setQuickEdit("income")} onQuickAdd={()=>setQuickExpenseOpen(true)}
    onEditCategory={setEditingCategory}/>
