@@ -35,7 +35,7 @@ describe("What Parents Say private pilot integrity",()=>{
  });
  it("constructs outbound public searches safely, not fake review summaries",()=>{
   const link=parentReviewExternalSearch("The Place & Co","Amman","maps");
-  expect(link).toStartWith("https://www.google.com/maps/search/");
+  expect(link.startsWith("https://www.google.com/maps/search/")).toBe(true);
   expect(link).toContain("The%20Place%20%26%20Co");
   expect(parentReviewExternalSearch("Club","Amman","web")).toContain("www.google.com/search");
  });
