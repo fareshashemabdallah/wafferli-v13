@@ -17,8 +17,7 @@ export function TodayQuickActions({onAsk,onOtherAction}:{onAsk:()=>void;onOtherA
   </button>;
  return <section aria-label={t("Quick family actions","خطوات العائلة السريعة")}
   className="rounded-[1.6rem] border border-[#F0E4E9] bg-[#FFFDFD] p-3 sm:p-4">
-  <h2 className="text-base font-extrabold text-[#25354B]">{t("What do you need to do?","شو بدك تعمل هلّق؟")}</h2>
-  <p className="mt-1 text-xs text-[#748093]">{t("Record a real expense, or ask Dabberna.","سجّل مصروف فعلي أو اسأل دبّرنا.")}</p>
+  <h2 className="text-base font-extrabold text-[#25354B]">{t("Quick actions","خطوات سريعة")}</h2>
   <div className="mt-3 flex flex-wrap gap-2">
    {action(t("Add expense","سجّل مصروف"),<Receipt className="size-5"/>,()=>{
     onOtherAction?.();setExpenseOpen(v=>!v);},expenseOpen,"#389683")}

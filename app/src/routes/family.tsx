@@ -45,10 +45,6 @@ export function FamilyLifePage(){
  const card="rounded-[1.55rem] border border-[#DDEBDD] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,82,64,.18)] sm:p-5";
  return <AppShell title={label("Family Life","حياة العيلة")}>
   <div className="space-y-4">
-   <p className="px-1 text-sm leading-relaxed text-[#657185]">
-    {label("Your family's time, plans and responsibilities — organized together.",
-     "مواعيد العيلة وخططها ومسؤولياتها — كلها بمكان واحد.")}
-   </p>
    <nav aria-label={label("Family Life sections","أقسام حياة العيلة")} className="rounded-2xl border border-[#DCE9DF] bg-white p-2">
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
      {views.map(item=>{
@@ -68,7 +64,6 @@ export function FamilyLifePage(){
      <div className="flex flex-wrap items-center justify-between gap-3">
       <div>
        <h2 className="text-lg font-extrabold text-[#25354B]">{label("Our family life","حياة عيلتنا")}</h2>
-       <p className="mt-1 text-xs text-[#738094]">{label("Your saved plans, dates and tasks in one place.","خططك ومواعيدك ومهامك المسجّلة في مكان واحد.")}</p>
       </div>
       <Link to="/space" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#EEE1E8] bg-[#FFF9FB] px-3 text-xs font-semibold text-[#9C4F78]">
        <UsersRound className="size-4"/>{label("Manage family members","أفراد العيلة")}
@@ -149,10 +144,11 @@ export function FamilyLifePage(){
    {view==="calendar"&&<FamilyCalendarWorkspace key={calendarFocus??"calendar"} embedded {...(calendarFocus?{focusDate:calendarFocus}:{})}/>}
    {view==="plans"&&<PlansWorkspace embedded/>}
    {view==="tasks"&&<FamilyTasksPanel/>}
-   <p className="px-1 text-[11px] leading-relaxed text-[#7B8491]">
-    {label("Family records are currently saved in this browser. Shared household accounts and background reminders are not yet active.",
-     "سجلات العيلة محفوظة حالياً بهذا المتصفح، ولا توجد مزامنة عائلية أو تذكيرات تلقائية بعد.")}
-   </p>
+   <details className="px-1 text-xs text-[#7B8491]">
+    <summary className="min-h-10 cursor-pointer font-semibold">{label("Private pilot · Device-only","تجربة خاصة · على هذا الجهاز")}</summary>
+    <p>{label("Family records are saved in this browser. Shared household accounts and background reminders are not active.",
+     "سجلات العيلة محفوظة بهذا المتصفح، ولا توجد مزامنة عائلية أو تذكيرات تلقائية بعد.")}</p>
+   </details>
   </div>
  </AppShell>;
 }

@@ -85,7 +85,7 @@ function MoneyPage() {
       </div></>}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
-        <span className="text-xs text-muted-foreground">{tr("Saved on this device only. Use fictional figures during the pilot.")}</span>
+        <span className="text-xs text-muted-foreground">{ar?"محفوظ على هذا الجهاز · استخدم أرقاماً تجريبية":"Saved here · Use fictional figures during pilot"}</span>
         <details className="ms-auto">
          <summary className="min-h-10 cursor-pointer text-xs font-medium text-muted-foreground">Settings / إعدادات</summary>
          <div className="mt-2 max-w-[740px] space-y-3 rounded-xl border border-[#DFE8DB] bg-white p-3">
@@ -123,26 +123,14 @@ function MoneyPage() {
         onBills={()=>setSection("planning")} onSpending={()=>setSection("spending")}
         onCategories={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"})}
         requestedSetupStep={requestedSetupStep}/>}
-      {section==="overview"&&s.demo&&<div className="mt-3 rounded-2xl border border-[#EBDABE] bg-[#FFF8ED] p-4">
-       <p className="text-sm font-semibold">{ar?"عم تشوف بيانات تجريبية":"You are viewing sample finances"}</p>
-       <p className="mt-1 text-xs text-[#826E56]">{ar?
-        "ابدأ بسجلات فعلية فقط بعد الموافقة. رح نحافظ على ملفات العيلة والتقويم والخطط.":
-        "You can switch to real Money when ready. Family profiles, calendar and plans stay intact."}</p>
-       <button type="button" className="mt-2 min-h-11 rounded-xl bg-[#36855E] px-4 text-xs font-bold text-white"
-         onClick={()=>{if(window.confirm(ar?
-          "تريد استبدال بيانات المالية التجريبية فقط، مع الاحتفاظ بسجلات العيلة؟":
-          "Replace only sample Money with a blank real Money record? Keep all family, calendar and plan records?"))setS(old=>old.demo?emptyRealMoney():old);}}>
-        {ar?"ابدأ بماليتي الفعلية":"Start with real Money"}
-       </button>
-      </div>}
-      {section==="planning"&&<>
+            {section==="planning"&&<>
       <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"الفواتير والدفعات":"Your bills & payments"}</h2>
-       <p className="mt-1 text-sm text-muted-foreground">{ar?"سجّل موعد الاستحقاق مرة واحدة، وبعد الدفع أكّد المبلغ الحقيقي. لإدخال مشترياتك اليومية، استخدم المصاريف.":"Add each bill once with its due date, then confirm the payment when it happens. Use Spending for everyday purchases."}</p></div>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?"سجّل الموعد مرة، وأكّد الدفع عند حدوثه.":"Add once. Confirm when paid."}</p></div>
       <CashFlowPlanner state={s} members={members} update={setS} />
       </>}
       {section==="spending"&&<>
       <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"سجّل اللي دفعته":"Record what you spent"}</h2>
-       <p className="mt-1 text-sm text-muted-foreground">{ar?"سجّل المصروف اليومي مرة واحدة. الفواتير المتكررة ومواعيد الدفع تجدها بقسم الفواتير.":"Add everyday purchases here. For rent, tuition or other payments with due dates, use Bills instead."}</p>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?"المصاريف المدفوعة فقط · الدفعات المجدولة في الفواتير.":"Paid expenses only · Scheduled payments are in Bills."}</p>
        <button type="button" className="mt-2 text-sm font-semibold text-brand underline underline-offset-2" onClick={()=>setSection("planning")}>{ar?"عندي فاتورة أو دفعة قادمة":"I have an upcoming bill or payment"} →</button>
       </div>
       {(s.demo||s.categories.length===0)&&<div className="mb-4 rounded-xl border border-[#DBE5D8] bg-[#F2F7EF] p-4">
