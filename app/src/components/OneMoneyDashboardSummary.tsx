@@ -23,8 +23,7 @@ export function OneMoneyDashboardSummary({state,forecast,onIncome,onExpense,onOp
  ];
  return <div className="space-y-3" data-testid="unified-money-dashboard">
   <div className="flex flex-wrap items-center justify-between gap-2">
-   <div><h3 className="text-lg font-extrabold text-[#275E44]">{t("Your family's money this month","مالية العيلة بهالشهر")}</h3>
-    <p className="text-xs text-[#738676]">{t("One picture · all amounts you recorded","صورة واحدة · كل الأرقام اللي دخلتها")}</p></div>
+   <h3 className="text-lg font-extrabold text-[#275E44]">{t("This month","هذا الشهر")}</h3>
    <button type="button" onClick={onExpense}
     className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#408F64] px-4 text-xs font-extrabold text-white">＋ {t("Add expense","سجّل مصروف")}</button>
   </div>
