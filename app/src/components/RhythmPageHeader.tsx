@@ -16,6 +16,9 @@ export function rhythmChapter(path:string){
  if(path==="/space"||path.startsWith("/household"))return {en:"Know our family",ar:"تعرّف على عيلتنا",
   sentenceEn:"Add only details that improve guidance. Profiles and birthdays are optional; manage them once here.",
   sentenceAr:"ضيف بس المعلومات المفيدة للنصيحة؛ الملفات وأعياد الميلاد اختيارية ومن مكان واحد."};
+ if(path==="/what-parents-say")return {en:"What Parents Say",ar:"شو بيقولوا الأهل؟",
+  sentenceEn:"Learn from real experiences. Keep external information separate, and never confuse a review with proof of child safety.",
+  sentenceAr:"استفيد من تجارب الأهل. فرّق بين مصادر الإنترنت والتجارب المباشرة، ولا تعتبر التقييم شهادة سلامة."};
  if(path==="/about")return {en:"Trust",ar:"الثقة",
   sentenceEn:"Understand what Dabberna can verify, what remains optional and who controls your information.",
   sentenceAr:"اعرف شو دبّرنا بتقدر تتأكد منه، وشو اختياري، وكيف تتحكّم بمعلوماتك."};

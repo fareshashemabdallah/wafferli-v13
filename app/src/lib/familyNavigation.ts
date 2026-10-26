@@ -14,7 +14,7 @@ export function areaFromRoute(path:string):FamilyArea{
  if(path.startsWith("/money")||path.startsWith("/household"))return "money";
  if(path.startsWith("/finds"))return "finds";
  if(path.startsWith("/advisor"))return "today";
- if(path.startsWith("/family")||path.startsWith("/plans")||
+ if(path.startsWith("/what-parents-say")||path.startsWith("/family")||path.startsWith("/plans")||
   path.startsWith("/calendar")||path.startsWith("/occasions")||
   path.startsWith("/space"))return "family";
  return "today";

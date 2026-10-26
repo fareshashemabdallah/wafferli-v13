@@ -15,6 +15,7 @@ import { Route as OccasionsRouteImport } from './routes/occasions'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as FamilyRouteImport } from './routes/family'
 import { Route as FindsRouteImport } from './routes/finds'
+import { Route as WhatParentsSayRouteImport } from './routes/what-parents-say'
 import { Route as AdvisorRouteImport } from './routes/advisor'
 import { Route as MoneyRouteImport } from './routes/money'
 import { Route as PlansRouteImport } from './routes/plans'
@@ -39,6 +40,11 @@ const CalendarRoute = CalendarRouteImport.update({
 const FindsRoute = FindsRouteImport.update({
   id: '/finds',
   path: '/finds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhatParentsSayRoute = WhatParentsSayRouteImport.update({
+  id: '/what-parents-say',
+  path: '/what-parents-say',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FamilyRoute = FamilyRouteImport.update({
@@ -78,6 +84,7 @@ const HouseholdRoute = HouseholdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/what-parents-say': typeof WhatParentsSayRoute
   '/plans': typeof PlansRoute
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/household': typeof HouseholdRoute
 }
 export interface FileRoutesByTo {
+  '/what-parents-say': typeof WhatParentsSayRoute
   '/plans': typeof PlansRoute
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
@@ -104,6 +112,7 @@ export interface FileRoutesByTo {
   '/household': typeof HouseholdRoute
 }
 export interface FileRoutesById {
+  '/what-parents-say': typeof WhatParentsSayRoute
   '/plans': typeof PlansRoute
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
@@ -120,6 +129,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/what-parents-say'
     | '/'
     | '/plans'
     | '/advisor'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/household'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/what-parents-say'
     | '/'
     | '/plans'
     | '/advisor'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/space'
     | '/household'
   id:
+    | '/what-parents-say'
     | '__root__'
     | '/plans'
     | '/'
@@ -160,6 +172,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  WhatParentsSayRoute: typeof WhatParentsSayRoute
   IndexRoute: typeof IndexRoute
   AdvisorRoute: typeof AdvisorRoute
   CalendarRoute: typeof CalendarRoute
@@ -175,6 +188,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/what-parents-say': {
+      id: '/what-parents-say'
+      path: '/what-parents-say'
+      fullPath: '/what-parents-say'
+      preLoaderRoute: typeof WhatParentsSayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -256,6 +276,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  WhatParentsSayRoute: WhatParentsSayRoute,
   IndexRoute: IndexRoute,
   AdvisorRoute: AdvisorRoute,
   CalendarRoute: CalendarRoute,
