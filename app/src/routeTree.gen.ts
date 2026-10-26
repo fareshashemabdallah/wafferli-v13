@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as OccasionsRouteImport } from './routes/occasions'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as FamilyRouteImport } from './routes/family'
+import { Route as FindsRouteImport } from './routes/finds'
 import { Route as AdvisorRouteImport } from './routes/advisor'
 import { Route as MoneyRouteImport } from './routes/money'
 import { Route as PlansRouteImport } from './routes/plans'
@@ -33,6 +34,11 @@ const AdvisorRoute = AdvisorRouteImport.update({
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindsRoute = FindsRouteImport.update({
+  id: '/finds',
+  path: '/finds',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FamilyRoute = FamilyRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
   '/calendar': typeof CalendarRoute
+  '/finds': typeof FindsRoute
   '/family': typeof FamilyRoute
   '/occasions': typeof OccasionsRoute
   '/about': typeof AboutRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
   '/calendar': typeof CalendarRoute
+  '/finds': typeof FindsRoute
   '/family': typeof FamilyRoute
   '/occasions': typeof OccasionsRoute
   '/about': typeof AboutRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/advisor': typeof AdvisorRoute
   '/calendar': typeof CalendarRoute
+  '/finds': typeof FindsRoute
   '/family': typeof FamilyRoute
   '/occasions': typeof OccasionsRoute
   '/about': typeof AboutRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/advisor'
     | '/calendar'
+    | '/finds'
     | '/family'
     | '/occasions'
     | '/about'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/advisor'
     | '/calendar'
+    | '/finds'
     | '/family'
     | '/occasions'
     | '/about'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/advisor'
     | '/calendar'
+    | '/finds'
     | '/family'
     | '/occasions'
     | '/about'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdvisorRoute: typeof AdvisorRoute
   CalendarRoute: typeof CalendarRoute
+  FindsRoute: typeof FindsRoute
   FamilyRoute: typeof FamilyRoute
   OccasionsRoute: typeof OccasionsRoute
   AboutRoute: typeof AboutRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/calendar'
       fullPath: '/calendar'
       preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/finds': {
+      id: '/finds'
+      path: '/finds'
+      fullPath: '/finds'
+      preLoaderRoute: typeof FindsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/family': {
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdvisorRoute: AdvisorRoute,
   CalendarRoute: CalendarRoute,
+  FindsRoute: FindsRoute,
   FamilyRoute: FamilyRoute,
   OccasionsRoute: OccasionsRoute,
   AboutRoute: AboutRoute,

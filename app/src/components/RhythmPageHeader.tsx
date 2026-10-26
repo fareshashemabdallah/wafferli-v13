@@ -9,6 +9,7 @@ export function rhythmChapter(path:string){
  const chapters={
   today:{en:"Today",ar:"اليوم",sentenceEn:"One clear view of your family journey.",sentenceAr:"صورة واضحة لرحلة عيلتك."},
   money:{en:"Understand",ar:"افهم",sentenceEn:"Edit the real figures behind your story. Plans, bills and recorded spending are different things.",sentenceAr:"عدّل الأرقام الأساسية لحكايتكم؛ الخطة والفاتورة والمصروف المدفوع أشياء مختلفة."},
+  finds:{en:"Share & discover",ar:"شارك واكتشف",sentenceEn:"Pass along something useful: sell, swap or share the joy. Private preview until community safeguards are ready.",sentenceAr:"بيع أو بدّل أو شارك الفرحة. التجربة حالياً خاصة حتى تجهز حماية المجتمع."},
   ask:{en:"Decide",ar:"قرّر",sentenceEn:"Compare realistic choices. Only you decide what becomes a saved family plan.",sentenceAr:"قارن خيارات واقعية؛ أنت وحدك بتقرر شو يتحوّل لخطة محفوظة."},
   family:{en:"Prepare & act",ar:"تحضّر ونفّذ",sentenceEn:"Your saved dates and plans stay connected as one source of truth.",sentenceAr:"المواعيد والخطط المحفوظة بتبقى مترابطة بدون نسخ ثانية."}
  } as const;

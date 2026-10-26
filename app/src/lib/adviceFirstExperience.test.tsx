@@ -18,12 +18,12 @@ afterEach(()=>{cleanup();window.localStorage.clear();vi.restoreAllMocks()});
 const draw=(view:ReactNode)=>render(<I18nProvider>{view}</I18nProvider>);
 const event={id:"school-gala",title:"School celebration",date:dateKey(shiftDays(new Date(),5)),kind:"school",annual:false};
 describe("Dabberna advice-first parent experience",()=>{
- it("shows three connected family areas with persistent Ask and settings",()=>{
+ it("shows four connected family areas with persistent Ask and settings",()=>{
   draw(<AppShell><p>Family briefing</p></AppShell>);
   const navs=screen.getAllByRole("navigation",{name:"Main"});
   expect(navs).toHaveLength(2);
   for(const nav of navs){
-   expect(within(nav).getAllByRole("link").map(x=>x.getAttribute("href"))).toEqual(["/","/money","/family"]);
+   expect(within(nav).getAllByRole("link").map(x=>x.getAttribute("href"))).toEqual(["/","/money","/finds","/family"]);
   }
   expect(screen.getAllByRole("link",{name:/Family & settings/}).length).toBeGreaterThan(0);
   expect(screen.getByRole("link",{name:"Ask Dabberna anywhere"})).toHaveAttribute("href","/advisor");

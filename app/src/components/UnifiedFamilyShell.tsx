@@ -9,7 +9,7 @@ import {RhythmPageHeader} from "./RhythmPageHeader";
 import "./adventureWorldSkin.css";
 import {LocalSaveNotice} from "./LocalSaveNotice";
 
-// Exactly three primary destinations; Ask remains persistent and contextual.
+// Four parent-friendly destinations; Ask remains persistent and contextual.
 // Only essential information remains in this menu; unfinished discovery tools are retired.
 const tools=[
  {to:"/about" as const,en:"About & privacy",ar:"حول دبّرنا والخصوصية"}
@@ -106,7 +106,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
    </main>
   </div>
   <nav aria-label={mobileName}
-   className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-[#D1E9D8] bg-[#F9FFF9]/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,91,60,.16)] backdrop-blur-xl lg:hidden">
+   className="pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#D1E9D8] bg-[#F9FFF9]/95 px-1 pt-2 shadow-[0_-10px_30px_-20px_rgba(38,91,60,.16)] backdrop-blur-xl lg:hidden">
    {familyDestinations.map(item=>{
     const Icon=item.icon,active=!secondaryShopping&&item.id===area;
     return <Link key={item.id} to={item.to} aria-current={active?"page":undefined}

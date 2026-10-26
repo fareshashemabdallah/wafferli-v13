@@ -9,11 +9,11 @@ vi.mock("@tanstack/react-router",()=>({
 }));
 afterEach(()=>{cleanup();localStorage.clear();vi.restoreAllMocks();});
 describe("one Dabberna navigation and no retired feature entry points",()=>{
- it("keeps just Today, Money and Family as primary destinations with contextual Ask",()=>{
+ it("keeps Today, Money, Family Finds and Family as primary destinations with contextual Ask",()=>{
   render(<I18nProvider><AppShell title="Our Plans"><p>Saved plan details</p></AppShell></I18nProvider>);
   const navs=screen.getAllByRole("navigation",{name:"Main"});
   expect(navs).toHaveLength(2);
-  for(const nav of navs)expect(within(nav).getAllByRole("link")).toHaveLength(3);
+  for(const nav of navs)expect(within(nav).getAllByRole("link")).toHaveLength(4);
   expect(screen.getByRole("heading",{level:1,name:"Our Plans"})).toBeInTheDocument();
   expect(screen.getByRole("link",{name:"Ask Dabberna anywhere"})).toHaveAttribute("href","/advisor");
   expect(localStorage.getItem("wafferli.v13.money")).toBeNull();
