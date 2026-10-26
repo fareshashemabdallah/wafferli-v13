@@ -16,12 +16,12 @@ vi.mock("@/components/LiveFamilyAdvisor",()=>({LiveFamilyAdvisor:()=> <section d
 vi.mock("@/lib/liveAiClient",()=>({LIVE_AI_UI_ENABLED:false}));
 afterEach(cleanup);
 describe("Dabberna one rhythm across pages",()=>{
- it("uses four main areas with Ask available throughout",()=>{
-  expect(familyDestinations.map(x=>x.to)).toEqual(["/","/money","/finds","/family"]);
-  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Market","Family"]);
+ it("uses five independent areas with Ask available throughout",()=>{
+  expect(familyDestinations.map(x=>x.to)).toEqual(["/","/money","/what-parents-say","/finds","/family"]);
+  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Parents Say","Market","Family"]);
  });
  it("gives Money, Decide, Calendar and About the same compact title treatment",()=>{
-  for(const route of ["/money","/advisor","/calendar","/about"]){
+  for(const route of ["/money","/advisor","/calendar","/about","/what-parents-say"]){
    const {unmount}=render(<I18nProvider><RhythmPageHeader path={route} title="Chapter title"/></I18nProvider>);
    expect(screen.getByRole("heading",{name:"Chapter title",level:1})).toBeInTheDocument();
    expect(screen.getByRole("link",{name:"Today's story"})).toHaveAttribute("href","/");
