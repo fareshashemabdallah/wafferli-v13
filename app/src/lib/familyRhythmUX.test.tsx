@@ -18,7 +18,7 @@ afterEach(cleanup);
 describe("Dabberna one rhythm across pages",()=>{
  it("uses four main areas with Ask available throughout",()=>{
   expect(familyDestinations.map(x=>x.to)).toEqual(["/","/money","/finds","/family"]);
-  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Finds","Family"]);
+  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Market","Family"]);
  });
  it("gives Money, Decide, Calendar and About the same compact title treatment",()=>{
   for(const route of ["/money","/advisor","/calendar","/about"]){
