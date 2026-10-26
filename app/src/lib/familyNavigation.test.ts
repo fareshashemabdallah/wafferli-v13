@@ -5,7 +5,7 @@ describe("single Dabberna family navigation",()=>{
  it("has four unique family areas in both languages",()=>{
   expect(familyDestinations.map(x=>x.id)).toEqual(["today","money","finds","family"]);
   expect(new Set(familyDestinations.map(x=>x.to)).size).toBe(4);
-  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Finds","Family"]);
+  expect(familyDestinations.map(x=>x.shortEn)).toEqual(["Today","Money","Market","Family"]);
   for(const x of familyDestinations){
    expect(x.en.length).toBeGreaterThan(0);
    expect(x.ar.length).toBeGreaterThan(0);
