@@ -1,6 +1,6 @@
-import {createFileRoute,Link} from "@tanstack/react-router";
+import {createFileRoute} from "@tanstack/react-router";
 import {useState,type FormEvent} from "react";
-import {ArrowLeft,ArrowRight,CheckCircle2,ChevronRight,Compass,ExternalLink,HeartHandshake,MapPin,MessageCircle,Plus,Search,ShieldAlert,ShieldCheck,ShoppingBag,Sparkles,Trash2,UsersRound,UtensilsCrossed,Waves} from "lucide-react";
+import {ArrowLeft,CheckCircle2,ChevronRight,Compass,ExternalLink,HeartHandshake,MapPin,MessageCircle,Plus,Search,ShieldAlert,ShieldCheck,ShoppingBag,Sparkles,Trash2,UsersRound,UtensilsCrossed,Waves} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {useI18n} from "@/lib/i18n";
 import {uid,useLocalState} from "@/lib/storage";
@@ -314,7 +314,6 @@ export function WhatParentsSayPage(){
    </section>}
    <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-[#79877F]">
     <p>{t("Our promise: genuine perspectives, transparent sources and no pretend safety certifications.","وعدنا: تجارب صادقة، مصادر واضحة، وبدون شهادات سلامة وهمية.")}</p>
-    <Link to="/family" className="inline-flex min-h-10 items-center gap-1 font-bold text-[#4A8664] underline">{t("Family Life","حياة العيلة")}<ArrowRight className="size-4 rtl:rotate-180"/></Link>
    </div>
   </div>
  </AppShell>;

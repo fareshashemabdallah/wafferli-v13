@@ -30,6 +30,7 @@ describe("Family Life: one pillar with all existing family functionality",()=>{
  it("offers one accessible in-page workspace for Calendar, Plans and Responsibilities",async()=>{
   draw();
   expect(screen.getByRole("heading",{level:1,name:"Family Life"})).toBeInTheDocument();
+  expect(screen.queryByTestId("parents-say-entry")).not.toBeInTheDocument();
   const nav=screen.getByRole("navigation",{name:"Family Life sections"});
   expect(nav.querySelectorAll("button")).toHaveLength(4);
   fireEvent.click(screen.getByRole("button",{name:"Special Moments"}));

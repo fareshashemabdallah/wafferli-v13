@@ -1,6 +1,6 @@
 import {createFileRoute,Link} from "@tanstack/react-router";
 import {useState} from "react";
-import {CalendarDays,CalendarHeart,ClipboardList,HeartHandshake,UsersRound,CheckCircle2,ChevronRight,MapPinned,MessageCircleHeart,ShieldCheck} from "lucide-react";
+import {CalendarDays,CalendarHeart,ClipboardList,HeartHandshake,UsersRound,CheckCircle2,ChevronRight,MapPinned} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {PlansWorkspace} from "@/routes/plans";
@@ -49,15 +49,6 @@ export function FamilyLifePage(){
     {label("Your family's time, plans and responsibilities — organized together.",
      "مواعيد العيلة وخططها ومسؤولياتها — كلها بمكان واحد.")}
    </p>
-   <Link to="/what-parents-say" data-testid="parents-say-entry" className="group flex min-h-[115px] items-center gap-3 rounded-[1.5rem] border border-[#EADBE4] bg-[linear-gradient(110deg,#FFF4F5,#F8F0F6_55%,#F1F9ED)] p-4 shadow-[0_14px_35px_-30px_rgba(94,65,86,.35)] transition hover:border-[#C98DAD] focus-visible:ring-2 focus-visible:ring-[#B56A91] sm:p-5">
-    <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#F8E3EB] text-[#B65F89]"><MessageCircleHeart className="size-6"/></span>
-    <span className="min-w-0 flex-1">
-     <span className="block text-base font-black text-[#4E4350]">{label("What Parents Say","شو بيقولوا الأهل؟")}</span>
-     <span className="mt-1 block text-xs leading-relaxed text-[#7B6D77]">{label("Explore family-focused questions and prepare your own firsthand reviews of clubs, outings and children's products.","اكتشف الأسئلة اللي بتهم الأهل وجهّز تجربتك عن النوادي والطلعات ومنتجات الأطفال.")}</span>
-     <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[#986380]"><ShieldCheck className="size-3"/>{label("Private pilot · Experience-focused","تجربة خاصة · من واقع الأهل")}</span>
-    </span>
-    <ChevronRight className="size-5 shrink-0 text-[#B26B8D] rtl:rotate-180"/>
-   </Link>
    <nav aria-label={label("Family Life sections","أقسام حياة العيلة")} className="rounded-2xl border border-[#DCE9DF] bg-white p-2">
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
      {views.map(item=>{

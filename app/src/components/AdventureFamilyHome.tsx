@@ -9,7 +9,6 @@ import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPrefe
 import {buildTodayActionPolicy,type TodayAction,type TodayWeekItem} from "@/lib/todayActionPolicy";
 import {TodayQuickActions} from "./TodayQuickActions";
 import {RobotBuddy} from "./AdventureArtwork";
-import {WhatParentsSayTodayCard} from "./WhatParentsSayTodayCard";
 
 const panel="rounded-[1.5rem] border border-[#DFE8DE] bg-white/95 p-4 shadow-[0_12px_30px_-27px_rgba(44,71,55,.25)] sm:p-5";
 /** Today is one contextual briefing, not a second Money or Family editor.
@@ -128,8 +127,6 @@ export function AdventureFamilyHome(){
        "مش ضروري نختلق مهمة. أضف شي بس وقت يكون مهم.")}</p></div>
     </div>
    </section>:null}
-
-  <WhatParentsSayTodayCard/>
 
   <div className="grid gap-3 md:grid-cols-2">
    <section className={panel} aria-label={t("This week","هذا الأسبوع")}>

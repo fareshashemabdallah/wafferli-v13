@@ -16,17 +16,12 @@ afterEach(()=>{cleanup();vi.restoreAllMocks();localStorage.clear()});
 const put=(key:string,value:unknown)=>localStorage.setItem("wafferli.v13."+key,JSON.stringify(value));
 const draw=()=>render(<I18nProvider><AdventureFamilyHome/></I18nProvider>);
 describe("Calm contextual Today redesign",()=>{
- it("highlights What Parents Say without replacing the family briefing or adding a fifth tab",()=>{
+ it("does not embed What Parents Say in Today; it has its own main destination",()=>{
   draw();
-  const spotlight=screen.getByTestId("today-parents-say");
-  expect(spotlight).toHaveTextContent("What Parents Say");
-  expect(spotlight).toHaveTextContent("Private pilot: community reviews and live online summaries are not connected yet.");
-  const link=screen.getByRole("link",{name:"Explore What Parents Say"});
-  expect(link).toHaveAttribute("href","/what-parents-say");
-  expect(spotlight).toContainElement(link);
+  expect(screen.queryByTestId("today-parents-say")).not.toBeInTheDocument();
+  expect(screen.queryByRole("link",{name:/Explore What Parents Say/})).not.toBeInTheDocument();
   expect(screen.getByRole("region",{name:"Family briefing"})).toBeInTheDocument();
   expect(localStorage.getItem("wafferli.v13.parentsSayReviews")).toBeNull();
-  expect(localStorage.getItem("wafferli.v13.money")).toBeNull();
  });
  it("renders the family artwork and exactly one family briefing, never the four money focus modes",async()=>{
   draw();

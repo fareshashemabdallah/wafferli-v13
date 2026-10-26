@@ -9,14 +9,29 @@ vi.mock("@tanstack/react-router",()=>({
 }));
 afterEach(()=>{cleanup();localStorage.clear();vi.restoreAllMocks();});
 describe("one Dabberna navigation and no retired feature entry points",()=>{
- it("keeps Today, Money, Family Finds and Family as primary destinations with contextual Ask",()=>{
+ it("keeps five independent top-level destinations with contextual Ask",()=>{
   render(<I18nProvider><AppShell title="Our Plans"><p>Saved plan details</p></AppShell></I18nProvider>);
   const navs=screen.getAllByRole("navigation",{name:"Main"});
   expect(navs).toHaveLength(2);
-  for(const nav of navs)expect(within(nav).getAllByRole("link")).toHaveLength(4);
+  for(const nav of navs){
+   const links=within(nav).getAllByRole("link");
+   expect(links).toHaveLength(5);
+   expect(links.map(link=>link.getAttribute("href"))).toEqual(["/","/money","/what-parents-say","/finds","/family"]);
+  }
   expect(screen.getByRole("heading",{level:1,name:"Our Plans"})).toBeInTheDocument();
   expect(screen.getByRole("link",{name:"Ask Dabberna anywhere"})).toHaveAttribute("href","/advisor");
   expect(localStorage.getItem("wafferli.v13.money")).toBeNull();
+ });
+ it("highlights What Parents Say itself, not Family, when its route opens",()=>{
+  window.location.hash="#/what-parents-say";
+  try{
+   render(<I18nProvider><AppShell title="What Parents Say"><p>Our reviews</p></AppShell></I18nProvider>);
+   const navs=screen.getAllByRole("navigation",{name:"Main"});
+   for(const nav of navs){
+    expect(within(nav).getByRole("link",{name:/What Parents Say|Parents Say/})).toHaveAttribute("aria-current","page");
+    expect(within(nav).getByRole("link",{name:"Family"})).not.toHaveAttribute("aria-current");
+   }
+  }finally{window.location.hash="";}
  });
  it("offers About & Privacy but no shopping, outings, product finding or circles links in either overflow menu",()=>{
   render(<I18nProvider><AppShell><p>Family content</p></AppShell></I18nProvider>);

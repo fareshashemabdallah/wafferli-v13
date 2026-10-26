@@ -27,9 +27,10 @@ describe("keyboard navigation and bilingual accessibility",()=>{
   const nav=screen.getAllByRole("navigation",{name:"Main"});
   expect(nav).toHaveLength(2);
   const links=nav.flatMap(n=>Array.from(n.querySelectorAll("a")));
-  expect(links).toHaveLength(8); // Four family areas on desktop and mobile; Ask has separate keyboard focus.
+  expect(links).toHaveLength(10); // Five independent tabs on desktop and mobile; Ask has separate keyboard focus.
   for(const link of links)expect(link.className).toContain("focus-visible:ring-2");
   expect(nav[0]?.querySelector('a[href="/family"]')).toBeTruthy();
+  expect(nav[0]?.querySelector('a[href="/what-parents-say"]')).toBeTruthy();
   expect(screen.getByRole("link",{name:"Ask Dabberna anywhere"})).toHaveAttribute("href","/advisor");
   expect(screen.getByRole("link",{name:"Ask Dabberna anywhere"}).className).toContain("focus-visible:ring-2");
  });
