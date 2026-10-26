@@ -9,6 +9,7 @@ export function rhythmChapter(path:string){
  const chapters={
   today:{en:"Today",ar:"اليوم",sentenceEn:"One clear view of your family journey.",sentenceAr:"صورة واضحة لرحلة عيلتك."},
   money:{en:"Understand",ar:"افهم",sentenceEn:"Edit the real figures behind your story. Plans, bills and recorded spending are different things.",sentenceAr:"عدّل الأرقام الأساسية لحكايتكم؛ الخطة والفاتورة والمصروف المدفوع أشياء مختلفة."},
+  parents:{en:"What Parents Say",ar:"شو بيقولوا الأهل؟",sentenceEn:"Understand firsthand parent experiences and their sources, separate from Family planning.",sentenceAr:"اقرأ تجارب الأهل ومصادرها بشكل مستقل عن تخطيط العيلة."},
   finds:{en:"Our Market",ar:"سوقنا",sentenceEn:"Pass along something useful: sell, swap or share the joy. Private preview until community safeguards are ready.",sentenceAr:"بيع أو بدّل أو شارك الفرحة. التجربة حالياً خاصة حتى تجهز حماية المجتمع."},
   ask:{en:"Decide",ar:"قرّر",sentenceEn:"Compare realistic choices. Only you decide what becomes a saved family plan.",sentenceAr:"قارن خيارات واقعية؛ أنت وحدك بتقرر شو يتحوّل لخطة محفوظة."},
   family:{en:"Prepare & act",ar:"تحضّر ونفّذ",sentenceEn:"Your saved dates and plans stay connected as one source of truth.",sentenceAr:"المواعيد والخطط المحفوظة بتبقى مترابطة بدون نسخ ثانية."}
@@ -16,9 +17,6 @@ export function rhythmChapter(path:string){
  if(path==="/space"||path.startsWith("/household"))return {en:"Know our family",ar:"تعرّف على عيلتنا",
   sentenceEn:"Add only details that improve guidance. Profiles and birthdays are optional; manage them once here.",
   sentenceAr:"ضيف بس المعلومات المفيدة للنصيحة؛ الملفات وأعياد الميلاد اختيارية ومن مكان واحد."};
- if(path==="/what-parents-say")return {en:"What Parents Say",ar:"شو بيقولوا الأهل؟",
-  sentenceEn:"Learn from real experiences. Keep external information separate, and never confuse a review with proof of child safety.",
-  sentenceAr:"استفيد من تجارب الأهل. فرّق بين مصادر الإنترنت والتجارب المباشرة، ولا تعتبر التقييم شهادة سلامة."};
  if(path==="/about")return {en:"Trust",ar:"الثقة",
   sentenceEn:"Understand what Dabberna can verify, what remains optional and who controls your information.",
   sentenceAr:"اعرف شو دبّرنا بتقدر تتأكد منه، وشو اختياري، وكيف تتحكّم بمعلوماتك."};
