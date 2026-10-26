@@ -13,6 +13,7 @@ describe("What Parents Say private pilot integrity",()=>{
   expect(first.name).toBe("Little Swimmers");
   expect(sameParentPlace(first,duplicate)).toBe(true);
   expect(sameParentPlace(first,{...duplicate,category:"products"})).toBe(false);
+  expect(createParentPlace({name:"Children\u0027s bicycle",area:"",category:"products"},"bike",now)?.area).toBe("");
  });
  it("rejects empty/overlong places and reviews too short to be useful",()=>{
   expect(createParentPlace({name:"a",area:"Amman",category:"activities"},"p",now)).toBeNull();
