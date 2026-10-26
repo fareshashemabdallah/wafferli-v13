@@ -1,6 +1,6 @@
 import {createFileRoute} from "@tanstack/react-router";
 import {useState,type FormEvent} from "react";
-import {ArrowLeft,BookOpen,Camera,CheckCircle2,Heart,Plus,Repeat2,Search,ShieldCheck,Tag,Trash2,X} from "lucide-react";
+import {BookOpen,Camera,CheckCircle2,Heart,Plus,Repeat2,Search,ShieldCheck,Tag,Trash2,X} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {useI18n} from "@/lib/i18n";
 import {uid,useLocalState} from "@/lib/storage";
@@ -85,7 +85,7 @@ export function FamilyFindsPage(){
   (form.offer==="sell"||form.offer==="share"||!!form.wanted.trim()||form.openOffers);
  const edit=(x:FamilyFindListing)=>{setEditing(x.id);setForm(readFindDraft(x));setError("");};
  const fresh=()=>{setEditing(null);setForm(blankFindDraft());setError("");};
- const set=<K extends keyof FindDraft>(key:K,val:FindDraft[K])=>setForm(old=>old?{...old,[key]:val}:old);
+ const set=(key:keyof FindDraft,val:FindDraft[keyof FindDraft])=>setForm(old=>old?{...old,[key]:val}:old);
  const save=(event:FormEvent)=>{
   event.preventDefault();if(!form)return;
   const previous=editing?listings.find(x=>x.id===editing):undefined;
