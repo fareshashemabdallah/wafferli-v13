@@ -193,7 +193,7 @@ export function FamilyFindsPage(){
          }}/>
        </label>
        {form.imageDataUrl&&<div className="mt-2 flex items-center gap-3">
-        <img src={form.imageDataUrl} alt={t("Selected item photo","صورة الغرض المختارة")} className="h-24 w-24 rounded-xl object-cover"/>
+        <img src={form.imageDataUrl} alt={t("Selected item photo","صورة الغرض المختارة")} className="h-24 w-24 rounded-xl border border-[#E4EADC] bg-[#F9FBF6] object-contain"/>
         <button type="button" onClick={()=>set("imageDataUrl",undefined)} className="min-h-11 text-xs font-bold text-[#99516A] underline">{t("Remove photo","احذف الصورة")}</button>
        </div>}
        <p className="mt-2 text-[11px] text-[#819084]">{t("Photo is resized and kept in this browser only. Avoid faces, school uniforms and address details.","الصورة تُصغّر وتُحفظ على هذا المتصفح فقط. تجنّب الوجوه والزي المدرسي والعناوين.")}</p>
@@ -242,7 +242,7 @@ export function FamilyFindsPage(){
       <div className="grid gap-3 sm:grid-cols-2">{shown.map(item=><article key={item.id} className={card}>
        <div className="flex items-start gap-3">
         {item.imageDataUrl&&safeFindImage(item.imageDataUrl)?
-         <img className="size-24 shrink-0 rounded-xl object-cover" alt={item.title} src={item.imageDataUrl}/>:
+         <img className="size-24 shrink-0 rounded-xl border border-[#E4EADC] bg-[#F9FBF6] object-contain" alt={item.title} src={item.imageDataUrl}/>:
          <div className="grid size-24 shrink-0 place-items-center rounded-xl bg-[#F5F6EC] text-4xl" aria-hidden="true">
           {item.category==="books"?"📚":item.category==="toys"?"🧸":item.category==="clothes"?"👕":item.category==="bikes"?"🚲":item.category==="sports"?"🏀":item.category==="games"?"🧩":"🎁"}
          </div>}

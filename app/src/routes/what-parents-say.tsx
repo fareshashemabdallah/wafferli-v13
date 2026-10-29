@@ -2,6 +2,7 @@ import {createFileRoute} from "@tanstack/react-router";
 import {useState,type FormEvent} from "react";
 import {ArrowLeft,CheckCircle2,ChevronRight,Compass,ExternalLink,HeartHandshake,MapPin,MessageCircle,Plus,Search,ShieldAlert,ShieldCheck,ShoppingBag,Sparkles,Trash2,UsersRound,UtensilsCrossed,Waves} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
+import {FAMILY_HERO_LAYOUT,FAMILY_HERO_TEXT,FamilyHeroIllustration} from "@/components/FamilyHeroIllustration";
 import {useI18n} from "@/lib/i18n";
 import {uid,useLocalState} from "@/lib/storage";
 import {PARENTS_SAY_PLACES_KEY,PARENTS_SAY_REVIEWS_KEY,createParentPlace,createParentReview,parentReviewExternalSearch,reportedReviewCount,sameParentPlace,upsertParentReview,type ParentPlace,type ParentReview,type ReviewCategory,type ReviewInput} from "@/lib/parentsSay";
@@ -84,13 +85,12 @@ export function WhatParentsSayPage(){
  "نسخة تجريبية خاصة — مشاركاتك محفوظة في هذا المتصفح فقط. لا يراها أهل آخرون ولا يتم إرسال تقارير أو محادثات.");
  return <AppShell title={t("What Parents Say","شو بيقولوا الأهل؟")}>
   <div className="mx-auto max-w-[980px] space-y-4 pb-5" data-testid="what-parents-say">
-   <section className="relative isolate overflow-hidden rounded-[1.7rem] border border-[#DBEADC] bg-[linear-gradient(115deg,#EDF8EA_5%,#FFF6EC_65%,#FFF0F5_100%)] p-5 sm:p-7">
-    <div className="relative z-10 max-w-[68%] pb-2 sm:max-w-[67%]">
-     <h2 className="text-[clamp(1.5rem,4vw,2.15rem)] font-black leading-tight text-[#25513D]">{t("What Parents Say","شو بيقولوا الأهل؟")}</h2>
+   <section className={FAMILY_HERO_LAYOUT+" border-[#DBEADC] bg-[linear-gradient(115deg,#EDF8EA_5%,#FFF6EC_65%,#FFF0F5_100%)]"} aria-label={t("What Parents Say illustration banner","صورة صفحة آراء الأهل")}>
+    <div className={FAMILY_HERO_TEXT}>
+     <h2 className="text-[clamp(1.2rem,4vw,2.15rem)] font-black leading-tight text-[#25513D]">{t("What Parents Say","شو بيقولوا الأهل؟")}</h2>
      <p className="mt-2 text-sm text-[#5D7666]">{t("Remember what worked for your family.","سجّل شو ناسب عيلتك.")}</p>
     </div>
-    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"} alt="" aria-hidden="true"
-     className="pointer-events-none absolute bottom-[-2px] end-[-12px] h-[160px] w-[45%] object-contain object-bottom sm:h-[215px]" />
+    <FamilyHeroIllustration decorative lazy/>
    </section>
    <details className="rounded-xl border border-[#DAE6DC] bg-white p-3 text-xs text-[#597266]">
     <summary className="min-h-10 cursor-pointer font-semibold">{t("Private pilot · Only you see your reviews","تجربة خاصة · تقييماتك إلك وحدك")}</summary>
