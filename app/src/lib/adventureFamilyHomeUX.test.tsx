@@ -23,9 +23,12 @@ describe("Calm contextual Today redesign",()=>{
   draw();
   const play=await screen.findByRole("region",{name:"This week's play"});
   expect(play.querySelectorAll('button[aria-expanded]')).toHaveLength(3);
+  expect(play.querySelectorAll('svg[data-testid^="weekly-game-art-"]')).toHaveLength(3);
+  expect(play).toHaveTextContent("Helps with");
   expect(screen.getAllByRole("region",{name:"Money at a glance"})).toHaveLength(1);
   fireEvent.click(play.querySelector('button[aria-expanded]')!);
   expect(play.querySelector('[aria-label="Game instructions"]')).toBeInTheDocument();
+  expect(screen.getByRole("heading",{name:"Why it matters"})).toBeInTheDocument();
   expect(localStorage.getItem("wafferli.v13.members")).toBe(before);
   expect(localStorage.getItem("wafferli.v13.playProgress")).toBeNull();
   expect(localStorage.getItem("wafferli.v13.money")).toBeNull();

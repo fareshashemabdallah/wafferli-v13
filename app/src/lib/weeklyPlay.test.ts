@@ -1,9 +1,18 @@
 import {describe,expect,it} from "vitest";
 import {sampleMembers,type Member} from "./money";
-import {knownChildAges,PLAY_CATEGORIES,playWeekIndex,weeklyPlaySelection} from "./weeklyPlay";
+import {knownChildAges,PLAY_CATEGORIES,playWeekIndex,weeklyPlaySelection,WEEKLY_GAMES} from "./weeklyPlay";
 
 const child=(id:string,ageYears:number):Member=>({id,name:"Child "+id,role:"child",ageGroup:"",prefs:"",ageYears});
 describe("read-only, weekly Today play selection",()=>{
+ it("documents a useful bilingual developmental benefit for each illustrated game",()=>{
+  expect(WEEKLY_GAMES).toHaveLength(21);
+  for(const g of WEEKLY_GAMES){
+   for(const value of [g.helpsEn,g.helpsAr,g.whyEn,g.whyAr]){
+    expect(value.trim().length).toBeGreaterThan(10);
+   }
+   expect(g.whyEn).not.toMatch(/boosts IQ|guarantees|diagnoses|cures/i);
+  }
+ });
  it("offers exactly three category-balanced games and keeps them unchanged through the week",()=>{
   const members=[child("a",3),child("b",5)];
   const thursday=weeklyPlaySelection(members,new Date(2026,9,29,9));
