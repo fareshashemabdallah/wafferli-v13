@@ -41,15 +41,17 @@ export function AdventureFamilyHome(){
   <ChevronRight className="size-4 shrink-0 rtl:rotate-180"/>
  </Link>;
  return <div className="mx-auto max-w-[930px] space-y-3 pb-5 text-[#263E36]" data-adventure-home>
-  <header className="relative isolate overflow-hidden rounded-[1.7rem] border border-[#D7E8D9] bg-[linear-gradient(120deg,#FAFBF2_5%,#E6F5E8_60%,#FFEFE4_100%)] p-4 sm:p-6" aria-label={t("Dabberna family greeting","ترحيب دبّرنا بالعائلة")}>
-   <div className="relative z-10 max-w-[58%] pb-2 sm:max-w-[65%]">
-    <h1 className="text-[clamp(1.45rem,5vw,2.4rem)] font-black leading-tight text-[#234E3D]">
+  <header className="relative isolate grid min-h-[158px] grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] items-center gap-2 overflow-hidden rounded-[1.7rem] border border-[#D7E8D9] bg-[linear-gradient(120deg,#FAFBF2_5%,#E6F5E8_60%,#FFEFE4_100%)] px-4 py-3 sm:min-h-[184px] sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:gap-5 sm:px-6 sm:py-4" aria-label={t("Dabberna family greeting","ترحيب دبّرنا بالعائلة")}>
+   <div className="relative z-10 min-w-0">
+    <h1 className="text-[clamp(1.2rem,4vw,2.4rem)] font-black leading-tight text-[#234E3D]">
      {t("Today, with your family","اليوم مع العيلة")}
     </h1>
    </div>
-   <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"}
-    alt={t("Illustrated family together","رسم عائلة معاً")}
-    className="pointer-events-none absolute bottom-[-4px] end-0 z-0 h-[145px] w-[49%] object-contain object-bottom sm:h-[195px]" loading="eager"/>
+   <div className="relative flex min-w-0 items-center justify-end self-stretch">
+    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"}
+     alt={t("Illustrated family together","رسم عائلة معاً")}
+     className="block h-auto max-h-[136px] w-full max-w-[340px] object-contain object-center sm:max-h-[164px] sm:max-w-[380px]" loading="eager"/>
+   </div>
   </header>
 
   {ready&&(!current||brief?.moneyStatus==="risk")&&
