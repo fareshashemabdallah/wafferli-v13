@@ -2,7 +2,8 @@ import {useState} from "react";
 import {Brain,ChevronDown,Clock3,Heart,MoveRight,Sparkles,X} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import type {Member} from "@/lib/money";
-import {knownChildAges,PLAY_CATEGORY_LABELS,weeklyPlaySelection,type PlayCategory} from "@/lib/weeklyPlay";
+import {knownChildAges,weeklyPlaySelection,type PlayCategory} from "@/lib/weeklyPlay";
+import {WeeklyGameArt} from "./WeeklyGameArt";
 
 const colours:Record<PlayCategory,{card:string,accent:string}>={
  focus:{card:"bg-[#F3ECFF] border-[#DDD1F6]",accent:"text-[#6A4B9F]"},
@@ -42,9 +43,12 @@ export function WeeklyPlay({members}:{members:readonly Member[]}){
      onClick={()=>setSelected(active?null:g.id)}
      className={"min-w-0 rounded-2xl border p-2.5 text-start transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#358E6A] sm:p-3 "+colour.card+
       (active?" ring-2 ring-[#4A8A6B]":" hover:brightness-[.98]")}>
-     <span className="mb-2 block text-3xl leading-none sm:text-4xl" aria-hidden="true">{g.emoji}</span>
+     <WeeklyGameArt gameId={g.id} category={g.category} className="mb-2 block aspect-[240/154] w-full rounded-xl"/>
      <span className="block break-words text-[11px] font-extrabold leading-tight text-[#33493E] sm:text-sm">{ar?g.ar:g.en}</span>
-     <span className={"mt-2 block text-[10px] font-semibold leading-snug "+colour.accent}>{t(PLAY_CATEGORY_LABELS[g.category].en,PLAY_CATEGORY_LABELS[g.category].ar)}</span>
+     <span className={"mt-2 block text-[10px] font-semibold leading-snug "+colour.accent}>
+      <span className="block opacity-80">{t("Helps with","يساعد على")}</span>
+      <span>{ar?g.helpsAr:g.helpsEn}</span>
+     </span>
      <span className="mt-1 flex items-center gap-1 text-[10px] text-[#65766D]"><Clock3 className="size-3" aria-hidden="true"/>{g.minutes} {t("min","د")}</span>
      <span className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[#3D6A50]">
       {t("How to play","كيف نلعب؟")}<ChevronDown className={"size-3 transition "+(active?"rotate-180":"")} aria-hidden="true"/>
@@ -61,6 +65,12 @@ export function WeeklyPlay({members}:{members:readonly Member[]}){
     </div>
     <button type="button" onClick={()=>setSelected(null)} aria-label={t("Close instructions","أغلق التعليمات")}
      className="grid size-10 shrink-0 place-items-center rounded-full bg-[#F2F6F0] text-[#4B6F5A] focus-visible:ring-2 focus-visible:ring-[#358E6A]"><X className="size-4"/></button>
+   </div>
+   <div className="mt-3 rounded-xl bg-[#EFF6EF] px-3 py-3 text-sm text-[#43614E]">
+    <h3 className="flex items-center gap-2 text-xs font-extrabold text-[#357A54]">
+     <Brain className="size-4" aria-hidden="true"/>{t("Why it matters","ليش هاللعبة مفيدة؟")}
+    </h3>
+    <p className="mt-1 leading-relaxed">{ar?open.whyAr:open.whyEn}</p>
    </div>
    <ol className="mt-3 space-y-2">
     {(ar?open.stepsAr:open.stepsEn).map((step,i)=><li key={i} className="flex gap-2 text-sm leading-relaxed">
