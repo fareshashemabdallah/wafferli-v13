@@ -11,6 +11,7 @@ import {buildFamilyMoneyRhythm} from "@/lib/familyMoneyRhythm";
 import {hasEnteredMonthlyIncome,type PlanSetupStep} from "@/lib/planBudgetSetup";
 import type {CategoryPicture} from "@/lib/familyCategoryCards";
 import {FamilyMoneyPrototypeHome} from "./FamilyMoneyPrototypeHome";
+import {FAMILY_HERO_LAYOUT,FAMILY_HERO_TEXT,FamilyHeroIllustration} from "./FamilyHeroIllustration";
 import {FamilyMoneyQuickEdit,type QuickMoneyEditor} from "./FamilyMoneyQuickEdit";
 import {QuickExpenseEntry} from "./QuickExpenseEntry";
 import {MonthAllowanceAdjustment} from "./MonthAllowanceAdjustment";
@@ -56,12 +57,11 @@ export function FamilyMoneyRhythm({state,setState,onSpending,onCategories,reques
  };
  const forecast=buildFamilyMoneyRhythm(state,plansReady?canonicalPlans:[],localToday(),30,true);
  return <section className="mx-auto max-w-[940px] space-y-3" aria-label={t("Family money rhythm","الإيقاع المالي للعيلة")} data-testid="family-money-rhythm">
-  <div className="relative overflow-hidden rounded-[1.5rem] border border-[#DCEADC] bg-[linear-gradient(120deg,#EEF7E8,#FAF7E9_65%,#FFF0F1)] p-4 sm:p-6">
-   <div className="relative z-10 max-w-[57%] sm:max-w-[66%]">
+  <div className={FAMILY_HERO_LAYOUT+" border-[#DCEADC] bg-[linear-gradient(120deg,#EEF7E8,#FAF7E9_65%,#FFF0F1)]"}>
+   <div className={FAMILY_HERO_TEXT}>
     <h2 className="text-xl font-black text-[#24573E] sm:text-2xl">{t("Our Money","مال العيلة")}</h2>
    </div>
-   <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"} alt="" aria-hidden="true" loading="lazy"
-    className="pointer-events-none absolute bottom-[-12px] end-0 h-[145px] w-[43%] object-contain object-bottom sm:h-[176px]"/>
+   <FamilyHeroIllustration decorative lazy/>
   </div>
   {!!requestedSetupStep&&<section id="money-plan-setup" data-testid="money-plan-setup"
    className="scroll-mt-5 rounded-2xl border border-[#D9E6D8] bg-[#F5FAF2] p-4" aria-label={t("Money setup for your plan","المالية المطلوبة لخطتك")}>
