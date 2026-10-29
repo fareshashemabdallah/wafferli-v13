@@ -43,6 +43,15 @@ describe("Calm contextual Today redesign",()=>{
  it("renders the family artwork and exactly one family briefing, never the four money focus modes",async()=>{
   draw();
   expect(screen.getByRole("img",{name:"Illustrated family together"})).toHaveAttribute("src",expect.stringContaining("landing-family-characters.avif"));
+  // Regression: a tall absolutely positioned image clipped above and below the old shallow hero.
+  const hero=screen.getByRole("banner",{name:"Dabberna family greeting"});
+  const illustration=screen.getByRole("img",{name:"Illustrated family together"});
+  expect(hero.className).toContain("grid");
+  expect(hero.className).toContain("min-h-[158px]");
+  expect(illustration.className).toContain("object-contain");
+  expect(illustration.className).toContain("max-h-[136px]");
+  expect(illustration.className).not.toMatch(/\\babsolute\\b|object-cover/);
+
   expect(screen.getByRole("region",{name:"Family briefing"})).toBeInTheDocument();
   expect(screen.queryByRole("button",{name:"Open my private weekly money story"})).not.toBeInTheDocument();
   expect(screen.queryByText("Understand, protect and prepare—so we can live well together.")).not.toBeInTheDocument();
