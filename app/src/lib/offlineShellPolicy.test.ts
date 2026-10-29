@@ -5,11 +5,11 @@ const base=(file:string)=>readFileSync(new URL("../../public/"+file,import.meta.
 describe("repository-scoped static-only offline shell",()=>{
  it("keeps manifest under GitHub Pages and provides usable brand icon metadata",()=>{
   const manifest=JSON.parse(base("manifest.webmanifest")) as {
-   start_url:string;scope:string;display:string;
+   id:string;start_url:string;scope:string;display:string;
    icons:Array<{src:string;type:string;sizes:string}>;
   };
   expect(manifest.start_url).toBe("/wafferli-v13/?welcome=1");
-  expect((manifest as {id:string}).id).toBe("/wafferli-v13/");
+  expect(manifest.id).toBe("/wafferli-v13/");
   expect(manifest.scope).toBe("/wafferli-v13/");
   expect(manifest.display).toBe("standalone");
   expect(manifest.icons.some(i=>i.src==="app-icon.svg"&&i.type==="image/svg+xml")).toBe(true);
