@@ -44,7 +44,7 @@ describe("Calm contextual Today redesign",()=>{
   draw();
   expect(screen.getByRole("img",{name:"Illustrated family together"})).toHaveAttribute("src",expect.stringContaining("landing-family-characters.avif"));
   // Regression: a tall absolutely positioned image clipped above and below the old shallow hero.
-  const hero=screen.getByRole("banner",{name:"Dabberna family greeting"});
+  const hero=screen.getByLabelText("Dabberna family greeting");
   const illustration=screen.getByRole("img",{name:"Illustrated family together"});
   expect(hero.className).toContain("grid");
   expect(hero.className).toContain("min-h-[158px]");
