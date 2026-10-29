@@ -9,6 +9,7 @@ import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPrefe
 import {buildTodayActionPolicy,type TodayAction,type TodayWeekItem} from "@/lib/todayActionPolicy";
 import {TodayQuickActions} from "./TodayQuickActions";
 import {WeeklyPlay} from "./WeeklyPlay";
+import {FAMILY_HERO_LAYOUT,FAMILY_HERO_TEXT,FamilyHeroIllustration} from "./FamilyHeroIllustration";
 import {RobotBuddy} from "./AdventureArtwork";
 
 const panel="rounded-[1.5rem] border border-[#DFE8DE] bg-white/95 p-4 shadow-[0_12px_30px_-27px_rgba(44,71,55,.25)] sm:p-5";
@@ -41,17 +42,13 @@ export function AdventureFamilyHome(){
   <ChevronRight className="size-4 shrink-0 rtl:rotate-180"/>
  </Link>;
  return <div className="mx-auto max-w-[930px] space-y-3 pb-5 text-[#263E36]" data-adventure-home>
-  <header className="relative isolate grid min-h-[158px] grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] items-center gap-2 overflow-hidden rounded-[1.7rem] border border-[#D7E8D9] bg-[linear-gradient(120deg,#FAFBF2_5%,#E6F5E8_60%,#FFEFE4_100%)] px-4 py-3 sm:min-h-[184px] sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:gap-5 sm:px-6 sm:py-4" aria-label={t("Dabberna family greeting","ترحيب دبّرنا بالعائلة")}>
-   <div className="relative z-10 min-w-0">
+  <header className={FAMILY_HERO_LAYOUT+" border-[#D7E8D9] bg-[linear-gradient(120deg,#FAFBF2_5%,#E6F5E8_60%,#FFEFE4_100%)]"} aria-label={t("Dabberna family greeting","ترحيب دبّرنا بالعائلة")}>
+   <div className={FAMILY_HERO_TEXT}>
     <h1 className="text-[clamp(1.2rem,4vw,2.4rem)] font-black leading-tight text-[#234E3D]">
      {t("Today, with your family","اليوم مع العيلة")}
     </h1>
    </div>
-   <div className="relative flex min-w-0 items-center justify-end self-stretch">
-    <img src={import.meta.env.BASE_URL+"landing-family-characters.avif"}
-     alt={t("Illustrated family together","رسم عائلة معاً")}
-     className="block h-auto max-h-[136px] w-full max-w-[340px] object-contain object-center sm:max-h-[164px] sm:max-w-[380px]" loading="eager"/>
-   </div>
+   <FamilyHeroIllustration alt={t("Illustrated family together","رسم عائلة معاً")}/>
   </header>
 
   {ready&&(!current||brief?.moneyStatus==="risk")&&
