@@ -16,6 +16,20 @@ afterEach(()=>{cleanup();vi.restoreAllMocks();localStorage.clear()});
 const put=(key:string,value:unknown)=>localStorage.setItem("wafferli.v13."+key,JSON.stringify(value));
 const draw=()=>render(<I18nProvider><AdventureFamilyHome/></I18nProvider>);
 describe("Calm contextual Today redesign",()=>{
+ it("keeps weekly games inside Today without adding a new family workspace or saving child activity data",async()=>{
+  put("members",[{id:"kid-3",name:"Child A",role:"child",ageGroup:"",prefs:"",ageYears:3},
+   {id:"kid-5",name:"Child B",role:"child",ageGroup:"",prefs:"",ageYears:5}]);
+  const before=localStorage.getItem("wafferli.v13.members");
+  draw();
+  const play=await screen.findByRole("region",{name:"This week's play"});
+  expect(play.querySelectorAll('button[aria-expanded]')).toHaveLength(3);
+  expect(screen.getAllByRole("region",{name:"Money at a glance"})).toHaveLength(1);
+  fireEvent.click(play.querySelector('button[aria-expanded]')!);
+  expect(play.querySelector('[aria-label="Game instructions"]')).toBeInTheDocument();
+  expect(localStorage.getItem("wafferli.v13.members")).toBe(before);
+  expect(localStorage.getItem("wafferli.v13.playProgress")).toBeNull();
+  expect(localStorage.getItem("wafferli.v13.money")).toBeNull();
+ });
  it("does not embed What Parents Say in Today; it has its own main destination",()=>{
   draw();
   expect(screen.queryByTestId("today-parents-say")).not.toBeInTheDocument();

@@ -8,6 +8,7 @@ import type {FamilyMoment} from "@/lib/familyCalendar";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {buildTodayActionPolicy,type TodayAction,type TodayWeekItem} from "@/lib/todayActionPolicy";
 import {TodayQuickActions} from "./TodayQuickActions";
+import {WeeklyPlay} from "./WeeklyPlay";
 import {RobotBuddy} from "./AdventureArtwork";
 
 const panel="rounded-[1.5rem] border border-[#DFE8DE] bg-white/95 p-4 shadow-[0_12px_30px_-27px_rgba(44,71,55,.25)] sm:p-5";
@@ -133,6 +134,7 @@ export function AdventureFamilyHome(){
    </section>
   </div>
 
+  {membersReady&&<WeeklyPlay members={members}/>}
   <TodayQuickActions onAsk={()=>navigate({to:"/advisor"})}/>
   <p className="px-2 text-[11px] leading-relaxed text-[#789086]">
    {t("Pilot: records stay on this device. Today never creates payments.","تجربة خاصة: السجلات على هالجهاز واليوم لا ينشئ دفعات.")}
