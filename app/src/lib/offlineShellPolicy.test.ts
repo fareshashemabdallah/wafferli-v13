@@ -8,7 +8,8 @@ describe("repository-scoped static-only offline shell",()=>{
    start_url:string;scope:string;display:string;
    icons:Array<{src:string;type:string;sizes:string}>;
   };
-  expect(manifest.start_url).toBe("/wafferli-v13/");
+  expect(manifest.start_url).toBe("/wafferli-v13/?welcome=1");
+  expect((manifest as {id:string}).id).toBe("/wafferli-v13/");
   expect(manifest.scope).toBe("/wafferli-v13/");
   expect(manifest.display).toBe("standalone");
   expect(manifest.icons.some(i=>i.src==="app-icon.svg"&&i.type==="image/svg+xml")).toBe(true);
@@ -16,7 +17,7 @@ describe("repository-scoped static-only offline shell",()=>{
  });
  it("rejects POST, third-party origins and nonstatic requests before any cache action",()=>{
   const code=base("offline-sw.js");
-  expect(code).toContain("dabberna-static-shell-20261022-v2");
+  expect(code).toContain("dabberna-static-shell-20261029-illustrated-v1");
   expect(code).toContain('request.method!=="GET"');
   expect(code).toContain("url.origin!==self.location.origin");
   expect(code).toContain("url.pathname.startsWith(SCOPE)");
