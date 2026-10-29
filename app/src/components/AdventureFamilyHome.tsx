@@ -44,8 +44,9 @@ export function AdventureFamilyHome(){
  return <div className="mx-auto max-w-[930px] space-y-3 pb-5 text-[#263E36]" data-adventure-home>
   <header className={FAMILY_HERO_LAYOUT+" border-[#D7E8D9] bg-[linear-gradient(120deg,#FAFBF2_5%,#E6F5E8_60%,#FFEFE4_100%)]"} aria-label={t("Dabberna family greeting","ترحيب دبّرنا بالعائلة")}>
    <div className={FAMILY_HERO_TEXT}>
-    <h1 className="text-[clamp(1.2rem,4vw,2.4rem)] font-black leading-tight text-[#234E3D]">
-     {t("Today, with your family","اليوم مع العيلة")}
+    <div className="mb-1 flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#42826A]"><RobotBuddy className="size-9 shrink-0" label={t("Dabberna friendly guide","روبوت دبّرنا الودود")}/><span>{t("Your family today","عيلتك اليوم")}</span></div>
+    <h1 className="text-[clamp(1.15rem,4vw,2.2rem)] font-black leading-tight text-[#234E3D]">
+     {t("A little easier, together","كل يوم أسهل، سوا")}
     </h1>
    </div>
    <FamilyHeroIllustration alt={t("Illustrated family together","رسم عائلة معاً")}/>

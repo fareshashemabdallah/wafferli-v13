@@ -1,19 +1,26 @@
 {
+  "id": "/wafferli-v13/",
   "name": "Dabberna | دبّرنا — Personal Pilot",
   "short_name": "Dabberna",
-  "start_url": "/wafferli-v13/",
+  "start_url": "/wafferli-v13/?welcome=1",
   "display": "standalone",
-  "background_color": "#f6f8f6",
-  "theme_color": "#145b4d",
+  "background_color": "#F6FFF5",
+  "theme_color": "#137E70",
   "icons": [
     {
       "src": "app-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
-  "description": "Bilingual family budgeting, plans and everyday decisions. Browser-local data pilot.",
+  "description": "Family money, moments and everyday decisions. Browser-local private pilot.",
   "scope": "/wafferli-v13/",
   "lang": "en",
   "dir": "auto"
