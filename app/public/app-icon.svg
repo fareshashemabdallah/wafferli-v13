@@ -1,6 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Dabberna">
- <rect width="192" height="192" rx="49" fill="#145b4d"/>
- <path d="M57 43v105h34c35 0 54-24 54-52s-19-53-54-53H57Z"
-  fill="none" stroke="#d7e993" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
- <circle cx="145" cy="44" r="10" fill="#d7e993"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Dabberna friendly robot">
+ <defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d6f8f2"/><stop offset=".55" stop-color="#f2fce9"/><stop offset="1" stop-color="#ffdeae"/></linearGradient>
+  <linearGradient id="body" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#d0ece4"/></linearGradient>
+  <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#183d43"/><stop offset="1" stop-color="#062d34"/></linearGradient>
+ </defs>
+ <rect width="512" height="512" rx="112" fill="url(#sky)"/>
+ <circle cx="402" cy="108" r="37" fill="#fff3b8" opacity=".8"/>
+ <path d="M105 102l8-27 8 27 27 8-27 8-8 27-8-27-27-8Z" fill="#ffcb83"/>
+ <path d="M390 368l5-17 5 17 17 5-17 5-5-17-17-5Z" fill="#79cbb1"/>
+ <ellipse cx="256" cy="443" rx="145" ry="25" fill="#5baf9a" opacity=".17"/>
+ <path d="M174 361Q119 352 106 324" stroke="#effaf7" stroke-width="36" stroke-linecap="round" fill="none"/>
+ <circle cx="105" cy="319" r="23" fill="#fafffd" stroke="#b7ddd2" stroke-width="5"/>
+ <path d="M342 358Q386 351 405 307" stroke="#f8fffd" stroke-width="36" stroke-linecap="round" fill="none"/>
+ <circle cx="407" cy="299" r="23" fill="#fafffd" stroke="#b7ddd2" stroke-width="5"/>
+ <rect x="153" y="323" width="206" height="119" rx="55" fill="url(#body)" stroke="#b6d9d1" stroke-width="7"/>
+ <circle cx="255" cy="381" r="34" fill="#6fc5ad"/><path d="M236 382l15 16 25-31" fill="none" stroke="#f8fff9" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+ <rect x="98" y="173" width="48" height="109" rx="24" fill="#6ecbb5" stroke="#edfffb" stroke-width="8"/>
+ <rect x="367" y="173" width="48" height="109" rx="24" fill="#6ecbb5" stroke="#edfffb" stroke-width="8"/>
+ <rect x="129" y="124" width="255" height="236" rx="88" fill="url(#body)" stroke="#accfc6" stroke-width="8"/>
+ <rect x="157" y="160" width="199" height="151" rx="57" fill="url(#screen)"/>
+ <path d="M190 220q17-24 35 0m64 0q17-24 35 0" fill="none" stroke="#88f6d9" stroke-width="13" stroke-linecap="round"/>
+ <path d="M215 258q41 39 82 0" fill="none" stroke="#88f6d9" stroke-width="11" stroke-linecap="round"/>
+ <path d="M255 126v-23" stroke="#90c6b6" stroke-width="11" stroke-linecap="round"/>
+ <circle cx="255" cy="89" r="18" fill="#65cda6" stroke="#f8fff4" stroke-width="7"/>
 </svg>

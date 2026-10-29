@@ -2,11 +2,11 @@
  * shopping/provider responses, POST requests or external origins.
  * User data remains in browser storage only and is not copied here.
  */
-const CACHE="dabberna-static-shell-20261022-v2";
+const CACHE="dabberna-static-shell-20261029-illustrated-v1";
 const PREFIX="dabberna-static-shell-";
 const SCOPE=new URL("./",self.registration.scope).pathname;
 const SHELL=SCOPE;
-const OFFLINE_STATIC=[SHELL,SCOPE+"manifest.webmanifest",SCOPE+"app-icon.svg"];
+const OFFLINE_STATIC=[SHELL,SCOPE+"manifest.webmanifest",SCOPE+"app-icon.svg",SCOPE+"apple-touch-icon.png",SCOPE+"landing-family-characters.avif"];
 
 function isAllowedStatic(request){
  if(request.method!=="GET")return false;
@@ -14,7 +14,7 @@ function isAllowedStatic(request){
  if(url.origin!==self.location.origin||url.search)return false;
  if(!url.pathname.startsWith(SCOPE))return false;
  const staticPath=url.pathname.startsWith(SCOPE+"assets/")||
-   url.pathname===SCOPE+"app-icon.svg"||url.pathname===SCOPE+"manifest.webmanifest";
+   ["app-icon.svg","apple-touch-icon.png","landing-family-characters.avif","manifest.webmanifest"].some(name=>url.pathname===SCOPE+name);
  return staticPath&&["script","style","image","font","manifest"].includes(request.destination);
 }
 self.addEventListener("install",event=>{
