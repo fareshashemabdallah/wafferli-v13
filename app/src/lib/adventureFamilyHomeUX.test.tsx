@@ -50,7 +50,8 @@ describe("Calm contextual Today redesign",()=>{
   expect(hero.className).toContain("min-h-[158px]");
   expect(illustration.className).toContain("object-contain");
   expect(illustration.className).toContain("max-h-[136px]");
-  expect(illustration.className).not.toMatch(/\\babsolute\\b|object-cover/);
+  expect(illustration.className).not.toContain("absolute");
+  expect(illustration.className).not.toContain("object-cover");
 
   expect(screen.getByRole("region",{name:"Family briefing"})).toBeInTheDocument();
   expect(screen.queryByRole("button",{name:"Open my private weekly money story"})).not.toBeInTheDocument();
