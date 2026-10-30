@@ -157,7 +157,7 @@ function Space() {
               <p className="font-medium">{tr(m.name)}</p>
               <p className="text-xs text-muted-foreground">{tr(m.role==="adult"?"Adult":"Child")}{typeof m.ageYears==="number"?" · "+m.ageYears+" "+(ar?"سنة":(lang==="fr"?frenchUI("years"):"years")):m.ageGroup?" · "+m.ageGroup:""}{m.prefs&&" · "+m.prefs}</p>
               {(m.birthday||m.birthdayMonthDay)&&
-                <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":(lang==="fr"?frenchUI("Birthday: "):"Birthday: ")}{m.birthdayMonthDay??(m.birthday?formatMomentDate(m.birthday,ar):"")}</p>}
+                <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-[#9D6867]"><Cake className="size-3.5"/>{ar?"عيد الميلاد: ":(lang==="fr"?frenchUI("Birthday: "):"Birthday: ")}{m.birthdayMonthDay??(m.birthday?formatMomentDate(m.birthday,ar,lang):"")}</p>}
             </div>
             <Button size="icon" variant="ghost" aria-label={(ar?"تعديل ":(lang==="fr"?frenchUI("Edit "):"Edit "))+m.name} onClick={()=>{setEdit(m);setErr("");}}><Pencil className="size-4"/></Button>
             <Button size="icon" variant="ghost" aria-label={(ar?"حذف ":(lang==="fr"?frenchUI("Delete "):"Delete "))+m.name} onClick={()=>removeMember(m)}><Trash2 className="size-4"/></Button>
@@ -212,7 +212,7 @@ function Space() {
               <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#FCEEE7] text-[#B47B6B]"><Heart className="size-4"/></span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">{event.title}</p>
-                <p className="text-xs text-muted-foreground">{formatMomentDate(event.date,ar)} · {kindNames[event.kind]?.[ar?"ar":(lang==="fr"?frenchUI("en"):"en")]??event.kind}{event.annual?" · "+(ar?"كل سنة":(lang==="fr"?frenchUI("Yearly"):"Yearly")):""}</p>
+                <p className="text-xs text-muted-foreground">{formatMomentDate(event.date,ar,lang)} · {kindNames[event.kind]?.[ar?"ar":(lang==="fr"?frenchUI("en"):"en")]??event.kind}{event.annual?" · "+(ar?"كل سنة":(lang==="fr"?frenchUI("Yearly"):"Yearly")):""}</p>
               </div>
               <Button size="icon" variant="ghost" aria-label={ar?"تعديل المناسبة":(lang==="fr"?frenchUI("Edit occasion"):"Edit occasion")} onClick={()=>setOccasion({id:event.id,title:event.title,date:event.date,kind:event.kind,annual:event.annual,note:event.note??""})}><Pencil className="size-4"/></Button>
               <Button size="icon" variant="ghost" aria-label={ar?"حذف المناسبة":(lang==="fr"?frenchUI("Remove occasion"):"Remove occasion")} onClick={()=>removeOccasion(event.id)}><Trash2 className="size-4"/></Button>
