@@ -95,7 +95,7 @@ export function FamilyLifePage(){
        :<ol className="mt-3 space-y-2">{upcoming.slice(0,3).map(item=><li key={item.id+"-"+item.occursOn}
         className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-[#F8F9FC] px-3 py-2">
          <span className="min-w-0 truncate text-sm font-semibold">{item.title}</span>
-         <span className="shrink-0 text-xs text-[#728094]">{formatMomentDate(item.occursOn,ar)}</span>
+         <span className="shrink-0 text-xs text-[#728094]">{formatMomentDate(item.occursOn,ar,lang)}</span>
          <button type="button" onClick={()=>openFamilyDate(item.occursOn)} aria-label={label("Prepare "+item.title,"حضّر "+item.title)} className="shrink-0 rounded-lg bg-white px-2 py-2 text-xs font-semibold text-[#B15380] underline">{label("Prepare","حضّر")}</button>
         </li>)}</ol>}
       <button onClick={()=>setView("calendar")} type="button" className="mt-3 inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#628BB4] underline">
