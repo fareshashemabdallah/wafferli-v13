@@ -47,7 +47,7 @@ const labels:Record<string,string>={
  "General city or area (no exact address)":"Ville ou secteur général (pas d’adresse précise)",
  "Your experience could be what another parent needs.":"Votre expérience peut aider d’autres parents.",
  "Please enter a valid age.":"Veuillez saisir un âge valide.",
- "Loading occasions…":"Chargement des événements…"
+ "Loading occasions…":"Chargement des événements…",
  "Your saved money figures need a review. They are not bank-verified.":"Vos montants enregistrés nécessitent une vérification. Ils ne sont pas confirmés par une banque.",
  "Nothing urgent in your saved family records.":"Aucune urgence dans vos informations familiales enregistrées.",
  "One next action":"Une prochaine étape",
