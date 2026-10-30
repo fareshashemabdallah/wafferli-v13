@@ -183,7 +183,7 @@ function Space() {
           <label className="block text-sm font-medium">{ar?"نوع المناسبة":(lang==="fr"?frenchUI("Occasion type"):"Occasion type")}
             <NativeSelect value={occasion.kind} onChange={e=>setOccasion({...occasion,kind:e.target.value as MomentKind})}>
               {(["anniversary","birthday","celebration","holiday","school","activity","other"] as MomentKind[]).map(kind=>
-                <option key={kind} value={kind}>{kindNames[kind][ar?"ar":(lang==="fr"?frenchUI("en"):"en")]}</option>)}
+                <option key={kind} value={kind}>{(ar?kindNames[kind].ar:lang==="fr"?frenchUI(kindNames[kind].en):kindNames[kind].en)}</option>)}
             </NativeSelect>
           </label>
           <label className="block text-sm font-medium">{ar?"تاريخ المناسبة":(lang==="fr"?frenchUI("Date"):"Date")}
@@ -212,7 +212,7 @@ function Space() {
               <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#FCEEE7] text-[#B47B6B]"><Heart className="size-4"/></span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">{event.title}</p>
-                <p className="text-xs text-muted-foreground">{formatMomentDate(event.date,ar,lang)} · {kindNames[event.kind]?.[ar?"ar":(lang==="fr"?frenchUI("en"):"en")]??event.kind}{event.annual?" · "+(ar?"كل سنة":(lang==="fr"?frenchUI("Yearly"):"Yearly")):""}</p>
+                <p className="text-xs text-muted-foreground">{formatMomentDate(event.date,ar,lang)} · {(ar?kindNames[event.kind]?.ar:lang==="fr"?frenchUI(kindNames[event.kind]?.en??event.kind):kindNames[event.kind]?.en)??event.kind}{event.annual?" · "+(ar?"كل سنة":(lang==="fr"?frenchUI("Yearly"):"Yearly")):""}</p>
               </div>
               <Button size="icon" variant="ghost" aria-label={ar?"تعديل المناسبة":(lang==="fr"?frenchUI("Edit occasion"):"Edit occasion")} onClick={()=>setOccasion({id:event.id,title:event.title,date:event.date,kind:event.kind,annual:event.annual,note:event.note??""})}><Pencil className="size-4"/></Button>
               <Button size="icon" variant="ghost" aria-label={ar?"حذف المناسبة":(lang==="fr"?frenchUI("Remove occasion"):"Remove occasion")} onClick={()=>removeOccasion(event.id)}><Trash2 className="size-4"/></Button>
