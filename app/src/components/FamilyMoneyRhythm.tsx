@@ -18,7 +18,7 @@ import {MonthAllowanceAdjustment} from "./MonthAllowanceAdjustment";
 import {FamilyCategoryEditor} from "./FamilyCategoryEditor";
 
 type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>MoneyState))=>void;
- onBills:()=>void;onSpending:()=>void;onReviewUncategorized:()=>void;onCategories:()=>void;requestedSetupStep?:PlanSetupStep|null};
+ onBills:()=>void;onSpending:()=>void;onReviewUncategorized?:()=>void;onCategories:()=>void;requestedSetupStep?:PlanSetupStep|null};
 /** Intentionally one Money surface. Obsolete pace, annual and parallel
  * timeline screens have been removed; canonical dates, bills, history and
  * forecasts stay untouched in MoneyState and their financial domain modules.
