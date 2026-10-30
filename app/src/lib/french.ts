@@ -1533,5 +1533,12 @@ const labels:Record<string,string>={
  "Your fixed, variable and periodic categories will appear here once saved.":"Vos catégories fixes, variables et périodiques apparaîtront ici après enregistrement.",
  "Review or edit expense categories":"Examiner ou modifier les catégories de dépenses",
  "See full breakdown & categories":"Voir la répartition complète et les catégories",
+ "Birthday":"Anniversaire",
+ "Wedding anniversary":"Anniversaire de mariage",
+ "Holiday":"Fête / vacances",
+ "Special occasion":"Événement spécial",
+ "School event":"Événement scolaire",
+ "Family activity":"Activité familiale",
+ "Other":"Autre",
 };
 export const frenchUI=(text:string):string=>labels[text]??text;
