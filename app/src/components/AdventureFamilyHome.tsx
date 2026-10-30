@@ -72,7 +72,7 @@ export function AdventureFamilyHome(){
      current.kind==="financial"||current.kind==="bill"?<Wallet className="size-4"/>:<Heart className="size-4"/>}
     {t("Next for your family","الخطوة الجاية للعيلة")}
    </div>
-   <h2 className="mt-3 text-base font-semibold text-[#564256]">{ar?current.titleAr:current.titleEn}</h2>
+   <h2 className="mt-3 text-base font-semibold text-[#564256]">{ar?current.titleAr:lang==="fr"?frenchUI(current.titleEn):current.titleEn}</h2>
    <p className="mt-1 text-lg font-black leading-snug text-[#263D37] sm:text-xl">
     {current.kind==="gift"?t("Choose a gift","اختار هدية"):
      current.kind==="bill"?t("Check this payment","راجع الدفعة"):
@@ -90,8 +90,8 @@ export function AdventureFamilyHome(){
    </Link>
    <details className="mt-3 border-t border-[#EADBE1] pt-3 text-xs text-[#745E6D]">
     <summary className="min-h-10 cursor-pointer font-semibold">{t("Why this step?","ليش هالخطوة؟")}</summary>
-    <p className="mt-1 leading-relaxed">{ar?current.detailAr:current.detailEn}</p>
-    <p className="mt-1 leading-relaxed">{ar?current.whyAr:current.whyEn}{current.date?" · "+current.date:""}</p>
+    <p className="mt-1 leading-relaxed">{ar?current.detailAr:lang==="fr"?frenchUI(current.detailEn):current.detailEn}</p>
+    <p className="mt-1 leading-relaxed">{ar?current.whyAr:lang==="fr"?frenchUI(current.whyEn):current.whyEn}{current.date?" · "+current.date:""}</p>
     {current.kind==="gift"&&<p className="mt-1">{current.sellerCount?t("Seller option saved","خيار متجر محفوظ"):t("No seller chosen","ما اخترت متجر بعد")}</p>}
    </details>
   </section>}
