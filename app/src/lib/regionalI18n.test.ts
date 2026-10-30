@@ -1,6 +1,7 @@
 import {describe,expect,it} from "vitest";
 import {localize,preferredBrowserLanguage} from "./i18n";
 import {frenchUI} from "./french";
+import {formatMomentDate} from "./familyCalendar";
 import {sameParentPlace,type ParentPlace} from "./parentsSay";
 
 describe("regional, independent language preferences",()=>{
@@ -34,6 +35,10 @@ describe("regional, independent language preferences",()=>{
   for(const label of interfaceLabels){
     expect(frenchUI(label),label).not.toBe(label);
   }
+ });
+ it("formats family calendar dates in French without altering stored dates",()=>{
+  expect(formatMomentDate("2026-03-15",false,"fr")).toMatch(/mars/i);
+  expect(formatMomentDate("2026-03-15",false)).toMatch(/Mar/);
  });
  it("keeps legacy Jordan reviews visible only in their original market",()=>{
   const legacy:ParentPlace={id:"a",name:"A sample park",area:"Amman",category:"activities",createdAt:"2026-01-01"};
