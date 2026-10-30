@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {createFileRoute} from "@tanstack/react-router";
 import {useState,type FormEvent} from "react";
 import {BookOpen,Camera,CheckCircle2,Heart,Plus,Repeat2,Search,ShieldCheck,Tag,Trash2,X} from "lucide-react";
@@ -64,7 +65,7 @@ function OfferTag({offer,ar}:{offer:FindOffer;ar:boolean}){
   (offer==="share"?"bg-[#FCEBF3] text-[#B34F7F]":offer==="sell-swap"?"bg-[#E7F3FC] text-[#326F9E]":"bg-[#EAF5E8] text-[#31724F]")}>{ar?a:en}</span>;
 }
 export function FamilyFindsPage(){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const [listings,setListings,ready]=useLocalState<FamilyFindListing[]>(FAMILY_FINDS_KEY,[]);
  const [wishes,setWishes,wishesReady]=useLocalState<FamilyFindWish[]>(FAMILY_FINDS_WISHES_KEY,[]);
  const [pane,setPane]=useState<"offers"|"wishes">("offers");
