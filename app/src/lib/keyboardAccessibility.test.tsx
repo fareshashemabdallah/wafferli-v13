@@ -36,12 +36,20 @@ describe("keyboard navigation and bilingual accessibility",()=>{
  });
  it("updates the skip wording for Arabic without changing saved finances",()=>{
   render(<I18nProvider><AppShell title="عائلتي">المحتوى</AppShell></I18nProvider>);
-  fireEvent.click(screen.getAllByRole("button",{name:"Switch to Arabic"})[0]!);
+  fireEvent.change(screen.getByRole("combobox",{name:"App language"}),{target:{value:"ar"}});
   expect(screen.getByRole("link",{name:"انتقل إلى المحتوى الرئيسي"})).toHaveAttribute("href","#dabberna-main-content");
   expect(document.documentElement.dir).toBe("rtl");
   expect(screen.getAllByRole("navigation",{name:"التنقل الرئيسي"})).toHaveLength(2);
   expect(screen.getAllByRole("link",{name:"الصفحة الرئيسية لدبّرنا"})).toHaveLength(2);
   expect(screen.queryAllByRole("navigation",{name:"Main"})).toHaveLength(0);
+  expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
+ });
+ it("offers a French language option independently of family Money",()=>{
+  render(<I18nProvider><AppShell title="Famille">Contenu</AppShell></I18nProvider>);
+  fireEvent.change(screen.getByRole("combobox",{name:"App language"}),{target:{value:"fr"}});
+  expect(document.documentElement.lang).toBe("fr");
+  expect(document.documentElement.dir).toBe("ltr");
+  expect(screen.getAllByRole("navigation",{name:"Navigation principale"})).toHaveLength(2);
   expect(window.localStorage.getItem("wafferli.v13.money")).toBeNull();
  });
  it("gives both brand links visible focus and legible mobile navigation labels",()=>{
