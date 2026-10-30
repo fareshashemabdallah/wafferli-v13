@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useState,type FormEvent} from "react";
 import {Link} from "@tanstack/react-router";
 import {CalendarClock,CheckCircle2,Gift,Plus,Wallet,AlertTriangle,ListChecks} from "lucide-react";
@@ -25,7 +26,7 @@ const cents=(s:string):number|null=>{
 };
 export function OccasionPreparationSection({event,planId}:{event?:MomentOccurrence;planId?:string}){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [members]=useLocalState<Member[]>("members",sampleMembers());
  const [events]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
@@ -70,7 +71,7 @@ function OccasionPreparationEditor({plan,eventDate,money,tasks}:{
  plan:FamilyPlan;eventDate:string;money:MoneyState;tasks:FamilyTask[];
 }){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const initial=plan.occasionPreparation??initialOccasionPreparation(eventDate);
  const [gift,setGift]=useState(String(initial.gift.amountJod));
  const [celebration,setCelebration]=useState(String(initial.celebration.amountJod));
