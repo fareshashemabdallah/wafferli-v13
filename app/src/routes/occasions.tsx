@@ -64,7 +64,7 @@ export function OccasionPlanner(){
         className={"min-w-36 shrink-0 rounded-xl border p-3 text-start text-xs "+
          (key===planKey(event)?"border-[#A65784] bg-[#FBE9F2]":"border-[#DBE6D9] bg-[#F9FCF8]")}>
         <strong className="block truncate">{event.title}</strong>
-        <span className="mt-1 block text-muted-foreground">{formatMomentDate(event.occursOn,ar)}</span>
+        <span className="mt-1 block text-muted-foreground">{formatMomentDate(event.occursOn,ar,lang)}</span>
        </button>)}
       </div>
      </section>
