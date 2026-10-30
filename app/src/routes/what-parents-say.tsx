@@ -107,7 +107,7 @@ export function WhatParentsSayPage(){
     <section className={card+" space-y-3"}>
      <div className="flex items-center justify-between gap-2">
       <h3 className="text-lg font-extrabold text-[#273E35]">{t("Explore experiences","اكتشف التجارب")}</h3>
-      <p className="mt-1 text-xs text-[#607F6B]">{t("Showing private entries for","عرض مدخلاتك الخاصة في","")}{lang==="fr"?"Mes entrées privées : ":" "}{market[lang]} · <Link to="/space" className="font-bold underline">{t("Change country","غيّر البلد")}</Link></p>
+      <p className="mt-1 text-xs text-[#607F6B]">{t("Showing private entries for","عرض مدخلاتك الخاصة في")}{" "}{market[lang]} · <Link to="/space" className="font-bold underline">{t("Change country","غيّر البلد")}</Link></p>
 
      </div>
      <label className="flex items-center gap-2 rounded-xl border border-[#D3E5D7] bg-[#FAFDF9] px-3">
