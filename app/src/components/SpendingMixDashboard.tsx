@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {Heart,LockKeyhole,ShoppingBasket,Wallet} from "lucide-react";
 import type {MoneyState} from "@/lib/money";
 import {useI18n} from "@/lib/i18n";
@@ -21,7 +22,7 @@ const palette={
 const segmentKeys=["committed","necessary","flexible","cushion","unclassified"] as const;
 
 export function SpendingMixDashboard({state}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const mix=spendingMixSummary(state,localToday().slice(0,7));
  const money=(v:number)=>fmtJOD(v);
  const hasPlan=state.categories.length>0&&mix.totalPlanned>0;
