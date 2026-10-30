@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useEffect,useState,type FormEvent} from "react";
 import {uid} from "@/lib/storage";
 import {localToday} from "@/lib/cashflow";
@@ -8,7 +9,7 @@ type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>Money
  onClose:()=>void;onHistory:()=>void};
 const field="mt-1 min-h-11 w-full rounded-xl border border-[#DCE6D9] bg-white p-2.5 text-sm";
 export function QuickExpenseEntry({state,setState,onClose,onHistory}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const [amount,setAmount]=useState("");
  const [category,setCategory]=useState(state.categories[0]?.id??"uncategorized");
  const [date,setDate]=useState(localToday());

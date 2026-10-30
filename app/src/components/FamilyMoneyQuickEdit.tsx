@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useEffect,useState,type FormEvent} from "react";
 import {X} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
@@ -16,7 +17,7 @@ const numeric=(s:string,allowZero=false,max=100000)=>{const n=parseHouseholdAmou
 const frame="mt-1 min-h-11 w-full rounded-xl border border-[#DCE8D9] bg-white px-3 py-2 text-sm text-[#335440] focus-visible:ring-2 focus-visible:ring-[#4F9E70]";
 const label="block text-xs font-bold text-[#58735E]";
 export function FamilyMoneyQuickEdit({kind,state,setState,onClose}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const source=state.incomeSources??legacyIncome(state.income),bills=state.commitments??[];
  const [picked,setPicked]=useState(kind==="income"&&source.length===1?source[0]!.id:"");
  const record=kind==="income"?source.find(x=>x.id===picked):kind==="bill"?bills.find(x=>x.id===picked):undefined;

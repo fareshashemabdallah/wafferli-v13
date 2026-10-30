@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState} from "@/lib/storage";
 import {sampleMembers,type Member} from "@/lib/money";
@@ -9,7 +10,7 @@ import {householdCountSource} from "@/lib/progressiveFamilyInput";
  * immediately reused by the existing household presence and city-aware discovery.
  */
 export function FamilyBasicsQuickInput(){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [presence,setPresence,presenceReady]=useLocalState<HouseholdPresence>(HOUSEHOLD_PRESENCE_KEY,emptyHouseholdPresence());
  const [prefs,setPrefs,prefsReady]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);

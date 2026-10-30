@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import { HouseholdPresencePanel } from "@/components/HouseholdPresencePanel";
 import {MoneyMonthlyReport} from "@/components/MoneyMonthlyReport";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
@@ -77,16 +78,16 @@ function MoneyPage() {
       {section!=="overview"&&<>
       <button type="button" onClick={()=>setSection("overview")}
        className="mb-3 inline-flex min-h-11 items-center rounded-xl border border-[#CFE1D1] bg-white px-4 text-sm font-bold text-[#397D58]">
-       ← {ar?"رجوع إلى خريطة المال":"Back to Money Map"}
+       ← {ar?"رجوع إلى خريطة المال":(lang==="fr"?frenchUI("Back to Money Map"):"Back to Money Map")}
       </button>
-      <div role="tablist" aria-label={ar?"أقسام المالية":"Money sections"} className="mb-3 grid grid-cols-3 gap-1 rounded-[1.25rem] border border-[#CFE4D8] bg-[#E5F3E6] p-1.5">
+      <div role="tablist" aria-label={ar?"أقسام المالية":(lang==="fr"?frenchUI("Money sections"):"Money sections")} className="mb-3 grid grid-cols-3 gap-1 rounded-[1.25rem] border border-[#CFE4D8] bg-[#E5F3E6] p-1.5">
         {([{id:"overview",en:"Our Money",ar:"مال العيلة",icon:"🏡"},{id:"spending",en:"Spending",ar:"المصاريف",icon:"🛍️"},{id:"planning",en:"Bills",ar:"الفواتير",icon:"📅"}] as const)
           .map(v=><button role="tab" aria-selected={section===v.id} key={v.id} type="button" onClick={()=>setSection(v.id)}
-            className={"flex min-h-12 items-center justify-center gap-1.5 rounded-xl px-1 text-xs font-bold transition sm:text-sm "+(section===v.id?"bg-white text-[#227355] shadow-sm":"text-[#59786A] hover:bg-white/60")}><span aria-hidden="true">{v.icon}</span>{ar?v.ar:v.en}</button>)}
+            className={"flex min-h-12 items-center justify-center gap-1.5 rounded-xl px-1 text-xs font-bold transition sm:text-sm "+(section===v.id?"bg-white text-[#227355] shadow-sm":"text-[#59786A] hover:bg-white/60")}><span aria-hidden="true">{v.icon}</span>{ar?v.ar:(lang==="fr"?frenchUI(v.en):v.en)}</button>)}
       </div></>}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {s.demo && <PilotBadge>{tr("Demo data")}</PilotBadge>}
-        <span className="text-xs text-muted-foreground">{ar?"محفوظ على هذا الجهاز · استخدم أرقاماً تجريبية":"Saved here · Use fictional figures during pilot"}</span>
+        <span className="text-xs text-muted-foreground">{ar?"محفوظ على هذا الجهاز · استخدم أرقاماً تجريبية":(lang==="fr"?frenchUI("Saved here · Use fictional figures during pilot"):"Saved here · Use fictional figures during pilot")}</span>
         <details className="ms-auto">
          <summary className="min-h-10 cursor-pointer text-xs font-medium text-muted-foreground">Settings / إعدادات</summary>
          <div className="mt-2 max-w-[740px] space-y-3 rounded-xl border border-[#DFE8DB] bg-white p-3">
@@ -97,23 +98,23 @@ function MoneyPage() {
           }}><RotateCcw className="size-4"/> {tr("Reset sample data")}</Button>
           <details className="rounded-xl border border-[#E3EBE0] p-3">
            <summary className="min-h-10 cursor-pointer text-xs font-bold text-[#3F805B]">
-            {ar?"السكن والمساعدون والزوار (اختياري)":"Household size, helpers & visitors (optional)"}
+            {ar?"السكن والمساعدون والزوار (اختياري)":(lang==="fr"?frenchUI("Household size, helpers & visitors (optional)"):"Household size, helpers & visitors (optional)")}
            </summary>
            <div className="mt-3"><HouseholdPresencePanel members={members} money={s} setMoney={setS}/></div>
           </details>
           <details className="rounded-xl border border-[#E3EBE0] p-3">
            <summary className="min-h-10 cursor-pointer text-xs font-bold text-[#3F805B]">
-            {ar?"تحليل مالي إضافي (اختياري)":"Additional financial analysis (optional)"}
+            {ar?"تحليل مالي إضافي (اختياري)":(lang==="fr"?frenchUI("Additional financial analysis (optional)"):"Additional financial analysis (optional)")}
            </summary>
            <div className="mt-3"><FinancialIntelligencePanel state={s}/></div>
           </details>
           {(s.commitments??[]).some(b=>!b.categoryId||!s.categories.some(c=>c.id===b.categoryId))&&
            <button type="button" onClick={()=>setSection("planning")} className="min-h-10 text-xs font-bold text-[#3B7C59] underline">
-            {ar?"مراجعة فواتير قديمة غير مصنفة":"Review older uncategorized bills"}
+            {ar?"مراجعة فواتير قديمة غير مصنفة":(lang==="fr"?frenchUI("Review older uncategorized bills"):"Review older uncategorized bills")}
            </button>}
           {s.expenses.some(e=>!s.categories.some(c=>c.id===e.categoryId))&&
            <button type="button" onClick={()=>setSection("spending")} className="min-h-10 text-xs font-bold text-[#3B7C59] underline">
-            {ar?"مراجعة مصاريف غير مصنفة":"Review uncategorized expenses"}
+            {ar?"مراجعة مصاريف غير مصنفة":(lang==="fr"?frenchUI("Review uncategorized expenses"):"Review uncategorized expenses")}
            </button>}
          </div>
         </details>
@@ -126,38 +127,36 @@ function MoneyPage() {
         requestedSetupStep={requestedSetupStep}/>}
       {section==="overview"&&<MoneyMonthlyReport state={s} plans={reportPlans}/>}
             {section==="planning"&&<>
-      <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"الفواتير والدفعات":"Your bills & payments"}</h2>
-       <p className="mt-1 text-xs text-muted-foreground">{ar?"سجّل الموعد مرة، وأكّد الدفع عند حدوثه.":"Add once. Confirm when paid."}</p></div>
+      <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"الفواتير والدفعات":(lang==="fr"?frenchUI("Your bills & payments"):"Your bills & payments")}</h2>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?"سجّل الموعد مرة، وأكّد الدفع عند حدوثه.":(lang==="fr"?frenchUI("Add once. Confirm when paid."):"Add once. Confirm when paid.")}</p></div>
       <CashFlowPlanner state={s} members={members} update={setS} />
       </>}
       {section==="spending"&&<>
-      <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"سجّل اللي دفعته":"Record what you spent"}</h2>
-       <p className="mt-1 text-xs text-muted-foreground">{ar?"المصاريف المدفوعة فقط · الدفعات المجدولة في الفواتير.":"Paid expenses only · Scheduled payments are in Bills."}</p>
-       <button type="button" className="mt-2 text-sm font-semibold text-brand underline underline-offset-2" onClick={()=>setSection("planning")}>{ar?"عندي فاتورة أو دفعة قادمة":"I have an upcoming bill or payment"} →</button>
+      <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"سجّل اللي دفعته":(lang==="fr"?frenchUI("Record what you spent"):"Record what you spent")}</h2>
+       <p className="mt-1 text-xs text-muted-foreground">{ar?"المصاريف المدفوعة فقط · الدفعات المجدولة في الفواتير.":(lang==="fr"?frenchUI("Paid expenses only · Scheduled payments are in Bills."):"Paid expenses only · Scheduled payments are in Bills.")}</p>
+       <button type="button" className="mt-2 text-sm font-semibold text-brand underline underline-offset-2" onClick={()=>setSection("planning")}>{ar?"عندي فاتورة أو دفعة قادمة":(lang==="fr"?frenchUI("I have an upcoming bill or payment"):"I have an upcoming bill or payment")} →</button>
       </div>
       {(s.demo||s.categories.length===0)&&<div className="mb-4 rounded-xl border border-[#DBE5D8] bg-[#F2F7EF] p-4">
-        <p className="text-sm font-semibold">{ar?"ابدأ بمصروف واحد، حتى بلا ميزانية":"Record one actual expense, even without a budget"}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{ar?
-         "اختَر وين بدك تسجّل المصروف. المبلغ بتدخله بعدين؛ ما بدك تكمّل ميزانية ولا تدخل دخل. الأرقام التجريبية رح تختفي فقط بعد موافقتك.":
-         "You can record an actual purchase without entering income or creating a category. Missing budget amounts remain unknown. Demo finance is replaced only with your permission."}</p>
+        <p className="text-sm font-semibold">{ar?"ابدأ بمصروف واحد، حتى بلا ميزانية":(lang==="fr"?frenchUI("Record one actual expense, even without a budget"):"Record one actual expense, even without a budget")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{ar?"اختَر وين بدك تسجّل المصروف. المبلغ بتدخله بعدين؛ ما بدك تكمّل ميزانية ولا تدخل دخل. الأرقام التجريبية رح تختفي فقط بعد موافقتك.":(lang==="fr"?frenchUI("You can record an actual purchase without entering income or creating a category. Missing budget amounts remain unknown. Demo finance is replaced only with your permission."):"You can record an actual purchase without entering income or creating a category. Missing budget amounts remain unknown. Demo finance is replaced only with your permission.")}</p>
         {s.demo&&<button type="button" className="mt-3 min-h-11 rounded-full bg-brand px-4 text-sm font-semibold text-white" onClick={()=>{
-          if(window.confirm(ar?"بدك تبدأ تسجيل مصاريف حقيقية؟ رح نستبدل أرقام المال التجريبية فقط ونحافظ على ملف العيلة والخطط.":"Start recording real spending? This replaces demo Money figures only. Family profiles, plans and calendar stay unchanged."))setS(current=>current.demo?emptyRealMoney():current);
-        }}>{ar?"ابدأ بأول مصروف مدفوع":"Start with my first paid expense"}</button>}
-        <details className="mt-3"><summary className="min-h-10 cursor-pointer text-xs font-semibold text-brand">{ar?"اختياري: أنشئ فئة للميزانية":"Optional: organize a budget category"}</summary>
+          if(window.confirm(ar?"بدك تبدأ تسجيل مصاريف حقيقية؟ رح نستبدل أرقام المال التجريبية فقط ونحافظ على ملف العيلة والخطط.":(lang==="fr"?frenchUI("Start recording real spending? This replaces demo Money figures only. Family profiles, plans and calendar stay unchanged."):"Start recording real spending? This replaces demo Money figures only. Family profiles, plans and calendar stay unchanged.")))setS(current=>current.demo?emptyRealMoney():current);
+        }}>{ar?"ابدأ بأول مصروف مدفوع":(lang==="fr"?frenchUI("Start with my first paid expense"):"Start with my first paid expense")}</button>}
+        <details className="mt-3"><summary className="min-h-10 cursor-pointer text-xs font-semibold text-brand">{ar?"اختياري: أنشئ فئة للميزانية":(lang==="fr"?frenchUI("Optional: organize a budget category"):"Optional: organize a budget category")}</summary>
         <div className="mt-3 flex flex-wrap gap-2">
          {([{id:"groceries",en:"Groceries",ar:"البقالة"},{id:"transport",en:"Transport",ar:"المواصلات"},
            {id:"education",en:"Education",ar:"التعليم"},{id:"health",en:"Healthcare",ar:"الصحة"},
            {id:"household",en:"Household",ar:"البيت"},{id:"other",en:"Other",ar:"أخرى"}] as const)
           .map(item=><button type="button" key={item.id} className="min-h-11 rounded-full border border-[#BFD9C6] bg-white px-3 text-xs font-semibold text-brand"
            onClick={()=>{
-            if(s.demo&&!window.confirm(ar?"تبدأ سجلات مصاريف العيلة؟ سنزيل أرقام المالية التجريبية فقط، ونحافظ على العيلة والخطط.":"Start real Money records? Only example Money figures will be removed; your family profiles and plans remain."))return;
+            if(s.demo&&!window.confirm(ar?"تبدأ سجلات مصاريف العيلة؟ سنزيل أرقام المالية التجريبية فقط، ونحافظ على العيلة والخطط.":(lang==="fr"?frenchUI("Start real Money records? Only example Money figures will be removed; your family profiles and plans remain."):"Start real Money records? Only example Money figures will be removed; your family profiles and plans remain.")))return;
             setS(previous=>{
              const base=previous.demo?emptyRealMoney():previous;
              const id="quick-"+item.id;
              if(base.categories.some(cat=>cat.id===id))return base;
              return {...base,financialInputsPartial:true,categories:[...base.categories,{id,name:item.en,type:"variable",planned:0,amountConfidence:"estimate"}]};
             });
-           }}>{ar?item.ar:item.en}</button>)}
+           }}>{ar?item.ar:(lang==="fr"?frenchUI(item.en):item.en)}</button>)}
         </div></details>
        </div>}
             <Expenses
@@ -183,8 +182,8 @@ function MoneyPage() {
             ...(mode==="deduct"&&prev.cashOnHand!=null?{cashOnHand:Math.round((prev.cashOnHand-amount)*100)/100,cashUpdatedAt:today()}:{})};
         })}
         onDelete={(expense)=>{
-          const restoreCash=!!expense.cashDeducted&&s.cashOnHand!==null&&s.cashOnHand!==undefined&&window.confirm(ar?"هل تريد إعادة المبلغ الذي خُصم من الرصيد عند حذف المصروف؟":"Restore the cash deducted for this expense when deleting it?");
-          if(!window.confirm(restoreCash?(ar?"تأكيد حذف المصروف وإعادة الرصيد؟":"Delete expense and restore cash?"):(ar?"حذف المصروف دون تغيير رصيد البنك؟":"Delete this expense without changing entered cash?")))return;
+          const restoreCash=!!expense.cashDeducted&&s.cashOnHand!==null&&s.cashOnHand!==undefined&&window.confirm(ar?"هل تريد إعادة المبلغ الذي خُصم من الرصيد عند حذف المصروف؟":(lang==="fr"?frenchUI("Restore the cash deducted for this expense when deleting it?"):"Restore the cash deducted for this expense when deleting it?"));
+          if(!window.confirm(restoreCash?(ar?"تأكيد حذف المصروف وإعادة الرصيد؟":(lang==="fr"?frenchUI("Delete expense and restore cash?"):"Delete expense and restore cash?")):(ar?"حذف المصروف دون تغيير رصيد البنك؟":(lang==="fr"?frenchUI("Delete this expense without changing entered cash?"):"Delete this expense without changing entered cash?"))))return;
           setS(previous=>{
           const base=reverseVarianceAllocation(previous,expense.id);
           if(expense.allocation&&base===previous)return previous;
@@ -198,7 +197,7 @@ function MoneyPage() {
         }}
       />
       <details className="editorial-card mt-4 px-4 py-3">
-        <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"راجع الفروقات بين المخطط والمدفوع (اختياري)":"Review budget differences (optional)"}</summary>
+        <summary className="min-h-10 cursor-pointer text-sm font-semibold text-brand">{ar?"راجع الفروقات بين المخطط والمدفوع (اختياري)":(lang==="fr"?frenchUI("Review budget differences (optional)"):"Review budget differences (optional)")}</summary>
         <MoneyGuidance scope="variance" state={s} setState={setS}/>
       </details>
       </>}
@@ -223,22 +222,22 @@ function Settings({income,target,hasSources,onSave}:{income:number;target:number
  const save=(e:FormEvent)=>{
    e.preventDefault();
    const i=hasSources?income:Number(inc),amount=Number(goal);
-   if(!Number.isFinite(i)||i<0||i>100000)return setErr(ar?"أدخل دخلاً صحيحاً.":"Enter a valid monthly income.");
-   if(!Number.isFinite(amount)||amount<0||amount>100000)return setErr(ar?"أدخل هدف ادخار صحيحاً.":"Enter a valid savings goal.");
+   if(!Number.isFinite(i)||i<0||i>100000)return setErr(ar?"أدخل دخلاً صحيحاً.":(lang==="fr"?frenchUI("Enter a valid monthly income."):"Enter a valid monthly income."));
+   if(!Number.isFinite(amount)||amount<0||amount>100000)return setErr(ar?"أدخل هدف ادخار صحيحاً.":(lang==="fr"?frenchUI("Enter a valid savings goal."):"Enter a valid savings goal."));
    setErr("");onSave(i,Math.round(amount*100)/100);
-   toast.success(ar?"تم تحديث الدخل وهدف الادخار.":"Income and savings goal updated.");
+   toast.success(ar?"تم تحديث الدخل وهدف الادخار.":(lang==="fr"?frenchUI("Income and savings goal updated."):"Income and savings goal updated."));
  };
  return <section className="mt-4">
-  <p className="text-xs text-muted-foreground">{ar?"حدّد هدف الادخار المعتاد كل شهر بالدينار. إعادة التوزيع لمصروف محدد تؤثر فقط على شهر الدفع.":"Set your regular monthly savings goal in JOD. One-off reallocations affect only their payment month."}</p>
+  <p className="text-xs text-muted-foreground">{ar?"حدّد هدف الادخار المعتاد كل شهر بالدينار. إعادة التوزيع لمصروف محدد تؤثر فقط على شهر الدفع.":(lang==="fr"?frenchUI("Set your regular monthly savings goal in JOD. One-off reallocations affect only their payment month."):"Set your regular monthly savings goal in JOD. One-off reallocations affect only their payment month.")}</p>
   <form onSubmit={save} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-   <Field label={ar?"الدخل الشهري (د.أ)":"Monthly income (JOD)"}>
+   <Field label={ar?"الدخل الشهري (د.أ)":(lang==="fr"?frenchUI("Monthly income (JOD)"):"Monthly income (JOD)")}>
     <Input inputMode="decimal" className={inputCls} disabled={hasSources} value={hasSources?String(income):inc} onChange={e=>setInc(e.target.value)}/>
    </Field>
-   <Field label={ar?"هدف الادخار شهرياً (د.أ)":"Monthly savings goal (JOD)"}>
+   <Field label={ar?"هدف الادخار شهرياً (د.أ)":(lang==="fr"?frenchUI("Monthly savings goal (JOD)"):"Monthly savings goal (JOD)")}>
     <Input inputMode="decimal" className={inputCls} value={goal} onChange={e=>setGoal(e.target.value)}/>
    </Field>
-   <Button type="submit" className="h-11">{ar?"حفظ":"Save"}</Button>
-   {hasSources&&<p className="text-xs text-muted-foreground sm:col-span-3">{ar?"تعديل مصدر الدخل من قائمة الدخل أعلاه.":"Edit monthly income through the Income schedule above."}</p>}
+   <Button type="submit" className="h-11">{ar?"حفظ":(lang==="fr"?frenchUI("Save"):"Save")}</Button>
+   {hasSources&&<p className="text-xs text-muted-foreground sm:col-span-3">{ar?"تعديل مصدر الدخل من قائمة الدخل أعلاه.":(lang==="fr"?frenchUI("Edit monthly income through the Income schedule above."):"Edit monthly income through the Income schedule above.")}</p>}
   </form>
   {err&&<p className="mt-2 text-sm text-destructive" role="alert">{err}</p>}
  </section>;
@@ -279,19 +278,19 @@ function Categories({ cats, budgetItems, spentBy, plannedBy, onChange }: { cats:
                 <div className="flex items-center gap-2">
                   <span className="truncate font-medium">{tr(c.name)}</span>
                   <span className="rounded-full bg-mint px-2 text-[11px] text-brand">{tr(typeLabel[c.type])}</span>
-                  {c.priority&&<span className="rounded-full border px-2 text-[11px] text-muted-foreground">{c.priority==="essential"?(lang==="ar"?"أساسي":"Essential"):c.priority==="protected"?(lang==="ar"?"مهم للعيلة":"Protected"):(lang==="ar"?"مرن":"Flexible")}</span>}
+                  {c.priority&&<span className="rounded-full border px-2 text-[11px] text-muted-foreground">{c.priority==="essential"?(lang==="ar"?"أساسي":(lang==="fr"?frenchUI("Essential"):"Essential")):c.priority==="protected"?(lang==="ar"?"مهم للعيلة":(lang==="fr"?frenchUI("Protected"):"Protected")):(lang==="ar"?"مرن":(lang==="fr"?frenchUI("Flexible"):"Flexible"))}</span>}
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
                   <div className={`h-full ${a > effective ? "bg-destructive" : "bg-brand-2"}`} style={{ width: `${pct}%` }} />
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{tr("Actual")} {fmtJOD(a)} · {tr("Planned")} {fmtJOD(effective)} {effective!==c.planned&&(lang==="ar"?"(معدل لهذا الشهر)":"(adjusted this month)")}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{tr("Actual")} {fmtJOD(a)} · {tr("Planned")} {fmtJOD(effective)} {effective!==c.planned&&(lang==="ar"?"(معدل لهذا الشهر)":(lang==="fr"?frenchUI("(adjusted this month)"):"(adjusted this month)"))}</p>
               </div>
               <Button size="icon" variant="ghost" aria-label={`Edit ${c.name}`} onClick={() => setEditing(c)}><Pencil className="size-4" /></Button>
               <Button
                 size="icon"
                 variant="ghost"
                 aria-label={`Delete ${c.name}`}
-                onClick={() => confirm(`${tr("Delete category")} "${c.name}"? ${lang==="ar"?"ستُحذف تفاصيل بنود هذه الفئة. تبقى المدفوعات والفواتير القديمة محفوظة ولكن قد تظهر دون فئة.":"Its detailed budget items will be removed. Existing payments and bills remain saved but may become uncategorized."}`) && onChange(cats.filter((x) => x.id !== c.id))}
+                onClick={() => confirm(`${tr("Delete category")} "${c.name}"? ${lang==="ar"?"ستُحذف تفاصيل بنود هذه الفئة. تبقى المدفوعات والفواتير القديمة محفوظة ولكن قد تظهر دون فئة.":(lang==="fr"?frenchUI("Its detailed budget items will be removed. Existing payments and bills remain saved but may become uncategorized."):"Its detailed budget items will be removed. Existing payments and bills remain saved but may become uncategorized.")}`) && onChange(cats.filter((x) => x.id !== c.id))}
               >
                 <Trash2 className="size-4" />
               </Button>
@@ -379,15 +378,15 @@ function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expe
   const selectedItem=matchingItems.some(i=>i.id===quickItem)?quickItem:"";
   const recordQuick=(ev:FormEvent)=>{
     ev.preventDefault();
-    if(demo||quickRecorded)return setQuickError(ar?"ابدأ بسجلات مالية حقيقية أولاً.":"Start real Money before logging a paid purchase.");
+    if(demo||quickRecorded)return setQuickError(ar?"ابدأ بسجلات مالية حقيقية أولاً.":(lang==="fr"?frenchUI("Start real Money before logging a paid purchase."):"Start real Money before logging a paid purchase."));
     const amount=parseAmount(quickAmount,50000);
     if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
-    if(quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":"Enter a valid expected amount.");
+    if(quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":(lang==="fr"?frenchUI("Enter a valid expected amount."):"Enter a valid expected amount."));
     if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
     const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:false,status:"paid",...(selectedItem?{budgetItemId:selectedItem}:{}),...(quickNote.trim()?{note:quickNote.trim().slice(0,60)}:{}),...(quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
     onRecord(entry);
     setQuickRecorded(true);setQuickError("");
-    toast.success(ar?"تم تسجيل المصروف المدفوع.":"Paid expense recorded.");
+    toast.success(ar?"تم تسجيل المصروف المدفوع.":(lang==="fr"?frenchUI("Paid expense recorded."):"Paid expense recorded."));
   };
   const month=today().slice(0,7);
   const knownCategoryIds=new Set(cats.map(c=>c.id));
@@ -399,47 +398,47 @@ function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expe
   return (
     <section className="card-soft mt-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{ar?"أضف مصروفاً":"Add an expense"}</h2>
+        <h2 className="text-lg font-semibold">{ar?"أضف مصروفاً":(lang==="fr"?frenchUI("Add an expense"):"Add an expense")}</h2>
         <Button size="sm" variant="outline" onClick={() => setEditing(blank)} disabled={demo}>
-          <Plus className="size-4" /> {ar?"إدخال بتفاصيل أكثر":"Add with more details"} </Button>
+          <Plus className="size-4" /> {ar?"إدخال بتفاصيل أكثر":(lang==="fr"?frenchUI("Add with more details"):"Add with more details")} </Button>
       </div>
       <form onSubmit={recordQuick} className="mt-3 grid gap-2 rounded-xl bg-muted/40 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-        <p className="sm:col-span-3 text-xs text-muted-foreground">{ar?"هذا لتسجيل مصروف تم دفعه بالفعل، وليس فاتورة قادمة.":"For a purchase already paid—not a future bill."}</p>
-        <Field label={ar?"كم دفعت؟ (د.أ)":"How much did you pay? (JOD)"}>
+        <p className="sm:col-span-3 text-xs text-muted-foreground">{ar?"هذا لتسجيل مصروف تم دفعه بالفعل، وليس فاتورة قادمة.":(lang==="fr"?frenchUI("For a purchase already paid—not a future bill."):"For a purchase already paid—not a future bill.")}</p>
+        <Field label={ar?"كم دفعت؟ (د.أ)":(lang==="fr"?frenchUI("How much did you pay? (JOD)"):"How much did you pay? (JOD)")}>
           <Input className={inputCls} inputMode="decimal" value={quickAmount}
             placeholder={tr("e.g. 12.50")} onChange={e=>setQuickAmount(e.target.value)} />
         </Field>
         <Field label={tr("Category")}>
           <NativeSelect value={selectedCategory} onChange={e=>{setQuickCategory(e.target.value);setQuickItem("");}}>
-            <option value="uncategorized">{ar?"غير مصنف بعد":"Uncategorized for now"}</option>
+            <option value="uncategorized">{ar?"غير مصنف بعد":(lang==="fr"?frenchUI("Uncategorized for now"):"Uncategorized for now")}</option>
             {cats.map(cat=><option key={cat.id} value={cat.id}>{tr(cat.name)}</option>)}
           </NativeSelect>
         </Field>
-        {matchingItems.length>0&&<Field label={ar?"أي بند؟ (اختياري)":"Which item? (optional)"}>
+        {matchingItems.length>0&&<Field label={ar?"أي بند؟ (اختياري)":(lang==="fr"?frenchUI("Which item? (optional)"):"Which item? (optional)")}>
           <NativeSelect value={selectedItem} onChange={e=>setQuickItem(e.target.value)}>
-           <option value="">{ar?"بدون تحديد بند":"Category only"}</option>
+           <option value="">{ar?"بدون تحديد بند":(lang==="fr"?frenchUI("Category only"):"Category only")}</option>
            {matchingItems.map(i=><option key={i.id} value={i.id}>{i.name}</option>)}
           </NativeSelect>
          </Field>}
-        <Field label={ar?"على شو صرفت؟ (اختياري)":"What was it for? (optional)"}>
-          <Input className={inputCls} maxLength={60} value={quickNote} onChange={e=>setQuickNote(e.target.value)} placeholder={ar?"مثلاً: تسوّق أسبوعي":"e.g. weekly groceries"}/>
+        <Field label={ar?"على شو صرفت؟ (اختياري)":(lang==="fr"?frenchUI("What was it for? (optional)"):"What was it for? (optional)")}>
+          <Input className={inputCls} maxLength={60} value={quickNote} onChange={e=>setQuickNote(e.target.value)} placeholder={ar?"مثلاً: تسوّق أسبوعي":(lang==="fr"?frenchUI("e.g. weekly groceries"):"e.g. weekly groceries")}/>
         </Field>
-        <Button type="submit" className="h-11" disabled={demo||quickRecorded||!selectedCategory}><Plus className="size-4"/> {ar?"سجّل المصروف":"Record expense"}</Button>
+        <Button type="submit" className="h-11" disabled={demo||quickRecorded||!selectedCategory}><Plus className="size-4"/> {ar?"سجّل المصروف":(lang==="fr"?frenchUI("Record expense"):"Record expense")}</Button>
         {quickRecorded&&<div role="status" className="sm:col-span-3 rounded-xl bg-[#EDF7EB] p-3 text-sm">
-          <strong>{ar?"تم تسجيل المصروف مرة واحدة.":"Expense recorded once."}</strong>
+          <strong>{ar?"تم تسجيل المصروف مرة واحدة.":(lang==="fr"?frenchUI("Expense recorded once."):"Expense recorded once.")}</strong>
           <button type="button" className="ms-3 min-h-10 font-semibold text-brand underline" onClick={()=>{
             setQuickRecorded(false);setQuickAmount("");setQuickExpected("");setQuickNote("");setQuickItem("");setQuickError("");
-          }}>{ar?"مصروف جديد":"Add another"}</button>
+          }}>{ar?"مصروف جديد":(lang==="fr"?frenchUI("Add another"):"Add another")}</button>
         </div>}
         <details className="sm:col-span-3 rounded-xl border border-border bg-white p-3">
-          <summary className="cursor-pointer text-xs font-semibold text-brand">{ar?"هل المبلغ مختلف عن المتوقع؟ (اختياري)":"Compare with an expected amount (optional)"} +</summary>
-          <label className="mt-2 block text-xs font-medium">{ar?"كم كنت تتوقع أن تدفع؟ (د.أ)":"What did you expect to pay? (JOD)"}
+          <summary className="cursor-pointer text-xs font-semibold text-brand">{ar?"هل المبلغ مختلف عن المتوقع؟ (اختياري)":(lang==="fr"?frenchUI("Compare with an expected amount (optional)"):"Compare with an expected amount (optional)")} +</summary>
+          <label className="mt-2 block text-xs font-medium">{ar?"كم كنت تتوقع أن تدفع؟ (د.أ)":(lang==="fr"?frenchUI("What did you expect to pay? (JOD)"):"What did you expect to pay? (JOD)")}
             <Input type="number" step=".01" min={0} max={50000} className="mt-1 max-w-44" value={quickExpected} onChange={e=>setQuickExpected(e.target.value)}/>
           </label>
-          <p className="mt-2 text-xs text-muted-foreground">{ar?"إذا في فرق، يظهر اقتراح تعديل مخصصاتك بعد التسجيل، وتؤكده أنت.":"If actual differs, you'll be offered a budget adjustment to approve."}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{ar?"إذا في فرق، يظهر اقتراح تعديل مخصصاتك بعد التسجيل، وتؤكده أنت.":(lang==="fr"?frenchUI("If actual differs, you'll be offered a budget adjustment to approve."):"If actual differs, you'll be offered a budget adjustment to approve.")}</p>
         </details>
         {quickError&&<p role="alert" className="text-sm text-destructive sm:col-span-3">{quickError}</p>}
-        <p className="text-xs text-muted-foreground sm:col-span-3">{ar?"التسجيل يضيف المصروف للتاريخ، ولا يخصم من رصيدك اليدوي تلقائياً.":"Recording adds the payment to your spending history. It does not automatically deduct it from your manually entered cash balance."}</p>
+        <p className="text-xs text-muted-foreground sm:col-span-3">{ar?"التسجيل يضيف المصروف للتاريخ، ولا يخصم من رصيدك اليدوي تلقائياً.":(lang==="fr"?frenchUI("Recording adds the payment to your spending history. It does not automatically deduct it from your manually entered cash balance."):"Recording adds the payment to your spending history. It does not automatically deduct it from your manually entered cash balance.")}</p>
       </form>
       {editing && (
         <ExpenseForm
@@ -456,52 +455,52 @@ function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expe
         />
       )}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
-       <h3 className="text-sm font-semibold">{onlyUncategorized?(ar?"مصاريف هذا الشهر دون فئة":"This month's uncategorized paid expenses"):showHistory?(ar?"كل المصاريف المسجلة":"All recorded expenses"):(ar?"مصاريف هذا الشهر":"This month's expenses")}</h3>
+       <h3 className="text-sm font-semibold">{onlyUncategorized?(ar?"مصاريف هذا الشهر دون فئة":(lang==="fr"?frenchUI("This month's uncategorized paid expenses"):"This month's uncategorized paid expenses")):showHistory?(ar?"كل المصاريف المسجلة":(lang==="fr"?frenchUI("All recorded expenses"):"All recorded expenses")):(ar?"مصاريف هذا الشهر":(lang==="fr"?frenchUI("This month's expenses"):"This month's expenses"))}</h3>
        {onlyUncategorized&&<button type="button" onClick={()=>setOnlyUncategorized(false)}
-        className="min-h-10 text-xs font-semibold text-brand underline">{ar?"عرض كل المصاريف":"Show all expenses"}</button>}
-       {olderCount>0&&!onlyUncategorized&&<button type="button" className="min-h-9 text-xs font-semibold text-brand underline" onClick={()=>setShowHistory(v=>!v)}>{showHistory?(ar?"هذا الشهر فقط":"This month only"):(ar?"عرض المصاريف السابقة":"Show older expenses")}</button>}
+        className="min-h-10 text-xs font-semibold text-brand underline">{ar?"عرض كل المصاريف":(lang==="fr"?frenchUI("Show all expenses"):"Show all expenses")}</button>}
+       {olderCount>0&&!onlyUncategorized&&<button type="button" className="min-h-9 text-xs font-semibold text-brand underline" onClick={()=>setShowHistory(v=>!v)}>{showHistory?(ar?"هذا الشهر فقط":(lang==="fr"?frenchUI("This month only"):"This month only")):(ar?"عرض المصاريف السابقة":(lang==="fr"?frenchUI("Show older expenses"):"Show older expenses"))}</button>}
       </div>
       {sorted.length === 0 ? (
-        <p className="mt-4 rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">{ar?"ما في مصاريف مسجّلة هون. سجّل أول مصروف أعلاه.":"No spending recorded here yet. Add your first expense above."}</p>
+        <p className="mt-4 rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">{ar?"ما في مصاريف مسجّلة هون. سجّل أول مصروف أعلاه.":(lang==="fr"?frenchUI("No spending recorded here yet. Add your first expense above."):"No spending recorded here yet. Add your first expense above.")}</p>
       ) : (
         <ul className="mt-3 divide-y">
           {sorted.map((e) => (
             <li key={e.id} className="flex items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{e.note || tr(catName(e.categoryId))}</p>
-                {e.status==="planned"&&<button type="button" onClick={()=>{setConfirming(e.id);setActualValue(String(e.amount));}} className="mt-1 min-h-9 rounded-lg bg-[#E8F1E7] px-2.5 text-xs font-semibold text-brand">{ar?"أكد الدفع الفعلي":"Confirm actual payment"}</button>}
+                {e.status==="planned"&&<button type="button" onClick={()=>{setConfirming(e.id);setActualValue(String(e.amount));}} className="mt-1 min-h-9 rounded-lg bg-[#E8F1E7] px-2.5 text-xs font-semibold text-brand">{ar?"أكد الدفع الفعلي":(lang==="fr"?frenchUI("Confirm actual payment"):"Confirm actual payment")}</button>}
                 {confirming===e.id&&e.status==="planned"&&<div className="mt-2 rounded-xl border border-border bg-[#F9FBF6] p-3">
-                  <label className="block text-xs font-semibold">{ar?"كم دفعت فعلياً؟ (د.أ)":"Actual amount paid (JOD)"}
+                  <label className="block text-xs font-semibold">{ar?"كم دفعت فعلياً؟ (د.أ)":(lang==="fr"?frenchUI("Actual amount paid (JOD)"):"Actual amount paid (JOD)")}
                     <Input className="mt-1 max-w-44" type="number" min={0} max={50000} step=".01" value={actualValue} onChange={ev=>setActualValue(ev.target.value)}/>
                   </label>
-                  <p className="mt-1 text-xs text-muted-foreground">{ar?"المتوقع ":"Expected "}{fmtJOD(e.plannedAmount??e.amount)} · {ar?"اختر إذا كان الرصيد يشمل الدفع أو يحتاج للخصم. تعديل المخصصات يتطلب موافقتك.":"Choose whether cash already reflects this payment. Budget changes need your approval."}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{ar?"المتوقع ":(lang==="fr"?frenchUI("Expected "):"Expected ")}{fmtJOD(e.plannedAmount??e.amount)} · {ar?"اختر إذا كان الرصيد يشمل الدفع أو يحتاج للخصم. تعديل المخصصات يتطلب موافقتك.":(lang==="fr"?frenchUI("Choose whether cash already reflects this payment. Budget changes need your approval."):"Choose whether cash already reflects this payment. Budget changes need your approval.")}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {cashBalance!==null&&<Button size="sm" type="button" variant="outline" onClick={()=>{ const v=Number(actualValue);
-                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":"Check the actual amount and balance.");
+                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":(lang==="fr"?frenchUI("Check the actual amount and balance."):"Check the actual amount and balance."));
                       onConfirmPlanned(e.id,Math.round(v*100)/100,"already");
                       setConfirming(null);setQuickError("");
-                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed."); }}>{ar?"الرصيد يشمل الدفع":"Already in cash balance"}</Button>}
+                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":(lang==="fr"?frenchUI("Actual payment confirmed."):"Actual payment confirmed.")); }}>{ar?"الرصيد يشمل الدفع":(lang==="fr"?frenchUI("Already in cash balance"):"Already in cash balance")}</Button>}
                     {cashBalance!==null&&<Button size="sm" type="button" onClick={()=>{ const v=Number(actualValue);
-                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000||cashBalance===null||v>cashBalance)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":"Check the actual amount and balance.");
+                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000||cashBalance===null||v>cashBalance)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":(lang==="fr"?frenchUI("Check the actual amount and balance."):"Check the actual amount and balance."));
                       onConfirmPlanned(e.id,Math.round(v*100)/100,"deduct");
                       setConfirming(null);setQuickError("");
-                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed."); }}>{ar?"اخصمه من الرصيد":"Deduct from cash"}</Button>}
+                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":(lang==="fr"?frenchUI("Actual payment confirmed."):"Actual payment confirmed.")); }}>{ar?"اخصمه من الرصيد":(lang==="fr"?frenchUI("Deduct from cash"):"Deduct from cash")}</Button>}
                     {cashBalance===null&&<Button size="sm" type="button" onClick={()=>{ const v=Number(actualValue);
-                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":"Check the actual amount and balance.");
+                      if(actualValue.trim()===""||!Number.isFinite(v)||v<0||v>50000)return setQuickError(ar?"راجع المبلغ الفعلي والرصيد.":(lang==="fr"?frenchUI("Check the actual amount and balance."):"Check the actual amount and balance."));
                       onConfirmPlanned(e.id,Math.round(v*100)/100,"untracked");
                       setConfirming(null);setQuickError("");
-                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":"Actual payment confirmed."); }}>{ar?"تأكيد (دون رصيد مدخل)":"Confirm (no cash balance)"}</Button>}
-                    <Button size="sm" type="button" variant="ghost" onClick={()=>setConfirming(null)}>{ar?"إلغاء":"Cancel"}</Button>
+                      toast.success(ar?"تم تسجيل المبلغ الفعلي.":(lang==="fr"?frenchUI("Actual payment confirmed."):"Actual payment confirmed.")); }}>{ar?"تأكيد (دون رصيد مدخل)":(lang==="fr"?frenchUI("Confirm (no cash balance)"):"Confirm (no cash balance)")}</Button>}
+                    <Button size="sm" type="button" variant="ghost" onClick={()=>setConfirming(null)}>{ar?"إلغاء":(lang==="fr"?frenchUI("Cancel"):"Cancel")}</Button>
                   </div>
                 </div>}
-                {e.budgetItemId&&budgetItems.some(i=>i.id===e.budgetItemId&&i.categoryId===e.categoryId)&&<p className="text-xs text-brand">{ar?"البند: ":"Item: "}{budgetItems.find(i=>i.id===e.budgetItemId)?.name}</p>}
+                {e.budgetItemId&&budgetItems.some(i=>i.id===e.budgetItemId&&i.categoryId===e.categoryId)&&<p className="text-xs text-brand">{ar?"البند: ":(lang==="fr"?frenchUI("Item: "):"Item: ")}{budgetItems.find(i=>i.id===e.budgetItemId)?.name}</p>}
                 <p className="text-xs text-muted-foreground">
-                  {e.status==="planned"?(ar?"بانتظار الدفع · ":"Planned, not paid · "):""}{e.date} · {tr(catName(e.categoryId))} {e.owner ? `· ${e.owner}` : ""} · {e.shared?(ar?"عائلي محلي":"Household label"):(ar?"خاص على الجهاز":"Private on device")}
+                  {e.status==="planned"?(ar?"بانتظار الدفع · ":(lang==="fr"?frenchUI("Planned, not paid · "):"Planned, not paid · ")):""}{e.date} · {tr(catName(e.categoryId))} {e.owner ? `· ${e.owner}` : ""} · {e.shared?(ar?"عائلي محلي":(lang==="fr"?frenchUI("Household label"):"Household label")):(ar?"خاص على الجهاز":(lang==="fr"?frenchUI("Private on device"):"Private on device"))}
                 </p>
               </div>
               <div className="shrink-0 text-end"><span className="block font-semibold tabular-nums">{fmtJOD(e.amount)}</span>
-                 {e.status==="planned"&&<span className="block text-[11px] text-muted-foreground">{ar?"متوقع":"Expected"}</span>}
-                 {e.status!=="planned"&&e.plannedAmount!=null&&e.plannedAmount!==e.amount&&<span className="block text-[11px] text-muted-foreground">{ar?"الخطة: ":"Plan: "}{fmtJOD(e.plannedAmount)}</span>}
+                 {e.status==="planned"&&<span className="block text-[11px] text-muted-foreground">{ar?"متوقع":(lang==="fr"?frenchUI("Expected"):"Expected")}</span>}
+                 {e.status!=="planned"&&e.plannedAmount!=null&&e.plannedAmount!==e.amount&&<span className="block text-[11px] text-muted-foreground">{ar?"الخطة: ":(lang==="fr"?frenchUI("Plan: "):"Plan: ")}{fmtJOD(e.plannedAmount)}</span>}
                </div>
               <Button size="icon" variant="ghost" disabled={!!e.billId||!!e.allocation} aria-label={tr("Edit expense")} onClick={() => setEditing(e)}><Pencil className="size-4" /></Button>
               <Button size="icon" variant="ghost" disabled={!!e.billId} aria-label={tr("Delete expense")} onClick={() => onDelete(e)}>
@@ -536,14 +535,14 @@ function ExpenseForm({ initial, cats, members, budgetItems, onSave, onCancel }: 
       <Field label={tr("Date")}><Input className={inputCls} type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
       <Field label={tr("Category")}>
         <NativeSelect value={f.categoryId} onChange={(e) => setF(previous=>{const {budgetItemId:_item,...rest}=previous;return {...rest,categoryId:e.target.value};})}>
-          <option value="uncategorized">{ar?"غير مصنف بعد":"Uncategorized for now"}</option>
+          <option value="uncategorized">{ar?"غير مصنف بعد":(lang==="fr"?frenchUI("Uncategorized for now"):"Uncategorized for now")}</option>
           {cats.map((c) => <option key={c.id} value={c.id}>{tr(c.name)}</option>)}
         </NativeSelect>
       </Field>
-      {budgetItems.some(i=>i.categoryId===f.categoryId)&&<Field label={ar?"البند (اختياري)":"Item (optional)"}>
+      {budgetItems.some(i=>i.categoryId===f.categoryId)&&<Field label={ar?"البند (اختياري)":(lang==="fr"?frenchUI("Item (optional)"):"Item (optional)")}>
         <NativeSelect value={budgetItems.some(i=>i.id===f.budgetItemId&&i.categoryId===f.categoryId)?f.budgetItemId??"":""}
          onChange={(e)=>setF(previous=>{const {budgetItemId:_item,...rest}=previous;return e.target.value?{...rest,budgetItemId:e.target.value}:rest;})}>
-         <option value="">{ar?"الفئة فقط":"Category only"}</option>
+         <option value="">{ar?"الفئة فقط":(lang==="fr"?frenchUI("Category only"):"Category only")}</option>
          {budgetItems.filter(i=>i.categoryId===f.categoryId).map(i=><option key={i.id} value={i.id}>{i.name}</option>)}
         </NativeSelect>
        </Field>}
@@ -556,7 +555,7 @@ function ExpenseForm({ initial, cats, members, budgetItems, onSave, onCancel }: 
       </Field>
       <Field label={tr("Note (optional)")}><Input className={inputCls} maxLength={60} value={f.note ?? ""} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
       <label className="flex items-center justify-between gap-3 rounded-md border bg-card px-3 text-sm font-medium">
-        {f.shared ? (ar?"علامة عائلية محلية — لا مشاركة تلقائية":"Household label only — no automatic sharing") : (ar?"خاص على هذا الجهاز":"Private on this device")}
+        {f.shared ? (ar?"علامة عائلية محلية — لا مشاركة تلقائية":(lang==="fr"?frenchUI("Household label only — no automatic sharing"):"Household label only — no automatic sharing")) : (ar?"خاص على هذا الجهاز":(lang==="fr"?frenchUI("Private on this device"):"Private on this device"))}
         <Switch checked={f.shared} onCheckedChange={(v) => setF({ ...f, shared: v })} />
       </label>
       {err && <p className="text-sm text-destructive sm:col-span-2" role="alert">{err}</p>}

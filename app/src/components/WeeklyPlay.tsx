@@ -45,10 +45,10 @@ export function WeeklyPlay({members}:{members:readonly Member[]}){
      className={"min-w-0 rounded-2xl border p-2.5 text-start transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#358E6A] sm:p-3 "+colour.card+
       (active?" ring-2 ring-[#4A8A6B]":" hover:brightness-[.98]")}>
      <WeeklyGameArt gameId={g.id} category={g.category} className="mb-2 block aspect-[240/154] w-full rounded-xl"/>
-     <span className="block break-words text-[11px] font-extrabold leading-tight text-[#33493E] sm:text-sm">{ar?g.ar:g.en}</span>
+     <span className="block break-words text-[11px] font-extrabold leading-tight text-[#33493E] sm:text-sm">{ar?g.ar:lang==="fr"?frenchUI(g.en):g.en}</span>
      <span className={"mt-2 block text-[10px] font-semibold leading-snug "+colour.accent}>
       <span className="block opacity-80">{t("Helps with","يساعد على")}</span>
-      <span>{ar?g.helpsAr:g.helpsEn}</span>
+      <span>{ar?g.helpsAr:lang==="fr"?frenchUI(g.helpsEn):g.helpsEn}</span>
      </span>
      <span className="mt-1 flex items-center gap-1 text-[10px] text-[#65766D]"><Clock3 className="size-3" aria-hidden="true"/>{g.minutes} {t("min","د")}</span>
      <span className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[#3D6A50]">
@@ -61,8 +61,8 @@ export function WeeklyPlay({members}:{members:readonly Member[]}){
    aria-label={t("Game instructions","طريقة اللعب")}>
    <div className="flex items-start justify-between gap-3">
     <div>
-     <p className="text-xs font-semibold text-[#3B8260]">{open.emoji} {ar?open.ar:open.en}</p>
-     <p className="mt-1 text-sm text-[#536B5E]">{ar?open.descriptionAr:open.descriptionEn}</p>
+     <p className="text-xs font-semibold text-[#3B8260]">{open.emoji} {ar?open.ar:lang==="fr"?frenchUI(open.en):open.en}</p>
+     <p className="mt-1 text-sm text-[#536B5E]">{ar?open.descriptionAr:lang==="fr"?frenchUI(open.descriptionEn):open.descriptionEn}</p>
     </div>
     <button type="button" onClick={()=>setSelected(null)} aria-label={t("Close instructions","أغلق التعليمات")}
      className="grid size-10 shrink-0 place-items-center rounded-full bg-[#F2F6F0] text-[#4B6F5A] focus-visible:ring-2 focus-visible:ring-[#358E6A]"><X className="size-4"/></button>
@@ -71,16 +71,16 @@ export function WeeklyPlay({members}:{members:readonly Member[]}){
     <h3 className="flex items-center gap-2 text-xs font-extrabold text-[#357A54]">
      <Brain className="size-4" aria-hidden="true"/>{t("Why it matters","ليش هاللعبة مفيدة؟")}
     </h3>
-    <p className="mt-1 leading-relaxed">{ar?open.whyAr:open.whyEn}</p>
+    <p className="mt-1 leading-relaxed">{ar?open.whyAr:lang==="fr"?frenchUI(open.whyEn):open.whyEn}</p>
    </div>
    <ol className="mt-3 space-y-2">
-    {(ar?open.stepsAr:open.stepsEn).map((step,i)=><li key={i} className="flex gap-2 text-sm leading-relaxed">
+    {(ar?open.stepsAr:lang==="fr"?open.stepsEn.map(step=>frenchUI(step)):open.stepsEn).map((step,i)=><li key={i} className="flex gap-2 text-sm leading-relaxed">
      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#E7F2E8] text-xs font-bold text-[#35724F]">{i+1}</span>
      <span>{step}</span>
     </li>)}
    </ol>
    <p className="mt-3 rounded-xl bg-[#F4F7F1] px-3 py-2 text-xs leading-relaxed text-[#496451]">
-    <Heart className="me-1 inline size-3.5" aria-hidden="true"/>{ar?open.adaptAr:open.adaptEn}
+    <Heart className="me-1 inline size-3.5" aria-hidden="true"/>{ar?open.adaptAr:lang==="fr"?frenchUI(open.adaptEn):open.adaptEn}
    </p>
    <p className="mt-2 text-[11px] leading-relaxed text-[#75847A]">
     {t("Suggested ages: ","أعمار مقترحة: ")}{open.minAge}–{open.maxAge} · {t("Play together, supervise, and stop if your child isn't enjoying it.","العبوا سوا، راقبوا الأطفال، ووقفوا إذا ما عادوا مستمتعين.")}

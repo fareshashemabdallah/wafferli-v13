@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {ShieldCheck} from "lucide-react";
 import {useState} from "react";
 import {prepareExpenseForShare,formatSharedJod} from "@/lib/expenseSharing";
@@ -17,62 +18,52 @@ export function LocalExpensePrivacyReview(){
   <div className="flex items-start gap-3">
    <ShieldCheck className="mt-0.5 size-5 text-brand"/>
    <div>
-    <h3 className="text-sm font-semibold">{ar?"راجع علامات خصوصية المصاريف":"Review local spending privacy labels"}</h3>
-    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
-     "«عائلي» و«خاص» هنا مجرد تصنيفات محفوظة على هذا المتصفح. لا تمنح أي والد آخر صلاحية الرؤية، ولا ترفع أي مصروف للسحابة. مشاركة بند على حساب أسرة موثّق تتطلب موافقة منفصلة لكل بند.":
-     "Household/private are labels on THIS browser only. They do not grant access to another adult or upload expenses to a server. Actual authenticated household sharing requires separate consent for each expense."}</p>
+    <h3 className="text-sm font-semibold">{ar?"راجع علامات خصوصية المصاريف":(lang==="fr"?frenchUI("Review local spending privacy labels"):"Review local spending privacy labels")}</h3>
+    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?"«عائلي» و«خاص» هنا مجرد تصنيفات محفوظة على هذا المتصفح. لا تمنح أي والد آخر صلاحية الرؤية، ولا ترفع أي مصروف للسحابة. مشاركة بند على حساب أسرة موثّق تتطلب موافقة منفصلة لكل بند.":(lang==="fr"?frenchUI("Household/private are labels on THIS browser only. They do not grant access to another adult or upload expenses to a server. Actual authenticated household sharing requires separate consent for each expense."):"Household/private are labels on THIS browser only. They do not grant access to another adult or upload expenses to a server. Actual authenticated household sharing requires separate consent for each expense.")}</p>
    </div>
   </div>
-  <p className="mt-3 text-xs font-semibold">{ar?"عائلي محلي":"Local household label"}: {counts.sharedLabels} · {ar?"خاص":"Private label"}: {counts.privateLabels}</p>
-  <p className="mt-1 text-[11px] text-muted-foreground">{ar?"أي سجل جديد يبدأ بخيار خاص. تصنيف عائلي لا ينقل المعلومات لأي جهاز أو حساب آخر.":"New entries start private. A household label is not an upload, household permission or invitation."}</p>
-  {money.demo?<p className="mt-3 text-xs text-muted-foreground">{ar?
-   "هذه بيانات تجريبية؛ أضف أرقاماً فعلية لتفعيل المراجعة.":"Demo financial data: switch to actual entries before changing labels."}</p>:
+  <p className="mt-3 text-xs font-semibold">{ar?"عائلي محلي":(lang==="fr"?frenchUI("Local household label"):"Local household label")}: {counts.sharedLabels} · {ar?"خاص":(lang==="fr"?frenchUI("Private label"):"Private label")}: {counts.privateLabels}</p>
+  <p className="mt-1 text-[11px] text-muted-foreground">{ar?"أي سجل جديد يبدأ بخيار خاص. تصنيف عائلي لا ينقل المعلومات لأي جهاز أو حساب آخر.":(lang==="fr"?frenchUI("New entries start private. A household label is not an upload, household permission or invitation."):"New entries start private. A household label is not an upload, household permission or invitation.")}</p>
+  {money.demo?<p className="mt-3 text-xs text-muted-foreground">{ar?"هذه بيانات تجريبية؛ أضف أرقاماً فعلية لتفعيل المراجعة.":(lang==="fr"?frenchUI("Demo financial data: switch to actual entries before changing labels."):"Demo financial data: switch to actual entries before changing labels.")}</p>:
    <div className="mt-3 space-y-2">
-    {entries.length===0&&<p className="text-xs text-muted-foreground">{ar?"لا توجد مصاريف مدفوعة مسجلة.":"No recorded paid expenses."}</p>}
+    {entries.length===0&&<p className="text-xs text-muted-foreground">{ar?"لا توجد مصاريف مدفوعة مسجلة.":(lang==="fr"?frenchUI("No recorded paid expenses."):"No recorded paid expenses.")}</p>}
     {entries.map(e=><article key={e.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#EBF0E8] p-3 text-xs">
      <span className="min-w-0 flex-1">{e.date} · {e.amount.toFixed(2)} JOD
-      <span className="block text-muted-foreground">{money.categories.find(c=>c.id===e.categoryId)?.name??(ar?"فئة غير محددة":"Other category")}</span>
+      <span className="block text-muted-foreground">{money.categories.find(c=>c.id===e.categoryId)?.name??(ar?"فئة غير محددة":(lang==="fr"?frenchUI("Other category"):"Other category"))}</span>
      </span>
-     <select aria-label={ar?"علامة خصوصية هذا المصروف":"Expense privacy label"}
+     <select aria-label={ar?"علامة خصوصية هذا المصروف":(lang==="fr"?frenchUI("Expense privacy label"):"Expense privacy label")}
       value={e.shared?"household":"private"}
       className="min-h-11 rounded-xl border px-2 text-xs" onChange={ev=>{
        const share=ev.target.value==="household";
-       if(share&&!window.confirm(ar?
-        "تغيير العلامة إلى عائلي سيؤثر على سجلّك المحلي فقط. لا تتم مشاركة بيانات عبر الإنترنت، لكن أي مشاركة مستقبلية تتطلب موافقتك. متابعة؟":
-        "Change this local label to Household? No information is uploaded. Any future authenticated upload requires explicit additional consent. Continue?"))return;
+       if(share&&!window.confirm(ar?"تغيير العلامة إلى عائلي سيؤثر على سجلّك المحلي فقط. لا تتم مشاركة بيانات عبر الإنترنت، لكن أي مشاركة مستقبلية تتطلب موافقتك. متابعة؟":(lang==="fr"?frenchUI("Change this local label to Household? No information is uploaded. Any future authenticated upload requires explicit additional consent. Continue?"):"Change this local label to Household? No information is uploaded. Any future authenticated upload requires explicit additional consent. Continue?")))return;
        setPreviewId(null);
        setMoney(old=>changeLocalExpenseVisibility(old,e.id,share));
       }}>
-      <option value="private">{ar?"خاص على الجهاز":"Private (device)"}</option>
-      <option value="household">{ar?"علامة عائلية محلية":"Household label only"}</option>
+      <option value="private">{ar?"خاص على الجهاز":(lang==="fr"?frenchUI("Private (device)"):"Private (device)")}</option>
+      <option value="household">{ar?"علامة عائلية محلية":(lang==="fr"?frenchUI("Household label only"):"Household label only")}</option>
      </select>
      <button type="button" className="min-h-10 rounded-lg bg-[#EDF4EA] px-3 text-xs font-semibold text-brand"
       aria-expanded={previewId===e.id} onClick={()=>setPreviewId(current=>current===e.id?null:e.id)}>
-      {ar?"راجع ما قد يظهر عند مشاركة منفصلة":"Preview separately consented fields"}
+      {ar?"راجع ما قد يظهر عند مشاركة منفصلة":(lang==="fr"?frenchUI("Preview separately consented fields"):"Preview separately consented fields")}
      </button>
      {previewId===e.id&&<div className="w-full rounded-xl border border-[#DCE6DA] bg-[#F7FAF5] p-3" role="region"
-      aria-label={ar?"معاينة مشاركة افتراضية فقط":"Hypothetical sharing data preview"}>
+      aria-label={ar?"معاينة مشاركة افتراضية فقط":(lang==="fr"?frenchUI("Hypothetical sharing data preview"):"Hypothetical sharing data preview")}>
       {(()=>{
        const ready=prepareExpenseForShare(money,e);
-       if(!ready)return <p>{ar?
-        "هذا المصروف ليس مؤهلاً حتى لمعاينة المشاركة: إما خاص أو مخطط أو يحتاج معلومات صحيحة. لا يُرسل شيء.":"This expense is not eligible for a potential sharing preview: it may be private, planned or missing required fields. Nothing is sent."}</p>;
+       if(!ready)return <p>{ar?"هذا المصروف ليس مؤهلاً حتى لمعاينة المشاركة: إما خاص أو مخطط أو يحتاج معلومات صحيحة. لا يُرسل شيء.":(lang==="fr"?frenchUI("This expense is not eligible for a potential sharing preview: it may be private, planned or missing required fields. Nothing is sent."):"This expense is not eligible for a potential sharing preview: it may be private, planned or missing required fields. Nothing is sent.")}</p>;
        return <div>
-        <p className="font-semibold">{ar?"الحقول التي قد تُنسخ إذا وافقت لاحقاً على مشاركة هذا البند:":"Fields that could be copied only after future per-item consent:"}</p>
+        <p className="font-semibold">{ar?"الحقول التي قد تُنسخ إذا وافقت لاحقاً على مشاركة هذا البند:":(lang==="fr"?frenchUI("Fields that could be copied only after future per-item consent:"):"Fields that could be copied only after future per-item consent:")}</p>
         <dl className="mt-2 grid grid-cols-2 gap-2">
-         <dt>{ar?"الفئة":"Category"}</dt><dd>{ready.category}</dd>
-         <dt>{ar?"المبلغ":"Amount"}</dt><dd>{formatSharedJod(ready.amountFils)}</dd>
-         <dt>{ar?"التاريخ":"Date"}</dt><dd>{ready.occurredOn}</dd>
+         <dt>{ar?"الفئة":(lang==="fr"?frenchUI("Category"):"Category")}</dt><dd>{ready.category}</dd>
+         <dt>{ar?"المبلغ":(lang==="fr"?frenchUI("Amount"):"Amount")}</dt><dd>{formatSharedJod(ready.amountFils)}</dd>
+         <dt>{ar?"التاريخ":(lang==="fr"?frenchUI("Date"):"Date")}</dt><dd>{ready.occurredOn}</dd>
         </dl>
-        <p className="mt-2 text-muted-foreground">{ar?
-         "لا تتضمن المعاينة الملاحظات أو أسماء أفراد العائلة أو الأرصدة أو الخطط. قد تُستخدم بصمة معرف محلية دون نقل المعرف نفسه. هذه المعاينة لا تعني موافقة ولا ترفع أي بيانات.":
-         "Notes, family names, balances and plans are excluded. A fingerprint of the local ID may be used instead of sending the ID. This preview is not consent, a network upload or proof that a server is enabled."}</p>
+        <p className="mt-2 text-muted-foreground">{ar?"لا تتضمن المعاينة الملاحظات أو أسماء أفراد العائلة أو الأرصدة أو الخطط. قد تُستخدم بصمة معرف محلية دون نقل المعرف نفسه. هذه المعاينة لا تعني موافقة ولا ترفع أي بيانات.":(lang==="fr"?frenchUI("Notes, family names, balances and plans are excluded. A fingerprint of the local ID may be used instead of sending the ID. This preview is not consent, a network upload or proof that a server is enabled."):"Notes, family names, balances and plans are excluded. A fingerprint of the local ID may be used instead of sending the ID. This preview is not consent, a network upload or proof that a server is enabled.")}</p>
        </div>;
       })()}
      </div>}
     </article>)}
    </div>}
-  <p className="mt-3 text-[11px] text-muted-foreground">{ar?
-   "لا توجد صلاحيات مستخدمين أو حسابات أطفال في هذه الأداة. تغييرات العلامات لا تغير حالة الدفع أو الرصيد أو التخطيط.":
-   "No identities, child permissions or financial transactions are changed. Labels do not modify paid status, cash, balances or cloud membership."}</p>
+  <p className="mt-3 text-[11px] text-muted-foreground">{ar?"لا توجد صلاحيات مستخدمين أو حسابات أطفال في هذه الأداة. تغييرات العلامات لا تغير حالة الدفع أو الرصيد أو التخطيط.":(lang==="fr"?frenchUI("No identities, child permissions or financial transactions are changed. Labels do not modify paid status, cash, balances or cloud membership."):"No identities, child permissions or financial transactions are changed. Labels do not modify paid status, cash, balances or cloud membership.")}</p>
  </section>;
 }

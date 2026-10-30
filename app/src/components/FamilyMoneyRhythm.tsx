@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useEffect,useState} from "react";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState} from "@/lib/storage";
@@ -24,7 +25,7 @@ type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>Money
  * forecasts stay untouched in MoneyState and their financial domain modules.
  */
 export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onReviewUncategorized=onSpending,onCategories,requestedSetupStep=null}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [members]=useLocalState<Member[]>("members",sampleMembers());
  const [events]=useLocalState<FamilyMoment[]>("familyCalendar",[]);

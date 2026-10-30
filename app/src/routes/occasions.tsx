@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {createFileRoute,Link} from "@tanstack/react-router";
 import {useMemo,useState} from "react";
 import {AppShell} from "@/components/AppShell";
@@ -22,7 +23,7 @@ export const Route=createFileRoute("/occasions")({
  */
 export function OccasionPlanner(){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [events,,eventsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [oldPlans,,oldReady]=useLocalState<OccasionPlans>("occasionPlans",{});
@@ -63,7 +64,7 @@ export function OccasionPlanner(){
         className={"min-w-36 shrink-0 rounded-xl border p-3 text-start text-xs "+
          (key===planKey(event)?"border-[#A65784] bg-[#FBE9F2]":"border-[#DBE6D9] bg-[#F9FCF8]")}>
         <strong className="block truncate">{event.title}</strong>
-        <span className="mt-1 block text-muted-foreground">{formatMomentDate(event.occursOn,ar)}</span>
+        <span className="mt-1 block text-muted-foreground">{formatMomentDate(event.occursOn,ar,lang)}</span>
        </button>)}
       </div>
      </section>

@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useMemo,useState} from "react";
 import {FileText,Printer,ChevronDown} from "lucide-react";
 import type {MoneyState} from "@/lib/money";
@@ -31,7 +32,7 @@ const number=(n:number)=>Number.isFinite(n)?n.toFixed(2):"—";
 
 export function MoneyMonthlyReport({state,plans}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [open,setOpen]=useState(false);
  const [month,setMonth]=useState(localToday().slice(0,7));
  const report=useMemo(()=>buildMonthlyMoneyReport(state,month,new Date(),plans),[state,month,plans]);
@@ -72,7 +73,7 @@ export function MoneyMonthlyReport({state,plans}:Props){
      "استخدم نافذة الطباعة واختر حفظ كملف PDF. لا يتم رفع المعلومات ولا إضافة أي حركة مالية.")}
     </p>
    </div>
-   <article id="dabberna-monthly-report" dir={ar?"rtl":"ltr"}
+   <article id="dabberna-monthly-report" dir={ar?"rtl":(lang==="fr"?frenchUI("ltr"):"ltr")}
     className="rounded-2xl border border-[#D5E2D8] bg-white p-4 text-[#253C30] shadow-sm sm:p-6">
     <header className="mb-5 border-b-2 border-[#387A5D] pb-4">
      <p className="text-xs font-semibold uppercase tracking-wide text-[#438268]">DABBERNA · {t("PRIVATE FAMILY FINANCES","المالية العائلية الخاصة")}</p>

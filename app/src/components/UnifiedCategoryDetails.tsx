@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useState,type FormEvent} from "react";
 import {useI18n} from "@/lib/i18n";
 import {uid,fmtJOD} from "@/lib/storage";
@@ -16,7 +17,7 @@ const btn="min-h-10 rounded-xl border border-[#BBD8C4] bg-white px-3 text-xs fon
 const amountOk=(s:string)=>/^\d{1,6}(\.\d{1,2})?$/.test(s)&&Number(s)>0&&Number(s)<=100000;
 const money=(n:number)=>fmtJOD(roundJod(n));
 export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const category=state.categories.find(c=>c.id===categoryId);
  const [showNewItem,setShowNewItem]=useState(false);
  const [editingItemId,setEditingItemId]=useState<string|null>(null);

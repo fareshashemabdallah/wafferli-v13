@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useState} from "react";
 import {Link} from "@tanstack/react-router";
 import {CalendarClock,CheckCircle2,ArrowUpRight} from "lucide-react";
@@ -11,7 +12,7 @@ import {canonicalPlanViews} from "@/lib/canonicalFamilyFacts";
 
 export function FamilyCommitmentsPanel({money,compact=false,withinBills=false}:{money:MoneyState;compact?:boolean;withinBills?:boolean}){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [plans,,ready]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [members]=useLocalState<Member[]>("members",sampleMembers());
  const [events]=useLocalState<FamilyMoment[]>("familyCalendar",[]);

@@ -119,7 +119,7 @@ export function monthCells(year:number,monthZeroBased:number):Array<{date:string
     return {date:dateKey(d),inMonth:d.getMonth()===monthZeroBased,weekend:isJordanWeekend(d)};
   });
 }
-export function formatMomentDate(value:string,arabic:boolean):string{
+export function formatMomentDate(value:string,arabic:boolean,language:"en"|"ar"|"fr"=arabic?"ar":"en"):string{
   const d=parseCalendarDate(value);
-  return d?new Intl.DateTimeFormat(arabic?"ar-JO":"en-GB",{day:"numeric",month:"short"}).format(d):value;
+  return d?new Intl.DateTimeFormat(language==="fr"?"fr-FR":arabic?"ar-JO":"en-GB",{day:"numeric",month:"short"}).format(d):value;
 }

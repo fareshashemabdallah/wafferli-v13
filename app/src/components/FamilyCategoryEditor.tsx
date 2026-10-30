@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useEffect,useState,type FormEvent} from "react";
 import {useI18n} from "@/lib/i18n";
 import {uid} from "@/lib/storage";
@@ -18,7 +19,7 @@ type Props={
 const field="mt-1 min-h-11 w-full rounded-xl border border-[#D9E6D7] bg-white p-2.5 text-sm text-[#2F5140] focus-visible:ring-2 focus-visible:ring-[#529F78]";
 const label="block text-xs font-bold text-[#5C7665]";
 export function FamilyCategoryEditor({state,setState,categoryId,starter,onClose,onMonthPlan,onAdvanced}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const existing=state.categories.find(c=>c.id===categoryId);
  const suggested=starter?pictureFor(starter):null;
  const [name,setName]=useState(existing?.name??(suggested?t(suggested.en,suggested.ar):""));
