@@ -25,8 +25,8 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
  const text=(en:string,arabic:string,fr=en)=>ar?arabic:lang==="fr"?fr:en;
  const accent=familyDestinations.find(x=>x.id===area)!;
  const colors={"--family-accent":accent.accent,"--family-soft":accent.soft} as CSSProperties;
- const navName=text("Main","التنقل الرئيسي");
- const mobileName=text("Main","التنقل الرئيسي");
+ const navName=text("Main","التنقل الرئيسي","Navigation principale");
+ const mobileName=text("Main","التنقل الرئيسي","Navigation principale");
  return <div dir={ar?"rtl":"ltr"} style={colors}
   className="dabberna-app dabberna-adventure-skin min-h-dvh bg-[#F7FBF4] text-[#234338] lg:flex">
   <a href="#dabberna-main-content"
