@@ -1,8 +1,20 @@
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useLocalState } from "./storage";
 import { arabicUI } from "./arabic";
+import { frenchUI } from "./french";
+import {readLocal} from "./storage";
 
-export type Lang = "en" | "ar";
+export type Lang = "en" | "ar" | "fr";
+
+export function preferredBrowserLanguage(languages:readonly string[]):Lang{
+ for(const candidate of languages){const base=candidate.toLowerCase().split("-")[0];
+  if(base==="ar"||base==="en"||base==="fr")return base;
+ }
+ return "en";
+}
+export function localize(lang:Lang,en:string,ar:string,fr=en):string{
+ return lang==="ar"?ar:lang==="fr"?fr:en;
+}
 
 const dict = {
   home: { en: "Today", ar: "اليوم" },
@@ -50,10 +62,18 @@ const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: Key) 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useLocalState<Lang>("lang", "en");
   useEffect(() => {
+    // Existing families retain their explicitly chosen Arabic/English value.
+    // Only brand-new browser profiles get a device-language suggestion.
+    if(readLocal<Lang|null>("lang",null)===null){
+      setLang(preferredBrowserLanguage(navigator.languages?.length
+        ?navigator.languages:[navigator.language]));
+    }
+  }, [setLang]);
+  useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
-  return <Ctx.Provider value={{ lang, setLang, t: (k) => dict[k][lang], tr: (s) => lang === "ar" ? arabicUI(s) : s }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ lang, setLang, t: (k) => lang === "ar" ? dict[k].ar : lang === "fr" ? frenchUI(dict[k].en) : dict[k].en, tr: (s) => lang === "ar" ? arabicUI(s) : lang === "fr" ? frenchUI(s) : s }}>{children}</Ctx.Provider>;
 }
 
 export const useI18n = () => useContext(Ctx);
