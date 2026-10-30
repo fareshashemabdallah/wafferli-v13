@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useState} from "react";
 import {useI18n} from "@/lib/i18n";
 import {computeMoney,type MoneyState} from "@/lib/money";
@@ -18,7 +19,7 @@ type Props={
  * No second category breakdown, savings intake, or planning-tools menu.
  */
 export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQuickAdd,onBills,onSpending,onReviewUncategorized,onEditCategory}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const [showAll,setShowAll]=useState(false);
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
  const totals=computeMoney(state);
