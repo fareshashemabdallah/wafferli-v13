@@ -11,13 +11,13 @@ import {UnifiedCategoryDetails} from "./UnifiedCategoryDetails";
 
 type Props={
  state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;forecast:RhythmForecast;
- onIncome:()=>void;onQuickAdd:()=>void;onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
+ onIncome:()=>void;onQuickAdd:()=>void;onBills:()=>void;onSpending:()=>void;onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
 /** The approved Money foundation: monthly numbers, spending mix, categories.
  * Money facts are read from canonical state and the existing category editor.
  * No second category breakdown, savings intake, or planning-tools menu.
  */
-export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQuickAdd,onEditCategory}:Props){
+export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQuickAdd,onBills,onSpending,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [showAll,setShowAll]=useState(false);
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
@@ -32,7 +32,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQui
  const back=()=>setActiveCategory(null);
  return <div className="space-y-4" data-testid="prototype-money-home">
   <OneMoneyDashboardSummary state={state} forecast={forecast}
-   onIncome={onIncome} onExpense={onQuickAdd} onOpenCategory={openCategory}/>
+   onIncome={onIncome} onExpense={onQuickAdd} onBills={onBills} onSpending={onSpending} onOpenCategory={openCategory}/>
   <section id="money-category-cards" className="scroll-mt-4 space-y-3"
    aria-label={t("Where our money goes","وين بتروح مصاريف العيلة")}>
    {activeCategory&&state.categories.some(c=>c.id===activeCategory)?<div className="space-y-3">

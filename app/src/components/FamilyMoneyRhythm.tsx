@@ -23,7 +23,7 @@ type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>Money
  * timeline screens have been removed; canonical dates, bills, history and
  * forecasts stay untouched in MoneyState and their financial domain modules.
  */
-export function FamilyMoneyRhythm({state,setState,onSpending,onCategories,requestedSetupStep=null}:Props){
+export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategories,requestedSetupStep=null}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [members]=useLocalState<Member[]>("members",sampleMembers());
@@ -94,7 +94,7 @@ export function FamilyMoneyRhythm({state,setState,onSpending,onCategories,reques
   </div>}
   <FamilyMoneyPrototypeHome state={state} setState={setState} forecast={forecast}
    onIncome={()=>setQuickEdit("income")} onQuickAdd={()=>setQuickExpenseOpen(true)}
-   onEditCategory={setEditingCategory}/>
+   onBills={onBills} onSpending={onSpending} onEditCategory={setEditingCategory}/>
   {quickExpenseOpen&&<QuickExpenseEntry state={state} setState={setState}
    onClose={()=>setQuickExpenseOpen(false)} onHistory={onSpending}/>}
   {quickEdit&&<FamilyMoneyQuickEdit kind={quickEdit} state={state} setState={setState}

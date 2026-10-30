@@ -49,16 +49,16 @@ export function SpendingMixDashboard({state}:Props){
       className="h-full min-w-0 border-r border-white/70 last:border-r-0"/>)}
     </div>
    </div>:<div className="mt-3 h-3.5 rounded-full bg-[#EDF1EC]"/>}
-  <div className="mt-3 grid grid-cols-2 gap-2" data-testid="spending-mix-stats">
+  <div className="mt-3 flex flex-wrap gap-2" data-testid="spending-mix-stats">
    {segmentKeys.filter(key=>key!=="unclassified"||extra).map(key=>{
     const detail=palette[key],Icon=detail.icon;
     const amount=key==="cushion"?mix.cushion:key==="unclassified"?mix.unclassified:mix[key];
-    return <div key={key} className="flex min-h-[76px] items-start gap-2 rounded-xl border border-[#E8ECE5] bg-[#FAFCF9] p-2.5 text-start"
+    return <div key={key} className="flex min-w-[120px] flex-1 items-center gap-2 rounded-xl border border-[#E8ECE5] bg-[#FAFCF9] px-2.5 py-2 text-start"
      data-testid={"mix-stat-"+key}>
-     <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-white" aria-hidden="true"><Icon className="size-4" style={{color:detail.color}}/></span>
+     <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-white" aria-hidden="true"><Icon className="size-4" style={{color:detail.color}}/></span>
      <span className="min-w-0">
       <span className="block text-[11px] font-bold leading-tight text-[#425E4B]">{t(detail.en,detail.ar)}</span>
-      <strong className="mt-1 block break-words text-sm tabular-nums text-[#32664B]">{money(amount)}</strong>
+      <strong className="block break-words text-xs font-bold tabular-nums text-[#32664B]">{money(amount)}</strong>
      </span>
     </div>;
    })}

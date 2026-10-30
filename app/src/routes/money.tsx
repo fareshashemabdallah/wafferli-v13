@@ -118,11 +118,11 @@ function MoneyPage() {
         </details>
       </div>
 
-      {section==="overview"&&<MoneyMonthlyReport state={s} plans={reportPlans}/>} 
       {section==="overview"&&<FamilyMoneyRhythm state={s} setState={setS}
         onBills={()=>setSection("planning")} onSpending={()=>setSection("spending")}
         onCategories={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"})}
         requestedSetupStep={requestedSetupStep}/>}
+      {section==="overview"&&<MoneyMonthlyReport state={s} plans={reportPlans}/>}
             {section==="planning"&&<>
       <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"الفواتير والدفعات":"Your bills & payments"}</h2>
        <p className="mt-1 text-xs text-muted-foreground">{ar?"سجّل الموعد مرة، وأكّد الدفع عند حدوثه.":"Add once. Confirm when paid."}</p></div>
