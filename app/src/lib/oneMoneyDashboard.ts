@@ -13,6 +13,10 @@ export function oneMoneyDashboard(state:MoneyState,forecast:RhythmForecast,today
  const hasCategoryPlan=state.categories.length>0;
  const scheduledBills=state.commitments??[];
  const paid=state.expenses.filter(e=>e.date.startsWith(today.slice(0,7))&&e.status!=="planned");
+ const knownCategoryIds=new Set(state.categories.map(c=>c.id));
+ // Real paid entries with no CURRENT category are already in Paid, but not
+ // represented by any monthly category allocation (including retired IDs).
+ const uncategorizedPaidRecords=paid.filter(e=>!knownCategoryIds.has(e.categoryId));
  const pending=state.expenses.filter(e=>e.status==="planned");
  const nextIncome=forecast.events.filter(e=>e.kind==="income").sort((a,b)=>a.date.localeCompare(b.date))[0];
  const firstUpcoming=forecast.events.filter(e=>e.kind!=="pace").sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
@@ -31,6 +35,8 @@ export function oneMoneyDashboard(state:MoneyState,forecast:RhythmForecast,today
   hasCategoryPlan,planned:hasCategoryPlan?c.planned:null,
   paid:roundJod(paid.reduce((sum,e)=>sum+e.amount,0)),
   numberPaid:paid.length,unpaidPlannedRecords:pending.length,
+  uncategorizedPaid:roundJod(uncategorizedPaidRecords.reduce((sum,e)=>sum+e.amount,0)),
+  uncategorizedPaidCount:uncategorizedPaidRecords.length,
   billsDue:scheduledBills.length||due.length?roundJod(due.reduce((sum,e)=>sum-e.amountJod,0)):null,
   upcoming:firstUpcoming,nextIncome,
   openingCash:state.demo?null:state.cashOnHand??null,

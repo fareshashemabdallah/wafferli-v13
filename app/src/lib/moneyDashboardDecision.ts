@@ -2,6 +2,7 @@ import type {MoneyState} from "./money";
 import type {RhythmForecast} from "./familyMoneyRhythm";
 import {roundJod} from "./cashflow";
 import {oneMoneyDashboard} from "./oneMoneyDashboard";
+import {spendingMixSummary} from "./spendingMixSummary";
 
 /** Read-only priorities derived from the original family ledger and forecast.
  * No second budget, due-date record, payment entry, or bank balance is created.
@@ -13,8 +14,17 @@ export type MoneyDashboardAction={
 };
 export function moneyDashboardDecision(state:MoneyState,forecast:RhythmForecast,today:string){
  const overview=oneMoneyDashboard(state,forecast,today);
+ const mix=spendingMixSummary(state,today.slice(0,7));
+ const unclassifiedRows=mix.unassigned.filter(row=>row.kind==="unclassified");
+ const unclassifiedPlanned=mix.unclassified;
+ const unclassifiedPaid=roundJod(unclassifiedRows.reduce((sum,row)=>sum+row.paid,0));
+ const mostUnclassified=unclassifiedRows.filter(row=>row.planned>0||row.paid>0)
+  .sort((a,b)=>Math.max(b.planned,b.paid)-Math.max(a.planned,a.paid))[0];
+ // Paid expenses without a current category do not have a category budget.
+ // Account for these once in the planning margin, but do NOT subtract paid
+ // expenses that are already inside a category plan or double-count bills.
  const unallocated=overview.monthlyIncome!==null&&overview.planned!==null?
-  roundJod(overview.monthlyIncome-overview.planned):null;
+  roundJod(overview.monthlyIncome-overview.planned-overview.uncategorizedPaid):null;
  // Scheduled bills are often already included in the category plan; never
  // subtract them again from unallocated or call the difference "cash".
  const upcomingBill=forecast.events.filter(e=>
@@ -72,5 +82,7 @@ export function moneyDashboardDecision(state:MoneyState,forecast:RhythmForecast,
    "Review spending","راجع المصاريف","spending");
  }
  return {overview,unallocated,upcomingBill,next,
+  unclassifiedPlanned,unclassifiedPaid,
+  unclassifiedCategoryId:mostUnclassified?.categoryId??null,
   planMayBeIncomplete:state.financialInputsPartial===true};
 }

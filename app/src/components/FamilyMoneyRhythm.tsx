@@ -18,12 +18,12 @@ import {MonthAllowanceAdjustment} from "./MonthAllowanceAdjustment";
 import {FamilyCategoryEditor} from "./FamilyCategoryEditor";
 
 type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>MoneyState))=>void;
- onBills:()=>void;onSpending:()=>void;onCategories:()=>void;requestedSetupStep?:PlanSetupStep|null};
+ onBills:()=>void;onSpending:()=>void;onReviewUncategorized?:()=>void;onCategories:()=>void;requestedSetupStep?:PlanSetupStep|null};
 /** Intentionally one Money surface. Obsolete pace, annual and parallel
  * timeline screens have been removed; canonical dates, bills, history and
  * forecasts stay untouched in MoneyState and their financial domain modules.
  */
-export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategories,requestedSetupStep=null}:Props){
+export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onReviewUncategorized=onSpending,onCategories,requestedSetupStep=null}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
  const [plans,,plansReady]=useLocalState<FamilyPlan[]>(FAMILY_PLANS_KEY,[]);
  const [members]=useLocalState<Member[]>("members",sampleMembers());
@@ -94,7 +94,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onCategorie
   </div>}
   <FamilyMoneyPrototypeHome state={state} setState={setState} forecast={forecast}
    onIncome={()=>setQuickEdit("income")} onQuickAdd={()=>setQuickExpenseOpen(true)}
-   onBills={onBills} onSpending={onSpending} onEditCategory={setEditingCategory}/>
+   onBills={onBills} onSpending={onSpending} onReviewUncategorized={onReviewUncategorized} onEditCategory={setEditingCategory}/>
   {quickExpenseOpen&&<QuickExpenseEntry state={state} setState={setState}
    onClose={()=>setQuickExpenseOpen(false)} onHistory={onSpending}/>}
   {quickEdit&&<FamilyMoneyQuickEdit kind={quickEdit} state={state} setState={setState}
