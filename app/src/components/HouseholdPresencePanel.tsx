@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useState,type FormEvent} from "react";
 import {CalendarDays,ChevronDown,HousePlus,Plus,Trash2,Users} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
@@ -20,7 +21,7 @@ const number=(v:string)=>v.trim()===""?0:Number(v);
 const within=(n:number,max=100000)=>Number.isFinite(n)&&n>=0&&n<=max;
 export function HouseholdPresencePanel({members,money,setMoney}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [presence,setPresence,ready]=useLocalState<HouseholdPresence>(HOUSEHOLD_PRESENCE_KEY,emptyHouseholdPresence());
  const [month,setMonth]=useState(thisMonth);
  const [helperDraft,setHelperDraft]=useState<HouseholdHelper|null>(null);
