@@ -1,4 +1,5 @@
 import {useI18n} from "@/lib/i18n";
+import {frenchUI} from "@/lib/french";
 import type {MoneyState} from "@/lib/money";
 import type {RhythmForecast} from "@/lib/familyMoneyRhythm";
 import {moneyDashboardDecision} from "@/lib/moneyDashboardDecision";
@@ -10,7 +11,7 @@ type Props={state:MoneyState;forecast:RhythmForecast;
  onIncome:()=>void;onExpense:()=>void;onBills:()=>void;onSpending:()=>void;onReviewUncategorized:()=>void;
  onOpenCategory:(categoryId:string)=>void;};
 export function OneMoneyDashboardSummary({state,forecast,onIncome,onExpense,onBills,onSpending,onReviewUncategorized,onOpenCategory}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const {overview,unallocated,upcomingBill,next,planMayBeIncomplete,
   unclassifiedPlanned,unclassifiedPaid,unclassifiedCategoryId}=
   moneyDashboardDecision(state,forecast,localToday());
