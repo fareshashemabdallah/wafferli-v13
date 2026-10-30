@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useMemo,useState} from "react";
 import {CalendarClock,Download} from "lucide-react";
 import {Button} from "@/components/ui/button";
@@ -39,48 +40,44 @@ export function CalendarReminderExport({money,members,moments}:{
  return <details className="mt-4 rounded-xl border border-[#DCE6D9] bg-white p-3">
   <summary className="flex min-h-10 cursor-pointer items-center gap-2 text-xs font-semibold text-brand">
    <CalendarClock className="size-4"/>
-   {ar?"انسخ المواعيد لتقويم هاتفك":"Export reminders to your own calendar"} +
+   {ar?"انسخ المواعيد لتقويم هاتفك":(lang==="fr"?frenchUI("Export reminders to your own calendar"):"Export reminders to your own calendar")} +
   </summary>
-  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?
-   "اختَر المواعيد التي تريدها. سنجهز ملف تقويم على جهازك فقط، مع تذكير قبل اليوم. التطبيق نفسه لا يرسل تنبيهات بالخلفية؛ قد يقوم تقويم هاتفك بإرسالها حسب إعداداته.":
-   "Choose which dates to include. This downloads an .ics file with a one-day reminder. Dabberna does not send background alerts; your calendar application decides whether to deliver them."}</p>
+  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{ar?"اختَر المواعيد التي تريدها. سنجهز ملف تقويم على جهازك فقط، مع تذكير قبل اليوم. التطبيق نفسه لا يرسل تنبيهات بالخلفية؛ قد يقوم تقويم هاتفك بإرسالها حسب إعداداته.":(lang==="fr"?frenchUI("Choose which dates to include. This downloads an .ics file with a one-day reminder. Dabberna does not send background alerts; your calendar application decides whether to deliver them."):"Choose which dates to include. This downloads an .ics file with a one-day reminder. Dabberna does not send background alerts; your calendar application decides whether to deliver them.")}</p>
   <div className="mt-3 flex flex-wrap gap-3 text-xs">
    <label className="inline-flex min-h-10 items-center gap-2">
     <input type="checkbox" className="size-4 accent-[#47715A]" checked={bills}
      onChange={e=>{setBills(e.target.checked);setAck(false);}}/>
-    {ar?"فواتير مسجلة وغير مؤكدة":"Recorded upcoming bills"}
+    {ar?"فواتير مسجلة وغير مؤكدة":(lang==="fr"?frenchUI("Recorded upcoming bills"):"Recorded upcoming bills")}
    </label>
    <label className="inline-flex min-h-10 items-center gap-2">
     <input type="checkbox" className="size-4 accent-[#47715A]" checked={family}
      onChange={e=>{setFamily(e.target.checked);setAck(false);}}/>
-    {ar?"المناسبات وأعياد الميلاد":"Family dates and birthdays"}
+    {ar?"المناسبات وأعياد الميلاد":(lang==="fr"?frenchUI("Family dates and birthdays"):"Family dates and birthdays")}
    </label>
    <label className="inline-flex min-h-10 items-center gap-2">
     <input type="checkbox" className="size-4 accent-[#47715A]" checked={tasksEnabled}
      onChange={e=>{setTasksEnabled(e.target.checked);setAck(false);}}/>
-    {ar?"مهام العائلة المفتوحة":"Open household tasks"}
+    {ar?"مهام العائلة المفتوحة":(lang==="fr"?frenchUI("Open household tasks"):"Open household tasks")}
    </label>
    <label className="inline-flex min-h-10 items-center gap-2">
     <input type="checkbox" className="size-4 accent-[#47715A]" checked={shoppingEnabled}
      onChange={e=>{setShoppingEnabled(e.target.checked);setAck(false);}}/>
-    {ar?"الهدايا والمشتريات المخططة":"Upcoming gifts and purchases"}
+    {ar?"الهدايا والمشتريات المخططة":(lang==="fr"?frenchUI("Upcoming gifts and purchases"):"Upcoming gifts and purchases")}
    </label>
   </div>
-  <p className="mt-2 text-xs font-semibold">{ar?"موعد جاهز للتصدير: ":"Reminders selected: "}{list.length}</p>
+  <p className="mt-2 text-xs font-semibold">{ar?"موعد جاهز للتصدير: ":(lang==="fr"?frenchUI("Reminders selected: "):"Reminders selected: ")}{list.length}</p>
   {list.length>0&&<div className="mt-2 max-h-40 overflow-auto rounded-lg border border-[#E1E9DF] p-2">
    {list.slice(0,12).map(e=><p key={e.key} className="py-1 text-xs">{e.date} · {e.title}</p>)}
-   {list.length>12&&<p className="mt-1 text-xs text-muted-foreground">+{list.length-12} {ar?"موعد إضافي":"more"}</p>}
+   {list.length>12&&<p className="mt-1 text-xs text-muted-foreground">+{list.length-12} {ar?"موعد إضافي":(lang==="fr"?frenchUI("more"):"more")}</p>}
   </div>}
   <label className="mt-3 flex items-start gap-2 text-xs">
    <input type="checkbox" className="mt-0.5 size-4 accent-[#47715A]" checked={ack}
     onChange={e=>setAck(e.target.checked)} disabled={!list.length||!tasksReady||!wishlistReady}/>
-   {ar?
-    "أفهم أن أسماء الفواتير والمناسبات والمهام والهدايا والمشتريات في الملف قد تنتقل إلى مزود تقويمي عند استيراده. أنا من أقرر استيراده ومشاركته.":
-    "I understand importing this file may share bill names, family dates, task names, and shopping/gift plans with my calendar provider. I decide whether and where to import it."}
+   {ar?"أفهم أن أسماء الفواتير والمناسبات والمهام والهدايا والمشتريات في الملف قد تنتقل إلى مزود تقويمي عند استيراده. أنا من أقرر استيراده ومشاركته.":(lang==="fr"?frenchUI("I understand importing this file may share bill names, family dates, task names, and shopping/gift plans with my calendar provider. I decide whether and where to import it."):"I understand importing this file may share bill names, family dates, task names, and shopping/gift plans with my calendar provider. I decide whether and where to import it.")}
   </label>
   <Button type="button" variant="outline" className="mt-3" onClick={download}
    disabled={!ack||!list.length||!tasksReady||!wishlistReady}>
-   <Download className="size-4"/>{ar?"تنزيل تذكيرات التقويم":"Download calendar reminders"}
+   <Download className="size-4"/>{ar?"تنزيل تذكيرات التقويم":(lang==="fr"?frenchUI("Download calendar reminders"):"Download calendar reminders")}
   </Button>
   {error&&<p role="alert" className="mt-2 text-xs text-destructive">{error}</p>}
  </details>;
