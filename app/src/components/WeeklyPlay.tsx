@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {Brain,ChevronDown,Clock3,Heart,MoveRight,Sparkles,X} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
+import {frenchUI} from "@/lib/french";
 import type {Member} from "@/lib/money";
 import {knownChildAges,weeklyPlaySelection,type PlayCategory} from "@/lib/weeklyPlay";
 import {WeeklyGameArt} from "./WeeklyGameArt";
@@ -15,7 +16,7 @@ const colours:Record<PlayCategory,{card:string,accent:string}>={
  * profile form, streak, purchase, completion score, or persistence. */
 export function WeeklyPlay({members}:{members:readonly Member[]}){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [selected,setSelected]=useState<string|null>(null);
  const games=weeklyPlaySelection(members);
  const open=games.find(g=>g.id===selected);
