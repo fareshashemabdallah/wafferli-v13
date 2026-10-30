@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useState,type FormEvent} from "react";
 import {Link} from "@tanstack/react-router";
 import {ArrowRight,CheckCircle2,ClipboardCopy,HeartHandshake,LockKeyhole,ShieldCheck,Sparkles,ThumbsDown,ThumbsUp} from "lucide-react";
@@ -14,7 +15,7 @@ const costValue=(value:string)=>value.trim()===""?undefined:!/^\d{1,6}(?:\.\d{1,
 const field="mt-1 w-full min-h-11 rounded-xl border border-[#D0DED3] bg-white px-3 text-sm";
 
 export function SixPillarDecisionStudio(){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,arabic:string)=>ar?arabic:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
@@ -96,7 +97,7 @@ export function SixPillarDecisionStudio(){
     {FAMILY_VALUES.map(value=><label key={value.id} className="flex min-h-11 items-center gap-2 text-sm">
      <input type="checkbox" className="size-4" checked={values.includes(value.id)} disabled={!ready}
       onChange={e=>toggleValue(value.id,e.target.checked)}/>
-     {ar?value.ar:value.en}
+     {ar?value.ar:(lang==="fr"?frenchUI(value.en):value.en)}
     </label>)}
    </div>
    <div className="mt-3 rounded-xl bg-[#F4F8F2] p-3">
@@ -117,7 +118,7 @@ export function SixPillarDecisionStudio(){
   <form onSubmit={submit} className="mt-4 space-y-3">
    <label className="block text-sm font-semibold">{t("What's the family decision?","شو قرار العيلة؟")}
     <select className={field} value={scenario} onChange={e=>{setScenario(e.target.value as DecisionScenario);setScenarioChosen(true);setBrief(null);}} disabled={!ready}>
-     {DECISION_SCENARIOS.map(item=><option key={item.id} value={item.id}>{ar?item.ar:item.en}</option>)}
+     {DECISION_SCENARIOS.map(item=><option key={item.id} value={item.id}>{ar?item.ar:(lang==="fr"?frenchUI(item.en):item.en)}</option>)}
     </select>
    </label>
    <label className="block text-sm font-semibold">{t("Your question (optional and not saved)","سؤالك (اختياري ولا يُحفظ)")}
