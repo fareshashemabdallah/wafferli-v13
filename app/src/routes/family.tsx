@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {createFileRoute,Link} from "@tanstack/react-router";
 import {useState} from "react";
 import {CalendarDays,CalendarHeart,ClipboardList,HeartHandshake,UsersRound,CheckCircle2,ChevronRight,MapPinned} from "lucide-react";
@@ -54,7 +55,7 @@ export function FamilyLifePage(){
        aria-pressed={selected} onClick={()=>setView(item.id)}
        className={"flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-[#479F7E] "+
        (selected?"bg-[#E4F4E8] text-[#226C4D]":"text-[#657B6D] hover:bg-[#F3F8F2]")}>
-       <Icon className="size-4 shrink-0"/>{ar?item.ar:item.en}
+       <Icon className="size-4 shrink-0"/>{ar?item.ar:(lang==="fr"?frenchUI(item.en):item.en)}
       </button>;
      })}
     </div>
