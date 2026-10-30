@@ -1,6 +1,7 @@
 import {Link,useNavigate} from "@tanstack/react-router";
 import {ArrowRight,CalendarDays,ChevronRight,Gift,Heart,ShieldCheck,Wallet} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
+import {frenchUI} from "@/lib/french";
 import {useLocalState,writeLocal,fmtJOD} from "@/lib/storage";
 import {sampleMoney,sampleMembers,type MoneyState,type Member} from "@/lib/money";
 import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan} from "@/lib/familyPlans";
@@ -19,7 +20,7 @@ const panel="rounded-[1.5rem] border border-[#DFE8DE] bg-white/95 p-4 shadow-[0_
 export function AdventureFamilyHome(){
  const navigate=useNavigate();
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [money,,moneyReady]=useLocalState<MoneyState>("money",sampleMoney());
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [moments,,momentsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
@@ -28,7 +29,7 @@ export function AdventureFamilyHome(){
  const ready=moneyReady&&membersReady&&momentsReady&&plansReady&&prefsReady;
  const brief=ready?buildTodayActionPolicy({money,members,moments,plans,preferences:prefs}):null;
  const current=brief?.action;
- const tr=(en:string,arabic:string)=>ar?arabic:en;
+ const tr=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  function continueAction(action:TodayAction|TodayWeekItem){
   if(action.planId)writeLocal(ACTIVE_PLAN_KEY,action.planId);
   if(action.occasionKey)writeLocal("focusedOccasionKey",action.occasionKey);
