@@ -2,6 +2,7 @@ import {useState} from "react";
 import {ArrowRight,CalendarClock,Coins,ShieldCheck,Wallet} from "lucide-react";
 import {fmtJOD} from "@/lib/storage";
 import {useI18n} from "@/lib/i18n";
+import {frenchUI} from "@/lib/french";
 import {computeMoney,type MoneyState} from "@/lib/money";
 import {getMoneyOverview} from "@/lib/moneyOverview";
 import {QuickMoneySetup} from "./QuickMoneySetup";
@@ -14,7 +15,7 @@ const card="rounded-[1.2rem] border border-[#DFE9DD] bg-white p-4 sm:p-5";
  * No repeated financial story, milestone hero, progress score or inferred cash.
  */
 export function AdventureMoneyJourney({money,setMoney,onBudget,onSpending,onBills,onInsights,setupNeeded}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const [setupOpen,setSetupOpen]=useState(false);
  const figures=computeMoney(money),overview=getMoneyOverview(money);
  const values=[
