@@ -13,6 +13,10 @@ describe("Dabberna live AI network boundary",()=>{
   expect(parseLiveAiAnswer({answer:"Please plan based on your actual budget."}))
    .toContain("actual budget");
  });
+ it("supports French safely without expanding the personal-data boundary",()=>{
+  expect(parseLiveAiRequest({...good(),language:"fr"}).language).toBe("fr");
+  expect(()=>parseLiveAiRequest({...good(),language:"de"})).toThrow();
+ });
  it("rejects extra unknown fields, identities and entire ledger dumps",()=>{
   expect(()=>parseLiveAiRequest({...good(),parentConsent:false})).toThrow();
   expect(()=>parseLiveAiRequest({...good(),parentConsent:undefined})).toThrow();
