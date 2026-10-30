@@ -49,6 +49,7 @@ export function WhatParentsSayPage(){
  const [placeArea,setPlaceArea]=useState("");
  const [placeCategory,setPlaceCategory]=useState<ReviewCategory>("activities");
  const [draft,setDraft]=useState<ReviewInput>(defaultReview);
+ const [reviewLanguage,setReviewLanguage]=useState<"ar"|"en"|"fr">("en");
  const [error,setError]=useState("");
  const [saved,setSaved]=useState(false);
  const ready=placesReady&&reviewsReady;
@@ -59,7 +60,7 @@ export function WhatParentsSayPage(){
   .sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
  const updateDraft=<K extends keyof ReviewInput>(key:K,value:ReviewInput[K])=>setDraft(old=>({...old,[key]:value}));
  const openPlace=(id:string)=>{setSelected(id);setActiveTab("parents");setError("");setMode("detail");};
- const startReview=()=>{setDraft(ownReview?{age:ownReview.age,experience:ownReview.experience,safety:ownReview.safety,convenience:ownReview.convenience,wouldReturn:ownReview.wouldReturn,comment:ownReview.comment,providerSummaryOptIn:ownReview.providerSummaryOptIn,parentQuestionsOptIn:ownReview.parentQuestionsOptIn}:defaultReview);setSaved(false);setError("");setMode("review");};
+ const startReview=()=>{setReviewLanguage(ownReview?.language??lang);setDraft(ownReview?{age:ownReview.age,experience:ownReview.experience,safety:ownReview.safety,convenience:ownReview.convenience,wouldReturn:ownReview.wouldReturn,comment:ownReview.comment,providerSummaryOptIn:ownReview.providerSummaryOptIn,parentQuestionsOptIn:ownReview.parentQuestionsOptIn}:defaultReview);setSaved(false);setError("");setMode("review");};
  const submitPlace=(event:FormEvent)=>{
   event.preventDefault();const proposed=createParentPlace({name:placeName,area:placeCategory==="products"?"":placeArea,category:placeCategory,countryCode:market.code},uid(),new Date().toISOString());
   if(!proposed){setError(t("Enter a place or product name and a general area.","اكتب اسم المكان أو المنتج ومنطقة عامة."));return;}
@@ -72,7 +73,7 @@ export function WhatParentsSayPage(){
   event.preventDefault();if(!selectedPlace)return;
   const created=createParentReview(draft,selectedPlace.id,ownReview?.id??uid(),new Date().toISOString(),ownReview);
   if(!created){setError(t("Please share at least 20 characters of useful firsthand feedback (maximum 1,500).","شارك تجربتك الفعلية في ٢٠ حرفاً على الأقل (الحد الأقصى ١٥٠٠)."));return;}
-  setReviews(old=>upsertParentReview(old,{...created,language:lang}));setError("");setSaved(true);setMode("detail");
+  setReviews(old=>upsertParentReview(old,{...created,language:reviewLanguage}));setError("");setSaved(true);setMode("detail");
  };
  const removePlace=()=>{
   if(!selectedPlace)return;
@@ -299,6 +300,13 @@ export function WhatParentsSayPage(){
      <label className="block space-y-1 text-sm font-semibold">{t("Would you choose it again?","هل ممكن تختاره مرة ثانية؟")}
       <select className={field} value={draft.wouldReturn} onChange={e=>updateDraft("wouldReturn",e.target.value as ReviewInput["wouldReturn"])}>
        {(["yes","maybe","no"] as const).map(x=><option key={x} value={x}>{labels.wouldReturn[x][ar?1:0]}</option>)}</select></label>
+     <label className="block space-y-1 text-sm font-semibold">
+      {t("Language of your written review","لغة التقييم المكتوب")}
+      <select className={field} aria-label={t("Language of your written review","لغة التقييم المكتوب")} value={reviewLanguage}
+       onChange={e=>setReviewLanguage(e.target.value as "ar"|"en"|"fr")}>
+       <option value="ar">العربية</option><option value="en">English</option><option value="fr">Français</option>
+      </select>
+     </label>
      <label className="block space-y-1 text-sm font-semibold">{t("What should another parent know?","شو بتحب أهل غيرك يعرفوا؟")}
       <textarea className={field+" min-h-[120px]"} required minLength={20} maxLength={1500} value={draft.comment} onChange={e=>updateDraft("comment",e.target.value)}
        placeholder={t("What worked? Any safety concerns, age considerations, practical tips or hidden costs?","شو كان منيح؟ في مخاوف، ملاحظات عن العمر، نصائح أو تكاليف إضافية؟")}/>
