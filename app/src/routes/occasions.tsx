@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {createFileRoute,Link} from "@tanstack/react-router";
 import {useMemo,useState} from "react";
 import {AppShell} from "@/components/AppShell";
@@ -22,7 +23,7 @@ export const Route=createFileRoute("/occasions")({
  */
 export function OccasionPlanner(){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [events,,eventsReady]=useLocalState<FamilyMoment[]>("familyCalendar",[]);
  const [members,,membersReady]=useLocalState<Member[]>("members",sampleMembers());
  const [oldPlans,,oldReady]=useLocalState<OccasionPlans>("occasionPlans",{});
