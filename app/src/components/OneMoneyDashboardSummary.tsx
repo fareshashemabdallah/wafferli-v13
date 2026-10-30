@@ -7,11 +7,12 @@ import {localToday} from "@/lib/cashflow";
 import {SpendingMixDashboard} from "./SpendingMixDashboard";
 
 type Props={state:MoneyState;forecast:RhythmForecast;
- onIncome:()=>void;onExpense:()=>void;onBills:()=>void;onSpending:()=>void;
+ onIncome:()=>void;onExpense:()=>void;onBills:()=>void;onSpending:()=>void;onReviewUncategorized:()=>void;
  onOpenCategory:(categoryId:string)=>void;};
-export function OneMoneyDashboardSummary({state,forecast,onIncome,onExpense,onBills,onSpending,onOpenCategory}:Props){
+export function OneMoneyDashboardSummary({state,forecast,onIncome,onExpense,onBills,onSpending,onReviewUncategorized,onOpenCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
- const {overview,unallocated,upcomingBill,next,planMayBeIncomplete}=
+ const {overview,unallocated,upcomingBill,next,planMayBeIncomplete,
+  unclassifiedPlanned,unclassifiedPaid,unclassifiedCategoryId}=
   moneyDashboardDecision(state,forecast,localToday());
  const money=(value:number|null)=>value===null?t("Not entered","غير مدخل"):fmtJOD(value);
  const openCategories=()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"});
@@ -52,16 +53,48 @@ export function OneMoneyDashboardSummary({state,forecast,onIncome,onExpense,onBi
     <strong className={"mt-2 block break-words text-base font-black tabular-nums sm:text-lg "+(unallocated!==null&&unallocated<0?"text-[#A94D3C]":"text-[#6D6747]")}>
      {money(unallocated===null?null:Math.abs(unallocated))}
     </strong>
-    <p className="mt-1 text-[10px] leading-snug text-[#817F6B]">{t("Income minus category plan; not cash or savings","الدخل ناقص خطة الفئات، وليس نقداً أو ادخاراً")}</p>
+    <p className="mt-1 text-[10px] leading-snug text-[#817F6B]">{t("Income − category plans − paid costs without a category; not cash","الدخل ناقص خطط الفئات والمصاريف المدفوعة بلا فئة؛ وليس نقداً")}</p>
    </div>
   </div>
   {unallocated!==null&&<p className="text-[11px] leading-relaxed text-[#657C6B]" data-testid="money-unallocated-caution">
-   {planMayBeIncomplete?
+   {overview.uncategorizedPaid>0?
+    t("Paid expenses without a category are deducted once from this planning difference, not added to the monthly category plan. It is not spendable cash.",
+      "المصاريف المدفوعة دون فئة تُخصم مرة واحدة من فرق التخطيط، ولا تُضاف لخطة الفئات. هذا ليس نقداً متاحاً."):
+    planMayBeIncomplete?
     t("Your plan is still partial. Unentered costs and savings goals can change this difference.",
       "خطتك ما زالت جزئية. المصاريف غير المدخلة وأهداف الادخار قد تغيّر هذا الفرق."):
     t("This is a planning difference, not money available to spend. Check savings, payment dates and actual cash.",
       "هذا فرق في التخطيط، وليس مبلغاً متاحاً للصرف. راجع الادخار ومواعيد الدفعات والنقد الفعلي.")}
   </p>}
+  {!state.demo&&(overview.uncategorizedPaid>0||unclassifiedPlanned>0||unclassifiedPaid>0)&&
+   <section data-testid="money-needs-categorization" aria-label={t("Amounts needing categorization","مبالغ بحاجة إلى تصنيف")}
+    className="rounded-2xl border border-[#E7D8B6] bg-[#FFFCF5] p-3 sm:p-4">
+    <h4 className="text-sm font-extrabold text-[#755E38]">{t("Money needing a clearer category","مصاريف بحاجة لتصنيف أوضح")}</h4>
+    {overview.uncategorizedPaid>0&&<div className="mt-2 flex flex-wrap items-center justify-between gap-2" data-testid="money-uncategorized-paid">
+     <div>
+      <p className="text-xs font-bold text-[#755E38]">{t("Paid without a category","مدفوع دون فئة")}: <span className="tabular-nums">{fmtJOD(overview.uncategorizedPaid)}</span></p>
+      <p className="mt-0.5 text-[11px] text-[#806F54]">{t("Already in Paid; outside category plans · ","ضمن المدفوع، وخارج خطط الفئات · ")}
+       {overview.uncategorizedPaidCount} {t("record(s)","حركة")}</p>
+     </div>
+     <button type="button" data-testid="review-uncategorized-paid" onClick={onReviewUncategorized}
+      className="min-h-10 rounded-xl border border-[#DBC697] bg-white px-3 text-xs font-bold text-[#7A613E]">
+      {t("Review payments","راجع المصاريف")}</button>
+    </div>}
+    {(unclassifiedPlanned>0||unclassifiedPaid>0)&&<div className="mt-2 flex flex-wrap items-center justify-between gap-2" data-testid="money-unclassified-plan">
+     <div>
+      <p className="text-xs font-bold text-[#755E38]">{t("Categories still unclassified","فئات لم تُصنّف بعد")}</p>
+      <p className="mt-0.5 text-xs tabular-nums text-[#755E38]">
+       {t("Planned ","المخطط ")}{fmtJOD(unclassifiedPlanned)} · {t("Paid ","المدفوع ")}{fmtJOD(unclassifiedPaid)}</p>
+      <p className="mt-0.5 text-[11px] text-[#806F54]">
+       {t("Already inside category budgets and Paid; not an extra cost.",
+         "محتسبة ضمن ميزانيات الفئات والمدفوع؛ ليست تكلفة إضافية.")}</p>
+     </div>
+     {unclassifiedCategoryId&&<button type="button" data-testid="review-unclassified-category"
+      onClick={()=>onOpenCategory(unclassifiedCategoryId)}
+      className="min-h-10 rounded-xl border border-[#DBC697] bg-white px-3 text-xs font-bold text-[#7A613E]">
+      {t("Review category","راجع الفئة")}</button>}
+    </div>}
+   </section>}
   <div className="grid gap-2 sm:grid-cols-2">
    <section data-testid="money-upcoming-payment" aria-label={t("What is coming","ما القادم")}
     className="rounded-2xl border border-[#DCE8DC] bg-white p-3 sm:p-4">
