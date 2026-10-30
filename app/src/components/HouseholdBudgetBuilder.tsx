@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useEffect,useState,type FormEvent} from "react";
 import {ChevronDown,Plus,ReceiptText,Trash2} from "lucide-react";
 import {fmtJOD,uid,useLocalState} from "@/lib/storage";
@@ -37,7 +38,7 @@ function ItemEditor({item,onSave,onRemove}:{item:BudgetItem;onSave:(i:BudgetItem
   const n=amount(cost),q=qty.trim()===""?null:amount(qty),p=price.trim()===""?null:amount(price);
   if(!draft.name.trim()||draft.name.length>90||n===null||
    (qty.trim()!==""&&q===null)||(price.trim()!==""&&p===null)||
-   ((qty.trim()==="")!==(price.trim()===""))){setError(ar?"راجع المبالغ والكمية والسعر.":"Check the amount, quantity and unit price.");return;}
+   ((qty.trim()==="")!==(price.trim()===""))){setError(ar?"راجع المبالغ والكمية والسعر.":(lang==="fr"?frenchUI("Check the amount, quantity and unit price."):"Check the amount, quantity and unit price."));return;}
   const copy:BudgetItem={...draft,name:draft.name.trim(),amountJod:n};
   if(q!==null&&p!==null){copy.quantity=q;copy.unitPriceJod=p;}else{
    delete copy.quantity;delete copy.unitPriceJod;delete copy.unitLabel;
@@ -48,61 +49,61 @@ function ItemEditor({item,onSave,onRemove}:{item:BudgetItem;onSave:(i:BudgetItem
  return <form onSubmit={save} className="mt-2 space-y-3 rounded-xl border border-[#DBE6DA] bg-[#F9FBF8] p-3">
   <div className="flex items-start justify-between gap-2">
    <label className="min-w-0 flex-1 text-xs font-medium">
-    {ar?"اسم المصروف":"Expense item"}
+    {ar?"اسم المصروف":(lang==="fr"?frenchUI("Expense item"):"Expense item")}
     <input className={input} maxLength={90} value={draft.name}
      onChange={e=>setDraft(d=>({...d,name:e.target.value}))}/>
    </label>
-   <button type="button" aria-label={ar?"حذف البند":"Remove budget item"} onClick={onRemove}
+   <button type="button" aria-label={ar?"حذف البند":(lang==="fr"?frenchUI("Remove budget item"):"Remove budget item")} onClick={onRemove}
     className="mt-5 grid size-10 shrink-0 place-items-center rounded-lg border border-[#E3DEDA]"><Trash2 className="size-4"/></button>
   </div>
   <label className="flex items-center gap-2 text-xs">
    <input type="checkbox" checked={draft.enabled} onChange={e=>setDraft(d=>({...d,enabled:e.target.checked}))}/>
-   {ar?"احتسب هذا البند ضمن الميزانية":"Include this item in the breakdown"}
+   {ar?"احتسب هذا البند ضمن الميزانية":(lang==="fr"?frenchUI("Include this item in the breakdown"):"Include this item in the breakdown")}
   </label>
   <div className="grid grid-cols-2 gap-3">
-   <label className="text-xs">{ar?"المبلغ لكل فترة (د.أ)":"Amount per period (JOD)"}
+   <label className="text-xs">{ar?"المبلغ لكل فترة (د.أ)":(lang==="fr"?frenchUI("Amount per period (JOD)"):"Amount per period (JOD)")}
     <input type="number" min={0} max={100000} step=".01" className={input} value={cost}
      onChange={e=>setCost(e.target.value)}/>
    </label>
-   <label className="text-xs">{ar?"كم مرة تدفع؟":"Frequency"}
+   <label className="text-xs">{ar?"كم مرة تدفع؟":(lang==="fr"?frenchUI("Frequency"):"Frequency")}
     <select className={input} value={draft.frequency} onChange={e=>setDraft(d=>({...d,frequency:e.target.value as ItemFrequency}))}>
-     <option value="monthly">{ar?"شهرياً":"Monthly"}</option>
-     <option value="weekly">{ar?"أسبوعياً":"Weekly"}</option>
-     <option value="quarterly">{ar?"كل ٣ أشهر":"Quarterly"}</option>
-     <option value="yearly">{ar?"سنوياً":"Yearly"}</option>
+     <option value="monthly">{ar?"شهرياً":(lang==="fr"?frenchUI("Monthly"):"Monthly")}</option>
+     <option value="weekly">{ar?"أسبوعياً":(lang==="fr"?frenchUI("Weekly"):"Weekly")}</option>
+     <option value="quarterly">{ar?"كل ٣ أشهر":(lang==="fr"?frenchUI("Quarterly"):"Quarterly")}</option>
+     <option value="yearly">{ar?"سنوياً":(lang==="fr"?frenchUI("Yearly"):"Yearly")}</option>
     </select>
    </label>
-   <label className="text-xs">{ar?"طبيعة التكلفة":"Cost behaviour"}
+   <label className="text-xs">{ar?"طبيعة التكلفة":(lang==="fr"?frenchUI("Cost behaviour"):"Cost behaviour")}
     <select className={input} value={draft.behaviour} onChange={e=>setDraft(d=>({...d,behaviour:e.target.value as BudgetItem["behaviour"]}))}>
-     <option value="fixed">{ar?"ثابتة":"Fixed"}</option><option value="variable">{ar?"متغيرة":"Variable"}</option>
+     <option value="fixed">{ar?"ثابتة":(lang==="fr"?frenchUI("Fixed"):"Fixed")}</option><option value="variable">{ar?"متغيرة":(lang==="fr"?frenchUI("Variable"):"Variable")}</option>
     </select>
    </label>
-   <label className="text-xs">{ar?"الأهمية للعيلة":"Family priority"}
+   <label className="text-xs">{ar?"الأهمية للعيلة":(lang==="fr"?frenchUI("Family priority"):"Family priority")}
     <select className={input} value={draft.priority} onChange={e=>setDraft(d=>({...d,priority:e.target.value as BudgetItem["priority"]}))}>
-     <option value="essential">{ar?"أساسي":"Essential"}</option>
-     <option value="protected">{ar?"مهم ونحافظ عليه":"Protected"}</option>
-     <option value="flexible">{ar?"مرن":"Flexible"}</option>
+     <option value="essential">{ar?"أساسي":(lang==="fr"?frenchUI("Essential"):"Essential")}</option>
+     <option value="protected">{ar?"مهم ونحافظ عليه":(lang==="fr"?frenchUI("Protected"):"Protected")}</option>
+     <option value="flexible">{ar?"مرن":(lang==="fr"?frenchUI("Flexible"):"Flexible")}</option>
     </select>
    </label>
   </div>
   {draft.unitLabel&&<div className="rounded-lg border border-[#DFE8DC] bg-white p-3">
-   <p className="text-xs font-semibold">{ar?"حساب حسب الكمية":"Optional quantity calculation"}</p>
+   <p className="text-xs font-semibold">{ar?"حساب حسب الكمية":(lang==="fr"?frenchUI("Optional quantity calculation"):"Optional quantity calculation")}</p>
    <div className="mt-2 grid grid-cols-2 gap-2">
-    <label className="text-xs">{ar?"الكمية":"Quantity"} ({draft.unitLabel})
+    <label className="text-xs">{ar?"الكمية":(lang==="fr"?frenchUI("Quantity"):"Quantity")} ({draft.unitLabel})
      <input type="number" min={0} step=".01" className={input} value={qty} onChange={e=>setQty(e.target.value)}/>
     </label>
-    <label className="text-xs">{ar?"سعر الوحدة (د.أ)":"Unit price (JOD)"}
+    <label className="text-xs">{ar?"سعر الوحدة (د.أ)":(lang==="fr"?frenchUI("Unit price (JOD)"):"Unit price (JOD)")}
      <input type="number" min={0} step=".01" className={input} value={price} onChange={e=>setPrice(e.target.value)}/>
     </label>
    </div>
-   <p className="mt-2 text-xs text-muted-foreground">{ar?"السعر الرسمي المرجعي":"Public unit price"}: {draft.priceCheckedMonth}.{" "}
-    {draft.priceSource?<a className="underline" href={draft.priceSource} target="_blank" rel="noopener noreferrer">{ar?"المصدر الحكومي":"Government source"}</a>:null}.{" "}
-    {ar?"الحساب حسب الكمية يحل مكان المبلغ اليدوي أعلاه، ولا يضاف عليه.":"Quantity × price replaces the manual amount; it is not added to it."}
+   <p className="mt-2 text-xs text-muted-foreground">{ar?"السعر الرسمي المرجعي":(lang==="fr"?frenchUI("Public unit price"):"Public unit price")}: {draft.priceCheckedMonth}.{" "}
+    {draft.priceSource?<a className="underline" href={draft.priceSource} target="_blank" rel="noopener noreferrer">{ar?"المصدر الحكومي":(lang==="fr"?frenchUI("Government source"):"Government source")}</a>:null}.{" "}
+    {ar?"الحساب حسب الكمية يحل مكان المبلغ اليدوي أعلاه، ولا يضاف عليه.":(lang==="fr"?frenchUI("Quantity × price replaces the manual amount; it is not added to it."):"Quantity × price replaces the manual amount; it is not added to it.")}
    </p>
   </div>}
-  <p className="text-xs text-muted-foreground">{ar?"المعادل الشهري بعد الحفظ: ":"Monthly equivalent when saved: "}{fmtJOD(monthlyItemCost({...draft,amountJod:amount(cost)??0,...(draft.unitLabel&&qty!==""&&price!==""?{quantity:Number(qty),unitPriceJod:Number(price)}:{})}))}</p>
+  <p className="text-xs text-muted-foreground">{ar?"المعادل الشهري بعد الحفظ: ":(lang==="fr"?frenchUI("Monthly equivalent when saved: "):"Monthly equivalent when saved: ")}{fmtJOD(monthlyItemCost({...draft,amountJod:amount(cost)??0,...(draft.unitLabel&&qty!==""&&price!==""?{quantity:Number(qty),unitPriceJod:Number(price)}:{})}))}</p>
   {error&&<p role="alert" className="text-xs font-semibold text-destructive">{error}</p>}
-  <button className="min-h-10 rounded-full bg-brand px-4 text-sm font-semibold text-white" type="submit">{ar?"احفظ البند":"Save item"}</button>
+  <button className="min-h-10 rounded-full bg-brand px-4 text-sm font-semibold text-white" type="submit">{ar?"احفظ البند":(lang==="fr"?frenchUI("Save item"):"Save item")}</button>
  </form>;
 }
 function CategoryDetails({category,money,setMoney,members,presence,month,autoOpen=false}:{category:Category;money:MoneyState;setMoney:Props["setMoney"];members:Member[];presence:HouseholdPresence;month:string;autoOpen?:boolean}){
@@ -134,7 +135,7 @@ function CategoryDetails({category,money,setMoney,members,presence,month,autoOpe
  };
  const savePlan=()=>{
   const n=amount(plan);
-  if(n===null||n<subtotal){setError(ar?"المخصص لازم يغطي البنود المفصّلة، أو عدّل البنود أولاً.":"Category allocation must cover itemized costs. Edit items first.");return;}
+  if(n===null||n<subtotal){setError(ar?"المخصص لازم يغطي البنود المفصّلة، أو عدّل البنود أولاً.":(lang==="fr"?frenchUI("Category allocation must cover itemized costs. Edit items first."):"Category allocation must cover itemized costs. Edit items first."));return;}
   if(money.demo)return;
   setMoney(s=>({...s,categories:s.categories.map(c=>c.id===category.id?{...c,planned:n,amountConfidence:"confirmed"}:c)}));
   setError("");
@@ -142,58 +143,54 @@ function CategoryDetails({category,money,setMoney,members,presence,month,autoOpe
  return <details open={autoOpen} className="rounded-xl border border-[#DEE8DB] bg-white p-3" data-budget-category={category.id}>
   <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2">
    <span className="min-w-0 flex-1"><strong className="block text-sm">{category.name}</strong>
-    <span className="text-xs text-muted-foreground">{ar?"مخطط شهري ":"Monthly plan "}{fmtJOD(category.planned)} · {ar?"مدفوع ":"Paid "}{fmtJOD(spent)}</span>
+    <span className="text-xs text-muted-foreground">{ar?"مخطط شهري ":(lang==="fr"?frenchUI("Monthly plan "):"Monthly plan ")}{fmtJOD(category.planned)} · {ar?"مدفوع ":(lang==="fr"?frenchUI("Paid "):"Paid ")}{fmtJOD(spent)}</span>
    </span>
    <span className="shrink-0 text-end text-xs">{ref?
-    <><span className="block font-semibold">{fmtJOD(ref.amountJod)}</span><span className="text-muted-foreground">{ar?"مرجع توضيحي":"Illustrative reference"}</span></>:
-    <span className="text-muted-foreground">{ar?"لا يوجد مرجع موثوق":"Reference unavailable"}</span>}
+    <><span className="block font-semibold">{fmtJOD(ref.amountJod)}</span><span className="text-muted-foreground">{ar?"مرجع توضيحي":(lang==="fr"?frenchUI("Illustrative reference"):"Illustrative reference")}</span></>:
+    <span className="text-muted-foreground">{ar?"لا يوجد مرجع موثوق":(lang==="fr"?frenchUI("Reference unavailable"):"Reference unavailable")}</span>}
    </span>
    <ChevronDown className="size-4 shrink-0 text-brand"/>
   </summary>
   <div className="mt-3 space-y-3 border-t border-[#E6ECE4] pt-3">
-   {ref&&<p className="text-xs leading-relaxed text-muted-foreground">{ar?
-    "نموذج توضيحي يتغير حسب عدد البالغين والأطفال والضيوف والمساعدين المضافين. ليس متوسط إنفاق رسمي للأسر في عمّان.":
-    "A household-adjusted illustrative calculation, NOT an observed public-data average for Amman. Helper and visitor costs are included only when you entered them. Do not count them twice."}</p>}
+   {ref&&<p className="text-xs leading-relaxed text-muted-foreground">{ar?"نموذج توضيحي يتغير حسب عدد البالغين والأطفال والضيوف والمساعدين المضافين. ليس متوسط إنفاق رسمي للأسر في عمّان.":(lang==="fr"?frenchUI("A household-adjusted illustrative calculation, NOT an observed public-data average for Amman. Helper and visitor costs are included only when you entered them. Do not count them twice."):"A household-adjusted illustrative calculation, NOT an observed public-data average for Amman. Helper and visitor costs are included only when you entered them. Do not count them twice.")}</p>}
    <div className="grid grid-cols-2 gap-2">
     <div className="rounded-lg bg-[#F4F8F2] p-3">
-     <p className="text-xs text-muted-foreground">{ar?"المخصص الشهري":"Monthly allocation"}</p>
+     <p className="text-xs text-muted-foreground">{ar?"المخصص الشهري":(lang==="fr"?frenchUI("Monthly allocation"):"Monthly allocation")}</p>
      <p className="mt-1 text-lg font-semibold">{fmtJOD(category.planned)}</p>
     </div>
     <div className="rounded-lg bg-[#FAF5ED] p-3">
-     <p className="text-xs text-muted-foreground">{ar?"المدفوع في الشهر المختار":"Paid in selected month"}</p>
+     <p className="text-xs text-muted-foreground">{ar?"المدفوع في الشهر المختار":(lang==="fr"?frenchUI("Paid in selected month"):"Paid in selected month")}</p>
      <p className="mt-1 text-lg font-semibold">{fmtJOD(spent)}</p>
     </div>
    </div>
    <div className="rounded-lg bg-[#F5F8F2] p-3">
-    <div className="flex justify-between gap-2 text-xs"><span>{ar?"بنود موزّعة":"Itemized"}</span><strong>{fmtJOD(subtotal)}</strong></div>
-    <div className="mt-1 flex justify-between gap-2 text-xs"><span>{remainder<0?(ar?"البنود تتجاوز المخصص":"Items above allocation"):(ar?"لم يوزّع على بنود":"Not yet itemized")}</span><strong>{fmtJOD(Math.abs(remainder))}</strong></div>
-    <p className="mt-2 text-xs text-muted-foreground">{ar?"البنود هي تفاصيل للمخصص الموجود، مش مصاريف إضافية.":"Items explain the category plan; they are never counted as additional spending."}</p>
+    <div className="flex justify-between gap-2 text-xs"><span>{ar?"بنود موزّعة":(lang==="fr"?frenchUI("Itemized"):"Itemized")}</span><strong>{fmtJOD(subtotal)}</strong></div>
+    <div className="mt-1 flex justify-between gap-2 text-xs"><span>{remainder<0?(ar?"البنود تتجاوز المخصص":(lang==="fr"?frenchUI("Items above allocation"):"Items above allocation")):(ar?"لم يوزّع على بنود":(lang==="fr"?frenchUI("Not yet itemized"):"Not yet itemized"))}</span><strong>{fmtJOD(Math.abs(remainder))}</strong></div>
+    <p className="mt-2 text-xs text-muted-foreground">{ar?"البنود هي تفاصيل للمخصص الموجود، مش مصاريف إضافية.":(lang==="fr"?frenchUI("Items explain the category plan; they are never counted as additional spending."):"Items explain the category plan; they are never counted as additional spending.")}</p>
    </div>
    {!money.demo&&<div className="flex flex-wrap items-end gap-2">
-    <label className="min-w-32 flex-1 text-xs">{ar?"عدّل مخصص الفئة (د.أ/شهر)":"Edit category allocation (JOD/month)"}
+    <label className="min-w-32 flex-1 text-xs">{ar?"عدّل مخصص الفئة (د.أ/شهر)":(lang==="fr"?frenchUI("Edit category allocation (JOD/month)"):"Edit category allocation (JOD/month)")}
      <input type="number" min={0} step=".01" className={input} value={plan} onChange={e=>setPlan(e.target.value)}/>
     </label>
-    <button className="min-h-10 rounded-full border border-[#CEDCCD] px-3 text-xs font-semibold text-brand" type="button" onClick={savePlan}>{ar?"احفظ المخصص":"Save plan"}</button>
+    <button className="min-h-10 rounded-full border border-[#CEDCCD] px-3 text-xs font-semibold text-brand" type="button" onClick={savePlan}>{ar?"احفظ المخصص":(lang==="fr"?frenchUI("Save plan"):"Save plan")}</button>
    </div>}
    {error&&<p role="alert" className="text-xs text-destructive">{error}</p>}
-   {items.length>0&&<p className="text-xs leading-relaxed text-muted-foreground">{ar?
-    "كل بند: خطتك الشهرية، مرجع توضيحي إذا متاح، والمدفوع المرتبط به في الشهر المختار. المرجع ليس سعر سوق مؤكداً.":
-    "Each item shows your monthly plan, an illustrative reference where available, and paid spending linked to it in the selected month. References are not verified market prices."}</p>}
-   {items.length>0&&<h3 className="text-sm font-extrabold text-[#205F4A]">{ar?"اكتشف البنود في هذه الفئة":"Explore inside this category"}</h3>}
+   {items.length>0&&<p className="text-xs leading-relaxed text-muted-foreground">{ar?"كل بند: خطتك الشهرية، مرجع توضيحي إذا متاح، والمدفوع المرتبط به في الشهر المختار. المرجع ليس سعر سوق مؤكداً.":(lang==="fr"?frenchUI("Each item shows your monthly plan, an illustrative reference where available, and paid spending linked to it in the selected month. References are not verified market prices."):"Each item shows your monthly plan, an illustrative reference where available, and paid spending linked to it in the selected month. References are not verified market prices.")}</p>}
+   {items.length>0&&<h3 className="text-sm font-extrabold text-[#205F4A]">{ar?"اكتشف البنود في هذه الفئة":(lang==="fr"?frenchUI("Explore inside this category"):"Explore inside this category")}</h3>}
   {items.map(item=>{
     const itemRef=itemIllustrativeReference(category,item,ref);
     return <div key={item.id} className="border-t border-[#E7EEE5] pt-2">
      <button type="button" className="flex min-h-10 w-full items-center gap-2 text-start text-sm font-semibold text-brand" onClick={()=>setSelected(v=>v===item.id?null:item.id)}>
       <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[#E9F2E6] text-lg" aria-hidden="true">{emojiFor(item.name)}</span>
-      <span className="flex-1 underline underline-offset-2">{item.name}{!item.enabled?(ar?" (مستبعد من الخطة)":" (excluded from plan)"):""}</span>
+      <span className="flex-1 underline underline-offset-2">{item.name}{!item.enabled?(ar?" (مستبعد من الخطة)":(lang==="fr"?frenchUI(" (excluded from plan)"):" (excluded from plan)")):""}</span>
       <ChevronDown className={"size-4 shrink-0 "+(selected===item.id?"rotate-180":"")}/>
      </button>
      <div className="mt-2 grid grid-cols-3 gap-2 rounded-lg bg-[#F6F9F4] p-2 text-xs">
-      <div><span className="block text-muted-foreground">{ar?"خطتك":"Your plan"}</span>
+      <div><span className="block text-muted-foreground">{ar?"خطتك":(lang==="fr"?frenchUI("Your plan"):"Your plan")}</span>
        <strong className="mt-1 block tabular-nums">{fmtJOD(monthlyItemCost(item))}</strong></div>
-      <div><span className="block text-muted-foreground">{ar?"مرجع توضيحي":"Illustrative ref."}</span>
+      <div><span className="block text-muted-foreground">{ar?"مرجع توضيحي":(lang==="fr"?frenchUI("Illustrative ref."):"Illustrative ref.")}</span>
        <strong className="mt-1 block tabular-nums">{itemRef===null?"—":fmtJOD(itemRef)}</strong></div>
-      <div><span className="block text-muted-foreground">{ar?"دفعت":"Paid"}</span>
+      <div><span className="block text-muted-foreground">{ar?"دفعت":(lang==="fr"?frenchUI("Paid"):"Paid")}</span>
        <strong className="mt-1 block tabular-nums">{fmtJOD(recorded.byItem[item.id]??0)}</strong></div>
      </div>
      {monthlyItemCost(item)>0&&<div className="mt-2 h-2 overflow-hidden rounded-full bg-[#E3EADD]" role="progressbar"
@@ -202,20 +199,18 @@ function CategoryDetails({category,money,setMoney,members,presence,month,autoOpe
       <div className="h-full rounded-full bg-[#41A97C] transition-all" style={{width:Math.min(100,(recorded.byItem[item.id]??0)/monthlyItemCost(item)*100)+"%"}}/>
      </div>}
      {selected===item.id&&<ItemEditor item={item} onSave={v=>{setMoney(s=>upsertBudgetItem(s,v));setSelected(null);}}
-      onRemove={()=>{if(window.confirm(ar?"حذف هذا البند من التفصيل؟":"Remove this item from the breakdown?")){setMoney(s=>removeBudgetItem(s,item.id));setSelected(null);}}}/>}
+      onRemove={()=>{if(window.confirm(ar?"حذف هذا البند من التفصيل؟":(lang==="fr"?frenchUI("Remove this item from the breakdown?"):"Remove this item from the breakdown?"))){setMoney(s=>removeBudgetItem(s,item.id));setSelected(null);}}}/>}
     </div>;
    })}
    {recorded.unassigned>0&&<div className="rounded-lg border border-[#E7E8DC] bg-[#FFFCF6] p-3 text-xs">
-    <div className="flex justify-between gap-2"><span>{ar?"مدفوع دون تحديد بند":"Payments not assigned to an item"}</span>
+    <div className="flex justify-between gap-2"><span>{ar?"مدفوع دون تحديد بند":(lang==="fr"?frenchUI("Payments not assigned to an item"):"Payments not assigned to an item")}</span>
      <strong>{fmtJOD(recorded.unassigned)}</strong></div>
-    <p className="mt-1 text-muted-foreground">{ar?
-     "مصاريف قديمة أو غير مصنفة. داخلة بمجموع الفئة، بدون توزيع تلقائي بالتخمين.":
-     "Older or category-only spending counts toward the category total without guessing which item it belongs to."}</p>
+    <p className="mt-1 text-muted-foreground">{ar?"مصاريف قديمة أو غير مصنفة. داخلة بمجموع الفئة، بدون توزيع تلقائي بالتخمين.":(lang==="fr"?frenchUI("Older or category-only spending counts toward the category total without guessing which item it belongs to."):"Older or category-only spending counts toward the category total without guessing which item it belongs to.")}</p>
    </div>}
    {!money.demo&&<>
     {templates.length>0&&<div className="rounded-xl border border-[#D8E7D8] bg-[#FFFCF6] p-3">
-     <h3 className="text-sm font-black text-[#285F4A]">{ar?"اكتشف بنوداً إضافية":"Discover more inside this category"}</h3>
-     <p className="mt-1 text-xs text-[#6B8072]">{ar?"بنود جاهزة لإضافتها إلى خطتك. المرجع التوضيحي مش مبلغ مطلوب منك تدفعه.":"Suggested items to add to your plan. An illustrative reference isn't a target you must match."}</p>
+     <h3 className="text-sm font-black text-[#285F4A]">{ar?"اكتشف بنوداً إضافية":(lang==="fr"?frenchUI("Discover more inside this category"):"Discover more inside this category")}</h3>
+     <p className="mt-1 text-xs text-[#6B8072]">{ar?"بنود جاهزة لإضافتها إلى خطتك. المرجع التوضيحي مش مبلغ مطلوب منك تدفعه.":(lang==="fr"?frenchUI("Suggested items to add to your plan. An illustrative reference isn't a target you must match."):"Suggested items to add to your plan. An illustrative reference isn't a target you must match.")}</p>
      <div className="mt-2 divide-y divide-[#E8E9DD]">
       {templates.slice(0,6).map(name=>{
        const preview:BudgetItem={id:"suggested-preview",categoryId:category.id,name,enabled:true,amountJod:0,frequency:"monthly",behaviour:"variable",priority:"essential"};
@@ -223,36 +218,36 @@ function CategoryDetails({category,money,setMoney,members,presence,month,autoOpe
        return <div key={name} className="flex min-h-12 items-center gap-2 py-2">
         <span className="text-xl" aria-hidden="true">{emojiFor(name)}</span>
         <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{name}</span>
-         <span className="block text-xs text-[#728376]">{estimate===null?(ar?"لا يوجد مرجع موثّق":"No reference available"):((ar?"مرجع توضيحي: ":"Illustrative ref.: ")+fmtJOD(estimate))}</span>
+         <span className="block text-xs text-[#728376]">{estimate===null?(ar?"لا يوجد مرجع موثّق":(lang==="fr"?frenchUI("No reference available"):"No reference available")):((ar?"مرجع توضيحي: ":(lang==="fr"?frenchUI("Illustrative ref.: "):"Illustrative ref.: "))+fmtJOD(estimate))}</span>
         </span>
         <button type="button" onClick={()=>add(name)}
-         className="min-h-10 rounded-full border border-[#CCE4D1] bg-white px-3 text-xs font-bold text-[#277C5E]">{ar?"أضف":"Add"} +</button>
+         className="min-h-10 rounded-full border border-[#CCE4D1] bg-white px-3 text-xs font-bold text-[#277C5E]">{ar?"أضف":(lang==="fr"?frenchUI("Add"):"Add")} +</button>
        </div>;
       })}
      </div>
     </div>}
     {templates.length>6&&<div className="flex flex-wrap items-end gap-2">
-     <label className="min-w-32 flex-1 text-xs">{ar?"اختر بنداً جاهزاً":"Add a suggested item"}
+     <label className="min-w-32 flex-1 text-xs">{ar?"اختر بنداً جاهزاً":(lang==="fr"?frenchUI("Add a suggested item"):"Add a suggested item")}
       <select className={input} value={newItem} onChange={e=>setNewItem(e.target.value)}>
-       <option value="">{ar?"اختر...":"Choose..."}</option>
+       <option value="">{ar?"اختر...":(lang==="fr"?frenchUI("Choose..."):"Choose...")}</option>
        {templates.map(name=><option key={name} value={name}>{name}</option>)}
       </select>
      </label>
      <button type="button" disabled={!newItem} onClick={()=>add(newItem)}
-      className="min-h-10 rounded-full border border-[#CEDCCD] px-3 text-xs font-semibold text-brand disabled:opacity-40"><Plus className="me-1 inline size-4"/>{ar?"أضف":"Add"}</button>
+      className="min-h-10 rounded-full border border-[#CEDCCD] px-3 text-xs font-semibold text-brand disabled:opacity-40"><Plus className="me-1 inline size-4"/>{ar?"أضف":(lang==="fr"?frenchUI("Add"):"Add")}</button>
     </div>}
     <div className="flex flex-wrap items-end gap-2">
-     <label className="min-w-32 flex-1 text-xs">{ar?"أو بند من عندك":"Or create your own item"}
-      <input className={input} value={custom} maxLength={90} onChange={e=>setCustom(e.target.value)} placeholder={ar?"مثال: احتياجات خاصة":"e.g. dietary supplies"}/>
+     <label className="min-w-32 flex-1 text-xs">{ar?"أو بند من عندك":(lang==="fr"?frenchUI("Or create your own item"):"Or create your own item")}
+      <input className={input} value={custom} maxLength={90} onChange={e=>setCustom(e.target.value)} placeholder={ar?"مثال: احتياجات خاصة":(lang==="fr"?frenchUI("e.g. dietary supplies"):"e.g. dietary supplies")}/>
      </label>
      <button type="button" disabled={!custom.trim()} onClick={()=>add(custom)}
-      className="min-h-10 rounded-full border border-[#CEDCCD] px-3 text-xs font-semibold text-brand disabled:opacity-40"><Plus className="me-1 inline size-4"/>{ar?"أضف":"Add"}</button>
+      className="min-h-10 rounded-full border border-[#CEDCCD] px-3 text-xs font-semibold text-brand disabled:opacity-40"><Plus className="me-1 inline size-4"/>{ar?"أضف":(lang==="fr"?frenchUI("Add"):"Add")}</button>
     </div>
     {items.length>0&&Math.abs(remainder)>.005&&<button type="button" className="min-h-10 text-xs font-semibold text-brand underline underline-offset-2" onClick={()=>{
-     if(window.confirm(ar?"هل تريد جعل مخصص الفئة يساوي مجموع بنودها؟ لن يتغير الإنفاق الفعلي أو الفواتير.":"Replace this category allocation with its item subtotal? No actual spending or bills will change.")){
+     if(window.confirm(ar?"هل تريد جعل مخصص الفئة يساوي مجموع بنودها؟ لن يتغير الإنفاق الفعلي أو الفواتير.":(lang==="fr"?frenchUI("Replace this category allocation with its item subtotal? No actual spending or bills will change."):"Replace this category allocation with its item subtotal? No actual spending or bills will change."))){
       setMoney(s=>setCategoryPlanFromItems(s,category.id));
      }
-    }}>{ar?"اعتمد مجموع البنود كمخصص للفئة":"Use item total as my category plan"}</button>}
+    }}>{ar?"اعتمد مجموع البنود كمخصص للفئة":(lang==="fr"?frenchUI("Use item total as my category plan"):"Use item total as my category plan")}</button>}
    </>}
   </div>
  </details>;
@@ -262,39 +257,32 @@ export function HouseholdBudgetBuilder({money,setMoney,members,onManageCategorie
  const [presence]=useLocalState<HouseholdPresence>(HOUSEHOLD_PRESENCE_KEY,emptyHouseholdPresence());
  const [month,setMonth]=useState(ym);
  const categories=focusedCategoryId?money.categories.filter(c=>c.id===focusedCategoryId):money.categories;
- return <section className="rounded-2xl border border-[#DAE5D9] bg-[#F8FBF7] p-4 sm:p-5" aria-label={ar?"بناء ميزانية البيت":"Build household budget"}>
+ return <section className="rounded-2xl border border-[#DAE5D9] bg-[#F8FBF7] p-4 sm:p-5" aria-label={ar?"بناء ميزانية البيت":(lang==="fr"?frenchUI("Build household budget"):"Build household budget")}>
   {!compact&&<div className="flex items-start gap-3">
    <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#E4F0E3] text-brand"><ReceiptText className="size-5"/></div>
    <div className="min-w-0 flex-1">
-    <p className="text-xs font-semibold tracking-wide text-brand">{ar?"خطة بيتك":"YOUR HOUSEHOLD BUDGET"}</p>
-    <h2 className="mt-1 text-lg font-semibold">{ar?"ابنِ ميزانيتك بنداً بنداً":"Build your budget, your way"}</h2>
-    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
-     "افتح الفئة لتشوف خطتك الشهرية والمصاريف المدفوعة والمرجع التوضيحي لكل بند. التفاصيل اختيارية.":
-     "Open a category to compare each item’s current monthly plan, paid spending and illustrative reference. All item details remain optional."}</p>
+    <p className="text-xs font-semibold tracking-wide text-brand">{ar?"خطة بيتك":(lang==="fr"?frenchUI("YOUR HOUSEHOLD BUDGET"):"YOUR HOUSEHOLD BUDGET")}</p>
+    <h2 className="mt-1 text-lg font-semibold">{ar?"ابنِ ميزانيتك بنداً بنداً":(lang==="fr"?frenchUI("Build your budget, your way"):"Build your budget, your way")}</h2>
+    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?"افتح الفئة لتشوف خطتك الشهرية والمصاريف المدفوعة والمرجع التوضيحي لكل بند. التفاصيل اختيارية.":(lang==="fr"?frenchUI("Open a category to compare each item’s current monthly plan, paid spending and illustrative reference. All item details remain optional."):"Open a category to compare each item’s current monthly plan, paid spending and illustrative reference. All item details remain optional.")}</p>
    </div>
   </div>}
   <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-   <label className="text-xs">{ar?"شهر مقارنة المصروف":"Spending comparison month"}
+   <label className="text-xs">{ar?"شهر مقارنة المصروف":(lang==="fr"?frenchUI("Spending comparison month"):"Spending comparison month")}
     <input className={input} type="month" value={month} onChange={e=>setMonth(e.target.value||ym())}/>
    </label>
-   <button type="button" className="min-h-10 text-xs font-semibold text-brand underline" onClick={onManageCategories}>{ar?"أضف أو عدّل فئة":"Manage categories"}</button>
+   <button type="button" className="min-h-10 text-xs font-semibold text-brand underline" onClick={onManageCategories}>{ar?"أضف أو عدّل فئة":(lang==="fr"?frenchUI("Manage categories"):"Manage categories")}</button>
   </div>
   <div className="mt-3 space-y-2">
    {categories.map(category=><CategoryDetails key={category.id} category={category} money={money}
     setMoney={setMoney} members={members} presence={presence} month={month} autoOpen={!!focusedCategoryId}/>)}
-   {money.categories.length===0&&<p className="rounded-lg bg-white p-4 text-sm text-muted-foreground">{ar?
-    "ما في فئات بعد. أضف أول فئة للبدء، ويمكن ترك الميزانية الإجمالية لوقت لاحق.":
-    "No spending categories yet. Add one category to begin; detailed allocations can wait."}</p>}
+   {money.categories.length===0&&<p className="rounded-lg bg-white p-4 text-sm text-muted-foreground">{ar?"ما في فئات بعد. أضف أول فئة للبدء، ويمكن ترك الميزانية الإجمالية لوقت لاحق.":(lang==="fr"?frenchUI("No spending categories yet. Add one category to begin; detailed allocations can wait."):"No spending categories yet. Add one category to begin; detailed allocations can wait.")}</p>}
   </div>
-  {!compact&&<p className="mt-3 text-xs text-muted-foreground">{ar?"الخطة هي المخصص الحالي؛ أما المدفوع فهو للشهر المختار.":"Plan figures are current monthly allocations; paid amounts are filtered to the chosen month."}</p>}
+  {!compact&&<p className="mt-3 text-xs text-muted-foreground">{ar?"الخطة هي المخصص الحالي؛ أما المدفوع فهو للشهر المختار.":(lang==="fr"?frenchUI("Plan figures are current monthly allocations; paid amounts are filtered to the chosen month."):"Plan figures are current monthly allocations; paid amounts are filtered to the chosen month.")}</p>}
    <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-   {ar?"الأرقام المرجعية العامة هنا نموذج توضيحي وليست إحصاءات سوق رسمية؛ فقط سعر البنزين والغاز مرتبط بمصدر حكومي لشهر تشرين الأول ٢٠٢٦. ما بنغيّر أي ميزانية حسب المرجع من دون قرارك.":
-    "Household reference totals are illustrative assumptions, not current public spending statistics. Only Petrol 90 and domestic LPG have verified government unit prices (October 2026). References never overwrite your plan automatically."}
+   {ar?"الأرقام المرجعية العامة هنا نموذج توضيحي وليست إحصاءات سوق رسمية؛ فقط سعر البنزين والغاز مرتبط بمصدر حكومي لشهر تشرين الأول ٢٠٢٦. ما بنغيّر أي ميزانية حسب المرجع من دون قرارك.":(lang==="fr"?frenchUI("Household reference totals are illustrative assumptions, not current public spending statistics. Only Petrol 90 and domestic LPG have verified government unit prices (October 2026). References never overwrite your plan automatically."):"Household reference totals are illustrative assumptions, not current public spending statistics. Only Petrol 90 and domestic LPG have verified government unit prices (October 2026). References never overwrite your plan automatically.")}
   </p>
-  {!compact&&<p className="mt-1 text-xs text-muted-foreground">{ar?
-   "المصدر العام لمسح إنفاق الأسرة الأردنية هو دائرة الإحصاءات العامة (2017–2018)؛ الأرقام القديمة ليست تقديرات شهرية حالية لعمّان.":
-   "Jordan's Department of Statistics publishes historical household spending data (2017–18), but that survey is not presented as a current 2026 Amman benchmark."}{" "}
-   <a className="underline" href="https://dosweb.dos.gov.jo/expenditures-income-tables2017/" target="_blank" rel="noopener noreferrer">{ar?"اطّلع على المصدر":"View survey source"}</a>.
+  {!compact&&<p className="mt-1 text-xs text-muted-foreground">{ar?"المصدر العام لمسح إنفاق الأسرة الأردنية هو دائرة الإحصاءات العامة (2017–2018)؛ الأرقام القديمة ليست تقديرات شهرية حالية لعمّان.":(lang==="fr"?frenchUI("Jordan's Department of Statistics publishes historical household spending data (2017–18), but that survey is not presented as a current 2026 Amman benchmark."):"Jordan's Department of Statistics publishes historical household spending data (2017–18), but that survey is not presented as a current 2026 Amman benchmark.")}{" "}
+   <a className="underline" href="https://dosweb.dos.gov.jo/expenditures-income-tables2017/" target="_blank" rel="noopener noreferrer">{ar?"اطّلع على المصدر":(lang==="fr"?frenchUI("View survey source"):"View survey source")}</a>.
   </p>}
  </section>;
 }
