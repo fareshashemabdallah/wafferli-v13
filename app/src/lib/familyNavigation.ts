@@ -3,11 +3,11 @@ import {Home,HeartHandshake,Wallet,Store,MessageCircleHeart} from "lucide-react"
 /** Five distinct top-level destinations; Ask remains a persistent capability.
  * Each chapter owns its own route and active navigation state. */
 export const familyDestinations=[
- {id:"today",to:"/" as const,en:"Today",ar:"اليوم",shortEn:"Today",shortAr:"اليوم",icon:Home,accent:"#338C70",soft:"#E5F4E9"},
- {id:"money",to:"/money" as const,en:"Money",ar:"المال",shortEn:"Money",shortAr:"المال",icon:Wallet,accent:"#2D917C",soft:"#E9F7F2"},
- {id:"parents",to:"/what-parents-say" as const,en:"What Parents Say",ar:"شو بيقولوا الأهل؟",shortEn:"Parents Say",shortAr:"تجارب الأهل",icon:MessageCircleHeart,accent:"#AD6588",soft:"#FFF0F6"},
- {id:"finds",to:"/finds" as const,en:"Our Market",ar:"سوقنا",shortEn:"Market",shortAr:"سوقنا",icon:Store,accent:"#C37664",soft:"#FFF3E8"},
- {id:"family",to:"/family" as const,en:"Family",ar:"العيلة",shortEn:"Family",shortAr:"العيلة",icon:HeartHandshake,accent:"#CB6393",soft:"#FCECF2"}
+ {id:"today",to:"/" as const,en:"Today",ar:"اليوم",shortEn:"Today",shortAr:"اليوم",fr:"Aujourd’hui",shortFr:"Aujourd’hui",icon:Home,accent:"#338C70",soft:"#E5F4E9"},
+ {id:"money",to:"/money" as const,en:"Money",ar:"المال",shortEn:"Money",shortAr:"المال",fr:"Budget",shortFr:"Budget",icon:Wallet,accent:"#2D917C",soft:"#E9F7F2"},
+ {id:"parents",to:"/what-parents-say" as const,en:"What Parents Say",ar:"شو بيقولوا الأهل؟",shortEn:"Parents Say",shortAr:"تجارب الأهل",fr:"L’avis des parents",shortFr:"Avis",icon:MessageCircleHeart,accent:"#AD6588",soft:"#FFF0F6"},
+ {id:"finds",to:"/finds" as const,en:"Our Market",ar:"سوقنا",shortEn:"Market",shortAr:"سوقنا",fr:"Notre marché",shortFr:"Marché",icon:Store,accent:"#C37664",soft:"#FFF3E8"},
+ {id:"family",to:"/family" as const,en:"Family",ar:"العيلة",shortEn:"Family",shortAr:"العيلة",fr:"Famille",shortFr:"Famille",icon:HeartHandshake,accent:"#CB6393",soft:"#FCECF2"}
 ] as const;
 export type FamilyArea=(typeof familyDestinations)[number]["id"];
 export function areaFromRoute(path:string):FamilyArea{
