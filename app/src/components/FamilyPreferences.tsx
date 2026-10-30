@@ -92,9 +92,6 @@ export function FamilyPreferences() {
     </div>
     </details>
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-      <label className="text-sm font-medium">{ar?"مدينتك (اختياري)":"Your city (optional)"}
-        <input className="mt-1 w-full rounded-xl border border-border bg-card p-3" maxLength={80} placeholder={ar?"مثل عمّان":"e.g. Amman"} value={preferences.city??""} onChange={e=>set("city",e.target.value.slice(0,80))}/>
-      </label>
       <label className="text-sm font-medium">{ar?"المسافة المفضلة للأنشطة":"Preferred outing distance"}
         <select className="mt-1 w-full rounded-xl border border-border bg-card p-3" value={preferences.distanceKm} onChange={e=>set("distanceKm",Number(e.target.value))}>
           {[5,10,15,25,50].map(km=><option key={km} value={km}>{km} km</option>)}

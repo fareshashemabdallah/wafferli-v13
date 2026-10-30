@@ -1,9 +1,12 @@
-import {createFileRoute} from "@tanstack/react-router";
+import {createFileRoute,Link} from "@tanstack/react-router";
 import {useState,type FormEvent} from "react";
 import {ArrowLeft,CheckCircle2,ChevronRight,Compass,ExternalLink,HeartHandshake,MapPin,MessageCircle,Plus,Search,ShieldAlert,ShieldCheck,ShoppingBag,Sparkles,Trash2,UsersRound,UtensilsCrossed,Waves} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {FAMILY_HERO_LAYOUT,FAMILY_HERO_TEXT,FamilyHeroIllustration} from "@/components/FamilyHeroIllustration";
 import {useI18n} from "@/lib/i18n";
+import {frenchUI} from "@/lib/french";
+import {COUNTRY_KEY,getCountry,type CountryCode} from "@/lib/regionalMarket";
+import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {uid,useLocalState} from "@/lib/storage";
 import {PARENTS_SAY_PLACES_KEY,PARENTS_SAY_REVIEWS_KEY,createParentPlace,createParentReview,parentReviewExternalSearch,reportedReviewCount,sameParentPlace,upsertParentReview,type ParentPlace,type ParentReview,type ReviewCategory,type ReviewInput} from "@/lib/parentsSay";
 
@@ -31,7 +34,10 @@ const labels={
  wouldReturn:{yes:["Yes","نعم"],maybe:["Maybe","ربما"],no:["No","لا"]}
 } as const;
 export function WhatParentsSayPage(){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
+ const [country]=useLocalState<CountryCode>(COUNTRY_KEY,"JO");
+ const [familyPrefs]=useLocalState<FamilyPreferences>("familyPreferences",defaultFamilyPreferences);
+ const market=getCountry(country);
  const [places,setPlaces,placesReady]=useLocalState<ParentPlace[]>(PARENTS_SAY_PLACES_KEY,[]);
  const [reviews,setReviews,reviewsReady]=useLocalState<ParentReview[]>(PARENTS_SAY_REVIEWS_KEY,[]);
  const [mode,setMode]=useState<"browse"|"detail"|"place"|"review">("browse");
@@ -40,33 +46,34 @@ export function WhatParentsSayPage(){
  const [category,setCategory]=useState<"all"|ReviewCategory>("all");
  const [activeTab,setActiveTab]=useState<"parents"|"web">("parents");
  const [placeName,setPlaceName]=useState("");
- const [placeArea,setPlaceArea]=useState("Amman");
+ const [placeArea,setPlaceArea]=useState("");
  const [placeCategory,setPlaceCategory]=useState<ReviewCategory>("activities");
  const [draft,setDraft]=useState<ReviewInput>(defaultReview);
+ const [reviewLanguage,setReviewLanguage]=useState<"ar"|"en"|"fr">("en");
  const [error,setError]=useState("");
  const [saved,setSaved]=useState(false);
  const ready=placesReady&&reviewsReady;
  const selectedPlace=places.find(x=>x.id===selected);
  const ownReview=reviews.find(x=>x.placeId===selected);
- const visible=places.filter(p=>(category==="all"||p.category===category)&&
+ const visible=places.filter(p=>(p.countryCode??"JO")===market.code&&(category==="all"||p.category===category)&&
   [p.name,p.area,p.category].join(" ").toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
   .sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
  const updateDraft=<K extends keyof ReviewInput>(key:K,value:ReviewInput[K])=>setDraft(old=>({...old,[key]:value}));
  const openPlace=(id:string)=>{setSelected(id);setActiveTab("parents");setError("");setMode("detail");};
- const startReview=()=>{setDraft(ownReview?{age:ownReview.age,experience:ownReview.experience,safety:ownReview.safety,convenience:ownReview.convenience,wouldReturn:ownReview.wouldReturn,comment:ownReview.comment,providerSummaryOptIn:ownReview.providerSummaryOptIn,parentQuestionsOptIn:ownReview.parentQuestionsOptIn}:defaultReview);setSaved(false);setError("");setMode("review");};
+ const startReview=()=>{setReviewLanguage(ownReview?.language??lang);setDraft(ownReview?{age:ownReview.age,experience:ownReview.experience,safety:ownReview.safety,convenience:ownReview.convenience,wouldReturn:ownReview.wouldReturn,comment:ownReview.comment,providerSummaryOptIn:ownReview.providerSummaryOptIn,parentQuestionsOptIn:ownReview.parentQuestionsOptIn}:defaultReview);setSaved(false);setError("");setMode("review");};
  const submitPlace=(event:FormEvent)=>{
-  event.preventDefault();const proposed=createParentPlace({name:placeName,area:placeCategory==="products"?"":placeArea,category:placeCategory},uid(),new Date().toISOString());
+  event.preventDefault();const proposed=createParentPlace({name:placeName,area:placeCategory==="products"?"":placeArea,category:placeCategory,countryCode:market.code},uid(),new Date().toISOString());
   if(!proposed){setError(t("Enter a place or product name and a general area.","اكتب اسم المكان أو المنتج ومنطقة عامة."));return;}
   const duplicate=places.find(p=>sameParentPlace(p,proposed));
   if(!duplicate)setPlaces(old=>[proposed,...old]);
   openPlace(duplicate?.id??proposed.id);
-  setPlaceName("");setPlaceArea("Amman");
+  setPlaceName("");setPlaceArea("");
  };
  const submitReview=(event:FormEvent)=>{
   event.preventDefault();if(!selectedPlace)return;
   const created=createParentReview(draft,selectedPlace.id,ownReview?.id??uid(),new Date().toISOString(),ownReview);
   if(!created){setError(t("Please share at least 20 characters of useful firsthand feedback (maximum 1,500).","شارك تجربتك الفعلية في ٢٠ حرفاً على الأقل (الحد الأقصى ١٥٠٠)."));return;}
-  setReviews(old=>upsertParentReview(old,created));setError("");setSaved(true);setMode("detail");
+  setReviews(old=>upsertParentReview(old,{...created,language:reviewLanguage}));setError("");setSaved(true);setMode("detail");
  };
  const removePlace=()=>{
   if(!selectedPlace)return;
@@ -101,6 +108,7 @@ export function WhatParentsSayPage(){
     <section className={card+" space-y-3"}>
      <div className="flex items-center justify-between gap-2">
       <h3 className="text-lg font-extrabold text-[#273E35]">{t("Explore experiences","اكتشف التجارب")}</h3>
+      <p className="mt-1 text-xs text-[#607F6B]">{t("Showing private entries for","عرض مدخلاتك الخاصة في")}{" "}{market[lang]} · <Link to="/space" className="font-bold underline">{t("Change country","غيّر البلد")}</Link></p>
 
      </div>
      <label className="flex items-center gap-2 rounded-xl border border-[#D3E5D7] bg-[#FAFDF9] px-3">
@@ -114,7 +122,7 @@ export function WhatParentsSayPage(){
        aria-pressed={category===item.id} className={"flex min-h-[94px] flex-col items-start justify-center gap-2 rounded-2xl border p-3 text-start transition focus-visible:ring-2 focus-visible:ring-[#459672] "+(category===item.id?"border-[#5EAC83] ring-1 ring-[#7EB99B]":"border-[#E1EAE0]")}
        style={{background:item.soft}}>
        <Icon className="size-6" style={{color:item.tone}}/>
-       <span className="text-xs font-bold text-[#31463D]">{ar?item.ar:item.en}</span>
+       <span className="text-xs font-bold text-[#31463D]">{ar?item.ar:lang==="fr"?frenchUI(item.en):item.en}</span>
       </button>;})}
      </div>
      {category!=="all"&&<button type="button" className="text-xs font-bold text-[#458667] underline" onClick={()=>setCategory("all")}>{t("Show all categories","كل الفئات")}</button>}
@@ -125,7 +133,7 @@ export function WhatParentsSayPage(){
        <h3 className="text-base font-extrabold">{t("Places & products you've added","الأماكن والمنتجات اللي أضفتها")}</h3>
 
       </div>
-      <button type="button" className={buttonPrimary} onClick={()=>{setError("");setPlaceCategory(category==="all"?"activities":category);setMode("place");}}>
+      <button type="button" className={buttonPrimary} onClick={()=>{setError("");setPlaceCategory(category==="all"?"activities":category);setPlaceArea(familyPrefs.city??"");setMode("place");}}>
        <Plus className="size-4"/>{t("Add a place or item","أضف مكان أو منتج")}</button>
      </div>
      {!ready?<p className="py-5 text-center text-sm text-[#718273]">{t("Loading your saved experiences…","جارٍ تحميل التجارب…")}</p>:
@@ -144,7 +152,7 @@ export function WhatParentsSayPage(){
         <span className="grid size-14 shrink-0 place-items-center rounded-2xl" style={{background:c.soft,color:c.tone}}><Icon className="size-6"/></span>
         <span className="min-w-0 flex-1">
          <strong className="block truncate text-sm text-[#31493B]">{p.name}</strong>
-         <span className="mt-1 block text-xs text-[#718176]">{p.area?p.area+" · ":""}{ar?c.ar:c.en}</span>
+         <span className="mt-1 block text-xs text-[#718176]">{p.area?p.area+" · ":""}{ar?c.ar:lang==="fr"?frenchUI(c.en):c.en}</span>
          <span className="mt-1 block text-[11px] text-[#4E8667]">{reportedReviewCount(reviews,p.id)===0?t("No saved reviews","لا توجد مراجعات محفوظة"):t("Your saved review","تجربتك المحفوظة")}</span>
         </span>
         <ChevronRight className="size-4 shrink-0 text-[#759481] rtl:rotate-180"/>
@@ -169,7 +177,7 @@ export function WhatParentsSayPage(){
       <input className={field} maxLength={100} required minLength={3} value={placeName} onChange={e=>setPlaceName(e.target.value)} placeholder={t("e.g. a swimming club or children's bicycle","مثلاً نادي سباحة أو دراجة أطفال")}/></label>
      <label className="block space-y-1 text-sm font-semibold">{t("Category","الفئة")}
       <select className={field} value={placeCategory} onChange={e=>setPlaceCategory(e.target.value as ReviewCategory)}>
-       {categoryCards.map(x=><option key={x.id} value={x.id}>{ar?x.ar:x.en}</option>)}</select></label>
+       {categoryCards.map(x=><option key={x.id} value={x.id}>{ar?x.ar:lang==="fr"?frenchUI(x.en):x.en}</option>)}</select></label>
      {placeCategory!=="products"&&<label className="block space-y-1 text-sm font-semibold">{t("General city or area (no exact address)","المدينة أو المنطقة العامة (بدون عنوان دقيق)")}
       <input className={field} maxLength={80} required value={placeArea} onChange={e=>setPlaceArea(e.target.value)}/></label>}
      <p className="rounded-xl bg-[#F3F8F2] p-3 text-xs leading-relaxed text-[#64796A]">
@@ -225,7 +233,8 @@ export function WhatParentsSayPage(){
         <div className="flex items-center gap-2"><span className="grid size-9 place-items-center rounded-full bg-[#E5F3E6] text-[#42835F]"><UsersRound className="size-5"/></span>
          <div className="min-w-0 flex-1"><p className="text-sm font-extrabold">{t("Your private parent review","تجربتك الخاصة")}</p>
           <p className="text-[11px] text-[#738477]">{t("Authenticated visit not verified · Not publicly posted","الزيارة غير موثّقة · غير منشورة")}</p></div></div>
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[#39483E]">{ownReview.comment}</p>
+        <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[#39483E]" lang={ownReview.language??undefined} dir="auto">{ownReview.comment}</p>
+        <p className="mt-1 text-[11px] text-[#738477]">{t("Original review — automatic translation is not available in this private pilot.","النص الأصلي — الترجمة التلقائية غير متاحة في هذه النسخة.")}</p>
         <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
          <span className="rounded-full bg-[#E9F5E9] px-2.5 py-1 text-[#387554]">{labels.experience[ownReview.experience][ar?1:0]}</span>
          <span className="rounded-full bg-[#FFF0EA] px-2.5 py-1 text-[#A16A56]">{labels.safety[ownReview.safety][ar?1:0]}</span>
@@ -291,6 +300,13 @@ export function WhatParentsSayPage(){
      <label className="block space-y-1 text-sm font-semibold">{t("Would you choose it again?","هل ممكن تختاره مرة ثانية؟")}
       <select className={field} value={draft.wouldReturn} onChange={e=>updateDraft("wouldReturn",e.target.value as ReviewInput["wouldReturn"])}>
        {(["yes","maybe","no"] as const).map(x=><option key={x} value={x}>{labels.wouldReturn[x][ar?1:0]}</option>)}</select></label>
+     <label className="block space-y-1 text-sm font-semibold">
+      {t("Language of your written review","لغة التقييم المكتوب")}
+      <select className={field} aria-label={t("Language of your written review","لغة التقييم المكتوب")} value={reviewLanguage}
+       onChange={e=>setReviewLanguage(e.target.value as "ar"|"en"|"fr")}>
+       <option value="ar">العربية</option><option value="en">English</option><option value="fr">Français</option>
+      </select>
+     </label>
      <label className="block space-y-1 text-sm font-semibold">{t("What should another parent know?","شو بتحب أهل غيرك يعرفوا؟")}
       <textarea className={field+" min-h-[120px]"} required minLength={20} maxLength={1500} value={draft.comment} onChange={e=>updateDraft("comment",e.target.value)}
        placeholder={t("What worked? Any safety concerns, age considerations, practical tips or hidden costs?","شو كان منيح؟ في مخاوف، ملاحظات عن العمر، نصائح أو تكاليف إضافية؟")}/>

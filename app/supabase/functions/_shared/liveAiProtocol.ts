@@ -4,7 +4,7 @@
  */
 import {detectSensitiveAiText} from "./liveAiPrivacy.ts";
 
-export type LiveAiLanguage="en"|"ar";
+export type LiveAiLanguage="en"|"ar"|"fr";
 export type LiveAiTurn={role:"user"|"assistant";content:string};
 export type LiveAiFinancialSummary={
  monthlyIncomeJod:number;plannedExpensesJod:number;recordedSpentJod:number;
@@ -28,7 +28,7 @@ export function parseLiveAiRequest(input:unknown):LiveAiRequest {
   input["parentConsent"]!==true||
   typeof input["question"]!=="string"||input["question"].trim().length<2||
   input["question"].length>600||
-  (input["language"]!=="ar"&&input["language"]!=="en")||
+  (input["language"]!=="ar"&&input["language"]!=="en"&&input["language"]!=="fr")||
   !Array.isArray(input["history"])||input["history"].length>6)
   throw new Error("Invalid family AI request");
  const history:LiveAiTurn[]=[];

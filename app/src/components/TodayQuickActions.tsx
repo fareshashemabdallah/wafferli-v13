@@ -1,13 +1,14 @@
 import {useState,type ReactNode} from "react";
 import {MessageCircle,Receipt} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
+import {frenchUI} from "@/lib/french";
 import {QuickExpenseCard} from "./QuickExpenseCard";
 
 /** Today has just two real, useful actions: record an actual expense or
  * ask for help. Retired shopping prototypes must not write another list. */
 export function TodayQuickActions({onAsk,onOtherAction}:{onAsk:()=>void;onOtherAction?:()=>void}){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [expenseOpen,setExpenseOpen]=useState(false);
  const action=(label:string,icon:ReactNode,onClick:()=>void,chosen:boolean,color:string)=>
   <button type="button" onClick={onClick} aria-pressed={chosen}
