@@ -45,8 +45,8 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
  const chosen=useMemo(()=>occurrencesForDate(combined,selected),[combined,selected]);
  const upcoming=useMemo(()=>upcomingMoments(combined,today,180).slice(0,8),[combined,today]);
  const move=(delta:number)=>setMonth(d=>new Date(d.getFullYear(),d.getMonth()+delta,1,12));
- const monthLabel=new Intl.DateTimeFormat(ar?"ar-JO":(lang==="fr"?frenchUI("en-US"):"en-US"),{month:"long",year:"numeric"}).format(month);
- const weekNames=Array.from({length:7},(_,i)=>new Intl.DateTimeFormat(ar?"ar-JO":(lang==="fr"?frenchUI("en-US"):"en-US"),{weekday:"short"}).format(new Date(2026,9,12+i,12)));
+ const monthLabel=new Intl.DateTimeFormat(ar?"ar-JO":lang==="fr"?"fr-FR":"en-US",{month:"long",year:"numeric"}).format(month);
+ const weekNames=Array.from({length:7},(_,i)=>new Intl.DateTimeFormat(ar?"ar-JO":lang==="fr"?"fr-FR":"en-US",{weekday:"short"}).format(new Date(2026,9,12+i,12)));
  const startNew=(date:string)=>{setForm(blank(date));setEditing(true);setError("");};
  const startEdit=(item:FamilyMoment)=>{setForm({id:item.id,title:item.title,date:item.date,kind:item.kind,annual:item.annual,time:item.time??"",note:item.note??""});setEditing(true);setError("");};
  const save=(e:FormEvent)=>{
@@ -69,7 +69,7 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
  };
  const localeDate=(day:string)=> {
   const d=parseCalendarDate(day);
-  return d?new Intl.DateTimeFormat(ar?"ar-JO":(lang==="fr"?frenchUI("en-US"):"en-US"),{weekday:"long",month:"long",day:"numeric"}).format(d):day;
+  return d?new Intl.DateTimeFormat(ar?"ar-JO":lang==="fr"?"fr-FR":"en-US",{weekday:"long",month:"long",day:"numeric"}).format(d):day;
  };
  const kindColor=(kind:MomentKind)=>kind==="birthday"?"bg-[#FBE9E7] text-[#A66760]":kind==="holiday"?"bg-[#FCF0DC] text-[#98754A]":kind==="school"?"bg-[#E8EEF8] text-[#5C789B]":"bg-mint text-brand";
  const content=<>
@@ -151,7 +151,7 @@ export function FamilyCalendarWorkspace({embedded=false,focusDate}:{embedded?:bo
    <h2 className="text-lg font-semibold">{ar?"قريباً في تقويمنا":(lang==="fr"?frenchUI("Coming up for your family"):"Coming up for your family")}</h2>
    {!ready?<p className="mt-2 text-sm text-muted-foreground">{ar?"جارٍ تحميل المناسبات...":(lang==="fr"?frenchUI("Loading saved occasions…"):"Loading saved occasions…")}</p>:upcoming.length===0?<p className="mt-2 rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{ar?"عندما تضيف مناسبات، ستظهر هنا وعلى الصفحة الرئيسية.":(lang==="fr"?frenchUI("When you add birthdays in My Family or occasions here, they will appear on My Day."):"When you add birthdays in My Family or occasions here, they will appear on My Day.")}</p>
    :<div className="mt-3 space-y-2">{upcoming.map(item=><div key={item.id+item.occursOn} className="card-soft flex items-center gap-3 p-3">
-    <Gift className="size-5 shrink-0 text-brand"/><div className="flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">{formatMomentDate(item.occursOn,ar)} · {kindNames[item.kind][ar?"ar":(lang==="fr"?frenchUI("en"):"en")]}</p></div>
+    <Gift className="size-5 shrink-0 text-brand"/><div className="flex-1"><p className="text-sm font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">{formatMomentDate(item.occursOn,ar,lang)} · {kindNames[item.kind][ar?"ar":(lang==="fr"?frenchUI("en"):"en")]}</p></div>
     {item.id.startsWith(PLANNED_OUTING_MOMENT_PREFIX)?<Link to="/plans" onClick={()=>writeLocal(ACTIVE_PLAN_KEY,item.id.slice(PLANNED_OUTING_MOMENT_PREFIX.length))} className="inline-flex min-h-11 items-center rounded-xl border border-[#D7E6DA] px-3 text-xs font-semibold text-brand underline">{ar?"راجع الفكرة":(lang==="fr"?frenchUI("Review idea"):"Review idea")}</Link>:<button type="button" onClick={()=>{
        setSelected(item.occursOn);
        const day=parseCalendarDate(item.occursOn);
