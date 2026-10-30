@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useState,type FormEvent} from "react";
 import {useI18n} from "@/lib/i18n";
 import {localToday} from "@/lib/cashflow";
@@ -11,7 +12,7 @@ const money=(value:string)=>/^\d{1,6}(?:\.\d{1,2})?$/.test(value.trim())&&Number
  Number(value)>=0&&Number(value)<=100000;
 const input="mt-1 min-h-11 w-full rounded-xl border border-[#D7E4D5] bg-white p-2 text-sm text-[#335644]";
 export function MonthAllowanceAdjustment({state,categoryId,setState,onClose}:Props){
- const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:en;
+ const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const cat=state.categories.find(c=>c.id===categoryId);
  const [month,setMonth]=useState(localToday().slice(0,7));
  const stored=confirmedMonthPlan(state,categoryId,month);
