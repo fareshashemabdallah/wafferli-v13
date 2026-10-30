@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import {useState,type FormEvent} from "react";
 import {Link} from "@tanstack/react-router";
 import {ArrowRight,MessageCircleQuestion,Send} from "lucide-react";
@@ -45,8 +46,7 @@ export function GuidedFamilyAdvisor(){
   e.preventDefault();
   const n=Number(quickAmount);
   if(!/^\d{1,6}(?:\.\d{1,2})?$/.test(quickAmount)||!Number.isFinite(n)||n<=0||n>100000){
-   setQuickError(ar?"أدخل مبلغاً بالدينار (منزلتان عشريتان كحد أقصى).":
-    "Enter a JOD amount with up to two decimal places.");
+   setQuickError(ar?"أدخل مبلغاً بالدينار (منزلتان عشريتان كحد أقصى).":(lang==="fr"?frenchUI("Enter a JOD amount with up to two decimal places."):"Enter a JOD amount with up to two decimal places."));
    return;
   }
   setQuickError("");
@@ -54,71 +54,67 @@ export function GuidedFamilyAdvisor(){
    "Can we afford "+quickAmount+" JOD for a family outing?");
  };
  return <section className="editorial-card mt-5 p-4 sm:p-5"
-  aria-label={ar?"مساعد العائلة المحلي":"Guided family advisor"}>
+  aria-label={ar?"مساعد العائلة المحلي":(lang==="fr"?frenchUI("Guided family advisor"):"Guided family advisor")}>
   <div className="flex items-start gap-3">
    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#E9F2E7] text-brand">
     <MessageCircleQuestion className="size-5"/>
    </span>
    <div>
-    <p className="section-eyebrow">{ar?"إرشادات العائلة":"FAMILY DECISIONS"}</p>
-    <h2 className="mt-1 text-lg font-semibold">{ar?"شو بتحب دبّرنا يساعدك فيه؟":"What can I help your family decide?"}</h2>
-    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?
-     "اسأل عن مصروف البيت أو الفواتير أو الادخار أو الأطفال أو الخطط. الإجابات مبنية فقط على البيانات اللي أدخلتها في هذا المتصفح—وليست محادثة AI متصلة.":
-     "Ask one question. I will use what you already saved and tell you what I can and cannot confirm. This guided advisor works on your device; connected generative AI is not active."}</p>
+    <p className="section-eyebrow">{ar?"إرشادات العائلة":(lang==="fr"?frenchUI("FAMILY DECISIONS"):"FAMILY DECISIONS")}</p>
+    <h2 className="mt-1 text-lg font-semibold">{ar?"شو بتحب دبّرنا يساعدك فيه؟":(lang==="fr"?frenchUI("What can I help your family decide?"):"What can I help your family decide?")}</h2>
+    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ar?"اسأل عن مصروف البيت أو الفواتير أو الادخار أو الأطفال أو الخطط. الإجابات مبنية فقط على البيانات اللي أدخلتها في هذا المتصفح—وليست محادثة AI متصلة.":(lang==="fr"?frenchUI("Ask one question. I will use what you already saved and tell you what I can and cannot confirm. This guided advisor works on your device; connected generative AI is not active."):"Ask one question. I will use what you already saved and tell you what I can and cannot confirm. This guided advisor works on your device; connected generative AI is not active.")}</p>
    </div>
   </div>
   <form onSubmit={submit} className="mt-4 flex flex-wrap gap-2 rounded-xl bg-[#EFF6ED] p-3">
    <label className="min-w-[175px] flex-1 text-xs font-semibold">
-    {ar?"أو اكتب سؤالك":"Or type your question"}
+    {ar?"أو اكتب سؤالك":(lang==="fr"?frenchUI("Or type your question"):"Or type your question")}
     <input maxLength={400} value={question} onChange={e=>setQuestion(e.target.value)}
      className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
-     placeholder={ar?"كيف الميزانية هالشهر؟":"What do our bills look like?"}/>
+     placeholder={ar?"كيف الميزانية هالشهر؟":(lang==="fr"?frenchUI("What do our bills look like?"):"What do our bills look like?")}/>
    </label>
    <Button type="submit" className="self-end" disabled={!ready||!question.trim()}>
-    <Send className="size-4"/>{ar?"اسأل":"Ask"}
+    <Send className="size-4"/>{ar?"اسأل":(lang==="fr"?frenchUI("Ask"):"Ask")}
    </Button>
   </form>
 
   <details className="mt-4 rounded-xl border border-[#DCE7DC] bg-white p-3">
    <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
-    {ar?"أسئلة جاهزة وحساب مبلغ محدد (اختياري)":"Suggested questions & amount check (optional)"}
+    {ar?"أسئلة جاهزة وحساب مبلغ محدد (اختياري)":(lang==="fr"?frenchUI("Suggested questions & amount check (optional)"):"Suggested questions & amount check (optional)")}
    </summary>
    <div className="mt-4 grid gap-2 sm:grid-cols-2">
    {guidedPrompts.filter(p=>["safety","bills","priorities","outings"].includes(p.id)).map(p=><button type="button" key={p.id} disabled={!ready}
-    onClick={()=>ask(ar?p.ar:p.en)}
+    onClick={()=>ask(ar?p.ar:(lang==="fr"?frenchUI(p.en):p.en))}
     className="min-h-11 rounded-xl border border-[#DDE8D9] bg-[#F6FAF4] px-3 py-2 text-start text-xs font-semibold text-brand transition hover:bg-[#ECF3E9] disabled:opacity-50">
-    {ar?p.ar:p.en}
+    {ar?p.ar:(lang==="fr"?frenchUI(p.en):p.en)}
    </button>)}
   </div>
   <details className="mt-3 rounded-xl border border-[#E1E8DF] bg-white px-3 py-2">
    <summary className="flex min-h-10 cursor-pointer items-center text-xs font-semibold text-brand">
-    {ar?"أسئلة إضافية عن الادخار والمشتريات والمهام":"More questions about savings, shopping & tasks"}
+    {ar?"أسئلة إضافية عن الادخار والمشتريات والمهام":(lang==="fr"?frenchUI("More questions about savings, shopping & tasks"):"More questions about savings, shopping & tasks")}
    </summary>
    <div className="mt-2 grid gap-2 sm:grid-cols-2">
     {guidedPrompts.filter(p=>!["safety","bills","priorities","outings"].includes(p.id)).map(p=><button type="button" key={p.id} disabled={!ready}
-     onClick={()=>ask(ar?p.ar:p.en)}
+     onClick={()=>ask(ar?p.ar:(lang==="fr"?frenchUI(p.en):p.en))}
      className="min-h-11 rounded-xl border border-[#DDE8D9] bg-[#F6FAF4] px-3 py-2 text-start text-xs font-semibold text-brand hover:bg-[#ECF3E9] disabled:opacity-50">
-     {ar?p.ar:p.en}
+     {ar?p.ar:(lang==="fr"?frenchUI(p.en):p.en)}
     </button>)}
    </div>
   </details>
   <form onSubmit={checkCost} className="mt-4 rounded-xl border border-[#DDE8D9] bg-[#F6FAF4] p-3"
-   aria-label={ar?"تقييم مصروف محدد":"Check a specific family cost"}>
-   <p className="text-sm font-semibold">{ar?"كم ممكن نخصص لطلعة العائلة؟":"Thinking about a family outing cost?"}</p>
-   <p className="mt-1 text-xs text-muted-foreground">{ar?
-    "أدخل المبلغ فقط؛ دبّرنا يراجعه مقابل رصيدك وفواتيرك المسجّلة، من دون تسجيل مصروف.":
-    "Enter one amount. Dabberna checks it against your entered cash and upcoming bills—without recording a payment."}</p>
+   aria-label={ar?"تقييم مصروف محدد":(lang==="fr"?frenchUI("Check a specific family cost"):"Check a specific family cost")}>
+   <p className="text-sm font-semibold">{ar?"كم ممكن نخصص لطلعة العائلة؟":(lang==="fr"?frenchUI("Thinking about a family outing cost?"):"Thinking about a family outing cost?")}</p>
+   <p className="mt-1 text-xs text-muted-foreground">{ar?"أدخل المبلغ فقط؛ دبّرنا يراجعه مقابل رصيدك وفواتيرك المسجّلة، من دون تسجيل مصروف.":(lang==="fr"?frenchUI("Enter one amount. Dabberna checks it against your entered cash and upcoming bills—without recording a payment."):"Enter one amount. Dabberna checks it against your entered cash and upcoming bills—without recording a payment.")}</p>
    <div className="mt-3 flex flex-wrap items-end gap-2">
     <label className="min-w-32 flex-1 text-xs font-semibold">
-     {ar?"المبلغ بالدينار":"Amount in JOD"}
+     {ar?"المبلغ بالدينار":(lang==="fr"?frenchUI("Amount in JOD"):"Amount in JOD")}
      <input type="number" min="0.01" max="100000" step="0.01" inputMode="decimal" required
-      aria-label={ar?"مبلغ المصروف بالدينار":"Proposed spending amount JOD"}
+      aria-label={ar?"مبلغ المصروف بالدينار":(lang==="fr"?frenchUI("Proposed spending amount JOD"):"Proposed spending amount JOD")}
       value={quickAmount} onChange={e=>{setQuickAmount(e.target.value);setQuickError("");}}
       className="mt-1 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm"
       placeholder="40"/>
     </label>
     <Button type="submit" className="min-h-11" disabled={!ready||!quickAmount}>
-     {ar?"افحص المبلغ":"Check amount"} <ArrowRight className="size-4 rtl:rotate-180"/>
+     {ar?"افحص المبلغ":(lang==="fr"?frenchUI("Check amount"):"Check amount")} <ArrowRight className="size-4 rtl:rotate-180"/>
     </Button>
    </div>
    {quickError&&<p role="alert" className="mt-2 text-xs text-destructive">{quickError}</p>}
@@ -130,17 +126,15 @@ export function GuidedFamilyAdvisor(){
     <p className="text-xs font-semibold text-[#567462]">{exchange.question}</p>
     <h3 className="mt-2 text-sm font-semibold">{ar?exchange.reply.titleAr:exchange.reply.titleEn}</h3>
     <p className="mt-1 text-xs leading-relaxed">{ar?exchange.reply.textAr:exchange.reply.textEn}</p>
-    <p className="mt-2 text-[11px] text-muted-foreground">{ar?"المصدر: ":"Source: "}{ar?exchange.reply.sourceAr:exchange.reply.sourceEn}</p>
+    <p className="mt-2 text-[11px] text-muted-foreground">{ar?"المصدر: ":(lang==="fr"?frenchUI("Source: "):"Source: ")}{ar?exchange.reply.sourceAr:exchange.reply.sourceEn}</p>
     <Link to={exchange.reply.route} className="mt-2 inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#E9F2E7] px-3 text-xs font-semibold text-brand">
      {ar?exchange.reply.actionAr:exchange.reply.actionEn}<ArrowRight className="size-3.5 rtl:rotate-180"/>
     </Link>
    </div>)}
    <button type="button" onClick={()=>setHistory([])} className="min-h-10 text-xs font-semibold text-muted-foreground underline">
-    {ar?"امسح الأسئلة من الشاشة":"Clear this conversation"}
+    {ar?"امسح الأسئلة من الشاشة":(lang==="fr"?frenchUI("Clear this conversation"):"Clear this conversation")}
    </button>
   </div>}
-  <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{ar?
-   "ما منخزّن أسئلتك ولا منرسلها إلى خادم. ما منقدم ضمانات مالية أو طبية أو أسعار مباشرة، والأسئلة غير المدعومة تُوضح حدود الخدمة.":
-   "Questions and answers are not saved or uploaded. No medical diagnosis, verified price, real-time banking, booking or financial guarantee. Unsupported questions are answered with a clear limitation."}</p>
+  <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{ar?"ما منخزّن أسئلتك ولا منرسلها إلى خادم. ما منقدم ضمانات مالية أو طبية أو أسعار مباشرة، والأسئلة غير المدعومة تُوضح حدود الخدمة.":(lang==="fr"?frenchUI("Questions and answers are not saved or uploaded. No medical diagnosis, verified price, real-time banking, booking or financial guarantee. Unsupported questions are answered with a clear limitation."):"Questions and answers are not saved or uploaded. No medical diagnosis, verified price, real-time banking, booking or financial guarantee. Unsupported questions are answered with a clear limitation.")}</p>
  </section>;
 }
