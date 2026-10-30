@@ -1,3 +1,4 @@
+import {frenchUI} from "@/lib/french";
 import { useI18n } from "@/lib/i18n";
 import { useEffect, useState, type FormEvent } from "react";
 import { CalendarClock, Check, Pencil, Plus, Trash2 } from "lucide-react";
@@ -114,14 +115,14 @@ export function CashFlowPlanner({state,members,update}:Props) {
   const markPaid=(bill:Commitment,dueDate:string,cashMode:PaidBillCashMode)=>{
     const value=pendingPaid?.actual??"";
     const amount=Number(value);
-    if(value.trim()===""||!Number.isFinite(amount)||amount<0||amount>50000){setError(ar?"أدخل مبلغاً فعلياً صحيحاً بين 0 و50000 دينار.":"Enter a valid actual paid amount between 0 and 50,000 JOD.");return;}
+    if(value.trim()===""||!Number.isFinite(amount)||amount<0||amount>50000){setError(ar?"أدخل مبلغاً فعلياً صحيحاً بين 0 و50000 دينار.":(lang==="fr"?frenchUI("Enter a valid actual paid amount between 0 and 50,000 JOD."):"Enter a valid actual paid amount between 0 and 50,000 JOD."));return;}
     if(cashMode==="deduct"&&(state.cashOnHand==null||state.cashOnHand<amount)){
-      setError(ar?"المبلغ أكبر من الرصيد المدخل. حدّث الرصيد أولاً.":"Payment exceeds entered cash. Refresh your balance first.");return;
+      setError(ar?"المبلغ أكبر من الرصيد المدخل. حدّث الرصيد أولاً.":(lang==="fr"?frenchUI("Payment exceeds entered cash. Refresh your balance first."):"Payment exceeds entered cash. Refresh your balance first."));return;
     }
     const expenseId=uid();
     update(current=>recordBillPayment(current,bill.id,dueDate,today,expenseId,cashMode,Math.round(amount*100)/100));
     setPendingPaid(null);setError("");
-    toast.success(ar?"سُجلت الفاتورة المدفوعة مع المصروف.":"Paid bill and expense recorded.");
+    toast.success(ar?"سُجلت الفاتورة المدفوعة مع المصروف.":(lang==="fr"?frenchUI("Paid bill and expense recorded."):"Paid bill and expense recorded."));
   };
   const undoPayment=(billId:string,date:string,restoreCash:boolean)=>{
     update(current=>{
@@ -131,7 +132,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
       return reverseBillPayment(base,billId,date,restoreCash,today);
     });
     setPendingUndo(null);setError("");
-    toast.success(ar?"تم التراجع عن الفاتورة والمصروف. راجع رصيدك.":"Payment and linked expense undone. Please check your cash balance.");
+    toast.success(ar?"تم التراجع عن الفاتورة والمصروف. راجع رصيدك.":(lang==="fr"?frenchUI("Payment and linked expense undone. Please check your cash balance."):"Payment and linked expense undone. Please check your cash balance."));
   };
   const dueIncome=incomes.flatMap(i=>
     scheduleDates(i.nextDate,i.frequency,futureDate(today,-45),today,i.endDate)
@@ -148,15 +149,15 @@ export function CashFlowPlanner({state,members,update}:Props) {
     <div className="flex flex-col gap-4" id="cash-flow">
       <details className="order-3 card-soft p-4 sm:p-5">
         <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-sm font-semibold text-brand">
-          <span className="inline-flex items-center gap-2"><CalendarClock className="size-4"/>{ar?"الرصيد والاحتياطي (اختياري)":"Cash balance & safety reserve (optional)"}</span>
-          <span className="text-xs font-normal tabular-nums text-muted-foreground">{state.cashOnHand==null?(ar?"غير مسجّل":"Not entered"):fmtJOD(state.cashOnHand)}</span>
+          <span className="inline-flex items-center gap-2"><CalendarClock className="size-4"/>{ar?"الرصيد والاحتياطي (اختياري)":(lang==="fr"?frenchUI("Cash balance & safety reserve (optional)"):"Cash balance & safety reserve (optional)")}</span>
+          <span className="text-xs font-normal tabular-nums text-muted-foreground">{state.cashOnHand==null?(ar?"غير مسجّل":(lang==="fr"?frenchUI("Not entered"):"Not entered")):fmtJOD(state.cashOnHand)}</span>
         </summary>
         <div className="mt-2">
         <p className="mt-1 text-xs text-muted-foreground">
           {tr("Understand when money actually comes in and when bills are due. Estimates are based on dates you enter; not connected to banks.")}
         </p>
-        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{ar?"هذه الأرقام مدخلة يدوياً وليست مربوطة بالبنك. الفاتورة المدفوعة ستُسجّل كمصروف، ويمكنك اختيار خصمها من الرصيد أو الإشارة إلى أن الرصيد يعكسها بالفعل.":"This is a manually entered bank and cash balance—not a bank connection. When marking a bill paid, you can deduct it from this balance or confirm that the balance already reflects it."}</p>
-        {state.cashUpdatedAt&&<p className="mt-2 text-xs font-medium text-brand">{ar?"تاريخ تحديث الرصيد: ":"Balance last updated: "}{state.cashUpdatedAt}</p>}
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{ar?"هذه الأرقام مدخلة يدوياً وليست مربوطة بالبنك. الفاتورة المدفوعة ستُسجّل كمصروف، ويمكنك اختيار خصمها من الرصيد أو الإشارة إلى أن الرصيد يعكسها بالفعل.":(lang==="fr"?frenchUI("This is a manually entered bank and cash balance—not a bank connection. When marking a bill paid, you can deduct it from this balance or confirm that the balance already reflects it."):"This is a manually entered bank and cash balance—not a bank connection. When marking a bill paid, you can deduct it from this balance or confirm that the balance already reflects it.")}</p>
+        {state.cashUpdatedAt&&<p className="mt-2 text-xs font-medium text-brand">{ar?"تاريخ تحديث الرصيد: ":(lang==="fr"?frenchUI("Balance last updated: "):"Balance last updated: ")}{state.cashUpdatedAt}</p>}
         <form onSubmit={saveBalance} className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
           <Field label={tr("Cash available now (JOD)")} hint={tr("Bank + cash balance as of today; manual")}>
             <Input inputMode="decimal" className={inputCls} value={cash} onChange={e=>setCash(e.target.value)} placeholder={tr("e.g. 750")} />
@@ -174,8 +175,8 @@ export function CashFlowPlanner({state,members,update}:Props) {
 
       <section className="order-1 card-soft p-4">
         <div className="flex items-center justify-between gap-2">
-          <div><h2 className="font-semibold">{ar?"الفواتير القادمة":"Upcoming bills"}</h2>
-            <p className="text-xs text-muted-foreground">{ar?"أضف الفاتورة مع تاريخ الاستحقاق، ثم أكّد الدفع من هنا. مناسبات العائلة تظهر تلقائياً عند وجود التزام.":"Add a bill and its due date here; mark it paid when paid. Confirmed family commitments can appear here automatically."}</p></div>
+          <div><h2 className="font-semibold">{ar?"الفواتير القادمة":(lang==="fr"?frenchUI("Upcoming bills"):"Upcoming bills")}</h2>
+            <p className="text-xs text-muted-foreground">{ar?"أضف الفاتورة مع تاريخ الاستحقاق، ثم أكّد الدفع من هنا. مناسبات العائلة تظهر تلقائياً عند وجود التزام.":(lang==="fr"?frenchUI("Add a bill and its due date here; mark it paid when paid. Confirmed family commitments can appear here automatically."):"Add a bill and its due date here; mark it paid when paid. Confirmed family commitments can appear here automatically.")}</p></div>
           <Button size="sm" onClick={()=>{setEditBill(blankBill());setBillAmount("");setError("");}}><Plus className="size-4"/> {tr("Add bill")}</Button>
         </div>
         {editBill&&<form onSubmit={saveBill} className="mt-3 space-y-3 rounded-xl border bg-muted/40 p-3">
@@ -190,10 +191,10 @@ export function CashFlowPlanner({state,members,update}:Props) {
             </NativeSelect></Field>
             <Field label={tr("Next due date")}><Input className={inputCls} type="date" value={editBill.dueDate}
               onChange={e=>setEditBill({...editBill,dueDate:e.target.value})}/></Field>
-            <Field label={ar?"فئة المصروف (لتسجيل الدفع في المكان الصحيح)":"Spending category (for payment history)"}>
+            <Field label={ar?"فئة المصروف (لتسجيل الدفع في المكان الصحيح)":(lang==="fr"?frenchUI("Spending category (for payment history)"):"Spending category (for payment history)")}>
               <NativeSelect value={editBill.categoryId??""} onChange={e=>{
                 const copy={...editBill};if(e.target.value)copy.categoryId=e.target.value;else delete copy.categoryId;setEditBill(copy);
-              }}><option value="">{ar?"من دون فئة":"Uncategorized"}</option>{state.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</NativeSelect>
+              }}><option value="">{ar?"من دون فئة":(lang==="fr"?frenchUI("Uncategorized"):"Uncategorized")}</option>{state.categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</NativeSelect>
             </Field>
           </div>
           <details className="rounded-lg bg-card p-3 text-sm"><summary className="cursor-pointer font-medium">{tr("More details (optional)")}</summary>
@@ -206,7 +207,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
           <div className="flex gap-2"><Button type="submit">{tr("Save bill")}</Button>
             <Button type="button" variant="outline" onClick={()=>{setEditBill(null);setError("");}}>{tr("Cancel")}</Button></div>
         </form>}
-        {bills.length===0&&familyBills.length===0&&<p className="mt-3 text-sm text-muted-foreground">{ar?"ما في فواتير مجدولة بعد. إضافة مخصص شهري للميزانية لا تنشئ فاتورة تلقائياً.":"No bills scheduled yet. A monthly budget allocation is not a bill—add a due date here when you know one."}</p>}
+        {bills.length===0&&familyBills.length===0&&<p className="mt-3 text-sm text-muted-foreground">{ar?"ما في فواتير مجدولة بعد. إضافة مخصص شهري للميزانية لا تنشئ فاتورة تلقائياً.":(lang==="fr"?frenchUI("No bills scheduled yet. A monthly budget allocation is not a bill—add a due date here when you know one."):"No bills scheduled yet. A monthly budget allocation is not a bill—add a due date here when you know one.")}</p>}
         <div className="mt-2 divide-y">
           {bills.map(bill=>{
             const next=upcomingBills.find(e=>e.sourceId===bill.id);
@@ -236,38 +237,38 @@ export function CashFlowPlanner({state,members,update}:Props) {
               </div>
               {latest&&Math.abs(difference)>=.005&&<div className={"mt-2 rounded-lg border px-3 py-2 text-xs leading-relaxed "+(difference>0?
                 "border-[#F0C6C9] bg-white/75 text-[#99494E]":"border-[#CDE1D1] bg-white/70 text-[#3E7551]")}>
-                <p className="font-semibold">{difference>0?(ar?"دفعت أكثر من المخطط":"Overpaid"):(ar?"دفعت أقل من المخطط":"Under budget")} · {latest.date}</p>
-                <p className="mt-1 tabular-nums">{ar?"المتوقع ":"Planned "}{fmtJOD(latest.plannedAmount??bill.amount)}
-                  {" → "}{ar?"المدفوع ":"Paid "}{fmtJOD(latest.amount)}
+                <p className="font-semibold">{difference>0?(ar?"دفعت أكثر من المخطط":(lang==="fr"?frenchUI("Overpaid"):"Overpaid")):(ar?"دفعت أقل من المخطط":(lang==="fr"?frenchUI("Under budget"):"Under budget"))} · {latest.date}</p>
+                <p className="mt-1 tabular-nums">{ar?"المتوقع ":(lang==="fr"?frenchUI("Planned "):"Planned ")}{fmtJOD(latest.plannedAmount??bill.amount)}
+                  {" → "}{ar?"المدفوع ":(lang==="fr"?frenchUI("Paid "):"Paid ")}{fmtJOD(latest.amount)}
                   {" · "}{difference>0?"+":""}{fmtJOD(difference)}
                   {percent!==null?" ("+(percent>0?"+":"")+percent+"%)":""}
                 </p>
                 <p className="mt-1">
-                  {latest.allocation?(ar?"تم تعديل مخصصات شهر الدفع بموافقتك؛ لن يُرحّل الفرق مرة أخرى.":"Adjusted in the payment month with your approval; no further carryover."):
-                   monthRelation==="next"?(ar?"تأثير الشهر القادم على الميزانية: ":"Next month's budget impact: ")+(difference>0?"−":"+")+fmtJOD(Math.abs(difference)):
-                   monthRelation==="current"?(ar?"هذا الفرق محسوب في ميزانية هذا الشهر.":"This difference is included in this month's budget.") :
-                   (ar?"الفرق ظاهر للمراجعة، ولا يُرحّل لأكثر من شهر واحد.":"Shown for reference; carryover lasts only one month.")}
+                  {latest.allocation?(ar?"تم تعديل مخصصات شهر الدفع بموافقتك؛ لن يُرحّل الفرق مرة أخرى.":(lang==="fr"?frenchUI("Adjusted in the payment month with your approval; no further carryover."):"Adjusted in the payment month with your approval; no further carryover.")):
+                   monthRelation==="next"?(ar?"تأثير الشهر القادم على الميزانية: ":(lang==="fr"?frenchUI("Next month's budget impact: "):"Next month's budget impact: "))+(difference>0?"−":"+")+fmtJOD(Math.abs(difference)):
+                   monthRelation==="current"?(ar?"هذا الفرق محسوب في ميزانية هذا الشهر.":(lang==="fr"?frenchUI("This difference is included in this month's budget."):"This difference is included in this month's budget.")) :
+                   (ar?"الفرق ظاهر للمراجعة، ولا يُرحّل لأكثر من شهر واحد.":(lang==="fr"?frenchUI("Shown for reference; carryover lasts only one month."):"Shown for reference; carryover lasts only one month."))}
                 </p>
               </div>}
               {next && <>
                 <Button type="button" className="mt-2" size="sm" variant="secondary"
-                  onClick={()=>{setPendingPaid({bill,dueDate:next.displayDate,actual:String(bill.amount)});setError("");}}><Check className="size-3.5"/> {ar?"تمّ الدفع":"Mark as paid"}</Button>
+                  onClick={()=>{setPendingPaid({bill,dueDate:next.displayDate,actual:String(bill.amount)});setError("");}}><Check className="size-3.5"/> {ar?"تمّ الدفع":(lang==="fr"?frenchUI("Mark as paid"):"Mark as paid")}</Button>
                 {pendingPaid?.bill.id===bill.id&&pendingPaid.dueDate===next.displayDate&&
                   <div className="mt-3 rounded-xl border border-[#DAE6D7] bg-[#F5F8F1] p-3">
-                    <p className="text-sm font-semibold">{ar?"تأكيد دفع الفاتورة":"Confirm this bill was paid"}</p>
-                    <label className="mt-3 block text-sm font-semibold">{ar?"المبلغ الذي دفعته فعلياً (د.أ)":"Actual amount paid (JOD)"}
+                    <p className="text-sm font-semibold">{ar?"تأكيد دفع الفاتورة":(lang==="fr"?frenchUI("Confirm this bill was paid"):"Confirm this bill was paid")}</p>
+                    <label className="mt-3 block text-sm font-semibold">{ar?"المبلغ الذي دفعته فعلياً (د.أ)":(lang==="fr"?frenchUI("Actual amount paid (JOD)"):"Actual amount paid (JOD)")}
                       <Input className="mt-1 max-w-44" type="number" min={0} max={50000} step=".01" inputMode="decimal" value={pendingPaid.actual}
                         onChange={e=>setPendingPaid({...pendingPaid,actual:e.target.value})}/>
                     </label>
-                    <p className="mt-2 text-xs text-muted-foreground">{ar?"المتوقع: ":"Planned: "}{fmtJOD(bill.amount)}. {ar?"سيسجّل الفرق، وأي تعديل للميزانية يحتاج موافقتك.":"The difference will be recorded. Any budget reallocation needs your approval."}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{ar?"هل رصيدك المدخل يعكس الدفع؟":"Does your entered cash already reflect this payment?"}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">{ar?"المتوقع: ":(lang==="fr"?frenchUI("Planned: "):"Planned: ")}{fmtJOD(bill.amount)}. {ar?"سيسجّل الفرق، وأي تعديل للميزانية يحتاج موافقتك.":(lang==="fr"?frenchUI("The difference will be recorded. Any budget reallocation needs your approval."):"The difference will be recorded. Any budget reallocation needs your approval.")}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{ar?"هل رصيدك المدخل يعكس الدفع؟":(lang==="fr"?frenchUI("Does your entered cash already reflect this payment?"):"Does your entered cash already reflect this payment?")}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {state.cashOnHand!=null&&<Button type="button" size="sm" variant="outline" onClick={()=>markPaid(bill,next.displayDate,"already")}>{ar?"نعم، الرصيد محدّث":"Yes, already reflected"}</Button>}
-                      {state.cashOnHand!=null&&state.cashOnHand>=Number(pendingPaid.actual)&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"deduct")}>{ar?"لا، اخصمه الآن":"No, deduct it now"}</Button>}
-                      {state.cashOnHand==null&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"untracked")}>{ar?"الرصيد غير مُدخل":"No cash balance entered"}</Button>}
-                      <Button type="button" size="sm" variant="ghost" onClick={()=>setPendingPaid(null)}>{ar?"إلغاء":"Cancel"}</Button>
+                      {state.cashOnHand!=null&&<Button type="button" size="sm" variant="outline" onClick={()=>markPaid(bill,next.displayDate,"already")}>{ar?"نعم، الرصيد محدّث":(lang==="fr"?frenchUI("Yes, already reflected"):"Yes, already reflected")}</Button>}
+                      {state.cashOnHand!=null&&state.cashOnHand>=Number(pendingPaid.actual)&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"deduct")}>{ar?"لا، اخصمه الآن":(lang==="fr"?frenchUI("No, deduct it now"):"No, deduct it now")}</Button>}
+                      {state.cashOnHand==null&&<Button type="button" size="sm" onClick={()=>markPaid(bill,next.displayDate,"untracked")}>{ar?"الرصيد غير مُدخل":(lang==="fr"?frenchUI("No cash balance entered"):"No cash balance entered")}</Button>}
+                      <Button type="button" size="sm" variant="ghost" onClick={()=>setPendingPaid(null)}>{ar?"إلغاء":(lang==="fr"?frenchUI("Cancel"):"Cancel")}</Button>
                     </div>
-                    <p className="mt-2 text-xs text-muted-foreground">{ar?"لا تخصم المبلغ مجدداً إذا كان رصيد البنك يشمل الدفع.":"If your actual balance already includes this payment, do not deduct it again."}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">{ar?"لا تخصم المبلغ مجدداً إذا كان رصيد البنك يشمل الدفع.":(lang==="fr"?frenchUI("If your actual balance already includes this payment, do not deduct it again."):"If your actual balance already includes this payment, do not deduct it again.")}</p>
                   </div>}
               </>}
               {paid.map(date=>{
@@ -279,13 +280,13 @@ export function CashFlowPlanner({state,members,update}:Props) {
                     {tr("Paid")} {date} · {tr("Undo")}
                   </button>
                   {show&&<div className="mt-2 rounded-xl bg-[#F5F8F1] p-3">
-                    <p className="text-xs font-medium">{ar?"سيتم حذف تأكيد الدفع والمصروف المرتبط.":"This removes the payment confirmation and its linked expense."}</p>
+                    <p className="text-xs font-medium">{ar?"سيتم حذف تأكيد الدفع والمصروف المرتبط.":(lang==="fr"?frenchUI("This removes the payment confirmation and its linked expense."):"This removes the payment confirmation and its linked expense.")}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {linked?.cashDeducted&&state.cashOnHand!=null&&<Button type="button" size="sm" onClick={()=>undoPayment(bill.id,date,true)}>{ar?"تراجع وأعد الخصم للرصيد":"Undo & restore deducted cash"}</Button>}
-                      <Button type="button" size="sm" variant="outline" onClick={()=>undoPayment(bill.id,date,false)}>{ar?"تراجع دون تغيير الرصيد":"Undo without changing cash"}</Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={()=>setPendingUndo(null)}>{ar?"إلغاء":"Cancel"}</Button>
+                      {linked?.cashDeducted&&state.cashOnHand!=null&&<Button type="button" size="sm" onClick={()=>undoPayment(bill.id,date,true)}>{ar?"تراجع وأعد الخصم للرصيد":(lang==="fr"?frenchUI("Undo & restore deducted cash"):"Undo & restore deducted cash")}</Button>}
+                      <Button type="button" size="sm" variant="outline" onClick={()=>undoPayment(bill.id,date,false)}>{ar?"تراجع دون تغيير الرصيد":(lang==="fr"?frenchUI("Undo without changing cash"):"Undo without changing cash")}</Button>
+                      <Button type="button" size="sm" variant="ghost" onClick={()=>setPendingUndo(null)}>{ar?"إلغاء":(lang==="fr"?frenchUI("Cancel"):"Cancel")}</Button>
                     </div>
-                    {linked?.cashDeducted&&<p className="mt-2 text-xs text-muted-foreground">{ar?"إذا عدّلت رصيد البنك يدوياً بعد الدفع، اختر التراجع دون تغيير الرصيد.":"If you manually changed cash after paying, undo without changing cash to avoid double adjustments."}</p>}
+                    {linked?.cashDeducted&&<p className="mt-2 text-xs text-muted-foreground">{ar?"إذا عدّلت رصيد البنك يدوياً بعد الدفع، اختر التراجع دون تغيير الرصيد.":(lang==="fr"?frenchUI("If you manually changed cash after paying, undo without changing cash to avoid double adjustments."):"If you manually changed cash after paying, undo without changing cash to avoid double adjustments.")}</p>}
                   </div>}
                 </div>;
               })}
@@ -297,12 +298,12 @@ export function CashFlowPlanner({state,members,update}:Props) {
 
       <details className="order-2 card-soft p-4">
         <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand">
-          {ar?"الدخل ومواعيد استلامه":"Income & paydays"} · {ar?"المستلم هذا الشهر: ":"Received this month: "}{fmtJOD(received)}
+          {ar?"الدخل ومواعيد استلامه":(lang==="fr"?frenchUI("Income & paydays"):"Income & paydays")} · {ar?"المستلم هذا الشهر: ":(lang==="fr"?frenchUI("Received this month: "):"Received this month: ")}{fmtJOD(received)}
         </summary>
         <div className="mt-3">
         <div className="flex items-center justify-between gap-2">
-          <div><h2 className="font-semibold">{ar?"مصادر الدخل":"Income sources"}</h2>
-            <p className="text-xs text-muted-foreground">{ar?"سجّل موعد الاستلام إذا أردت متابعة التدفق النقدي.":"Add payment dates only if you want a cash-flow forecast."}</p></div>
+          <div><h2 className="font-semibold">{ar?"مصادر الدخل":(lang==="fr"?frenchUI("Income sources"):"Income sources")}</h2>
+            <p className="text-xs text-muted-foreground">{ar?"سجّل موعد الاستلام إذا أردت متابعة التدفق النقدي.":(lang==="fr"?frenchUI("Add payment dates only if you want a cash-flow forecast."):"Add payment dates only if you want a cash-flow forecast.")}</p></div>
           <Button size="sm" onClick={()=>{setEditIncome(blankIncome());setIncomeAmount("");setError("");}}>
             <Plus className="size-4"/> {tr("Add income")} </Button>
         </div>
@@ -338,7 +339,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
               </NativeSelect></Field>
               <Field label={tr("Privacy label")}><NativeSelect value={editIncome.shared?"shared":"private"}
                 onChange={e=>setEditIncome({...editIncome,shared:e.target.value==="shared"})}>
-                <option value="shared">{ar?"علامة عائلية محلية":"Household label (device only)"}</option><option value="private">{ar?"خاص على الجهاز":"Private on device"}</option>
+                <option value="shared">{ar?"علامة عائلية محلية":(lang==="fr"?frenchUI("Household label (device only)"):"Household label (device only)")}</option><option value="private">{ar?"خاص على الجهاز":(lang==="fr"?frenchUI("Private on device"):"Private on device")}</option>
               </NativeSelect></Field>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">{tr("Privacy labels are organizational in this device-only pilot; real multi-user access control is not yet implemented.")}</p>
@@ -393,7 +394,7 @@ export function CashFlowPlanner({state,members,update}:Props) {
       </details>
 
       <details className="order-4 editorial-card p-4">
-        <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"تفاصيل التدفق النقدي خلال ٣٠ يوماً":"Detailed 30-day cash-flow timeline"} +</summary>
+        <summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"تفاصيل التدفق النقدي خلال ٣٠ يوماً":(lang==="fr"?frenchUI("Detailed 30-day cash-flow timeline"):"Detailed 30-day cash-flow timeline")} +</summary>
         <div className="mt-3">
         <p className="mt-1 text-xs text-muted-foreground">{tr("Projected end balance:")} {forecast.projectedEnd===null?tr("Set today's actual cash balance"):fmtJOD(forecast.projectedEnd)}. {tr("Future income is expected, not yet received.")}</p>
         {forecast.events.length===0&&<p className="mt-3 text-sm text-muted-foreground">{tr("Add expected payment and bill due dates to see a cash-flow timeline.")}</p>}
