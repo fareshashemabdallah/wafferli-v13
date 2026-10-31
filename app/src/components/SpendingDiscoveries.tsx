@@ -5,11 +5,11 @@ import {localToday} from "@/lib/cashflow";
 import {type MoneyState} from "@/lib/money";
 import {buildSpendingDiscoveries,discoveryTargetValid} from "@/lib/spendingDiscoveries";
 
-type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>MoneyState))=>void};
+type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>MoneyState))=>void;onStartReal:()=>void;onRecordExpense:()=>void};
 /** One optional insight inside Our Money, never another finance dashboard.
  * A target is a voluntary behavioural guide, not cash saved or a budget entry.
  */
-export function SpendingDiscoveries({state,setState}:Props){
+export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}:Props){
  const {lang}=useI18n();
  const t=(en:string,ar:string,fr:string)=>lang==="ar"?ar:lang==="fr"?fr:en;
  const view=buildSpendingDiscoveries(state,localToday().slice(0,7));
@@ -18,7 +18,60 @@ export function SpendingDiscoveries({state,setState}:Props){
  const [editing,setEditing]=useState(false);
  const [draft,setDraft]=useState("");
  const [error,setError]=useState("");
- if(state.demo||view.paidCount<2||groups.length===0)return null;
+
+ // Keep the feature visible while family records are incomplete. Do not claim
+ // illustrative numbers are the parent's own, and do not require setup.
+ const heading=<div className="flex items-start justify-between gap-3">
+   <div>
+    <p className="text-[11px] font-bold uppercase tracking-wider text-[#598770]">{t("Our Money","مال العيلة","Notre budget")}</p>
+    <h3 className="mt-1 text-base font-extrabold text-[#285D42]">{t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}</h3>
+   </div>
+   <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[#E5F3E6] text-xl">🔎</span>
+  </div>;
+ const shell="rounded-2xl border border-[#D9E7DB] bg-[linear-gradient(130deg,#F3FAF3,#FFFFFF_70%)] p-4 sm:p-5";
+ if(state.demo)return <section data-testid="money-spending-discoveries" className={shell}
+   aria-label={t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}>
+   {heading}
+   <p className="mt-3 inline-flex rounded-full bg-[#FFF0DB] px-3 py-1 text-[11px] font-bold text-[#84622D]">
+    {t("Example only · not your spending","مثال فقط · مش مصاريفك","Exemple uniquement · ce ne sont pas vos dépenses")}
+   </p>
+   <div className="mt-3 rounded-xl border border-[#E3EBDE] bg-white p-3">
+    <p className="text-sm font-semibold text-[#47745A]">🥡 {t("Food delivery","توصيل الأكل","Livraison de repas")}</p>
+    <div className="mt-1 flex items-end justify-between gap-2">
+     <strong className="text-2xl font-black tabular-nums text-[#285D42]">{fmtJOD(96)}</strong>
+     <span className="text-xs text-[#657F6C]">8 {t("sample orders","طلبات افتراضية","commandes fictives")}</span>
+    </div>
+    <p className="mt-2 text-xs text-[#667E6C]">{t(
+     "Eight small orders can add up. See where your money goes, then choose whether to set a target.",
+     "ثمانية طلبات صغيرة ممكن يتراكم مبلغها. شوف وين بتروح مصاريفك، وبعدها قرّر إذا بدك تحدّد هدف.",
+     "Huit petites commandes peuvent vite s'additionner. Découvrez vos dépenses, puis choisissez votre objectif."
+    )}</p>
+   </div>
+   <button type="button" onClick={onStartReal}
+    className="mt-3 min-h-11 rounded-xl border border-[#B7D8C2] bg-white px-4 text-sm font-bold text-[#327650]">
+    {t("Use my own figures","استخدم أرقامي","Utiliser mes propres chiffres")}
+   </button>
+  </section>;
+ if(view.paidCount<2||groups.length===0)return <section data-testid="money-spending-discoveries" className={shell}
+   aria-label={t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}>
+   {heading}
+   <p className="mt-3 text-sm font-semibold text-[#355F48]">{t(
+    "Discover what small purchases add up to.","اكتشف قديش بتتراكم المصاريف الصغيرة.","Découvrez combien représentent vos petits achats."
+   )}</p>
+   <p className="mt-1 text-xs leading-relaxed text-[#6C8372]">{view.paidCount===0?t(
+    "No paid purchases recorded this month yet. Your first entries will help build a clearer picture.",
+    "ما في مصاريف مدفوعة مسجّلة هالشهر. أول تسجيلاتك بتساعد توضّح الصورة.",
+    "Aucun achat payé enregistré ce mois-ci. Vos premières saisies aideront à mieux comprendre vos dépenses."
+   ):t(
+    "One paid purchase recorded this month. Keep recording as you spend; insights appear once there is enough information.",
+    "مسجّل مصروف مدفوع واحد هالشهر. كمّل التسجيل مع الوقت لتظهر الاكتشافات.",
+    "Un achat payé enregistré ce mois-ci. Continuez au fil des achats pour voir les tendances."
+   )}</p>
+   <button type="button" onClick={onRecordExpense}
+    className="mt-3 min-h-11 rounded-xl border border-[#B7D8C2] bg-white px-4 text-sm font-bold text-[#327650]">
+    {t("Record an expense","سجّل مصروف","Enregistrer une dépense")}
+   </button>
+  </section>;
  const active=groups.find(g=>g.key===key)??groups[0]!;
  const food=active.kind==="food-delivery";
  const name=food?t("Food delivery","توصيل الأكل","Livraison de repas"):active.label;
@@ -43,14 +96,9 @@ export function SpendingDiscoveries({state,setState}:Props){
   Math.round((active.amountJod-active.targetJod)*100)/100;
  return <section data-testid="money-spending-discoveries"
   aria-label={t("Spending discoveries","اكتشافات المصاريف","Découvertes de dépenses")}
-  className="rounded-2xl border border-[#D9E7DB] bg-[linear-gradient(130deg,#F3FAF3,#FFFFFF_70%)] p-4 sm:p-5">
-  <div className="flex items-start justify-between gap-3">
-   <div>
-    <p className="text-[11px] font-bold uppercase tracking-wider text-[#598770]">{t("Money insight","معلومة عن مصاريفك","Éclairage sur vos dépenses")}</p>
-    <h3 className="mt-1 text-base font-extrabold text-[#285D42]">{t("Something worth noticing","مصروف يستحق الانتباه","Une dépense à remarquer")}</h3>
-   </div>
-   <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[#E5F3E6] text-xl">{food?"🥡":"🔎"}</span>
-  </div>
+  className={shell}>
+  {heading}
+  <p className="mt-3 text-xs font-semibold text-[#567F63]">{t("Something worth noticing","مصروف يستحق الانتباه","Une dépense à remarquer")}</p>
   {groups.length>1&&<div className="mt-3 flex flex-wrap gap-2" aria-label={t("Spending areas","مجالات المصاريف","Catégories de dépenses")}>
    {groups.map(g=><button key={g.key} type="button" onClick={()=>select(g.key)} aria-pressed={active.key===g.key}
     className={"min-h-10 max-w-full rounded-full border px-3 text-xs font-semibold "+(active.key===g.key?"border-[#548E6D] bg-[#E4F2E6] text-[#26583F]":"border-[#DDE9DE] bg-white text-[#587262]")}>
