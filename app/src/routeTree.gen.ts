@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as ExplorersRouteImport } from './routes/explorers'
 import { Route as OccasionsRouteImport } from './routes/occasions'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as FamilyRouteImport } from './routes/family'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdvisorRoute = AdvisorRouteImport.update({
   id: '/advisor',
   path: '/advisor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExplorersRoute = ExplorersRouteImport.update({
+  id: '/explorers',
+  path: '/explorers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarRoute = CalendarRouteImport.update({
@@ -84,6 +90,7 @@ const HouseholdRoute = HouseholdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/explorers': typeof ExplorersRoute
   '/what-parents-say': typeof WhatParentsSayRoute
   '/plans': typeof PlansRoute
   '/': typeof IndexRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/household': typeof HouseholdRoute
 }
 export interface FileRoutesByTo {
+  '/explorers': typeof ExplorersRoute
   '/what-parents-say': typeof WhatParentsSayRoute
   '/plans': typeof PlansRoute
   '/': typeof IndexRoute
@@ -112,6 +120,7 @@ export interface FileRoutesByTo {
   '/household': typeof HouseholdRoute
 }
 export interface FileRoutesById {
+  '/explorers': typeof ExplorersRoute
   '/what-parents-say': typeof WhatParentsSayRoute
   '/plans': typeof PlansRoute
   __root__: typeof rootRouteImport
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/'
     | '/plans'
     | '/advisor'
+    | '/explorers'
     | '/calendar'
     | '/finds'
     | '/family'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/'
     | '/plans'
     | '/advisor'
+    | '/explorers'
     | '/calendar'
     | '/finds'
     | '/family'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/'
     | '/advisor'
+    | '/explorers'
     | '/calendar'
     | '/finds'
     | '/family'
@@ -172,6 +184,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  ExplorersRoute: typeof ExplorersRoute
   WhatParentsSayRoute: typeof WhatParentsSayRoute
   IndexRoute: typeof IndexRoute
   AdvisorRoute: typeof AdvisorRoute
@@ -200,6 +213,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explorers': {
+      id: '/explorers'
+      path: '/explorers'
+      fullPath: '/explorers'
+      preLoaderRoute: typeof ExplorersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/advisor': {
@@ -276,6 +296,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  ExplorersRoute: ExplorersRoute,
   WhatParentsSayRoute: WhatParentsSayRoute,
   IndexRoute: IndexRoute,
   AdvisorRoute: AdvisorRoute,
