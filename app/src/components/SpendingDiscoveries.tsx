@@ -20,14 +20,14 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
 
  // Keep the feature visible while family records are incomplete. Do not claim
  // illustrative numbers are the parent's own, and do not require setup.
- const heading=<div className="flex items-start justify-between gap-3">
+ const heading=<div className="flex items-center justify-between gap-3">
    <div>
-    <p className="text-[11px] font-bold uppercase tracking-wider text-[#598770]">{t("Our Money","مال العيلة","Notre budget")}</p>
+    
     <h3 className="mt-1 text-base font-extrabold text-[#285D42]">{t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}</h3>
    </div>
-   <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[#E5F3E6] text-xl">🔎</span>
+   <span aria-hidden="true" className="text-lg">🔎</span>
   </div>;
- const shell="rounded-2xl border border-[#D9E7DB] bg-[linear-gradient(130deg,#F3FAF3,#FFFFFF_70%)] p-4 sm:p-5";
+ const shell="rounded-2xl border border-[#D9E7DB] bg-white p-3 sm:p-4";
  if(state.demo)return <section data-testid="money-spending-discoveries" className={shell}
    aria-label={t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}>
    {heading}
@@ -54,22 +54,20 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
  if(view.paidCount<2||groups.length===0)return <section data-testid="money-spending-discoveries" className={shell}
    aria-label={t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}>
    {heading}
-   <p className="mt-3 text-sm font-semibold text-[#355F48]">{t(
-    "Discover what small purchases add up to.","اكتشف قديش بتتراكم المصاريف الصغيرة.","Découvrez combien représentent vos petits achats."
+   <p className="mt-2 text-sm font-semibold text-[#355F48]">{t(
+    "No overlooked spending pattern spotted yet.",
+    "ما ظهر نمط مصاريف غير متوقّع بعد.",
+    "Aucune habitude de dépense inhabituelle repérée pour le moment."
    )}</p>
-   <p className="mt-1 text-xs leading-relaxed text-[#6C8372]">{view.paidCount===0?t(
-    "No paid purchases recorded this month yet. Your first entries will help build a clearer picture.",
-    "ما في مصاريف مدفوعة مسجّلة هالشهر. أول تسجيلاتك بتساعد توضّح الصورة.",
-    "Aucun achat payé enregistré ce mois-ci. Vos premières saisies aideront à mieux comprendre vos dépenses."
-   ):t(
-    "One paid purchase recorded this month. Keep recording as you spend; insights appear once there is enough information.",
-    "مسجّل مصروف مدفوع واحد هالشهر. كمّل التسجيل مع الوقت لتظهر الاكتشافات.",
-    "Un achat payé enregistré ce mois-ci. Continuez au fil des achats pour voir les tendances."
+   <p className="mt-1 text-xs leading-relaxed text-[#6C8372]">{t(
+    "We look for repeated optional purchases, not school fees or essential bills. This reflects only expenses you recorded.",
+    "مندور على المصاريف الاختيارية المتكررة، مش أقساط المدرسة أو الفواتير الأساسية. حسب اللي سجّلته فقط.",
+    "Nous examinons les achats facultatifs répétés, pas les frais scolaires ou les factures essentielles. Selon vos saisies uniquement."
    )}</p>
-   <button type="button" onClick={onRecordExpense}
-    className="mt-3 min-h-11 rounded-xl border border-[#B7D8C2] bg-white px-4 text-sm font-bold text-[#327650]">
+   {view.paidCount===0&&<button type="button" onClick={onRecordExpense}
+    className="mt-2 min-h-10 rounded-xl border border-[#B7D8C2] bg-white px-3 text-xs font-bold text-[#327650]">
     {t("Record an expense","سجّل مصروف","Enregistrer une dépense")}
-   </button>
+   </button>}
   </section>;
  const active=groups[0]!;
  const food=active.kind==="food-delivery";
