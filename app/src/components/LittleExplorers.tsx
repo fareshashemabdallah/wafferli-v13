@@ -58,7 +58,7 @@ export function LittleExplorers(){
  const [stage,setStage]=useState<Stage>("welcome");
  const [index,setIndex]=useState(0);
  const [wrong,setWrong]=useState(false);
- const round=memoryRounds[index];
+ const round=memoryRounds[index]!;
  const isRTL=locale==="ar";
  const advance=()=>{
   setWrong(false);
