@@ -98,7 +98,7 @@ export function buildSpendingDiscoveries(state:MoneyState,month:string):Spending
    twoFewerJod:value(2*group.currentCents/group.count),
    previousMonthJod:comparable?previousJod:null,
    previousCount:group.previousCount,increaseJod:increase?increaseJod:null,
-   targetJod,categoryId:group.categoryId
+   targetJod,...(group.categoryId?{categoryId:group.categoryId}:{})
   };
   return [{entry,score:(increase?20000:repeated?10000:0)+
     (targetJod!==null?2000:0)+group.currentCents/100+group.count*2}];
