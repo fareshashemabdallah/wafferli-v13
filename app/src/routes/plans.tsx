@@ -210,6 +210,16 @@ export function PlansWorkspace({embedded=false}:{embedded?:boolean}={}){
       {ar?"تغير موعد المناسبة. راجع مواعيد الهدية والاحتفال؛ لن نغير الدفعات تلقائياً.":(lang==="fr"?frenchUI("The occasion date changed. Review gift and celebration deadlines; confirmed payment dates won't move automatically."):"The occasion date changed. Review gift and celebration deadlines; confirmed payment dates won't move automatically.")}
      </p>}
     {currentPlan.kind==="occasion"&&<OccasionPreparationSection planId={currentPlan.id}/>}
+    {currentPlan.kind==="outing"&&currentPlan.status!=="completed"&&<div className="mt-3 flex items-center gap-3 rounded-2xl border border-[#D9E9D7] bg-[#F5FAF1] p-3">
+     <span aria-hidden="true" className="text-3xl">🧩</span>
+     <div className="min-w-0 flex-1">
+      <p className="text-sm font-bold text-[#315D44]">{ar?"وقت انتظار مع الأطفال؟":(lang==="fr"?"Un moment d’attente avec les enfants ?":"Waiting with children?")}</p>
+      <p className="mt-1 text-xs text-[#65786B]">{ar?"لعبة ذاكرة قصيرة وبعدها نشاط بعيد عن الشاشة.":(lang==="fr"?"Un petit jeu de mémoire, suivi d’une activité sans écran.":"A short memory game, then an offline activity.")}</p>
+     </div>
+     <Link to="/explorers" className="inline-flex min-h-11 shrink-0 items-center rounded-xl bg-[#2E805D] px-3 text-xs font-bold text-white">
+      {ar?"العب":(lang==="fr"?"Jouer":"Play")}
+     </Link>
+    </div>}
     {currentPlan.status!=="completed"&&<>
       <div className="mt-5 rounded-xl bg-[#F4F7F0] p-4">
        <h3 className="font-semibold">{ar?"الخطوة التالية: قارن الخيارات":(lang==="fr"?frenchUI("Next step: compare suitable options"):"Next step: compare suitable options")}</h3>
