@@ -18,7 +18,7 @@ function fixture():MoneyState{return {...emptyRealMoney(),cashOnHand:300,
 function App(){
  const [state,setState]=useState(fixture());
  return <I18nProvider>
-  <SpendingDiscoveries state={state} setState={setState}/>
+  <SpendingDiscoveries state={state} setState={setState} onStartReal={()=>{}} onRecordExpense={()=>{}}/>
   <output data-testid="ledger">{JSON.stringify(state.expenses)}</output>
   <output data-testid="targets">{JSON.stringify(state.spendingDiscoveryTargets??{})}</output>
  </I18nProvider>;
