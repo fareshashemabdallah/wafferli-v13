@@ -15,6 +15,7 @@ export function QuickExpenseEntry({state,setState,onClose,onHistory}:Props){
  const [date,setDate]=useState(localToday());
  const [status,setStatus]=useState<"paid"|"planned">("paid");
  const [note,setNote]=useState("");
+ const [foodDelivery,setFoodDelivery]=useState(false);
  const [error,setError]=useState("");
  useEffect(()=>{const onKey=(event:KeyboardEvent)=>{if(event.key==="Escape")onClose();};
   window.addEventListener("keydown",onKey);return ()=>window.removeEventListener("keydown",onKey);},[onClose]);
@@ -28,7 +29,7 @@ export function QuickExpenseEntry({state,setState,onClose,onHistory}:Props){
    setError(t("Enter a valid amount, date and category.","أدخل مبلغ وتاريخ وفئة صحيحة."));return;
   }
   const expense:Expense={id:uid(),date,amount:Math.round(value*100)/100,
-   categoryId:category,status,shared:false,...(note.trim()?{note:note.trim().slice(0,160)}:{})};
+   categoryId:category,status,shared:false,...(foodDelivery?{purpose:"food-delivery" as const}:{}),...(note.trim()?{note:note.trim().slice(0,160)}:{})};
   // Exactly one new expense. Confirming paid does not silently subtract cash:
   // the parent's manually entered opening balance is separate from this ledger.
   setState(previous=>previous.demo||previous.expenses.some(e=>e.id===expense.id)?previous:
@@ -67,6 +68,10 @@ export function QuickExpenseEntry({state,setState,onClose,onHistory}:Props){
        {t("Planned","مخطط")}</label>
      </div>
     </fieldset>
+    <label className="flex min-h-11 items-center gap-2 rounded-xl border border-[#DCE8D9] bg-white px-3 text-xs font-semibold text-[#50715E]">
+     <input type="checkbox" checked={foodDelivery} onChange={e=>setFoodDelivery(e.target.checked)}/>
+     {t("Food delivery (optional)","توصيل أكل (اختياري)","Livraison de repas (facultatif)")}
+    </label>
     <details className="rounded-xl border border-[#E2EADF] bg-white p-3">
      <summary className="min-h-10 cursor-pointer text-xs font-bold text-[#4A8460]">{t("Optional note","ملاحظة اختيارية")}</summary>
      <input className={field} maxLength={160} value={note} onChange={e=>setNote(e.target.value)}
