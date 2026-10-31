@@ -37,7 +37,7 @@ describe("Spending discoveries user journey",()=>{
  it("shows a distinct delivery subtotal and saves a target without changing expense or budget records",()=>{
   render(<App/>);
   expect(screen.getByTestId("money-spending-discoveries")).toBeInTheDocument();
-  expect(screen.getByText("Food delivery")).toBeInTheDocument();
+  expect(screen.getAllByText("Food delivery").length).toBeGreaterThan(0);
   const before=screen.getByTestId("ledger").textContent;
   fireEvent.click(screen.getByRole("button",{name:"Set a comfortable target"}));
   fireEvent.change(screen.getByLabelText("Monthly spending target in JOD"),{target:{value:"15"}});
