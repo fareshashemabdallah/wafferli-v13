@@ -13,7 +13,9 @@ function fixture():MoneyState{return {...emptyRealMoney(),cashOnHand:300,
  expenses:[
   {id:"a",date:today,categoryId:"out",amount:12,status:"paid",shared:false,purpose:"food-delivery"},
   {id:"b",date:today,categoryId:"out",amount:9,status:"paid",shared:false,purpose:"food-delivery"},
-  {id:"c",date:today,categoryId:"out",amount:20,status:"paid",shared:false}
+  {id:"c",date:today,categoryId:"out",amount:11,status:"paid",shared:false,purpose:"food-delivery"},
+  {id:"d",date:today,categoryId:"out",amount:13,status:"paid",shared:false,purpose:"food-delivery"},
+  {id:"e",date:today,categoryId:"out",amount:20,status:"paid",shared:false}
  ]};}
 function App(){
  const [state,setState]=useState(fixture());
@@ -44,7 +46,7 @@ describe("Spending discoveries user journey",()=>{
   expect(screen.getByText("Spending Discoveries")).toBeInTheDocument();
   expect(screen.getByText("Example only · not your spending")).toBeInTheDocument();
   expect(screen.getByText(/sample orders/)).toBeInTheDocument();
-  expect(screen.queryByRole("button",{name:"Set a comfortable target"})).not.toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Choose a spending target"})).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"Use my own figures"}));
   expect(onStart).toHaveBeenCalledOnce();
   expect(onExpense).not.toHaveBeenCalled();
@@ -56,12 +58,12 @@ describe("Spending discoveries user journey",()=>{
    state={{...sample,expenses}} setState={()=>{}} onStartReal={()=>{}} onRecordExpense={onExpense}/></I18nProvider>;
   const {rerender}=render(make([]));
   expect(screen.getByTestId("money-spending-discoveries")).toBeInTheDocument();
-  expect(screen.getByText(/No paid purchases recorded this month/)).toBeInTheDocument();
-  expect(screen.queryByRole("button",{name:"Set a comfortable target"})).not.toBeInTheDocument();
+  expect(screen.getByText(/No overlooked spending pattern spotted yet/)).toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Choose a spending target"})).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"Record an expense"}));
   expect(onExpense).toHaveBeenCalledOnce();
   rerender(make([sample.expenses[0]!]));
-  expect(screen.getByText(/One paid purchase recorded this month/)).toBeInTheDocument();
+  expect(screen.getByText(/No overlooked spending pattern spotted yet/)).toBeInTheDocument();
   expect(screen.queryByText(/Example only/)).not.toBeInTheDocument();
  });
  it("shows a distinct delivery subtotal and saves a target without changing expense or budget records",()=>{
@@ -69,7 +71,7 @@ describe("Spending discoveries user journey",()=>{
   expect(screen.getByTestId("money-spending-discoveries")).toBeInTheDocument();
   expect(screen.getAllByText("Food delivery").length).toBeGreaterThan(0);
   const before=screen.getByTestId("ledger").textContent;
-  fireEvent.click(screen.getByRole("button",{name:"Set a comfortable target"}));
+  fireEvent.click(screen.getByRole("button",{name:"Choose a spending target"}));
   fireEvent.change(screen.getByLabelText("Monthly spending target in JOD"),{target:{value:"15"}});
   fireEvent.click(screen.getByRole("button",{name:"Save target"}));
   expect(screen.getByTestId("targets")).toHaveTextContent('"food-delivery":15');
