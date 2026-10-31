@@ -96,6 +96,9 @@ export function AdventureFamilyHome(){
    </details>
   </section>}
 
+  <TodayQuickActions onAsk={()=>navigate({to:"/advisor"})}/>
+  {membersReady&&<WeeklyPlay members={members}/>}
+
   <div className="grid gap-3 md:grid-cols-2">
    <section className={panel} aria-label={t("This week","هذا الأسبوع")}>
     <div className="flex items-center justify-between gap-2">
@@ -135,8 +138,6 @@ export function AdventureFamilyHome(){
    </section>
   </div>
 
-  {membersReady&&<WeeklyPlay members={members}/>}
-  <TodayQuickActions onAsk={()=>navigate({to:"/advisor"})}/>
   <p className="px-2 text-[11px] leading-relaxed text-[#789086]">
    {t("Pilot: records stay on this device. Today never creates payments.","تجربة خاصة: السجلات على هالجهاز واليوم لا ينشئ دفعات.")}
   </p>

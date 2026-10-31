@@ -74,17 +74,13 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
      {text("Understand · Prepare · Decide · Live","نفهم · نتحضّر · نقرّر · نعيش")}
     </span>
     <div className="ms-auto flex items-center gap-2">
-     <Link to="/advisor" aria-label={text("Ask Dabberna","اسأل دبّرنا")}
-       className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#E6D6ED] bg-[#F6EEFC] px-3 text-xs font-bold text-[#79569A] focus-visible:ring-2">
-       <MessageCircle className="size-4"/><span className="hidden min-[370px]:inline">{text("Ask","اسأل","Demander")}</span>
-     </Link>
      <details className="group relative lg:hidden">
       <summary aria-label={text("More features","مميزات أخرى")} className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-full border border-[#F0E4E9] bg-white text-[#536277] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#AF7B9B]">
        <MoreHorizontal className="size-5"/>
       </summary>
       <div className="absolute end-0 top-12 z-50 w-[min(85vw,265px)] max-h-[65dvh] space-y-0.5 overflow-y-auto rounded-2xl border border-[#F0E4E9] bg-white p-2 shadow-xl">
        {tools.map(x=><Link key={x.to} to={x.to} className="flex min-h-11 items-center rounded-xl px-3 text-xs font-semibold text-[#536277] hover:bg-[#FFF0F4] focus-visible:ring-2">
-        {ar?x.ar:x.en}</Link>)}
+        {ar?x.ar:lang==="fr"?x.fr:x.en}</Link>)}
       </div>
      </details>
      <label className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[#F0E4E9] bg-white px-2.5 text-xs font-bold text-[#39475F] shadow-sm focus-within:ring-2 focus-within:ring-[#AF7B9B]">
@@ -122,7 +118,7 @@ export function UnifiedFamilyShell({children,title,homeLayout=false,shopping=fal
    })}
   </nav>
   <Link to="/advisor" aria-label={text("Ask Dabberna anywhere","اسأل دبّرنا من أي مكان")}
-   className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] end-3 z-30 grid size-12 place-items-center rounded-full border-2 border-white bg-[#398C68] text-white shadow-[0_10px_24px_-8px_rgba(32,89,66,.5)] transition hover:scale-105 focus-visible:ring-2 focus-visible:ring-[#358E6A] lg:bottom-6 lg:end-6">
+   className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] end-3 z-30 grid size-12 lg:hidden place-items-center rounded-full border-2 border-white bg-[#398C68] text-white shadow-[0_10px_24px_-8px_rgba(32,89,66,.5)] transition hover:scale-105 focus-visible:ring-2 focus-visible:ring-[#358E6A] lg:bottom-6 lg:end-6">
    <MessageCircle className="size-5"/><span className="sr-only">{text("Ask Dabberna","اسأل دبّرنا")}</span>
   </Link>
  </div>;

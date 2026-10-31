@@ -5,13 +5,13 @@
  --adventure-leaf:#278466;
  --adventure-line:#DCEADF;
  --adventure-paper:#FBFFF9;
- background:linear-gradient(158deg,#F5FBF2 0%,#FFFBF5 48%,#F5FAF6 100%);
+ background:linear-gradient(160deg,#F7FBF5 0%,#FFFCF7 52%,#F6FAF7 100%);
  color:var(--adventure-ink);
 }
 .dabberna-adventure-skin .dabberna-page :where(.editorial-card,.card-soft) {
  border-color:var(--adventure-line);
- border-radius:1.4rem;
- box-shadow:0 14px 29px -28px rgba(29,99,66,.32);
+ border-radius:1.45rem;
+ box-shadow:0 16px 35px -31px rgba(29,88,60,.32);
 }
 .dabberna-adventure-skin .dabberna-page :where(.page-intro,.hero-surface){
  background:linear-gradient(130deg,#E6F6E9,#F6F9E7 58%,#FFEFD8);
@@ -42,5 +42,21 @@
  .dabberna-adventure-skin *, .dabberna-adventure-skin *::before,.dabberna-adventure-skin *::after {
   transition-duration:.01ms !important;
   animation-duration:.01ms !important;
+ }
+}
+
+/* Shared finishing details. Keep legacy finance editors functional. */
+.dabberna-adventure-skin .dabberna-page :where(h1,h2,h3){
+ text-wrap:balance;
+}
+.dabberna-adventure-skin .dabberna-page :where(button,a,summary){
+ touch-action:manipulation;
+}
+.dabberna-adventure-skin .dabberna-page :where(input,textarea,select):not([type="checkbox"]):not([type="radio"]){
+ min-height:44px;
+}
+@media(max-width:640px){
+ .dabberna-adventure-skin .dabberna-page :where(.page-intro,.hero-surface){
+  padding:1rem;
  }
 }

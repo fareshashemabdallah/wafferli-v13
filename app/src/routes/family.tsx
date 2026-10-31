@@ -1,7 +1,6 @@
-import {frenchUI} from "@/lib/french";
 import {createFileRoute,Link} from "@tanstack/react-router";
 import {useState} from "react";
-import {CalendarDays,CalendarHeart,ClipboardList,HeartHandshake,UsersRound,CheckCircle2,ChevronRight,MapPinned} from "lucide-react";
+import {ArrowLeft,ArrowRight,CalendarDays,CalendarHeart,CheckCircle2,ClipboardList,HeartHandshake,UsersRound} from "lucide-react";
 import {AppShell} from "@/components/AppShell";
 import {FamilyTasksPanel} from "@/components/FamilyTasksPanel";
 import {PlansWorkspace} from "@/routes/plans";
@@ -16,19 +15,13 @@ import {upcomingMoments,formatMomentDate,type FamilyMoment} from "@/lib/familyCa
 import {canonicalFamilyReadModel} from "@/lib/canonicalFamilyFacts";
 
 export const Route=createFileRoute("/family")({
- head:()=>({meta:[{title:"Family Life — Dabberna"},{name:"description",content:"One family workspace for dates, plans, children and responsibilities."}]}),
+ head:()=>({meta:[{title:"Family Life — Dabberna"},{name:"description",content:"One calm place for family dates, plans, profiles and responsibilities."}]}),
  component:FamilyLifePage
 });
 type View="overview"|"calendar"|"plans"|"tasks";
-const views=[
- {id:"overview" as const,en:"Our Family",ar:"عيلتنا",icon:HeartHandshake},
- {id:"calendar" as const,en:"Special Moments",ar:"مناسباتنا",icon:CalendarDays},
- {id:"plans" as const,en:"Our Plans",ar:"خططنا",icon:CalendarHeart},
- {id:"tasks" as const,en:"Family Tasks",ar:"مهام العيلة",icon:ClipboardList}
-];
 export function FamilyLifePage(){
  const {lang}=useI18n(),ar=lang==="ar";
- const label=(en:string,arabic:string)=>ar?arabic:en;
+ const t=(en:string,arabic:string,fr:string)=>ar?arabic:lang==="fr"?fr:en;
  const [view,setView]=useState<View>("overview");
  const [calendarFocus,setCalendarFocus]=useState<string|undefined>();
  const openFamilyDate=(day:string)=>{setCalendarFocus(day);setView("calendar");};
@@ -40,115 +33,86 @@ export function FamilyLifePage(){
  const ready=membersReady&&momentsReady&&plansReady&&tasksReady;
  const realMembers=realFamilyMembers(members);
  const family=canonicalFamilyReadModel(plans,moments,members,ar);
- const upcoming=upcomingMoments(family.moments,new Date(),180);
- const activePlans=upcomingFamilyPlans(family.plans.filter(p=>p.status!=="completed"),new Date(),5);
- const activeTasks=taskSummary(tasks);
- const card="rounded-[1.55rem] border border-[#DDEBDD] bg-white p-4 shadow-[0_16px_35px_-28px_rgba(57,82,64,.18)] sm:p-5";
- return <AppShell title={label("Family Life","حياة العيلة")}>
-  <div className="space-y-4">
-   <nav aria-label={label("Family Life sections","أقسام حياة العيلة")} className="rounded-2xl border border-[#DCE9DF] bg-white p-2">
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-     {views.map(item=>{
-      const selected=view===item.id;
-      const Icon=item.icon;
-      return <button key={item.id} type="button" aria-current={selected?"page":undefined}
-       aria-pressed={selected} onClick={()=>setView(item.id)}
-       className={"flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-[#479F7E] "+
-       (selected?"bg-[#E4F4E8] text-[#226C4D]":"text-[#657B6D] hover:bg-[#F3F8F2]")}>
-       <Icon className="size-4 shrink-0"/>{ar?item.ar:(lang==="fr"?frenchUI(item.en):item.en)}
+ const nextMoment=upcomingMoments(family.moments,new Date(),180)[0];
+ const nextPlan=upcomingFamilyPlans(family.plans.filter(p=>p.status!=="completed"),new Date(),5)[0];
+ const taskCounts=taskSummary(tasks);
+ const card="rounded-[1.5rem] border border-[#DEEADE] bg-white p-4 shadow-[0_14px_34px_-29px_rgba(34,90,61,.28)] sm:p-5";
+ const choices=[
+  {id:"calendar" as const,title:t("Special moments","المناسبات","Les moments importants"),detail:t("Birthdays, school and celebrations","أعياد الميلاد والمدرسة والمناسبات","Anniversaires, école et fêtes"),icon:CalendarDays,color:"bg-[#EDF4FD] text-[#4C76A1]"},
+  {id:"plans" as const,title:t("Our plans","خططنا","Nos projets"),detail:t("Outings, gifts and decisions","طلعات وهدايا وخطط","Sorties, cadeaux et décisions"),icon:CalendarHeart,color:"bg-[#FFF0F2] text-[#B5657A]"},
+  {id:"tasks" as const,title:t("Family tasks","مهام العيلة","Tâches familiales"),detail:t("Things that need attention","الأمور اللي لازم ننتبهلها","Les choses à faire"),icon:ClipboardList,color:"bg-[#ECF7F0] text-[#348267]"}
+ ];
+ return <AppShell title={t("Family","العيلة","Famille")}>
+  <div className="mx-auto max-w-3xl space-y-3" data-testid="family-simple-hub">
+   {view==="overview"?<>
+    <section className="flex items-center gap-3 rounded-[1.5rem] border border-[#DEEBD9] bg-[linear-gradient(120deg,#EDF7E8,#FFF8EE_75%)] p-4 sm:p-5">
+     <div aria-hidden="true" className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white/90 text-[#468368]"><HeartHandshake className="size-7"/></div>
+     <div className="min-w-0">
+      <h2 className="text-lg font-black text-[#2B5340]">{t("Our family, in one place","عيلتنا بمحل واحد","Notre famille, au même endroit")}</h2>
+      <p className="mt-1 text-sm text-[#647969]">{t("The moments and plans that matter.","المناسبات والخطط اللي بتهمّنا.","Les moments et les projets qui comptent.")}</p>
+     </div>
+    </section>
+    <section className={card} aria-label={t("Coming up","القادم","À venir")}>
+     <p className="text-xs font-bold uppercase tracking-wide text-[#538064]">{t("COMING UP","الخطوة الجاية","À VENIR")}</p>
+     {!ready?<p className="mt-3 text-sm text-[#66786A]">{t("Loading family details…","عم نحمّل معلومات العيلة…","Chargement de la famille…")}</p>:
+      nextMoment?<div className="mt-3">
+       <h3 className="text-lg font-bold text-[#2B5040]">{nextMoment.title}</h3>
+       <p className="mt-1 text-sm text-[#698071]">{formatMomentDate(nextMoment.occursOn,ar,lang)}</p>
+       <button type="button" onClick={()=>openFamilyDate(nextMoment.occursOn)}
+        className="mt-3 inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#2D805E] px-5 text-sm font-extrabold text-white">
+        {t("Prepare this moment","حضّر هالمناسبة","Préparer cet événement")}<ArrowRight className="size-4 rtl:rotate-180"/>
+       </button>
+      </div>:nextPlan?<div className="mt-3">
+       <h3 className="text-lg font-bold text-[#2B5040]">{nextPlan.title}</h3>
+       <p className="mt-1 text-sm text-[#698071]">{nextPlan.date??t("An ongoing family plan","خطة عائلية حالية","Un projet familial en cours")}</p>
+       <button type="button" onClick={()=>{setActivePlan(nextPlan.id);setView("plans");}}
+        className="mt-3 inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#2D805E] px-5 text-sm font-extrabold text-white">
+        {t("Continue plan","كمّل الخطة","Continuer le projet")}<ArrowRight className="size-4 rtl:rotate-180"/>
+       </button>
+      </div>:taskCounts.open>0?<div className="mt-3">
+       <h3 className="text-base font-bold text-[#2C5441]">{t("You have family tasks to review","عندك مهام عائلية للمراجعة","Vous avez des tâches à consulter")}</h3>
+       <button type="button" onClick={()=>setView("tasks")} className="mt-3 inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#2D805E] px-5 text-sm font-bold text-white">
+        {t("Open tasks","شوف المهام","Voir les tâches")}<ArrowRight className="size-4 rtl:rotate-180"/>
+       </button>
+      </div>:<div className="mt-3">
+       <p className="text-sm text-[#67796D]">{realMembers.length?t("No upcoming plans or occasions saved.","ما في خطط أو مناسبات قريبة محفوظة.","Aucun projet ou événement à venir."):t("Add your family once to make suggestions more useful.","ضيف أفراد العيلة مرة وحدة لنقدّم اقتراحات أنسب.","Ajoutez votre famille une fois pour recevoir des suggestions adaptées.")}</p>
+       <Link to="/space" className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-extrabold text-[#2C805D] underline">{t("Family members","أفراد العيلة","Membres de la famille")}<ArrowRight className="size-4 rtl:rotate-180"/></Link>
+      </div>}
+    </section>
+    <div className="grid grid-cols-2 gap-3" aria-label={t("Family areas","أقسام العيلة","Rubriques famille")}>
+     {choices.map(choice=>{
+      const Icon=choice.icon;
+      return <button key={choice.id} type="button" onClick={()=>{setCalendarFocus(undefined);setView(choice.id);}}
+       className={card+" flex min-h-[142px] flex-col items-start gap-2 text-start transition hover:border-[#8BBA9D] focus-visible:ring-2 focus-visible:ring-[#348765]"}>
+       <span className={"grid size-11 place-items-center rounded-xl "+choice.color}><Icon className="size-5"/></span>
+       <strong className="text-sm text-[#2E5040]">{choice.title}</strong>
+       <span className="text-xs leading-snug text-[#6C8072]">{choice.detail}</span>
       </button>;
      })}
+     <Link to="/space" className={card+" flex min-h-[142px] flex-col items-start gap-2 transition hover:border-[#8BBA9D] focus-visible:ring-2 focus-visible:ring-[#348765]"}>
+      <span className="grid size-11 place-items-center rounded-xl bg-[#F5EDF9] text-[#9770AB]"><UsersRound className="size-5"/></span>
+      <strong className="text-sm text-[#2E5040]">{t("Family members","أفراد العيلة","Membres de la famille")}</strong>
+      <span className="text-xs leading-snug text-[#6C8072]">{t("Profiles and preferences","الملفات والتفضيلات","Profils et préférences")}</span>
+     </Link>
     </div>
-   </nav>
-   {view==="overview"&&<div className="space-y-4">
-    <section className={card}>
-     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div>
-       <h2 className="text-lg font-extrabold text-[#25354B]">{label("Our family life","حياة عيلتنا")}</h2>
-      </div>
-      <Link to="/space" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#EEE1E8] bg-[#FFF9FB] px-3 text-xs font-semibold text-[#9C4F78]">
-       <UsersRound className="size-4"/>{label("Manage family members","أفراد العيلة")}
-      </Link>
-     </div>
-     <div className="mt-4 grid grid-cols-3 gap-2">
-      <div className="rounded-2xl bg-[#FCEEF3] p-3 text-center">
-       <strong className="text-xl tabular-nums">{ready?realMembers.length:"—"}</strong>
-       <p className="mt-1 text-[11px] text-[#68748A]">{label("Family members","أفراد العيلة")}</p>
-      </div>
-      <div className="rounded-2xl bg-[#F0F5FB] p-3 text-center">
-       <strong className="text-xl tabular-nums">{ready?upcoming.length:"—"}</strong>
-       <p className="mt-1 text-[11px] text-[#68748A]">{label("Dates next 6 months","مواعيد خلال ٦ أشهر")}</p>
-      </div>
-      <div className="rounded-2xl bg-[#EFF8F2] p-3 text-center">
-       <strong className="text-xl tabular-nums">{ready?activeTasks.open:"—"}</strong>
-       <p className="mt-1 text-[11px] text-[#68748A]">{label("Open tasks","مهام مفتوحة")}</p>
-      </div>
-     </div>
-    </section>
-    <div className="grid gap-4 md:grid-cols-2">
-     <section className={card} aria-label={label("Upcoming family dates","المواعيد القادمة")}>
-      <div className="flex items-center gap-2">
-       <CalendarDays className="size-5 text-[#668DB5]"/><h2 className="text-base font-extrabold">{label("Upcoming dates","المواعيد القادمة")}</h2>
-      </div>
-      {!ready?<p className="mt-3 text-sm text-[#727C91]">{label("Loading family records…","جارٍ تحميل بيانات العيلة…")}</p>
-       :upcoming.length===0?<p className="mt-3 text-sm text-[#727C91]">{label("No saved dates in the next six months.","ما في مواعيد مسجّلة خلال الأشهر الستة المقبلة.")}</p>
-       :<ol className="mt-3 space-y-2">{upcoming.slice(0,3).map(item=><li key={item.id+"-"+item.occursOn}
-        className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-[#F8F9FC] px-3 py-2">
-         <span className="min-w-0 truncate text-sm font-semibold">{item.title}</span>
-         <span className="shrink-0 text-xs text-[#728094]">{formatMomentDate(item.occursOn,ar,lang)}</span>
-         <button type="button" onClick={()=>openFamilyDate(item.occursOn)} aria-label={label("Prepare "+item.title,"حضّر "+item.title)} className="shrink-0 rounded-lg bg-white px-2 py-2 text-xs font-semibold text-[#B15380] underline">{label("Prepare","حضّر")}</button>
-        </li>)}</ol>}
-      <button onClick={()=>setView("calendar")} type="button" className="mt-3 inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#628BB4] underline">
-       {label("Open family calendar","افتح تقويم العيلة")}<ChevronRight className="size-4 rtl:rotate-180"/>
-      </button>
-     </section>
-     <section className={card} aria-label={label("Current family plans","الخطط الحالية")}>
-      <div className="flex items-center gap-2">
-       <CalendarHeart className="size-5 text-[#C86A91]"/><h2 className="text-base font-extrabold">{label("Plans & activities","الخطط والأنشطة")}</h2>
-      </div>
-      {!ready?<p className="mt-3 text-sm text-[#727C91]">{label("Loading plans…","جارٍ تحميل الخطط…")}</p>
-       :activePlans.length===0?<p className="mt-3 text-sm text-[#727C91]">{label("No active plans recorded yet.","ما في خطط نشطة مسجّلة بعد.")}</p>
-       :<ol className="mt-3 space-y-2">{activePlans.slice(0,3).map(item=><li key={item.id}
-        className="flex min-h-12 items-center gap-2 rounded-xl bg-[#FFF8FB] px-3 py-2">
-         <button type="button" onClick={()=>{setActivePlan(item.id);setView("plans");}} className="min-h-11 min-w-0 flex-1 truncate text-start text-sm font-semibold text-[#356B51] underline-offset-2 hover:underline" aria-label={label("Continue plan: "+item.title,"تابع خطة: "+item.title)}>{item.title}</button>
-         {item.status==="completed"&&<CheckCircle2 className="size-4 text-[#408C71]"/>}
-        </li>)}</ol>}
-      <button onClick={()=>setView("plans")} type="button" className="mt-3 inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#B95484] underline">
-       {label("Open plans","افتح الخطط")}<ChevronRight className="size-4 rtl:rotate-180"/>
-      </button>
-     </section>
+    {ready&&taskCounts.overdue>0&&<button type="button" onClick={()=>setView("tasks")} className="flex min-h-12 w-full items-center gap-2 rounded-xl border border-[#E8DECE] bg-[#FFF8EE] px-4 text-start text-sm font-semibold text-[#876544]">
+     <ClipboardList className="size-5 shrink-0"/>{taskCounts.overdue} {t("tasks need a look","مهام بدها مراجعة","tâches demandent votre attention")}<ArrowRight className="ms-auto size-4 rtl:rotate-180"/>
+    </button>}
+   </>:<>
+    <div className="flex items-center justify-between gap-3">
+     <button type="button" onClick={()=>{setView("overview");setCalendarFocus(undefined);}}
+      className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#D8E6DC] bg-white px-4 text-sm font-bold text-[#396E52]">
+      <ArrowLeft className="size-4 rtl:rotate-180"/>{t("Family home","العودة للعيلة","Accueil famille")}
+     </button>
+     <span className="text-xs font-bold text-[#6D8074]">{view==="calendar"?t("Special moments","المناسبات","Moments importants"):view==="plans"?t("Our plans","خططنا","Nos projets"):t("Family tasks","مهام العيلة","Tâches familiales")}</span>
     </div>
-    <section className={card}>
-     <div className="flex items-center justify-between gap-2">
-      <div className="flex items-center gap-2"><ClipboardList className="size-5 text-[#4A997F]"/>
-       <h2 className="text-base font-extrabold">{label("Family responsibilities","مهام العيلة")}</h2></div>
-      <button onClick={()=>setView("tasks")} type="button" className="inline-flex min-h-11 items-center gap-1 text-xs font-bold text-[#408E74] underline">
-       {label("Manage tasks","إدارة المهام")}<ChevronRight className="size-4 rtl:rotate-180"/>
-      </button>
-     </div>
-     <p className="mt-2 text-sm text-[#687587]">{ready?
-      label(String(activeTasks.dueSoon)+" due within 7 days · "+String(activeTasks.overdue)+" overdue",
-       String(activeTasks.dueSoon)+" خلال ٧ أيام · "+String(activeTasks.overdue)+" متأخرة")
-      :label("Loading tasks…","جارٍ تحميل المهام…")}</p>
-    </section>
-    <details className={card}>
-     <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 text-sm font-semibold text-[#58667A]">
-      <MapPinned className="size-5 text-[#B66B92]"/>{label("More family experiences","أنشطة عائلية إضافية")}
-     </summary>
-     <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
-      
-      <Link to="/occasions" className="rounded-xl bg-[#FCECF2] px-4 py-3 text-[#965477]">{label("Celebrations","المناسبات")}</Link>
-      
-     </div>
-    </details>
-   </div>}
-   {view==="calendar"&&<FamilyCalendarWorkspace key={calendarFocus??"calendar"} embedded {...(calendarFocus?{focusDate:calendarFocus}:{})}/>}
-   {view==="plans"&&<PlansWorkspace embedded/>}
-   {view==="tasks"&&<FamilyTasksPanel/>}
-   <details className="px-1 text-xs text-[#7B8491]">
-    <summary className="min-h-10 cursor-pointer font-semibold">{label("Private pilot · Device-only","تجربة خاصة · على هذا الجهاز")}</summary>
-    <p>{label("Family records are saved in this browser. Shared household accounts and background reminders are not active.",
-     "سجلات العيلة محفوظة بهذا المتصفح، ولا توجد مزامنة عائلية أو تذكيرات تلقائية بعد.")}</p>
+    {view==="calendar"&&<FamilyCalendarWorkspace key={calendarFocus??"calendar"} embedded {...(calendarFocus?{focusDate:calendarFocus}:{})}/>}
+    {view==="plans"&&<PlansWorkspace embedded/>}
+    {view==="tasks"&&<FamilyTasksPanel/>}
+   </>}
+   <details className="px-2 text-xs text-[#718275]">
+    <summary className="min-h-10 cursor-pointer font-semibold">{t("Private pilot · Saved on this device","تجربة خاصة · محفوظة عالجهاز","Essai privé · Enregistré sur cet appareil")}</summary>
+    <p>{t("Family records are saved in this browser. Shared household accounts and background reminders are not active.","معلومات العيلة محفوظة بهالمتصفح. ما في مزامنة عائلية أو تذكيرات تلقائية بعد.","Les données restent dans ce navigateur. La synchronisation et les rappels automatiques ne sont pas activés.")}</p>
    </details>
   </div>
  </AppShell>;
