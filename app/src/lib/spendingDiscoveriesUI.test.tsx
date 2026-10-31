@@ -24,7 +24,7 @@ function App(){
  </I18nProvider>;
 }
 function Entry(){
- const [state,setState]=useState({...fixture(),expenses:[]});
+ const [state,setState]=useState<MoneyState>({...fixture(),expenses:[]});
  const [closed,setClosed]=useState(false);
  return <I18nProvider>
   {!closed&&<QuickExpenseEntry state={state} setState={setState} onClose={()=>setClosed(true)} onHistory={()=>{}}/>}
