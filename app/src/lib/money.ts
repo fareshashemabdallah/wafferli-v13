@@ -7,7 +7,7 @@ import {effectiveCategoryAllowance} from "./monthAwareMoney";
 export type CatType = "fixed" | "variable" | "periodic";
 export type Category = { id: string; name: string; type: CatType; planned: number; /** Applies ONLY to the unbroken part of the monthly category envelope; detailed lines retain their own roles. */ remainderRole?:import("./spendingGroups").SpendingRole; /** Stable image grouping independent of category name. */ visualGroup?:import("./familyCategoryCards").CategoryVisualGroup; visualIcon?:import("./familyCategoryCards").CategoryPicture; /** Optional family-declared priority, independent of fixed/variable schedule. */ priority?:"essential"|"protected"|"flexible"; /** Unreviewed legacy values remain estimates. */ amountConfidence?:"estimate"|"confirmed" };
 export type BudgetAllocation = {kind:"variable"|"savings"; categoryId?:string; delta:number; approvedAt:string};
-export type Expense = { id: string; date: string; categoryId: string; amount: number; /** Optional link to one detailed budget item; older entries remain category-only. */ budgetItemId?:string; note?: string; owner?: string; shared: boolean; billId?:string; dueDate?:string; cashDeducted?:boolean; sourcePlanId?:string; /** Identifies exactly one paid component of a family occasion. */ sourceOccasionCost?:"gift"|"celebration"|"extras"; /** Planned entries do not count as actual spending until confirmed. */ status?:"planned"|"paid"; plannedAmount?:number; allocation?:BudgetAllocation; varianceDismissed?:boolean; };
+export type Expense = { id: string; date: string; categoryId: string; amount: number; /** Optional link to one detailed budget item; older entries remain category-only. */ budgetItemId?:string; note?: string; owner?: string; shared: boolean; billId?:string; dueDate?:string; cashDeducted?:boolean; sourcePlanId?:string; /** Identifies exactly one paid component of a family occasion. */ sourceOccasionCost?:"gift"|"celebration"|"extras"; /** Planned entries do not count as actual spending until confirmed. */ status?:"planned"|"paid"; /** Parent-identified purchase purpose; remains the SAME transaction. */ purpose?:"food-delivery"; plannedAmount?:number; allocation?:BudgetAllocation; varianceDismissed?:boolean; };
 export type MoneyState = {
   /** Legacy monthly income: retained to preserve users' existing saved budgets. */
   income:number; savingsPct:number; categories:Category[]; expenses:Expense[]; demo:boolean;
@@ -38,6 +38,8 @@ export type MoneyState = {
   monthlyAdjustments?:Record<string,{savingsDelta:number;categoryDeltas:Record<string,number>}>;
   /** Manually stated goals, not bank balances or actual cash transfers. */
   savingsGoals?:SavingsGoal[];
+  /** Optional spending-awareness targets; NOT a budget, saving balance or extra expense. */
+  spendingDiscoveryTargets?:Record<string,number>;
   /** User attested there are no scheduled bills this calendar month. */
   noBillsConfirmedMonth?:string;
 };

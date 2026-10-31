@@ -365,6 +365,7 @@ function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expe
   const [quickAmount, setQuickAmount] = useState("");
   const [quickExpected,setQuickExpected]=useState("");
   const [quickNote,setQuickNote]=useState("");
+  const [quickDelivery,setQuickDelivery]=useState(false);
   const [showHistory,setShowHistory]=useState(false);
   const [onlyUncategorized,setOnlyUncategorized]=useState(initialUncategorizedOnly);
   const [confirming,setConfirming]=useState<string|null>(null);
@@ -383,7 +384,7 @@ function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expe
     if(amount===null)return setQuickError(tr("Enter a valid amount greater than zero (up to 50,000 JOD)."));
     if(quickExpected.trim()!==""&&(!Number.isFinite(Number(quickExpected))||Number(quickExpected)<0||Number(quickExpected)>50000))return setQuickError(ar?"أدخل مبلغاً متوقعاً صحيحاً.":(lang==="fr"?frenchUI("Enter a valid expected amount."):"Enter a valid expected amount."));
     if(!selectedCategory)return setQuickError(tr("Add a spending category first."));
-    const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:false,status:"paid",...(selectedItem?{budgetItemId:selectedItem}:{}),...(quickNote.trim()?{note:quickNote.trim().slice(0,60)}:{}),...(quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
+    const entry:Expense={id:uid(),date:today(),categoryId:selectedCategory,amount,shared:false,status:"paid",...(quickDelivery?{purpose:"food-delivery" as const}:{}),...(selectedItem?{budgetItemId:selectedItem}:{}),...(quickNote.trim()?{note:quickNote.trim().slice(0,60)}:{}),...(quickExpected.trim()?{plannedAmount:Math.round(Number(quickExpected)*100)/100}:{})};
     onRecord(entry);
     setQuickRecorded(true);setQuickError("");
     toast.success(ar?"تم تسجيل المصروف المدفوع.":(lang==="fr"?frenchUI("Paid expense recorded."):"Paid expense recorded."));
@@ -423,11 +424,15 @@ function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expe
         <Field label={ar?"على شو صرفت؟ (اختياري)":(lang==="fr"?frenchUI("What was it for? (optional)"):"What was it for? (optional)")}>
           <Input className={inputCls} maxLength={60} value={quickNote} onChange={e=>setQuickNote(e.target.value)} placeholder={ar?"مثلاً: تسوّق أسبوعي":(lang==="fr"?frenchUI("e.g. weekly groceries"):"e.g. weekly groceries")}/>
         </Field>
+        <label className="flex min-h-11 items-center gap-2 text-xs font-semibold text-brand sm:col-span-3">
+          <input type="checkbox" checked={quickDelivery} onChange={e=>setQuickDelivery(e.target.checked)}/>
+          {ar?"توصيل أكل (اختياري)":(lang==="fr"?"Livraison de repas (facultatif)":"Food delivery (optional)")}
+        </label>
         <Button type="submit" className="h-11" disabled={demo||quickRecorded||!selectedCategory}><Plus className="size-4"/> {ar?"سجّل المصروف":(lang==="fr"?frenchUI("Record expense"):"Record expense")}</Button>
         {quickRecorded&&<div role="status" className="sm:col-span-3 rounded-xl bg-[#EDF7EB] p-3 text-sm">
           <strong>{ar?"تم تسجيل المصروف مرة واحدة.":(lang==="fr"?frenchUI("Expense recorded once."):"Expense recorded once.")}</strong>
           <button type="button" className="ms-3 min-h-10 font-semibold text-brand underline" onClick={()=>{
-            setQuickRecorded(false);setQuickAmount("");setQuickExpected("");setQuickNote("");setQuickItem("");setQuickError("");
+            setQuickRecorded(false);setQuickAmount("");setQuickExpected("");setQuickNote("");setQuickItem("");setQuickDelivery(false);setQuickError("");
           }}>{ar?"مصروف جديد":(lang==="fr"?frenchUI("Add another"):"Add another")}</button>
         </div>}
         <details className="sm:col-span-3 rounded-xl border border-border bg-white p-3">
@@ -493,6 +498,7 @@ function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expe
                     <Button size="sm" type="button" variant="ghost" onClick={()=>setConfirming(null)}>{ar?"إلغاء":(lang==="fr"?frenchUI("Cancel"):"Cancel")}</Button>
                   </div>
                 </div>}
+                {e.purpose==="food-delivery"&&<p className="text-xs font-semibold text-brand">{ar?"توصيل أكل":(lang==="fr"?"Livraison de repas":"Food delivery")}</p>}
                 {e.budgetItemId&&budgetItems.some(i=>i.id===e.budgetItemId&&i.categoryId===e.categoryId)&&<p className="text-xs text-brand">{ar?"البند: ":(lang==="fr"?frenchUI("Item: "):"Item: ")}{budgetItems.find(i=>i.id===e.budgetItemId)?.name}</p>}
                 <p className="text-xs text-muted-foreground">
                   {e.status==="planned"?(ar?"بانتظار الدفع · ":(lang==="fr"?frenchUI("Planned, not paid · "):"Planned, not paid · ")):""}{e.date} · {tr(catName(e.categoryId))} {e.owner ? `· ${e.owner}` : ""} · {e.shared?(ar?"عائلي محلي":(lang==="fr"?frenchUI("Household label"):"Household label")):(ar?"خاص على الجهاز":(lang==="fr"?frenchUI("Private on device"):"Private on device"))}
@@ -554,6 +560,13 @@ function ExpenseForm({ initial, cats, members, budgetItems, onSave, onCancel }: 
         </NativeSelect>
       </Field>
       <Field label={tr("Note (optional)")}><Input className={inputCls} maxLength={60} value={f.note ?? ""} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
+      <label className="flex min-h-11 items-center gap-2 text-xs font-semibold text-brand">
+        <input type="checkbox" checked={f.purpose==="food-delivery"} onChange={e=>setF(previous=>{
+         if(e.target.checked)return {...previous,purpose:"food-delivery"};
+         const {purpose:_purpose,...rest}=previous;return rest;
+        })}/>
+        {ar?"توصيل أكل":(lang==="fr"?"Livraison de repas":"Food delivery")}
+      </label>
       <label className="flex items-center justify-between gap-3 rounded-md border bg-card px-3 text-sm font-medium">
         {f.shared ? (ar?"علامة عائلية محلية — لا مشاركة تلقائية":(lang==="fr"?frenchUI("Household label only — no automatic sharing"):"Household label only — no automatic sharing")) : (ar?"خاص على هذا الجهاز":(lang==="fr"?frenchUI("Private on this device"):"Private on this device"))}
         <Switch checked={f.shared} onCheckedChange={(v) => setF({ ...f, shared: v })} />
