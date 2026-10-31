@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {afterEach,beforeEach,describe,expect,it} from "vitest";
+import {afterEach,beforeEach,describe,expect,it,vi} from "vitest";
 import {cleanup,fireEvent,render,screen} from "@testing-library/react";
 import {I18nProvider} from "./i18n";
 import {SpendingDiscoveries} from "@/components/SpendingDiscoveries";
@@ -34,6 +34,36 @@ function Entry(){
 beforeEach(()=>window.localStorage.clear());
 afterEach(()=>{cleanup();window.localStorage.clear();});
 describe("Spending discoveries user journey",()=>{
+
+ it("keeps the discovery visible in demo mode with clearly marked example figures",()=>{
+  const onStart=vi.fn(),onExpense=vi.fn();
+  const state={...fixture(),demo:true};
+  render(<I18nProvider><SpendingDiscoveries state={state} setState={()=>{}}
+   onStartReal={onStart} onRecordExpense={onExpense}/></I18nProvider>);
+  expect(screen.getByTestId("money-spending-discoveries")).toBeInTheDocument();
+  expect(screen.getByText("Spending Discoveries")).toBeInTheDocument();
+  expect(screen.getByText("Example only · not your spending")).toBeInTheDocument();
+  expect(screen.getByText(/sample orders/)).toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Set a comfortable target"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Use my own figures"}));
+  expect(onStart).toHaveBeenCalledOnce();
+  expect(onExpense).not.toHaveBeenCalled();
+ });
+ it("keeps an informative empty state with zero or one paid expense, without fabricated findings",()=>{
+  const onExpense=vi.fn();
+  const sample=fixture();
+  const make=(expenses:MoneyState["expenses"])=><I18nProvider><SpendingDiscoveries
+   state={{...sample,expenses}} setState={()=>{}} onStartReal={()=>{}} onRecordExpense={onExpense}/></I18nProvider>;
+  const {rerender}=render(make([]));
+  expect(screen.getByTestId("money-spending-discoveries")).toBeInTheDocument();
+  expect(screen.getByText(/No paid purchases recorded this month/)).toBeInTheDocument();
+  expect(screen.queryByRole("button",{name:"Set a comfortable target"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Record an expense"}));
+  expect(onExpense).toHaveBeenCalledOnce();
+  rerender(make([sample.expenses[0]!]));
+  expect(screen.getByText(/One paid purchase recorded this month/)).toBeInTheDocument();
+  expect(screen.queryByText(/Example only/)).not.toBeInTheDocument();
+ });
  it("shows a distinct delivery subtotal and saves a target without changing expense or budget records",()=>{
   render(<App/>);
   expect(screen.getByTestId("money-spending-discoveries")).toBeInTheDocument();
