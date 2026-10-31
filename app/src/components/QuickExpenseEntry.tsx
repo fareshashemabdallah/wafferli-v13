@@ -70,7 +70,7 @@ export function QuickExpenseEntry({state,setState,onClose,onHistory}:Props){
     </fieldset>
     <label className="flex min-h-11 items-center gap-2 rounded-xl border border-[#DCE8D9] bg-white px-3 text-xs font-semibold text-[#50715E]">
      <input type="checkbox" checked={foodDelivery} onChange={e=>setFoodDelivery(e.target.checked)}/>
-     {t("Food delivery (optional)","توصيل أكل (اختياري)","Livraison de repas (facultatif)")}
+     {lang==="fr"?"Livraison de repas (facultatif)":t("Food delivery (optional)","توصيل أكل (اختياري)")}
     </label>
     <details className="rounded-xl border border-[#E2EADF] bg-white p-3">
      <summary className="min-h-10 cursor-pointer text-xs font-bold text-[#4A8460]">{t("Optional note","ملاحظة اختيارية")}</summary>
