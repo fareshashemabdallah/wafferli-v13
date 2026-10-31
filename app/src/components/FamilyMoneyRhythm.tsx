@@ -94,7 +94,7 @@ export function FamilyMoneyRhythm({state,setState,onBills,onSpending,onReviewUnc
     {t("Use my own figures","استخدم أرقامي")}</button>
   </div>}
   <FamilyMoneyPrototypeHome state={state} setState={setState} forecast={forecast}
-   onIncome={()=>setQuickEdit("income")} onQuickAdd={()=>setQuickExpenseOpen(true)}
+   onIncome={()=>setQuickEdit("income")} onQuickAdd={()=>setQuickExpenseOpen(true)} onStartReal={startOwnMoney}
    onBills={onBills} onSpending={onSpending} onReviewUncategorized={onReviewUncategorized} onEditCategory={setEditingCategory}/>
   {quickExpenseOpen&&<QuickExpenseEntry state={state} setState={setState}
    onClose={()=>setQuickExpenseOpen(false)} onHistory={onSpending}/>}
