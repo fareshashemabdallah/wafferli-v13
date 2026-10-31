@@ -40,7 +40,7 @@ describe("spending discoveries",()=>{
  });
  it("recognizes explicit delivery budget items, keeps uncategorized expenses visible",()=>{
   const s=state();
-  s.budgetItems=[{id:"delivery",categoryId:"restaurant",name:"Food delivery",amount:100,frequency:"monthly",enabled:true,priority:"flexible"}];
+  s.budgetItems=[{id:"delivery",categoryId:"restaurant",name:"Food delivery",amountJod:100,frequency:"monthly",enabled:true,behaviour:"variable",priority:"flexible"}];
   s.expenses=[expense("a","2026-10-01",15,"restaurant",{budgetItemId:"delivery"}),
    expense("b","2026-10-02",7,"uncategorized")];
   const v=buildSpendingDiscoveries(s,"2026-10");
