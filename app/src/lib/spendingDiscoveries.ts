@@ -62,7 +62,7 @@ export function buildSpendingDiscoveries(state:MoneyState,month:string):Spending
   amountJod:g.currentCents/100,count:g.count,
   sharePct:monthCents>0?Math.round(g.currentCents/monthCents*100):0,
   previousMonthJod:g.previousCount>0?g.priorCents/100:null,previousCount:g.previousCount,
-  targetJod:typeof target[g.key]==="number"&&discoveryTargetValid(target[g.key])?target[g.key]:null,
+  targetJod:typeof target[g.key]==="number"&&discoveryTargetValid(target[g.key]!)?target[g.key]!:null,
   prefer:g.prefer
  })).sort((a,b)=>Number(b.prefer)-Number(a.prefer)||b.amountJod-a.amountJod||a.key.localeCompare(b.key))
   .map(({prefer:_prefer,...rest})=>rest);
