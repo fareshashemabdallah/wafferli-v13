@@ -13,8 +13,7 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
  const {lang}=useI18n();
  const t=(en:string,ar:string,fr:string)=>lang==="ar"?ar:lang==="fr"?fr:en;
  const view=buildSpendingDiscoveries(state,localToday().slice(0,7));
- const groups=view.visible.slice(0,4);
- const [key,setKey]=useState<string|null>(null);
+ const groups=view.visible.slice(0,1);
  const [editing,setEditing]=useState(false);
  const [draft,setDraft]=useState("");
  const [error,setError]=useState("");
@@ -72,10 +71,9 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
     {t("Record an expense","سجّل مصروف","Enregistrer une dépense")}
    </button>
   </section>;
- const active=groups.find(g=>g.key===key)??groups[0]!;
+ const active=groups[0]!;
  const food=active.kind==="food-delivery";
  const name=food?t("Food delivery","توصيل الأكل","Livraison de repas"):active.label;
- const select=(value:string)=>{setKey(value);setEditing(false);setError("");};
  const save=(ev:FormEvent)=>{
   ev.preventDefault();
   if(!/^\d{1,6}(?:\.\d{1,2})?$/.test(draft.trim())||!discoveryTargetValid(Number(draft))){
@@ -98,23 +96,17 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
   aria-label={t("Spending discoveries","اكتشافات المصاريف","Découvertes de dépenses")}
   className={shell}>
   {heading}
-  <p className="mt-3 text-xs font-semibold text-[#567F63]">{t("Something worth noticing","مصروف يستحق الانتباه","Une dépense à remarquer")}</p>
-  {groups.length>1&&<div className="mt-3 flex flex-wrap gap-2" aria-label={t("Spending areas","مجالات المصاريف","Catégories de dépenses")}>
-   {groups.map(g=><button key={g.key} type="button" onClick={()=>select(g.key)} aria-pressed={active.key===g.key}
-    className={"min-h-10 max-w-full rounded-full border px-3 text-xs font-semibold "+(active.key===g.key?"border-[#548E6D] bg-[#E4F2E6] text-[#26583F]":"border-[#DDE9DE] bg-white text-[#587262]")}>
-    {g.kind==="food-delivery"?t("Food delivery","توصيل الأكل","Livraison de repas"):g.label}
-   </button>)}
-  </div>}
+  <p className="mt-3 text-xs font-semibold text-[#567F63]">{t("Worth noticing","يستحق الانتباه","À remarquer")}</p>
   <div className="mt-3 flex flex-wrap items-end justify-between gap-2">
    <div className="min-w-0">
     <p className="text-sm font-semibold text-[#476A52]">{name}</p>
     <p className="mt-1 text-2xl font-black tabular-nums text-[#285D42]">{fmtJOD(active.amountJod)}</p>
    </div>
    <p className="text-xs font-semibold text-[#597766]">
-    {active.count} {t("recorded purchases","مصاريف مسجلة","achats enregistrés")} · {active.sharePct}% {t("of recorded spending","من المصاريف المسجلة","des dépenses enregistrées")}
+    {active.count} {t("recorded purchases","مصاريف مسجلة","achats enregistrés")}
    </p>
   </div>
-  {active.previousMonthJod!==null&&<p className="mt-2 text-xs text-[#647D6D]">
+  {active.previousMonthJod!==null&&active.signal==="increase"&&<p className="mt-2 text-xs text-[#647D6D]">
    {t("Previous month recorded: ","الشهر السابق مسجّل: ","Mois précédent enregistré : ")}{fmtJOD(active.previousMonthJod)}
   </p>}
   {active.targetJod!==null&&<div className="mt-3 rounded-xl border border-[#D6E7DA] bg-white p-3">
