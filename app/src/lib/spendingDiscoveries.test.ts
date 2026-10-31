@@ -4,52 +4,93 @@ import {sampleMoney,type Expense,type MoneyState} from "./money";
 const expense=(id:string,date:string,amount:number,categoryId:string,extra:Partial<Expense>={}):Expense=>
  ({id,date,amount,categoryId,shared:false,status:"paid",...extra});
 const state=():MoneyState=>({...sampleMoney(),demo:false,expenses:[],
- categories:[{id:"restaurant",name:"Restaurants",type:"variable",planned:300},
- {id:"rent",name:"Rent",type:"fixed",planned:500}]});
-describe("spending discoveries",()=>{
- it("never presents demo figures as personal discoveries",()=>{
-  const result=buildSpendingDiscoveries(sampleMoney(),"2026-10");
-  expect(result.visible).toEqual([]);
+ categories:[
+  {id:"restaurant",name:"Restaurants",type:"variable",planned:300},
+  {id:"rent",name:"Rent",type:"fixed",planned:500},
+  {id:"school",name:"School Tuition",type:"periodic",planned:800},
+  {id:"insurance",name:"Parents insurance",type:"fixed",planned:600},
+  {id:"groceries",name:"Groceries",type:"variable",planned:400,priority:"essential"},
+  {id:"travel",name:"Travel ticket",type:"periodic",planned:600},
+ ]});
+const month="2026-10";
+describe("Spending discoveries focus on behaviour, not big bills",()=>{
+ it("never treats demonstration records as a real discovery",()=>{
+  expect(buildSpendingDiscoveries(sampleMoney(),month).visible).toEqual([]);
  });
- it("splits explicit food delivery from the restaurant category without double counting",()=>{
+ it("does not call the screenshot's tuition, insurance, groceries or travel ticket a savings discovery",()=>{
   const s=state();
-  s.expenses=[expense("a","2026-10-01",12,"restaurant",{purpose:"food-delivery"}),
-   expense("b","2026-10-05",8,"restaurant",{note:"Food delivery"}),
-   expense("c","2026-10-09",25,"restaurant"),expense("d","2026-10-12",500,"rent")];
-  s.spendingDiscoveryTargets={"food-delivery":18};
+  s.expenses=[
+   expense("tuition","2026-10-02",800,"school"),
+   expense("insurance","2026-10-03",620,"insurance"),
+   expense("groceries","2026-10-04",400,"groceries"),
+   expense("ticket","2026-10-05",900,"travel")];
+  const view=buildSpendingDiscoveries(s,month);
+  expect(view.paidCount).toBe(4);
+  expect(view.totalRecordedJod).toBe(2720);
+  expect(view.visible).toEqual([]);
+ });
+ it("finds eight delivery orders and counts each transaction only once",()=>{
+  const s=state();
+  s.expenses=[
+   ...Array.from({length:8},(_,i)=>expense("del-"+i,"2026-10-"+String(i+1).padStart(2,"0"),12,"restaurant",
+    i%2?{purpose:"food-delivery"}:{note:"Food delivery"})),
+   expense("sit-down","2026-10-20",40,"restaurant"),
+   expense("tuition","2026-10-21",800,"school")];
   const before=JSON.stringify(s);
-  const result=buildSpendingDiscoveries(s,"2026-10");
-  expect(result.totalRecordedJod).toBe(545);
-  expect(result.paidCount).toBe(4);
-  expect(result.visible.find(g=>g.key==="food-delivery")).toMatchObject({count:2,amountJod:20,targetJod:18});
-  expect(result.visible.find(g=>g.key==="category:restaurant")?.amountJod).toBe(25);
-  expect(result.visible.reduce((n,g)=>n+g.amountJod,0)).toBe(545);
+  const view=buildSpendingDiscoveries(s,month);
+  expect(view.totalRecordedJod).toBe(936);
+  expect(view.paidCount).toBe(10);
+  expect(view.visible[0]).toMatchObject({
+   key:"food-delivery",kind:"food-delivery",signal:"repeated",
+   count:8,amountJod:96,averageJod:12,twoFewerJod:24
+  });
+  expect(view.visible.some(g=>g.key==="category:school")).toBe(false);
   expect(JSON.stringify(s)).toBe(before);
  });
- it("ignores planned expenses, handles a prior month without inventing missing comparisons",()=>{
+ it("makes no discovery from a one-off discretionary purchase or two small orders",()=>{
   const s=state();
-  s.expenses=[expense("old","2026-09-10",60,"restaurant"),
-   expense("now","2026-10-10",30,"restaurant"),
-   expense("plan","2026-10-11",100,"restaurant",{status:"planned"}),
-   expense("invalid","2026-10-12",Number.NaN,"restaurant")];
-  const result=buildSpendingDiscoveries(s,"2026-10");
-  expect(result.visible[0]).toMatchObject({amountJod:30,count:1,previousMonthJod:60,previousCount:1});
-  expect(result.paidCount).toBe(1);
-  s.expenses=s.expenses.filter(e=>e.id!=="old");
-  expect(buildSpendingDiscoveries(s,"2026-10").visible[0]?.previousMonthJod).toBeNull();
+  s.expenses=[expense("a","2026-10-01",400,"restaurant"),
+   expense("b","2026-10-02",8,"restaurant",{purpose:"food-delivery"}),
+   expense("c","2026-10-04",10,"restaurant",{purpose:"food-delivery"})];
+  expect(buildSpendingDiscoveries(s,month).visible).toEqual([]);
  });
- it("recognizes explicit delivery budget items, keeps uncategorized expenses visible",()=>{
+ it("detects repeated restaurant purchases and a supported rise versus the prior month",()=>{
   const s=state();
-  s.budgetItems=[{id:"delivery",categoryId:"restaurant",name:"Food delivery",amountJod:100,frequency:"monthly",enabled:true,behaviour:"variable",priority:"flexible"}];
-  s.expenses=[expense("a","2026-10-01",15,"restaurant",{budgetItemId:"delivery"}),
-   expense("b","2026-10-02",7,"uncategorized")];
-  const v=buildSpendingDiscoveries(s,"2026-10");
-  expect(v.visible.some(g=>g.key==="food-delivery"&&g.amountJod===15)).toBe(true);
-  expect(v.visible.some(g=>g.label==="Uncategorized"&&g.amountJod===7)).toBe(true);
+  s.expenses=[expense("a","2026-09-01",20,"restaurant"),expense("b","2026-09-10",20,"restaurant"),
+   expense("c","2026-10-01",40,"restaurant"),expense("d","2026-10-05",40,"restaurant"),
+   expense("e","2026-10-10",40,"restaurant")];
+  expect(buildSpendingDiscoveries(s,month).visible[0]).toMatchObject({
+   signal:"increase",previousMonthJod:40,previousCount:2,increaseJod:80,amountJod:120,count:3
+  });
+  s.expenses=s.expenses.filter(x=>x.id!=="b");
+  expect(buildSpendingDiscoveries(s,month).visible).toEqual([]);
+  s.expenses=[1,2,3,4].map(i=>expense(String(i),"2026-10-0"+i,15,"restaurant"));
+  expect(buildSpendingDiscoveries(s,month).visible[0]).toMatchObject({signal:"repeated",count:4,amountJod:60});
  });
- it("validates month and target amounts without turning targets into budget records",()=>{
+ it("respects explicit protected priorities and excluded paid bills",()=>{
   const s=state();
-  expect(buildSpendingDiscoveries(s,"2026-13").visible).toEqual([]);
+  s.categories[0]={...s.categories[0]!,priority:"protected"};
+  s.expenses=Array.from({length:8},(_,i)=>expense("del-"+i,"2026-10-"+String(i+1).padStart(2,"0"),12,"restaurant",{purpose:"food-delivery"}));
+  expect(buildSpendingDiscoveries(s,month).visible).toEqual([]);
+  s.categories[0]={...s.categories[0]!,priority:"flexible"};
+  s.expenses=s.expenses.map(x=>({...x,billId:"bill123"}));
+  expect(buildSpendingDiscoveries(s,month).visible).toEqual([]);
+ });
+ it("keeps previously set optional targets without changing the expense ledger",()=>{
+  const s=state();
+  s.spendingDiscoveryTargets={"category:restaurant":75,"category:school":500};
+  s.expenses=[expense("a","2026-10-03",20,"restaurant"),
+   expense("b","2026-10-04",800,"school"),
+   expense("c","2026-10-05",10,"uncategorized"),
+   expense("d","2026-10-09",200,"restaurant",{status:"planned"})];
+  const before=JSON.stringify(s);
+  const view=buildSpendingDiscoveries(s,month);
+  expect(view.totalRecordedJod).toBe(830);
+  expect(view.visible).toMatchObject([{key:"category:restaurant",signal:"target",targetJod:75}]);
+  expect(JSON.stringify(s)).toBe(before);
+ });
+ it("rejects invalid months and unrealistic targets",()=>{
+  expect(buildSpendingDiscoveries(state(),"2026-13").visible).toEqual([]);
   expect(discoveryTargetValid(72)).toBe(true);
   expect(discoveryTargetValid(0)).toBe(true);
   expect(discoveryTargetValid(-1)).toBe(false);

@@ -13,22 +13,21 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
  const {lang}=useI18n();
  const t=(en:string,ar:string,fr:string)=>lang==="ar"?ar:lang==="fr"?fr:en;
  const view=buildSpendingDiscoveries(state,localToday().slice(0,7));
- const groups=view.visible.slice(0,4);
- const [key,setKey]=useState<string|null>(null);
+ const groups=view.visible.slice(0,1);
  const [editing,setEditing]=useState(false);
  const [draft,setDraft]=useState("");
  const [error,setError]=useState("");
 
  // Keep the feature visible while family records are incomplete. Do not claim
  // illustrative numbers are the parent's own, and do not require setup.
- const heading=<div className="flex items-start justify-between gap-3">
+ const heading=<div className="flex items-center justify-between gap-3">
    <div>
-    <p className="text-[11px] font-bold uppercase tracking-wider text-[#598770]">{t("Our Money","مال العيلة","Notre budget")}</p>
+    
     <h3 className="mt-1 text-base font-extrabold text-[#285D42]">{t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}</h3>
    </div>
-   <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[#E5F3E6] text-xl">🔎</span>
+   <span aria-hidden="true" className="text-lg">🔎</span>
   </div>;
- const shell="rounded-2xl border border-[#D9E7DB] bg-[linear-gradient(130deg,#F3FAF3,#FFFFFF_70%)] p-4 sm:p-5";
+ const shell="rounded-2xl border border-[#D9E7DB] bg-white p-3 sm:p-4";
  if(state.demo)return <section data-testid="money-spending-discoveries" className={shell}
    aria-label={t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}>
    {heading}
@@ -42,9 +41,9 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
      <span className="text-xs text-[#657F6C]">8 {t("sample orders","طلبات افتراضية","commandes fictives")}</span>
     </div>
     <p className="mt-2 text-xs text-[#667E6C]">{t(
-     "Eight small orders can add up. See where your money goes, then choose whether to set a target.",
-     "ثمانية طلبات صغيرة ممكن يتراكم مبلغها. شوف وين بتروح مصاريفك، وبعدها قرّر إذا بدك تحدّد هدف.",
-     "Huit petites commandes peuvent vite s'additionner. Découvrez vos dépenses, puis choisissez votre objectif."
+     "At 12 JOD per order, two fewer similar orders could mean around 24 JOD less spending.",
+     "إذا الطلب الواحد ١٢ دينار، طلبين أقل ممكن يخفّضوا المصروف بحوالي ٢٤ دينار.",
+     "À 12 JOD par commande, deux commandes similaires en moins pourraient réduire les dépenses d'environ 24 JOD."
     )}</p>
    </div>
    <button type="button" onClick={onStartReal}
@@ -55,27 +54,24 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
  if(view.paidCount<2||groups.length===0)return <section data-testid="money-spending-discoveries" className={shell}
    aria-label={t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}>
    {heading}
-   <p className="mt-3 text-sm font-semibold text-[#355F48]">{t(
-    "Discover what small purchases add up to.","اكتشف قديش بتتراكم المصاريف الصغيرة.","Découvrez combien représentent vos petits achats."
+   <p className="mt-2 text-sm font-semibold text-[#355F48]">{t(
+    "No overlooked spending pattern spotted yet.",
+    "ما ظهر نمط مصاريف غير متوقّع بعد.",
+    "Aucune habitude de dépense inhabituelle repérée pour le moment."
    )}</p>
-   <p className="mt-1 text-xs leading-relaxed text-[#6C8372]">{view.paidCount===0?t(
-    "No paid purchases recorded this month yet. Your first entries will help build a clearer picture.",
-    "ما في مصاريف مدفوعة مسجّلة هالشهر. أول تسجيلاتك بتساعد توضّح الصورة.",
-    "Aucun achat payé enregistré ce mois-ci. Vos premières saisies aideront à mieux comprendre vos dépenses."
-   ):t(
-    "One paid purchase recorded this month. Keep recording as you spend; insights appear once there is enough information.",
-    "مسجّل مصروف مدفوع واحد هالشهر. كمّل التسجيل مع الوقت لتظهر الاكتشافات.",
-    "Un achat payé enregistré ce mois-ci. Continuez au fil des achats pour voir les tendances."
+   <p className="mt-1 text-xs leading-relaxed text-[#6C8372]">{t(
+    "We look for repeated optional purchases, not school fees or essential bills. This reflects only expenses you recorded.",
+    "مندور على المصاريف الاختيارية المتكررة، مش أقساط المدرسة أو الفواتير الأساسية. حسب اللي سجّلته فقط.",
+    "Nous examinons les achats facultatifs répétés, pas les frais scolaires ou les factures essentielles. Selon vos saisies uniquement."
    )}</p>
-   <button type="button" onClick={onRecordExpense}
-    className="mt-3 min-h-11 rounded-xl border border-[#B7D8C2] bg-white px-4 text-sm font-bold text-[#327650]">
+   {view.paidCount===0&&<button type="button" onClick={onRecordExpense}
+    className="mt-2 min-h-10 rounded-xl border border-[#B7D8C2] bg-white px-3 text-xs font-bold text-[#327650]">
     {t("Record an expense","سجّل مصروف","Enregistrer une dépense")}
-   </button>
+   </button>}
   </section>;
- const active=groups.find(g=>g.key===key)??groups[0]!;
+ const active=groups[0]!;
  const food=active.kind==="food-delivery";
  const name=food?t("Food delivery","توصيل الأكل","Livraison de repas"):active.label;
- const select=(value:string)=>{setKey(value);setEditing(false);setError("");};
  const save=(ev:FormEvent)=>{
   ev.preventDefault();
   if(!/^\d{1,6}(?:\.\d{1,2})?$/.test(draft.trim())||!discoveryTargetValid(Number(draft))){
@@ -98,23 +94,35 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
   aria-label={t("Spending discoveries","اكتشافات المصاريف","Découvertes de dépenses")}
   className={shell}>
   {heading}
-  <p className="mt-3 text-xs font-semibold text-[#567F63]">{t("Something worth noticing","مصروف يستحق الانتباه","Une dépense à remarquer")}</p>
-  {groups.length>1&&<div className="mt-3 flex flex-wrap gap-2" aria-label={t("Spending areas","مجالات المصاريف","Catégories de dépenses")}>
-   {groups.map(g=><button key={g.key} type="button" onClick={()=>select(g.key)} aria-pressed={active.key===g.key}
-    className={"min-h-10 max-w-full rounded-full border px-3 text-xs font-semibold "+(active.key===g.key?"border-[#548E6D] bg-[#E4F2E6] text-[#26583F]":"border-[#DDE9DE] bg-white text-[#587262]")}>
-    {g.kind==="food-delivery"?t("Food delivery","توصيل الأكل","Livraison de repas"):g.label}
-   </button>)}
-  </div>}
-  <div className="mt-3 flex flex-wrap items-end justify-between gap-2">
+
+  <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
    <div className="min-w-0">
     <p className="text-sm font-semibold text-[#476A52]">{name}</p>
     <p className="mt-1 text-2xl font-black tabular-nums text-[#285D42]">{fmtJOD(active.amountJod)}</p>
    </div>
    <p className="text-xs font-semibold text-[#597766]">
-    {active.count} {t("recorded purchases","مصاريف مسجلة","achats enregistrés")} · {active.sharePct}% {t("of recorded spending","من المصاريف المسجلة","des dépenses enregistrées")}
+    {active.count} {t("recorded purchases","مصاريف مسجلة","achats enregistrés")}
    </p>
   </div>
-  {active.previousMonthJod!==null&&<p className="mt-2 text-xs text-[#647D6D]">
+  <p className="mt-2 text-sm leading-relaxed text-[#496B57]">{active.signal==="increase"&&active.increaseJod!==null?t(
+    "You have already recorded "+fmtJOD(active.increaseJod)+" more here than last month. Worth a look?",
+    "مصاريفك المسجلة هون صارت أعلى من الشهر الماضي بـ"+fmtJOD(active.increaseJod)+". بتستحق نظرة؟",
+    "Vous avez déjà enregistré "+fmtJOD(active.increaseJod)+" de plus ici que le mois dernier. À examiner ?"
+   ):active.signal==="target"?t(
+    "This is how your recorded purchases compare with the target you chose.",
+    "هيك مصاريفك المسجلة مقارنة بالهدف اللي اخترته.",
+    "Voici vos achats enregistrés par rapport à votre objectif."
+   ):t(
+    "These smaller purchases have added up this month.",
+    "هالمصاريف الصغيرة تراكمت خلال هالشهر.",
+    "Ces petits achats se sont accumulés ce mois-ci."
+   )}</p>
+  {active.signal!=="target"&&active.count>=3&&<p className="mt-1 text-xs leading-relaxed text-[#6A8070]">{t(
+    "Two fewer similar purchases at your recorded average could mean around "+fmtJOD(active.twoFewerJod)+" less spending.",
+    "مصروفين مشابهين أقل، حسب متوسط مصاريفك المسجلة، ممكن يخفّضوا المصروف بحوالي "+fmtJOD(active.twoFewerJod)+".",
+    "Deux achats similaires en moins, au prix moyen enregistré, pourraient réduire les dépenses d'environ "+fmtJOD(active.twoFewerJod)+"."
+   )}</p>}
+  {active.previousMonthJod!==null&&active.signal==="increase"&&<p className="mt-2 text-xs text-[#647D6D]">
    {t("Previous month recorded: ","الشهر السابق مسجّل: ","Mois précédent enregistré : ")}{fmtJOD(active.previousMonthJod)}
   </p>}
   {active.targetJod!==null&&<div className="mt-3 rounded-xl border border-[#D6E7DA] bg-white p-3">
@@ -132,7 +140,7 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
   </div>}
   {!editing?<button type="button" onClick={()=>{setDraft(active.targetJod===null?"":String(active.targetJod));setEditing(true);}}
    className="mt-3 min-h-11 rounded-xl border border-[#B7D8C2] bg-white px-4 text-sm font-bold text-[#327650]">
-   {active.targetJod===null?t("Set a comfortable target","حدّد هدف مناسب","Fixer un objectif réaliste"):
+   {active.targetJod===null?t("Choose a spending target","حدّد هدف للمصروف","Choisir un objectif de dépenses"):
     t("Adjust my target","عدّل هدفي","Modifier mon objectif")}
   </button>:<form onSubmit={save} className="mt-3 rounded-xl border border-[#D6E7DA] bg-white p-3">
    <label className="text-xs font-bold text-[#4E735D]">{t("Monthly target · JOD","الهدف الشهري · دينار","Objectif mensuel · JOD")}
