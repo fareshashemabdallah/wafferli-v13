@@ -25,73 +25,70 @@ vi.mock("@/components/FamilyTasksPanel",()=>({
 beforeEach(()=>localStorage.clear());
 afterEach(()=>{cleanup();localStorage.clear();vi.restoreAllMocks()});
 const draw=()=>render(<I18nProvider><FamilyLifePage/></I18nProvider>);
+const dateKey=(d:Date)=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+const inDays=(days:number)=>{const date=new Date();date.setDate(date.getDate()+days);return dateKey(date);};
 
-describe("Family Life: one pillar with all existing family functionality",()=>{
- it("offers one accessible in-page workspace for Calendar, Plans and Responsibilities",async()=>{
+describe("Family Life: one upcoming action and four direct destinations",()=>{
+ it("opens the existing calendar, plans and tasks without duplicate tabs or writes",()=>{
   draw();
-  expect(screen.getByRole("heading",{level:1,name:"Family Life"})).toBeInTheDocument();
-  expect(screen.queryByTestId("parents-say-entry")).not.toBeInTheDocument();
-  const nav=screen.getByRole("navigation",{name:"Family Life sections"});
-  expect(nav.querySelectorAll("button")).toHaveLength(4);
-  fireEvent.click(screen.getByRole("button",{name:"Special Moments"}));
+  expect(screen.getByRole("heading",{level:1,name:"Family"})).toBeInTheDocument();
+  expect(screen.getByTestId("family-simple-hub")).toBeInTheDocument();
+  expect(screen.queryByRole("navigation",{name:"Family Life sections"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:/Special moments/}));
   expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-embedded","true");
-  expect(screen.queryByTestId("embedded-plans")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button",{name:"Our Plans"}));
+  fireEvent.click(screen.getByRole("button",{name:"Family home"}));
+  fireEvent.click(screen.getByRole("button",{name:/Our plans/}));
   expect(screen.getByTestId("embedded-plans")).toHaveAttribute("data-embedded","true");
-  fireEvent.click(screen.getByRole("button",{name:"Family Tasks"}));
+  fireEvent.click(screen.getByRole("button",{name:"Family home"}));
+  fireEvent.click(screen.getByRole("button",{name:/Family tasks/}));
   expect(screen.getByTestId("embedded-tasks")).toBeInTheDocument();
   expect(localStorage.getItem("wafferli.v13.familyCalendar")).toBeNull();
   expect(localStorage.getItem("wafferli.v13.familyPlans")).toBeNull();
  });
- it("uses actual saved profiles, dates and plans without showing sample family as real",async()=>{
+ it("shows one real upcoming moment while keeping saved profiles and plans unchanged",async()=>{
   localStorage.setItem("wafferli.v13.members",JSON.stringify([...sampleMembers(),{
-   id:"parent-1",name:"Mira",role:"adult",ageGroup:"30–44",prefs:""}]));
-  const date=new Date();date.setDate(date.getDate()+2);
-  const localDate=[date.getFullYear(),String(date.getMonth()+1).padStart(2,"0"),String(date.getDate()).padStart(2,"0")].join("-");
-  localStorage.setItem("wafferli.v13.familyCalendar",JSON.stringify([
-   {id:"event1",title:"School recital",date:localDate,kind:"school",annual:false}
-  ]));
-  localStorage.setItem("wafferli.v13.familyPlans",JSON.stringify([
-   {id:"trip1",title:"Visit grandparents",date:localDate,kind:"outing",status:"planning",
-    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}
-  ]));
+   id:"parent-1",name:"Mira",role:"adult",ageGroup:"30–44",prefs:""
+  }]));
+  const date=inDays(2);
+  const event={id:"event1",title:"School recital",date,kind:"school",annual:false};
+  const trip={id:"trip1",title:"Visit grandparents",date,kind:"outing",status:"planning",
+   createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+  localStorage.setItem("wafferli.v13.familyCalendar",JSON.stringify([event]));
+  localStorage.setItem("wafferli.v13.familyPlans",JSON.stringify([trip]));
   draw();
   await waitFor(()=>expect(screen.getByText("School recital")).toBeInTheDocument());
-  expect(screen.getByText("Visit grandparents")).toBeInTheDocument();
   expect(screen.queryByText("Partner (sample)")).not.toBeInTheDocument();
-  expect(screen.getByText("Family members").previousElementSibling).toHaveTextContent("1");
-  expect(screen.getByRole("link",{name:"Manage family members"})).toHaveAttribute("href","/space");
-  fireEvent.click(screen.getByRole("button",{name:"Prepare School recital"}));
-  expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-focus",localDate);
-  expect(screen.queryByTestId("embedded-plans")).not.toBeInTheDocument();
+  expect(screen.getByRole("link",{name:/Family members Profiles and preferences/})).toHaveAttribute("href","/space");
+  fireEvent.click(screen.getByRole("button",{name:"Prepare this moment"}));
+  expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-focus",date);
+  expect(localStorage.getItem("wafferli.v13.familyPlans")).toBe(JSON.stringify([trip]));
+  fireEvent.click(screen.getByRole("button",{name:"Family home"}));
+  fireEvent.click(screen.getByRole("button",{name:/Our plans/}));
+  expect(screen.getByTestId("embedded-plans")).toBeInTheDocument();
  });
- it("reads one corrected birthday across Family dates and linked plan buttons without rewriting stored financial decisions",async()=>{
-  const local=(d:Date)=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
-  const original=new Date();original.setDate(original.getDate()+3);
-  const corrected=new Date();corrected.setDate(corrected.getDate()+8);
-  const oldDate=local(original),newDate=local(corrected);
+ it("uses the corrected birthday and does not rewrite the linked plan or calendar",async()=>{
+  const oldDate=inDays(3),newDate=inDays(8);
   localStorage.setItem("wafferli.v13.members",JSON.stringify([
-   {id:"child-1",name:"Sophie",role:"child",ageGroup:"",prefs:"",
-    birthdayMonthDay:newDate.slice(5)}
+   {id:"child-1",name:"Sophie",role:"child",ageGroup:"",prefs:"",birthdayMonthDay:newDate.slice(5)}
   ]));
-  const stale={
-   id:"gift-1",kind:"occasion",title:"Sophia's birthday",status:"planning",
+  const stale={id:"gift-1",kind:"occasion",title:"Sophia's birthday",status:"planning",
    date:oldDate,sourceRef:"occasion:member-birthday:child-1@"+newDate.slice(0,4),
-   budgetJod:85,createdAt:"2026-01-01T12:00:00Z",updatedAt:"2026-01-01T12:00:00Z"
-  };
+   budgetJod:85,createdAt:"2026-01-01T12:00:00Z",updatedAt:"2026-01-01T12:00:00Z"};
   localStorage.setItem("wafferli.v13.familyPlans",JSON.stringify([stale]));
   draw();
-  await waitFor(()=>expect(screen.getByRole("button",{name:"Continue plan: Sophie's birthday"})).toBeInTheDocument());
-  expect(screen.getByRole("button",{name:"Prepare Sophie's birthday"})).toBeInTheDocument();
-  expect(screen.queryByRole("button",{name:"Continue plan: Sophia's birthday"})).not.toBeInTheDocument();
+  await waitFor(()=>expect(screen.getByText("Sophie's birthday")).toBeInTheDocument());
+  expect(screen.queryByText("Sophia's birthday")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Prepare this moment"}));
+  expect(screen.getByTestId("embedded-calendar")).toHaveAttribute("data-focus",newDate);
   expect(localStorage.getItem("wafferli.v13.familyPlans")).toBe(JSON.stringify([stale]));
   expect(localStorage.getItem("wafferli.v13.familyCalendar")).toBeNull();
  });
- it("retains linked celebration planning without exposing retired outings or circles",()=>{
+ it("keeps celebrations through the real calendar, without retired experience menus",()=>{
   draw();
-  fireEvent.click(screen.getByText("More family experiences"));
-  expect(screen.getByRole("link",{name:"Celebrations"})).toHaveAttribute("href","/occasions");
+  expect(screen.queryByText("More family experiences")).not.toBeInTheDocument();
   expect(screen.queryByRole("link",{name:"Outings"})).not.toBeInTheDocument();
   expect(screen.queryByRole("link",{name:"Family & Friends Circles"})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:/Special moments/}));
+  expect(screen.getByTestId("embedded-calendar")).toBeInTheDocument();
  });
 });
