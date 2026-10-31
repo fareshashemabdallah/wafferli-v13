@@ -1,94 +1,65 @@
 import {useState} from "react";
-import {Brain,ChevronDown,Clock3,Heart,MoveRight,Sparkles,X} from "lucide-react";
+import {Link} from "@tanstack/react-router";
+import {ArrowRight,Brain,ChevronDown,Clock3,Heart,Lightbulb,Sparkles} from "lucide-react";
 import {useI18n} from "@/lib/i18n";
 import {frenchUI} from "@/lib/french";
 import type {Member} from "@/lib/money";
-import {knownChildAges,weeklyPlaySelection,type PlayCategory} from "@/lib/weeklyPlay";
+import {knownChildAges,weeklyPlaySelection} from "@/lib/weeklyPlay";
 import {WeeklyGameArt} from "./WeeklyGameArt";
 
-const colours:Record<PlayCategory,{card:string,accent:string}>={
- focus:{card:"bg-[#F3ECFF] border-[#DDD1F6]",accent:"text-[#6A4B9F]"},
- movement:{card:"bg-[#E8F5EF] border-[#CBE8D7]",accent:"text-[#287553]"},
- creative:{card:"bg-[#FFF0E6] border-[#F8DFCC]",accent:"text-[#A45B30]"}
-};
-
-/** Optional, read-only Today feature: no second navigation destination,
- * profile form, streak, purchase, completion score, or persistence. */
+/** One short screen activity plus existing parent-led weekly games.
+ * No extra child profile, subscriptions, scores or secondary play database. */
 export function WeeklyPlay({members}:{members:readonly Member[]}){
  const {lang}=useI18n(),ar=lang==="ar";
- const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
+ const t=(en:string,arabic:string,fr?:string)=>ar?arabic:lang==="fr"?(fr??frenchUI(en)):en;
+ const [more,setMore]=useState(false);
  const [selected,setSelected]=useState<string|null>(null);
  const games=weeklyPlaySelection(members);
  const open=games.find(g=>g.id===selected);
  const ages=knownChildAges(members);
- return <section aria-label={t("This week's play","ألعاب هالأسبوع")}
-  className="rounded-[1.5rem] border border-[#E2E7D9] bg-[#FFFEF9] p-4 shadow-[0_12px_30px_-26px_rgba(44,71,55,.21)] sm:p-5"
-  data-testid="today-weekly-play">
-  <div className="flex items-start justify-between gap-3">
-   <div className="min-w-0">
-    <h2 className="flex items-center gap-2 text-sm font-extrabold text-[#375B48]">
-     <Sparkles className="size-4 text-[#B16D49]" aria-hidden="true"/>{t("This Week's Play","ألعاب هالأسبوع")}
-    </h2>
-    <p className="mt-1 text-xs leading-relaxed text-[#6E8073]">
-     {t("Three little games to enjoy together — refreshed every Monday.","٣ ألعاب صغيرة تلعبوها سوا — بتتجدّد كل يوم اثنين.")}
-    </p>
+ return <section aria-label={t("Play together","نلعب سوا","Jouons ensemble")}
+   className="rounded-[1.6rem] border border-[#D9E9DC] bg-white p-4 shadow-[0_16px_36px_-30px_rgba(40,89,54,.25)] sm:p-5"
+   data-testid="today-weekly-play">
+  <div className="flex items-start gap-3">
+   <WeeklyGameArt gameId="whats-missing" category="focus" className="aspect-[240/154] w-[114px] shrink-0 rounded-2xl sm:w-[160px]"/>
+   <div className="min-w-0 flex-1">
+    <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#41825E]"><Sparkles className="size-4"/>{t("LITTLE EXPLORERS","المستكشفون الصغار","PETITS EXPLORATEURS")}</div>
+    <h2 className="mt-1 text-base font-extrabold text-[#2C5140]">{t("What disappeared?","شو اختفى؟","Qu'est-ce qui a disparu ?")}</h2>
+    <p className="mt-1 text-xs leading-relaxed text-[#62786B]">{t("A tiny memory game, then explore together offline.","لعبة ذاكرة قصيرة، وبعدها اكتشفوا سوا بعيد عن الشاشة.","Un petit jeu de mémoire, puis explorez ensemble sans écran.")}</p>
+    <p className="mt-2 flex items-center gap-1.5 text-[11px] text-[#5E7866]"><Clock3 className="size-3.5"/>{t("Ages 4–5 · About 3 min","عمر ٤–٥ · حوالي ٣ دقائق","4–5 ans · Environ 3 min")}</p>
    </div>
-   <span className="shrink-0 rounded-full bg-[#EDF3E8] px-2.5 py-1 text-[10px] font-bold text-[#4A795F]">
-    {t("Free","مجاني")}
-   </span>
   </div>
-  <div className="mt-3 grid grid-cols-3 gap-2" role="group" aria-label={t("This week's three games","ألعاب الأسبوع الثلاثة")}>
-   {games.map(g=>{
-    const colour=colours[g.category],active=selected===g.id;
-    return <button type="button" key={g.id} aria-expanded={active} aria-controls="weekly-play-detail"
-     onClick={()=>setSelected(active?null:g.id)}
-     className={"min-w-0 rounded-2xl border p-2.5 text-start transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#358E6A] sm:p-3 "+colour.card+
-      (active?" ring-2 ring-[#4A8A6B]":" hover:brightness-[.98]")}>
-     <WeeklyGameArt gameId={g.id} category={g.category} className="mb-2 block aspect-[240/154] w-full rounded-xl"/>
-     <span className="block break-words text-[11px] font-extrabold leading-tight text-[#33493E] sm:text-sm">{ar?g.ar:lang==="fr"?frenchUI(g.en):g.en}</span>
-     <span className={"mt-2 block text-[10px] font-semibold leading-snug "+colour.accent}>
-      <span className="block opacity-80">{t("Helps with","يساعد على")}</span>
-      <span>{ar?g.helpsAr:lang==="fr"?frenchUI(g.helpsEn):g.helpsEn}</span>
+  <Link to="/explorers" className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#2E805D] px-4 text-sm font-extrabold text-white shadow-sm hover:bg-[#24694D] focus-visible:ring-2 focus-visible:ring-[#2E805D]">
+   {t("Play now","العب هلّق","Jouer maintenant")}<ArrowRight className="size-4 rtl:rotate-180"/>
+  </Link>
+  <button type="button" className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 text-xs font-bold text-[#39775A]"
+   aria-expanded={more} onClick={()=>{setMore(v=>!v);setSelected(null);}}>
+   {t("More games without a screen","ألعاب كمان بلا شاشة","D'autres jeux sans écran")}<ChevronDown className={"size-4 transition-transform "+(more?"rotate-180":"")}/>
+  </button>
+  {more&&<div className="space-y-2 border-t border-[#E2EEE3] pt-3">
+   <p className="text-xs leading-relaxed text-[#69816F]">{t("Three fresh ideas each week, guided by the children's saved ages.","٣ أفكار كل أسبوع بحسب أعمار الأطفال المحفوظة.","Trois idées par semaine, adaptées aux âges enregistrés.")}</p>
+   {games.map(g=><div key={g.id} className="rounded-xl border border-[#E0EADF] bg-[#FCFEFA]">
+    <button type="button" aria-expanded={selected===g.id} onClick={()=>setSelected(selected===g.id?null:g.id)}
+     className="flex min-h-14 w-full items-center gap-3 px-3 py-2 text-start">
+     <span className="text-2xl" aria-hidden="true">{g.emoji}</span>
+     <span className="min-w-0 flex-1">
+      <span className="block text-sm font-bold text-[#375943]">{ar?g.ar:lang==="fr"?frenchUI(g.en):g.en}</span>
+      <span className="block text-xs text-[#718478]">{g.minutes} {t("min","د","min")} · {ar?g.helpsAr:lang==="fr"?frenchUI(g.helpsEn):g.helpsEn}</span>
      </span>
-     <span className="mt-1 flex items-center gap-1 text-[10px] text-[#65766D]"><Clock3 className="size-3" aria-hidden="true"/>{g.minutes} {t("min","د")}</span>
-     <span className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[#3D6A50]">
-      {t("How to play","كيف نلعب؟")}<ChevronDown className={"size-3 transition "+(active?"rotate-180":"")} aria-hidden="true"/>
-     </span>
-    </button>;
-   })}
-  </div>
-  {open&&<div id="weekly-play-detail" className="mt-3 rounded-2xl border border-[#D9E7D8] bg-white p-3 sm:p-4"
-   aria-label={t("Game instructions","طريقة اللعب")}>
-   <div className="flex items-start justify-between gap-3">
-    <div>
-     <p className="text-xs font-semibold text-[#3B8260]">{open.emoji} {ar?open.ar:lang==="fr"?frenchUI(open.en):open.en}</p>
-     <p className="mt-1 text-sm text-[#536B5E]">{ar?open.descriptionAr:lang==="fr"?frenchUI(open.descriptionEn):open.descriptionEn}</p>
-    </div>
-    <button type="button" onClick={()=>setSelected(null)} aria-label={t("Close instructions","أغلق التعليمات")}
-     className="grid size-10 shrink-0 place-items-center rounded-full bg-[#F2F6F0] text-[#4B6F5A] focus-visible:ring-2 focus-visible:ring-[#358E6A]"><X className="size-4"/></button>
-   </div>
-   <div className="mt-3 rounded-xl bg-[#EFF6EF] px-3 py-3 text-sm text-[#43614E]">
-    <h3 className="flex items-center gap-2 text-xs font-extrabold text-[#357A54]">
-     <Brain className="size-4" aria-hidden="true"/>{t("Why it matters","ليش هاللعبة مفيدة؟")}
-    </h3>
-    <p className="mt-1 leading-relaxed">{ar?open.whyAr:lang==="fr"?frenchUI(open.whyEn):open.whyEn}</p>
-   </div>
-   <ol className="mt-3 space-y-2">
-    {(ar?open.stepsAr:lang==="fr"?open.stepsEn.map(step=>frenchUI(step)):open.stepsEn).map((step,i)=><li key={i} className="flex gap-2 text-sm leading-relaxed">
-     <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#E7F2E8] text-xs font-bold text-[#35724F]">{i+1}</span>
-     <span>{step}</span>
-    </li>)}
-   </ol>
-   <p className="mt-3 rounded-xl bg-[#F4F7F1] px-3 py-2 text-xs leading-relaxed text-[#496451]">
-    <Heart className="me-1 inline size-3.5" aria-hidden="true"/>{ar?open.adaptAr:lang==="fr"?frenchUI(open.adaptEn):open.adaptEn}
-   </p>
-   <p className="mt-2 text-[11px] leading-relaxed text-[#75847A]">
-    {t("Suggested ages: ","أعمار مقترحة: ")}{open.minAge}–{open.maxAge} · {t("Play together, supervise, and stop if your child isn't enjoying it.","العبوا سوا، راقبوا الأطفال، ووقفوا إذا ما عادوا مستمتعين.")}
-   </p>
+     <ChevronDown className={"size-4 shrink-0 text-[#6D8573] transition-transform "+(selected===g.id?"rotate-180":"")}/>
+    </button>
+    {open?.id===g.id&&<div className="border-t border-[#E0EADF] px-4 pb-4 pt-3">
+     <p className="text-xs leading-relaxed text-[#536B5C]">{ar?g.descriptionAr:lang==="fr"?frenchUI(g.descriptionEn):g.descriptionEn}</p>
+     <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-[#3E5C49]">
+      {(ar?g.stepsAr:lang==="fr"?g.stepsEn.map(x=>frenchUI(x)):g.stepsEn).map((step,i)=><li key={i}>{step}</li>)}
+     </ol>
+     <p className="mt-3 flex items-start gap-2 rounded-xl bg-[#F1F7ED] p-3 text-xs leading-relaxed text-[#54705D]">
+      <Brain className="mt-0.5 size-4 shrink-0"/>{ar?g.whyAr:lang==="fr"?frenchUI(g.whyEn):g.whyEn}
+     </p>
+     <p className="mt-2 flex items-start gap-2 text-xs text-[#738779]"><Heart className="size-4 shrink-0"/>{ar?g.adaptAr:lang==="fr"?frenchUI(g.adaptEn):g.adaptEn}</p>
+    </div>}
+   </div>)}
+   <p className="flex items-center gap-1.5 text-[11px] text-[#6D8175]"><Lightbulb className="size-4"/>{ages.length?t("No scores or tracking.","بلا علامات أو متابعة.","Ni score ni suivi."):t("Add children's ages only if you wish.","أضف أعمار الأطفال بس إذا بدك.","Ajoutez les âges seulement si vous le souhaitez.")}</p>
   </div>}
-  <p className="mt-3 flex items-center gap-1.5 text-[11px] text-[#78877A]">
-   {ages.length?<><Brain className="size-3.5" aria-hidden="true"/>{t("Ideas guided by saved child ages. No scores or tracking.","أفكار بحسب الأعمار المحفوظة، بلا علامات أو متابعة.")}</>:
-    <><MoveRight className="size-3.5" aria-hidden="true"/>{t("Easy starter ideas. Add ages only if you wish.","أفكار بسيطة للبداية. إضافة الأعمار اختيارية.")}</>}
-  </p>
  </section>;
 }
