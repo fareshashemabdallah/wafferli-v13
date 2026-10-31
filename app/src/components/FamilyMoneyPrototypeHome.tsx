@@ -13,13 +13,13 @@ import {SpendingDiscoveries} from "./SpendingDiscoveries";
 
 type Props={
  state:MoneyState;setState:(v:MoneyState|((p:MoneyState)=>MoneyState))=>void;forecast:RhythmForecast;
- onIncome:()=>void;onQuickAdd:()=>void;onBills:()=>void;onSpending:()=>void;onReviewUncategorized:()=>void;onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
+ onIncome:()=>void;onQuickAdd:()=>void;onStartReal:()=>void;onBills:()=>void;onSpending:()=>void;onReviewUncategorized:()=>void;onEditCategory:(selection:{id?:string;starter?:CategoryPicture})=>void;
 };
 /** The approved Money foundation: monthly numbers, spending mix, categories.
  * Money facts are read from canonical state and the existing category editor.
  * No second category breakdown, savings intake, or planning-tools menu.
  */
-export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQuickAdd,onBills,onSpending,onReviewUncategorized,onEditCategory}:Props){
+export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQuickAdd,onStartReal,onBills,onSpending,onReviewUncategorized,onEditCategory}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const [showAll,setShowAll]=useState(false);
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
@@ -35,7 +35,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQui
  return <div className="space-y-4" data-testid="prototype-money-home">
   <OneMoneyDashboardSummary state={state} forecast={forecast}
    onIncome={onIncome} onExpense={onQuickAdd} onBills={onBills} onSpending={onSpending} onReviewUncategorized={onReviewUncategorized} onOpenCategory={openCategory}/>
-  <SpendingDiscoveries state={state} setState={setState}/>
+  <SpendingDiscoveries state={state} setState={setState} onStartReal={onStartReal} onRecordExpense={onQuickAdd}/>
   <section id="money-category-cards" className="scroll-mt-4 space-y-3"
    aria-label={t("Where our money goes","وين بتروح مصاريف العيلة")}>
    {activeCategory&&state.categories.some(c=>c.id===activeCategory)?<div className="space-y-3">
