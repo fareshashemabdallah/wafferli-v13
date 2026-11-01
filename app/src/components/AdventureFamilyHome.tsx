@@ -120,7 +120,7 @@ export function AdventureFamilyHome(){
       <strong className="mt-1 block text-lg text-[#307855]">{ready?fmtJOD(brief?.upcomingBillsJod??0):t("Loading","جار التحميل")}</strong>
      </div>
      <div className="rounded-xl bg-[#FFF5F7] p-3">
-      <p className="text-xs text-[#866874]">{t("Paid · this month","المدفوع · هالشهر")}</p>
+      <p className="text-xs text-[#866874]">{t("Paid · this cycle","المدفوع · دورة الراتب")}</p>
       <strong className="mt-1 block text-lg text-[#B34D7C]">{ready?fmtJOD(brief?.monthPaidJod??0):t("Loading","جار التحميل")}</strong>
      </div>
     </div>
