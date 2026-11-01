@@ -19,6 +19,8 @@ export type MoneyState = {
   hiddenStarterGroups?:import("./familyCategoryCards").CategoryPicture[];
   /** Explicitly distinguishes a parent-entered zero income from unknown income. */
   incomeKnown?:boolean; incomeConfidence?:"estimate"|"confirmed";
+  /** Optional parent-selected day (1-28) that starts each financial salary cycle. */
+  cycleStartDay?:number;
   /** A one-fact-at-a-time estimate does NOT describe the entire household budget. */
   financialInputsPartial?:boolean;
   /** Declared priorities for family life, not automatically deducted or shared. */
