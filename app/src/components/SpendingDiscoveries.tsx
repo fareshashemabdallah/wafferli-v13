@@ -4,6 +4,7 @@ import {fmtJOD} from "@/lib/storage";
 import {localToday} from "@/lib/cashflow";
 import {type MoneyState} from "@/lib/money";
 import {buildSpendingDiscoveries,discoveryTargetValid} from "@/lib/spendingDiscoveries";
+import {moneyCycleFor} from "@/lib/moneyCycle";
 
 type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>MoneyState))=>void;onStartReal:()=>void;onRecordExpense:()=>void};
 /** One optional insight inside Our Money, never another finance dashboard.
@@ -12,7 +13,8 @@ type Props={state:MoneyState;setState:(next:MoneyState|((prev:MoneyState)=>Money
 export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}:Props){
  const {lang}=useI18n();
  const t=(en:string,ar:string,fr:string)=>lang==="ar"?ar:lang==="fr"?fr:en;
- const view=buildSpendingDiscoveries(state,localToday().slice(0,7));
+ const cycle=moneyCycleFor(state,localToday());
+ const view=buildSpendingDiscoveries(state,cycle.key,cycle);
  const groups=view.visible.slice(0,1);
  const [editing,setEditing]=useState(false);
  const [draft,setDraft]=useState("");
