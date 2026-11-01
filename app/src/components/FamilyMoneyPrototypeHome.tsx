@@ -2,6 +2,7 @@ import {frenchUI} from "@/lib/french";
 import {useState} from "react";
 import {useI18n} from "@/lib/i18n";
 import {computeMoney,type MoneyState} from "@/lib/money";
+import {moneyCycleFor,cyclePaidTotal} from "@/lib/moneyCycle";
 import {fmtJOD} from "@/lib/storage";
 import {confirmedMonthPlan} from "@/lib/monthAwareMoney";
 import {localToday} from "@/lib/cashflow";
@@ -23,10 +24,12 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQui
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
  const [showAll,setShowAll]=useState(false);
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
- const totals=computeMoney(state);
+ const [cycleEditor,setCycleEditor]=useState(false);
+ const cycle=moneyCycleFor(state,localToday());
+ const totals=computeMoney(state,new Date(cycle.start+"T12:00:00"));
  const allCategories=[...state.categories].sort((a,b)=>totals.plannedBy(b.id)-totals.plannedBy(a.id));
  const displayed=showAll?allCategories:allCategories.slice(0,5);
- const month=localToday().slice(0,7);
+ const month=cycle.key;
  const openCategory=(id:string)=>{
   setActiveCategory(id);
   window.requestAnimationFrame?.(()=>document.getElementById("active-money-category")?.scrollIntoView?.({behavior:"smooth",block:"start"}));
@@ -35,6 +38,18 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQui
  return <div className="space-y-4" data-testid="prototype-money-home">
   <OneMoneyDashboardSummary state={state} forecast={forecast}
    onIncome={onIncome} onExpense={onQuickAdd} onBills={onBills} onSpending={onSpending} onReviewUncategorized={onReviewUncategorized} onOpenCategory={openCategory}/>
+  {!state.demo&&<div className="flex flex-wrap items-center gap-2 text-xs text-[#64816B]">
+   <span>{t("Reporting starts on day","بداية الدورة يوم")} {cycle.day} · {t(cycle.source==="income-payday"?"Based on monthly payday":cycle.source==="explicit"?"Your chosen date":"Calendar-month default",
+     cycle.source==="income-payday"?"حسب موعد الراتب الشهري":cycle.source==="explicit"?"حسب اختيارك":"افتراض الشهر الميلادي")}</span>
+   <button className="font-bold underline" type="button" onClick={()=>setCycleEditor(x=>!x)}>{t("Change","تغيير")}</button>
+   {cycleEditor&&<label className="flex items-center gap-2">{t("Start day","يوم البداية")}
+    <select aria-label={t("Money cycle start day","يوم بداية الدورة المالية")} className="rounded-lg border bg-white p-2" value={cycle.day}
+      onChange={e=>setState(s=>({...s,cycleStartDay:Number(e.target.value)}))}>
+     {Array.from({length:28},(_,i)=>i+1).map(day=><option key={day} value={day}>{day}</option>)}
+    </select>
+    {state.cycleStartDay!==undefined&&<button type="button" className="underline" onClick={()=>setState(s=>{const {cycleStartDay:unused,...rest}=s;return rest;})}>{t("Use payday","موعد الراتب")}</button>}
+   </label>}
+  </div>}
   <SpendingDiscoveries state={state} setState={setState} onStartReal={onStartReal} onRecordExpense={onQuickAdd}/>
   <section id="money-category-cards" className="scroll-mt-4 space-y-3"
    aria-label={t("Where our money goes","وين بتروح مصاريف العيلة")}>
@@ -59,7 +74,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQui
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5" data-testid="money-category-preview">
      {displayed.map(cat=>{
       const pic=pictureFor(iconForCategory(cat));
-      const total=totals.plannedBy(cat.id),paid=totals.spentBy(cat.id);
+      const total=totals.plannedBy(cat.id),paid=cyclePaidTotal(state,cycle,cat.id);
       const pct=total>0?Math.max(0,Math.min(100,paid/total*100)):paid>0?100:0;
       const group=visualGroupOf(cat);
       const first=STARTER_PICTURES.some(p=>p.key===group)&&state.categories.find(c=>visualGroupOf(c)===group)?.id===cat.id;
