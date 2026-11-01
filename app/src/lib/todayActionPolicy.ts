@@ -6,6 +6,7 @@ import {dateKey,shiftDays,upcomingMoments,type FamilyMoment} from "./familyCalen
 import {planKey} from "./occasionAdvisor";
 import {canonicalFamilyReadModel,occasionSourceRef} from "./canonicalFamilyFacts";
 import type {MoneyState,Member} from "./money";
+import {moneyCycleFor,cyclePaidTotal} from "./moneyCycle";
 import type {FamilyPlan} from "./familyPlans";
 import type {FamilyPreferences} from "./familyPreferences";
 
@@ -186,6 +187,6 @@ export function buildTodayActionPolicy(input:{
   reality.kind==="essentials-gap"||reality.kind==="plan-gap"||reality.kind==="tight"||reality.forecastCashRisk?
   "risk":reality.kind==="unknown"||money.financialInputsPartial?"partial":"estimated",
   cashVerified:false,
-  upcomingBillsJod:bill7,monthPaidJod:money.demo?null:overview.month.spent,
+  upcomingBillsJod:bill7,monthPaidJod:money.demo?null:cyclePaidTotal(money,moneyCycleFor(money,today)),
   plannedGiftJod:gift??null};
 }
