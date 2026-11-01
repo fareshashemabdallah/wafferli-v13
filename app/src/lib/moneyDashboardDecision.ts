@@ -3,6 +3,7 @@ import type {RhythmForecast} from "./familyMoneyRhythm";
 import {roundJod} from "./cashflow";
 import {oneMoneyDashboard} from "./oneMoneyDashboard";
 import {spendingMixSummary} from "./spendingMixSummary";
+import {moneyCycleFor} from "./moneyCycle";
 
 /** Read-only priorities derived from the original family ledger and forecast.
  * No second budget, due-date record, payment entry, or bank balance is created.
@@ -14,7 +15,8 @@ export type MoneyDashboardAction={
 };
 export function moneyDashboardDecision(state:MoneyState,forecast:RhythmForecast,today:string){
  const overview=oneMoneyDashboard(state,forecast,today);
- const mix=spendingMixSummary(state,today.slice(0,7));
+ const cycle=moneyCycleFor(state,today);
+ const mix=spendingMixSummary(state,cycle.key,cycle);
  const unclassifiedRows=mix.unassigned.filter(row=>row.kind==="unclassified");
  const unclassifiedPlanned=mix.unclassified;
  const unclassifiedPaid=roundJod(unclassifiedRows.reduce((sum,row)=>sum+row.paid,0));
