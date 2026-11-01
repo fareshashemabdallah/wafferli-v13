@@ -5,6 +5,7 @@ import {useI18n} from "@/lib/i18n";
 import {localToday} from "@/lib/cashflow";
 import {fmtJOD} from "@/lib/storage";
 import {spendingMixSummary} from "@/lib/spendingMixSummary";
+import {moneyCycleFor} from "@/lib/moneyCycle";
 
 type Props={state:MoneyState;onOpenCategory:(id:string)=>void};
 const palette={
@@ -23,7 +24,8 @@ const segmentKeys=["committed","necessary","flexible","cushion","unclassified"] 
 
 export function SpendingMixDashboard({state}:Props){
  const {lang}=useI18n(),ar=lang==="ar",t=(en:string,a:string)=>ar?a:lang==="fr"?frenchUI(en):en;
- const mix=spendingMixSummary(state,localToday().slice(0,7));
+ const cycle=moneyCycleFor(state,localToday());
+ const mix=spendingMixSummary(state,cycle.key,cycle);
  const money=(v:number)=>fmtJOD(v);
  const hasPlan=state.categories.length>0&&mix.totalPlanned>0;
  const extra=mix.unclassified>0;
