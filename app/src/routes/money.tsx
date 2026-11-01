@@ -13,6 +13,7 @@ import {emptyRealMoney} from "@/lib/moneyOverview";
 import {PLAN_MONEY_FOCUS_KEY,type PlanSetupStep} from "@/lib/planBudgetSetup";
 import {FinancialIntelligencePanel} from "@/components/FinancialIntelligencePanel";
 import { localToday } from "@/lib/cashflow";
+import {moneyCycleFor,inMoneyCycle,type MoneyCycle} from "@/lib/moneyCycle";
 import { Pencil, Plus, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -167,6 +168,7 @@ function MoneyPage() {
         members={members}
         budgetItems={s.budgetItems??[]}
         expenses={s.expenses}
+        cycle={moneyCycleFor(s,today())}
         onChange={(apply) => setS(previous=>({...previous,expenses:apply(previous.expenses)}))}
         onRecord={(entry)=>setS(previous=>{
           if(previous.demo||previous.expenses.some(e=>e.id===entry.id)||
@@ -352,8 +354,8 @@ function CategoryForm({ initial, minimumAllocation, onSave, onCancel }: { initia
   );
 }
 
-function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expenses, onChange, onRecord, onDelete, onConfirmPlanned, cashBalance, initialUncategorizedOnly=false }: {
-  cats: Category[]; retiredCategoryNames:Record<string,string>; demo:boolean; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];
+function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expenses, cycle, onChange, onRecord, onDelete, onConfirmPlanned, cashBalance, initialUncategorizedOnly=false }: {
+  cats: Category[]; retiredCategoryNames:Record<string,string>; demo:boolean; members: Member[]; budgetItems: BudgetItem[]; expenses: Expense[];cycle:MoneyCycle;
   onChange: (apply: (existing:Expense[])=>Expense[]) => void; onRecord:(e:Expense)=>void; onDelete: (e:Expense)=>void;
   onConfirmPlanned:(id:string,actual:number,mode:"already"|"deduct"|"untracked")=>void;
   cashBalance:number|null;initialUncategorizedOnly?:boolean;
@@ -389,12 +391,12 @@ function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expe
     setQuickRecorded(true);setQuickError("");
     toast.success(ar?"تم تسجيل المصروف المدفوع.":(lang==="fr"?frenchUI("Paid expense recorded."):"Paid expense recorded."));
   };
-  const month=today().slice(0,7);
+  const inCurrentCycle=(date:string)=>inMoneyCycle(date,cycle);
   const knownCategoryIds=new Set(cats.map(c=>c.id));
-  const sorted=[...expenses].filter(e=>(showHistory||e.date.startsWith(month)||e.status==="planned")&&
-    (!onlyUncategorized||(e.date.startsWith(month)&&e.status!=="planned"&&!knownCategoryIds.has(e.categoryId))))
+  const sorted=[...expenses].filter(e=>(showHistory||inCurrentCycle(e.date)||e.status==="planned")&&
+    (!onlyUncategorized||(inCurrentCycle(e.date)&&e.status!=="planned"&&!knownCategoryIds.has(e.categoryId))))
     .sort((a,b)=>b.date.localeCompare(a.date));
-  const olderCount=expenses.filter(e=>!e.date.startsWith(month)&&e.status!=="planned").length;
+  const olderCount=expenses.filter(e=>!inCurrentCycle(e.date)&&e.status!=="planned").length;
   const catName = (id: string) => cats.find((c) => c.id === id)?.name ?? retiredCategoryNames[id] ?? "Uncategorized";
   return (
     <section className="card-soft mt-6 p-4">
@@ -460,10 +462,10 @@ function Expenses({ cats, retiredCategoryNames, demo, members, budgetItems, expe
         />
       )}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
-       <h3 className="text-sm font-semibold">{onlyUncategorized?(ar?"مصاريف هذا الشهر دون فئة":(lang==="fr"?frenchUI("This month's uncategorized paid expenses"):"This month's uncategorized paid expenses")):showHistory?(ar?"كل المصاريف المسجلة":(lang==="fr"?frenchUI("All recorded expenses"):"All recorded expenses")):(ar?"مصاريف هذا الشهر":(lang==="fr"?frenchUI("This month's expenses"):"This month's expenses"))}</h3>
+       <h3 className="text-sm font-semibold">{onlyUncategorized?(ar?"مصاريف هذه الدورة دون فئة":(lang==="fr"?frenchUI("This cycle's uncategorized paid expenses"):"This month's uncategorized paid expenses")):showHistory?(ar?"كل المصاريف المسجلة":(lang==="fr"?frenchUI("All recorded expenses"):"All recorded expenses")):(ar?"مصاريف هذه الدورة":(lang==="fr"?frenchUI("This cycle's expenses"):"This month's expenses"))}</h3>
        {onlyUncategorized&&<button type="button" onClick={()=>setOnlyUncategorized(false)}
         className="min-h-10 text-xs font-semibold text-brand underline">{ar?"عرض كل المصاريف":(lang==="fr"?frenchUI("Show all expenses"):"Show all expenses")}</button>}
-       {olderCount>0&&!onlyUncategorized&&<button type="button" className="min-h-9 text-xs font-semibold text-brand underline" onClick={()=>setShowHistory(v=>!v)}>{showHistory?(ar?"هذا الشهر فقط":(lang==="fr"?frenchUI("This month only"):"This month only")):(ar?"عرض المصاريف السابقة":(lang==="fr"?frenchUI("Show older expenses"):"Show older expenses"))}</button>}
+       {olderCount>0&&!onlyUncategorized&&<button type="button" className="min-h-9 text-xs font-semibold text-brand underline" onClick={()=>setShowHistory(v=>!v)}>{showHistory?(ar?"هذه الدورة فقط":(lang==="fr"?frenchUI("This cycle only"):"This month only")):(ar?"عرض المصاريف السابقة":(lang==="fr"?frenchUI("Show older expenses"):"Show older expenses"))}</button>}
       </div>
       {sorted.length === 0 ? (
         <p className="mt-4 rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">{ar?"ما في مصاريف مسجّلة هون. سجّل أول مصروف أعلاه.":(lang==="fr"?frenchUI("No spending recorded here yet. Add your first expense above."):"No spending recorded here yet. Add your first expense above.")}</p>
