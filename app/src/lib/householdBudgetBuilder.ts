@@ -167,12 +167,12 @@ export function itemIllustrativeReference(category:Category,item:BudgetItem,refe
 export type RecordedItemSpending={total:number;byItem:Record<string,number>;unassigned:number};
 /** Only paid entries within the selected month count as actual spending.
  * Old records and invalid/deleted item links stay visible as unassigned. */
-export function recordedItemSpending(state:MoneyState,categoryId:string,month:string):RecordedItemSpending{
+export function recordedItemSpending(state:MoneyState,categoryId:string,month:string,cycle?:{start:string;endExclusive:string}):RecordedItemSpending{
  const empty:RecordedItemSpending={total:0,byItem:{},unassigned:0};
  if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))return empty;
  const ids=new Set((state.budgetItems??[]).filter(i=>i.categoryId===categoryId).map(i=>i.id));
  for(const expense of state.expenses){
-  if(expense.categoryId!==categoryId||!expense.date.startsWith(month+"-")||expense.status==="planned"||
+  if(expense.categoryId!==categoryId||!(cycle?expense.date>=cycle.start&&expense.date<cycle.endExclusive:expense.date.startsWith(month+"-"))||expense.status==="planned"||
    !Number.isFinite(expense.amount)||expense.amount<0)continue;
   empty.total=r2(empty.total+expense.amount);
   const itemId=expense.budgetItemId;

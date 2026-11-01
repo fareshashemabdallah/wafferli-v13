@@ -1,28 +1,30 @@
 import {computeMoney,type MoneyState} from "./money";
 import {roundJod,legacyIncome,scheduleDates,type IncomeSource} from "./cashflow";
 import type {RhythmForecast} from "./familyMoneyRhythm";
+import {moneyCycleFor,paidInMoneyCycle,inMoneyCycle} from "./moneyCycle";
 
 /** Everything on the Money landing page is a read-only projection of the same
  * underlying Money records. No new amounts are written by this summary. */
 export function oneMoneyDashboard(state:MoneyState,forecast:RhythmForecast,today:string){
- const year=Number(today.slice(0,4)),month=Number(today.slice(5,7));
- const now=new Date(year,month-1,Number(today.slice(8)),12);
+ const cycle=moneyCycleFor(state,today);
+ const year=Number(cycle.start.slice(0,4)),month=Number(cycle.start.slice(5,7));
+ const now=new Date(year,month-1,Number(cycle.start.slice(8)),12);
  const c=computeMoney(state,now);
  const sources=state.incomeSources??legacyIncome(state.income);
  const incomeKnown=state.demo?false:state.incomeKnown===true||sources.length>0;
  const hasCategoryPlan=state.categories.length>0;
  const scheduledBills=state.commitments??[];
- const paid=state.expenses.filter(e=>e.date.startsWith(today.slice(0,7))&&e.status!=="planned");
+ const paid=paidInMoneyCycle(state,cycle);
  const knownCategoryIds=new Set(state.categories.map(c=>c.id));
  // Real paid entries with no CURRENT category are already in Paid, but not
  // represented by any monthly category allocation (including retired IDs).
  const uncategorizedPaidRecords=paid.filter(e=>!knownCategoryIds.has(e.categoryId));
- const pending=state.expenses.filter(e=>e.status==="planned");
+ const pending=state.expenses.filter(e=>e.status==="planned"&&inMoneyCycle(e.date,cycle));
  const nextIncome=forecast.events.filter(e=>e.kind==="income").sort((a,b)=>a.date.localeCompare(b.date))[0];
  const firstUpcoming=forecast.events.filter(e=>e.kind!=="pace").sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
  const due=forecast.events.filter(e=>e.kind==="bill"||e.kind==="annual");
  const incomeReceivedThisMonth=sources.reduce((sum: number,s:IncomeSource)=>{
-  return sum+(s.receivedDates??[]).reduce((t,date)=>t+(date.startsWith(today.slice(0,7))?
+  return sum+(s.receivedDates??[]).reduce((t,date)=>t+(inMoneyCycle(date,cycle)?
    (s.receivedAmounts?.[date]??s.amount):0),0);
  },0);
  const unlinkedCategories=state.categories.filter(cat=>cat.planned>0&&
@@ -30,7 +32,8 @@ export function oneMoneyDashboard(state:MoneyState,forecast:RhythmForecast,today
  const missingDates=forecast.missingDates;
  const inferredCash=false;
  return {
-  monthKey:today.slice(0,7),incomeKnown,monthlyIncome:incomeKnown?c.monthlyIncome:null,
+  monthKey:cycle.key,cycleStart:cycle.start,cycleEnd:cycle.end,cycleDay:cycle.day,cycleSource:cycle.source,
+  incomeKnown,monthlyIncome:incomeKnown?c.monthlyIncome:null,
   receivedIncome:roundJod(incomeReceivedThisMonth),
   hasCategoryPlan,planned:hasCategoryPlan?c.planned:null,
   paid:roundJod(paid.reduce((sum,e)=>sum+e.amount,0)),

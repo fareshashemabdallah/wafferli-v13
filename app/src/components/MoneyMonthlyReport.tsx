@@ -5,6 +5,7 @@ import type {MoneyState} from "@/lib/money";
 import type {FamilyPlan} from "@/lib/familyPlans";
 import {buildMonthlyMoneyReport} from "@/lib/monthlyMoneyReport";
 import {localToday} from "@/lib/cashflow";
+import {moneyCycleFor} from "@/lib/moneyCycle";
 import {useI18n} from "@/lib/i18n";
 
 type Props={state:MoneyState;plans:readonly FamilyPlan[]};
@@ -34,7 +35,7 @@ export function MoneyMonthlyReport({state,plans}:Props){
  const {lang}=useI18n(),ar=lang==="ar";
  const t=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  const [open,setOpen]=useState(false);
- const [month,setMonth]=useState(localToday().slice(0,7));
+ const [month,setMonth]=useState(moneyCycleFor(state,localToday()).key);
  const report=useMemo(()=>buildMonthlyMoneyReport(state,month,new Date(),plans),[state,month,plans]);
  const fmt=(n:number|null)=>n===null?t("Not recorded","غير مسجل"):number(n)+" "+t("JOD","د.أ");
  const exportPdf=()=>{window.print();};
@@ -47,7 +48,7 @@ export function MoneyMonthlyReport({state,plans}:Props){
    <div className="flex items-center gap-2">
     <FileText className="size-5 text-[#367953]" aria-hidden="true"/>
     <div>
-     <p className="text-sm font-semibold text-[#254D39]">{t("Monthly report","التقرير الشهري")}</p>
+     <p className="text-sm font-semibold text-[#254D39]">{t("Salary-cycle report","تقرير دورة الراتب")}</p>
     </div>
    </div>
    <button type="button" onClick={()=>setOpen(x=>!x)}
@@ -59,9 +60,9 @@ export function MoneyMonthlyReport({state,plans}:Props){
   </div>
   {open&&<div className="mt-3">
    <div className="money-report-screen-only mb-3 flex flex-wrap items-end justify-between gap-3 rounded-xl border border-[#DAE6DD] bg-white p-3">
-    <label className="text-sm font-semibold">{t("Reporting month","شهر التقرير")}
-     <input type="month" value={month} max={localToday().slice(0,7)} min="2000-01"
-      onChange={e=>{if(/^\d{4}-(0[1-9]|1[0-2])$/.test(e.target.value)&&e.target.value<=localToday().slice(0,7))setMonth(e.target.value);}}
+    <label className="text-sm font-semibold">{t("Cycle starting in","الدورة التي تبدأ في")}
+     <input type="month" value={month} max={moneyCycleFor(state,localToday()).key} min="2000-01"
+      onChange={e=>{if(/^\d{4}-(0[1-9]|1[0-2])$/.test(e.target.value)&&e.target.value<=moneyCycleFor(state,localToday()).key)setMonth(e.target.value);}}
       className="mt-1 block min-h-11 rounded-lg border border-[#CBDCCF] px-3" />
     </label>
     <button type="button" onClick={exportPdf}
@@ -77,8 +78,8 @@ export function MoneyMonthlyReport({state,plans}:Props){
     className="rounded-2xl border border-[#D5E2D8] bg-white p-4 text-[#253C30] shadow-sm sm:p-6">
     <header className="mb-5 border-b-2 border-[#387A5D] pb-4">
      <p className="text-xs font-semibold uppercase tracking-wide text-[#438268]">DABBERNA · {t("PRIVATE FAMILY FINANCES","المالية العائلية الخاصة")}</p>
-     <h1 className="mt-1 text-2xl font-bold">{t("Monthly Money Report","التقرير المالي الشهري")}</h1>
-     <p className="money-report-subtitle mt-1 text-sm">{report.month} · {t("Generated","تاريخ الإنشاء")} {report.generatedOn}</p>
+     <h1 className="mt-1 text-2xl font-bold">{t("Salary-cycle Money Report","التقرير المالي لدورة الراتب")}</h1>
+     <p className="money-report-subtitle mt-1 text-sm">{report.periodStart} – {report.periodEnd} · {t("Generated","تاريخ الإنشاء")} {report.generatedOn}</p>
      {report.sample&&<p className="mt-2 rounded-lg bg-amber-50 p-2 text-sm font-bold text-amber-900">{t("DEMO / EXAMPLE FINANCES — not real family data","بيانات تجريبية — ليست المالية الحقيقية للعائلة")}</p>}
      {report.partial&&<p className="mt-2 text-xs font-semibold text-amber-900">{t("Some household information is incomplete.","بعض المعلومات المالية للعائلة غير مكتملة.")}</p>}
     </header>
@@ -159,7 +160,7 @@ export function MoneyMonthlyReport({state,plans}:Props){
     </section>
     <section className="money-report-page mt-5">
      <h2 className="mb-2 text-lg font-bold">{t("5. Itemized recorded expenses","٥. تفاصيل المصاريف المسجلة")}</h2>
-     {report.paidExpenses.length===0?<p className="text-sm">{t("No paid entries recorded for this month.","لا توجد مصاريف مدفوعة مسجلة في هذا الشهر.")}</p>:
+     {report.paidExpenses.length===0?<p className="text-sm">{t("No paid entries recorded for this salary cycle.","لا توجد مصاريف مدفوعة مسجلة خلال دورة الراتب.")}</p>:
       <div className="money-report-scroll overflow-x-auto"><table className="w-full text-xs">
        <thead className="bg-[#EAF3EB]"><tr><th className="p-2 text-start">{t("Paid date","تاريخ الدفع")}</th>
         <th className="p-2 text-start">{t("Category / item","الفئة / البند")}</th>
@@ -176,8 +177,8 @@ export function MoneyMonthlyReport({state,plans}:Props){
      </>}
     </section>
     <section className="mt-5">
-     <h2 className="mb-2 text-lg font-bold">{t("6. Bills and family commitments due this month","٦. الفواتير والالتزامات العائلية المستحقة هذا الشهر")}</h2>
-     {report.dues.length===0?<p className="text-sm">{t("No dated obligations recorded for this month; this does not prove none exist.","لا توجد التزامات مسجلة بتاريخ استحقاق لهذا الشهر، ولا يعني ذلك عدم وجود التزامات أخرى.")}</p>:
+     <h2 className="mb-2 text-lg font-bold">{t("6. Bills and family commitments due this cycle","٦. الفواتير والالتزامات العائلية المستحقة خلال الدورة")}</h2>
+     {report.dues.length===0?<p className="text-sm">{t("No dated obligations recorded for this cycle; this does not prove none exist.","لا توجد التزامات مسجلة خلال دورة الراتب، ولا يعني ذلك عدم وجود التزامات أخرى.")}</p>:
       <div className="money-report-scroll overflow-x-auto"><table className="w-full text-xs">
        <thead className="bg-[#EAF3EB]"><tr>
         <th className="p-2 text-start">{t("Due / obligation","تاريخ / الالتزام")}</th>

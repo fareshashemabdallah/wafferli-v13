@@ -4,6 +4,7 @@ import {useI18n} from "@/lib/i18n";
 import {uid,fmtJOD} from "@/lib/storage";
 import {localToday,futureDate,scheduleDates,roundJod} from "@/lib/cashflow";
 import {computeMoney,type MoneyState} from "@/lib/money";
+import {moneyCycleFor,cyclePaidTotal} from "@/lib/moneyCycle";
 import {categoryItemTotal,monthlyItemCost,recordedItemSpending,type BudgetItem,type ItemFrequency} from "@/lib/householdBudgetBuilder";
 import {addCategoryItem,recordCategoryPayment,undoCategoryPayment,
  billPaidTotal,billOutstanding,saveCategoryDueDate,removeCategoryBill,stopCategoryItem} from "@/lib/unifiedCategoryLedger";
@@ -41,13 +42,14 @@ export function UnifiedCategoryDetails({state,setState,categoryId,onEdit,onClose
  const [showAllHistory,setShowAllHistory]=useState(false);
  const [error,setError]=useState("");
  if(!category)return null;
- const month=localToday().slice(0,7);
+ const cycle=moneyCycleFor(state,localToday());
+ const month=cycle.key;
  const items=(state.budgetItems??[]).filter(i=>i.categoryId===categoryId&&i.enabled);
  const bills=(state.commitments??[]).filter(b=>b.categoryId===categoryId);
  const recent=state.expenses.filter(e=>e.categoryId===categoryId&&e.status!=="planned")
   .slice().sort((a,b)=>b.date.localeCompare(a.date));
- const spending=recordedItemSpending(state,categoryId,month),overview=computeMoney(state);
- const plan=overview.plannedBy(categoryId),paid=overview.spentBy(categoryId);
+ const spending=recordedItemSpending(state,categoryId,month,cycle),overview=computeMoney(state,new Date(cycle.start+"T12:00:00"));
+ const plan=overview.plannedBy(categoryId),paid=cyclePaidTotal(state,cycle,categoryId);
  const difference=roundJod(plan-paid);
  const itemized=categoryItemTotal(state.budgetItems??[],categoryId);
  const free=roundJod(category.planned-itemized);

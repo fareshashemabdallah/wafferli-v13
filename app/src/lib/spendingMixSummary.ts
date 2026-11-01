@@ -1,6 +1,7 @@
 import type {MoneyState} from "./money";
 import {roundJod} from "./cashflow";
 import {spendingBreakdown,type SpendingRole} from "./spendingGroups";
+import type {MoneyCycle} from "./moneyCycle";
 
 /** Read-only presentation of the SAME monthly category and expense-line
  * ledger as Money. No new income, budget, bill or transaction records.
@@ -8,8 +9,8 @@ import {spendingBreakdown,type SpendingRole} from "./spendingGroups";
  * A positive unused allowance within an itemized category is a cushion,
  * not an unclassified cost; negative monthly overrides remain adjustments.
  */
-export function spendingMixSummary(state:MoneyState,month:string){
- const view=spendingBreakdown(state,month);
+export function spendingMixSummary(state:MoneyState,month:string,cycle?:MoneyCycle){
+ const view=spendingBreakdown(state,month,cycle);
  const groups=view.groups.map(g=>({
   ...g,
   protectedCount:g.lines.filter(line=>line.priority==="protected"||

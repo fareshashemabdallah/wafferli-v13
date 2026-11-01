@@ -5,6 +5,7 @@ import {billOutstanding,billPaidTotal} from "./unifiedCategoryLedger";
 import {familyFinancialCommitments,familyForecastCommitments} from "./familyFinancialCommitments";
 import type {FamilyPlan} from "./familyPlans";
 import {validMoneyMonth} from "./monthAwareMoney";
+import {moneyCycleFor,moneyCycleForMonth,inMoneyCycle,cyclePaidTotal} from "./moneyCycle";
 
 /** Read-only report projection. No report field becomes a new Money record. */
 export type MonthlyReportCategory={
@@ -26,7 +27,7 @@ export type MonthlyReportIncome={
  scheduledDates:string[];confirmedReceipts:{date:string;amount:number;estimated:boolean}[];
 };
 export type MonthlyMoneyReport={
- month:string;sample:boolean;partial:boolean;generatedOn:string;
+ month:string;periodStart:string;periodEnd:string;sample:boolean;partial:boolean;generatedOn:string;
  plannedIncome:number|null;confirmedIncome:number|null;incomeRows:MonthlyReportIncome[];
  categoryRows:MonthlyReportCategory[];classification:ReturnType<typeof categoryGroups>["groups"];
  plannedExpenses:MonthlyReportExpense[];paidExpenses:MonthlyReportExpense[];
@@ -47,11 +48,12 @@ export function buildMonthlyMoneyReport(
  state:MoneyState,month:string,now=new Date(),plans:readonly FamilyPlan[]=[]
 ):MonthlyMoneyReport{
  if(!validMoneyMonth(month))throw new Error("Invalid reporting month");
+ const cycle=moneyCycleForMonth(state,month);
  const [year,m]=month.split("-").map(Number);
- const date=new Date(year!,m!-1,15,12);
- const first=month+"-01",last=month+"-"+String(new Date(year!,m!,0).getDate()).padStart(2,"0");
+ const date=new Date(year!,m!-1,cycle.day,12);
+ const first=cycle.start,last=cycle.end;
  const calc=computeMoney(state,date);
- const classification=categoryGroups(state,month);
+ const classification=categoryGroups(state,month,cycle);
  const bills=state.commitments??[];
  const byBill=new Map(bills.map(b=>[b.id,b]));
  const byItem=new Map((state.budgetItems??[]).map(i=>[i.id,i]));
@@ -60,8 +62,8 @@ export function buildMonthlyMoneyReport(
  const categoryRows:MonthlyReportCategory[]=state.categories.map(c=>({
   id:c.id,name:c.name,type:c.type,priority:c.priority??"not specified",
   confidence:c.amountConfidence??"estimate",
-  planned:roundJod(calc.plannedBy(c.id)),paid:roundJod(calc.spentBy(c.id)),
-  difference:roundJod(calc.plannedBy(c.id)-calc.spentBy(c.id)),
+  planned:roundJod(calc.plannedBy(c.id)),paid:cyclePaidTotal(state,cycle,c.id),
+  difference:roundJod(calc.plannedBy(c.id)-cyclePaidTotal(state,cycle,c.id)),
   lines:allLines.filter(l=>l.categoryId===c.id).map(l=>({
    name:l.name,role:l.role,review:l.needsReview,planned:l.planned,paid:l.paid,
    frequency:l.frequency,priority:l.priority
@@ -71,8 +73,8 @@ export function buildMonthlyMoneyReport(
   }))
  }));
  // Retired/unknown categories are shown, not discarded or silently reassigned.
- const unknownPaid=state.expenses.filter(e=>e.date.startsWith(month+"-")&&e.status!=="planned"&&!byCategory.has(e.categoryId));
- const unknownPlanned=state.expenses.filter(e=>e.date.startsWith(month+"-")&&e.status==="planned"&&!byCategory.has(e.categoryId));
+ const unknownPaid=state.expenses.filter(e=>inMoneyCycle(e.date,cycle)&&e.status!=="planned"&&!byCategory.has(e.categoryId));
+ const unknownPlanned=state.expenses.filter(e=>inMoneyCycle(e.date,cycle)&&e.status==="planned"&&!byCategory.has(e.categoryId));
  if(unknownPaid.length||unknownPlanned.length){
   const amount=sum(unknownPaid.map(e=>e.amount));
   categoryRows.push({id:"unclassified-report-only",name:"Uncategorized / retired categories",
@@ -87,14 +89,14 @@ export function buildMonthlyMoneyReport(
    link:e.billId?"Bill: "+(byBill.get(e.billId)?.name??"linked payment"):
     e.sourcePlanId?"Family plan payment":"",status:e.status==="planned"?"planned":"paid"};
  };
- const entries=state.expenses.filter(e=>e.date.startsWith(month+"-")).slice()
+ const entries=state.expenses.filter(e=>inMoneyCycle(e.date,cycle)).slice()
   .sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
  const paidExpenses=entries.filter(e=>e.status!=="planned").map(toExpense);
  const plannedExpenses=entries.filter(e=>e.status==="planned").map(toExpense);
  const incomeSources=state.incomeSources??legacyIncome(state.income);
  const incomeRows=incomeSources.map(i=>{
   const scheduledDates=scheduleDates(i.nextDate,i.frequency,first,last,i.endDate);
-  const confirmedReceipts=[...new Set(i.receivedDates??[])].filter(d=>d.startsWith(month+"-"))
+  const confirmedReceipts=[...new Set(i.receivedDates??[])].filter(d=>inMoneyCycle(d,cycle))
    .sort().map(d=>({date:d,amount:i.receivedAmounts?.[d]??i.amount,
     estimated:i.receivedAmounts?.[d]===undefined}));
   const rate:Record<string,number>={daily:365/12,weekly:52/12,biweekly:26/12,
@@ -120,7 +122,7 @@ export function buildMonthlyMoneyReport(
  }
  const existing=new Set(bills.map(b=>b.id));
  for(const row of familyFinancialCommitments(plans,state)){
-  if(!row.dueDate.startsWith(month+"-")||existing.has(row.id))continue;
+  if(!inMoneyCycle(row.dueDate,cycle)||existing.has(row.id))continue;
   dues.push({id:row.id,name:row.planTitle+" · "+row.label,category:"Family occasion",
    dueDate:row.dueDate,scheduled:row.amountJod,recordedPaid:row.actualPaidJod??0,
    remaining:row.paid?0:row.certainty==="idea"?0:row.amountJod,
@@ -128,7 +130,7 @@ export function buildMonthlyMoneyReport(
     row.certainty==="firm"?"confirmed commitment":"planned commitment",source:"occasion"});
  }
  dues.sort((a,b)=>a.dueDate.localeCompare(b.dueDate)||a.name.localeCompare(b.name));
- const current=month===iso(now).slice(0,7);
+ const current=month===moneyCycleFor(state,iso(now)).key;
  const today=iso(now);
  const currentBalance=cash(state.cashOnHand);
  const forecast=current?buildForecast({
@@ -139,7 +141,8 @@ export function buildMonthlyMoneyReport(
  const warnings=[
   "Recorded paid expenses are only the entries saved in Dabberna; missing entries are not savings.",
   "Budgets, expense items and bill schedules are different views of existing records, never additive expenses.",
-  "Historical planned amounts reflect the current saved category budget and any saved month adjustment; they may not be the original budget for that month.",
+  "This report covers the salary cycle from "+first+" through "+last+"; saved bill and payment dates were not changed.",
+  "Historical planned amounts reflect the current saved category budget and any saved month adjustment; they may not be the original budget for that cycle.",
   ...(state.demo?["SAMPLE DATA: Not a report of your household."]:[]),
   ...(!incomeKnown?["Income has not been provided. Zero is not assumed."]:[]),
   ...((state.financialInputsPartial||state.categories.length===0)?["Financial inputs may be incomplete."]:[]),
@@ -147,12 +150,12 @@ export function buildMonthlyMoneyReport(
   ...(dues.some(d=>d.state==="marked paid (amount not recorded)")?["Some bills were marked paid without a recorded amount. They cannot be treated as verified payments."]:[]),
   ...(incomeRows.some(i=>i.confirmedReceipts.some(r=>r.estimated))?["Some income receipts were confirmed without an actual amount; scheduled amounts are shown as estimates."]:[])
  ];
- return {month,sample:state.demo,partial:!!state.financialInputsPartial||!incomeKnown,
+ return {month,periodStart:first,periodEnd:last,sample:state.demo,partial:!!state.financialInputsPartial||!incomeKnown,
   generatedOn:today,plannedIncome:incomeKnown?roundJod(calc.monthlyIncome):null,
   confirmedIncome:hasRecordedIncome?sum(receipts.map(r=>r.amount)):null,
   incomeRows,categoryRows,classification:classification.groups,
   plannedExpenses,paidExpenses,categoryPlanTotal:roundJod(calc.planned),
-  actualPaidTotal:roundJod(calc.spent),variance:roundJod(calc.planned-calc.spent),
+  actualPaidTotal:cyclePaidTotal(state,cycle),variance:roundJod(calc.planned-cyclePaidTotal(state,cycle)),
   dues,totalDue:sum(dues.filter(d=>d.state!=="idea only — not committed").map(d=>d.scheduled)),
   totalRecordedDuePayments:sum(dues.map(d=>d.recordedPaid)),
   outstandingDue:sum(dues.map(d=>d.remaining)),

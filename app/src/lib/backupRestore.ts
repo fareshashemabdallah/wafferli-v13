@@ -128,6 +128,7 @@ const schemas:Record<RestorableKey,z.ZodTypeAny>={
    categoryMonthlyPlans:z.record(z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),z.record(smallMoney)).optional(),
   cashOnHand:cash.optional(),cashReserve:maxNumber.optional(),cashUpdatedAt:isoDate.optional(),
   savingsTargetAmount:maxNumber.optional(),financialInputsPartial:z.boolean().optional(),
+  cycleStartDay:z.number().int().min(1).max(28).optional(),
   monthlyAdjustments:z.record(opts({
    savingsDelta:z.number().finite().min(-1_000_000).max(1_000_000),
    categoryDeltas:z.record(z.number().finite().min(-1_000_000).max(1_000_000))

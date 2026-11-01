@@ -1,4 +1,5 @@
 import type {MoneyState,Expense} from "./money";
+import {inMoneyCycle,moneyCycleForMonth,type MoneyCycle} from "./moneyCycle";
 
 /** Read-only observations from the existing paid-expense ledger. A large bill,
  * a single purchase or a protected family commitment is NOT a discovery.
@@ -38,18 +39,19 @@ const value=(c:number)=>Math.round(c)/100;
 /** Record-level classification: expense counted once, delivery is not counted
  * again under Restaurants. Unknown/uncategorized spending remains in Money
  * totals but is not speculatively labelled discretionary. */
-export function buildSpendingDiscoveries(state:MoneyState,month:string):SpendingDiscoveryView{
+export function buildSpendingDiscoveries(state:MoneyState,month:string,cycle?:MoneyCycle):SpendingDiscoveryView{
  const empty={month,totalRecordedJod:0,paidCount:0,visible:[]};
  if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)||state.demo)return empty;
  const previous=previousMonth(month);
+ const priorCycle=cycle?moneyCycleForMonth(state,previous):undefined;
  const categories=new Map(state.categories.map(c=>[c.id,c]));
  const budgetItems=new Map((state.budgetItems??[]).map(i=>[i.id,i]));
  const groups=new Map<string,Group>();
  let totalRecordedCents=0,paidCount=0;
  for(const expense of state.expenses){
   if(!valid(expense))continue;
-  const current=expense.date.startsWith(month+"-");
-  const earlier=expense.date.startsWith(previous+"-");
+  const current=cycle?inMoneyCycle(expense.date,cycle):expense.date.startsWith(month+"-");
+  const earlier=priorCycle?inMoneyCycle(expense.date,priorCycle):expense.date.startsWith(previous+"-");
   if(!current&&!earlier)continue;
   const amount=cents(expense.amount);
   if(current){totalRecordedCents+=amount;paidCount++;}

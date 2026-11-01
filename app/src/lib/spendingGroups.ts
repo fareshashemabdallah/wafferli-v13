@@ -3,6 +3,7 @@ import {monthlyItemCost} from "./householdBudgetBuilder";
 import {computeMoney,type MoneyState} from "./money";
 import {billOutstanding,billPaidTotal} from "./unifiedCategoryLedger";
 import {roundJod,scheduleDates} from "./cashflow";
+import {inMoneyCycle,type MoneyCycle} from "./moneyCycle";
 
 export type SpendingRole="committed"|"necessary"|"flexible";
 export const spendingRoles:readonly SpendingRole[]=["committed","necessary","flexible"];
@@ -43,11 +44,11 @@ export type SpendingBreakdown={
  * Items split that envelope but do not add another. Unlinked payments stay
  * visibly unassigned; true dated obligations are shown independently.
  */
-export function spendingBreakdown(state:MoneyState,month:string):SpendingBreakdown{
+export function spendingBreakdown(state:MoneyState,month:string,cycle?:MoneyCycle):SpendingBreakdown{
  const [year,mm]=month.split("-").map(Number);
- const first=month+"-01";
- const last=month+"-"+String(new Date(year!,mm!,0).getDate()).padStart(2,"0");
- const finance=computeMoney(state,new Date(year!,mm!-1,15,12));
+ const first=cycle?.start??month+"-01";
+ const last=cycle?.end??month+"-"+String(new Date(year!,mm!,0).getDate()).padStart(2,"0");
+ const finance=computeMoney(state,new Date(year!,mm!-1,cycle?.day??15,12));
  const lines:ClassifiedLine[]=[];
  const unassigned:UnassignedCategory[]=[];
  const due:DueObligation[]=[];
@@ -59,7 +60,7 @@ export function spendingBreakdown(state:MoneyState,month:string):SpendingBreakdo
   let paidOther=0;
   for(const payment of state.expenses){
    if(payment.categoryId!==category.id||payment.status==="planned"||
-      !payment.date.startsWith(month+"-")||!Number.isFinite(payment.amount))continue;
+      !(cycle?inMoneyCycle(payment.date,cycle):payment.date.startsWith(month+"-"))||!Number.isFinite(payment.amount))continue;
    const itemId=payment.budgetItemId??(payment.billId?bills.get(payment.billId)?.budgetItemId:undefined);
    if(itemId&&itemIds.has(itemId))
     spent.set(itemId,roundJod((spent.get(itemId)??0)+payment.amount));
@@ -118,6 +119,7 @@ export function spendingBreakdown(state:MoneyState,month:string):SpendingBreakdo
   }),
   unassigned,due:due.sort((a,b)=>a.dueDate.localeCompare(b.dueDate)),
   totalPlanned:roundJod(state.categories.reduce((a,c)=>a+finance.plannedBy(c.id),0)),
-  totalPaid:roundJod(state.categories.reduce((a,c)=>a+finance.spentBy(c.id),0))
+  totalPaid:roundJod(state.categories.reduce((a,c)=>a+state.expenses.filter(e=>e.status!=="planned"&&e.categoryId===c.id&&
+    (cycle?inMoneyCycle(e.date,cycle):e.date.startsWith(month+"-"))).reduce((n,e)=>n+e.amount,0),0))
  };
 }
