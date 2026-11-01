@@ -17,8 +17,8 @@ const iso=(d:Date)=>d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getU
  * monthly salary's expected date; do not infer an income receipt from it. */
 export function moneyCycleBasis(state:MoneyState):{day:number;source:MoneyCycle["source"]}{
  const selected=state.cycleStartDay;
- if(Number.isInteger(selected)&&selected!>=1&&selected!<=28)
-  return {day:selected!,source:"explicit"};
+ if(typeof selected==="number"&&Number.isInteger(selected)&&selected>=1&&selected<=28)
+  return {day:selected,source:"explicit"};
  const monthly=(state.incomeSources??[]).filter(i=>
   i.frequency==="monthly"&&dateOk(i.nextDate)&&Number(i.nextDate.slice(8))<=28&&
   Number.isFinite(i.amount)&&i.amount>=0);
