@@ -77,7 +77,7 @@ describe("Existing Money flows: alignment & confirmed actuals",()=>{
  it("never reallocates demo data or money from a variable budget already spent",()=>{
   const paid=recordBillPayment(fixture(),"bill","2026-10-20","2026-10-15","e4","already",460);
   paid.expenses.push({id:"g",date:"2026-10-15",categoryId:"fun",amount:190,shared:true});
-  expect(allocationOptions(paid,60,"rent").some(x=>x.categoryId==="fun")).toBe(false);
+  expect(allocationOptions(paid,60,"rent","2026-10").some(x=>x.categoryId==="fun")).toBe(false);
   expect(applyVarianceAllocation({...paid,demo:true},"e4",{kind:"savings"},"2026-10-15").savingsTargetAmount).toBe(100);
  });
 });
