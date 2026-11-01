@@ -16,6 +16,7 @@ export function OneMoneyDashboardSummary({state,forecast,onIncome,onExpense,onBi
   unclassifiedPlanned,unclassifiedPaid,unclassifiedCategoryId}=
   moneyDashboardDecision(state,forecast,localToday());
  const money=(value:number|null)=>value===null?t("Not entered","غير مدخل"):fmtJOD(value);
+ const cycleLabel=overview.cycleStart+" – "+overview.cycleEnd;
  const openCategories=()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"});
  const nextAction=()=>({
   income:onIncome,categories:openCategories,bills:onBills,spending:onSpending
@@ -25,12 +26,13 @@ export function OneMoneyDashboardSummary({state,forecast,onIncome,onExpense,onBi
    subtitle:t("Received: ","المستلم: ")+money(overview.receivedIncome),bg:"#EAF5E8",action:onIncome},
   {id:"plan",emoji:"🧺",label:t("Monthly cost plan","خطة مصاريف الشهر"),value:money(overview.planned),
    subtitle:t("Includes planned category costs","تشمل تكاليف الفئات المخططة"),bg:"#EDF3FF",action:openCategories},
-  {id:"paid",emoji:"✅",label:t("Recorded as paid","المسجّل كمدفوع"),value:money(overview.paid),
-   subtitle:t("Only confirmed expense entries","فقط المصاريف المؤكدة"),bg:"#FFF0F5",action:onExpense}
+  {id:"paid",emoji:"✅",label:t("Paid this cycle","المدفوع خلال الدورة"),value:money(overview.paid),
+   subtitle:overview.numberPaid+" "+t("recorded payments","دفعات مسجلة"),bg:"#FFF0F5",action:onExpense}
  ];
  return <div className="space-y-3" data-testid="unified-money-dashboard">
   <div className="flex flex-wrap items-center justify-between gap-2">
-   <h3 className="text-lg font-extrabold text-[#275E44]">{t("This month, at a glance","الشهر بنظرة سريعة")}</h3>
+   <div><h3 className="text-lg font-extrabold text-[#275E44]">{t("Your money cycle","دورة ميزانية العيلة")}</h3>
+    <p data-testid="money-cycle-range" className="mt-1 text-xs font-semibold text-[#5B7968]">{cycleLabel}</p></div>
    <button type="button" onClick={onExpense}
     className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#408F64] px-4 text-xs font-extrabold text-white">＋ {t("Add expense","سجّل مصروف")}</button>
   </div>
