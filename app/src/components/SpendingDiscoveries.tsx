@@ -1,4 +1,5 @@
-import {useState,type FormEvent} from "react";
+import {useEffect,useState,type FormEvent} from "react";
+import {TODAY_DISCOVERY_FOCUS_KEY} from "@/lib/moneyFocus";
 import {useI18n} from "@/lib/i18n";
 import {fmtJOD} from "@/lib/storage";
 import {localToday} from "@/lib/cashflow";
@@ -19,6 +20,13 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
  const [editing,setEditing]=useState(false);
  const [draft,setDraft]=useState("");
  const [error,setError]=useState("");
+ // Scroll to the existing insight after arriving from Today. This creates no
+ // new expense, financial target or persistent preference.
+ useEffect(()=>{
+  if(typeof window==="undefined"||window.sessionStorage.getItem(TODAY_DISCOVERY_FOCUS_KEY)!=="1")return;
+  window.sessionStorage.removeItem(TODAY_DISCOVERY_FOCUS_KEY);
+  document.getElementById("money-spending-discoveries")?.scrollIntoView?.({behavior:"smooth",block:"center"});
+ },[]);
 
  // Keep the feature visible while family records are incomplete. Do not claim
  // illustrative numbers are the parent's own, and do not require setup.
@@ -30,7 +38,7 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
    <span aria-hidden="true" className="text-lg">🔎</span>
   </div>;
  const shell="rounded-2xl border border-[#D9E7DB] bg-white p-3 sm:p-4";
- if(state.demo)return <section data-testid="money-spending-discoveries" className={shell}
+ if(state.demo)return <section id="money-spending-discoveries" data-testid="money-spending-discoveries" className={shell}
    aria-label={t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}>
    {heading}
    <p className="mt-3 inline-flex rounded-full bg-[#FFF0DB] px-3 py-1 text-[11px] font-bold text-[#84622D]">
@@ -53,7 +61,7 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
     {t("Use my own figures","استخدم أرقامي","Utiliser mes propres chiffres")}
    </button>
   </section>;
- if(view.paidCount<2||groups.length===0)return <section data-testid="money-spending-discoveries" className={shell}
+ if(view.paidCount<2||groups.length===0)return <section id="money-spending-discoveries" data-testid="money-spending-discoveries" className={shell}
    aria-label={t("Spending Discoveries","اكتشافات المصاريف","Découvertes de dépenses")}>
    {heading}
    <p className="mt-2 text-sm font-semibold text-[#355F48]">{t(
@@ -92,7 +100,7 @@ export function SpendingDiscoveries({state,setState,onStartReal,onRecordExpense}
  };
  const difference=active.targetJod===null?null:
   Math.round((active.amountJod-active.targetJod)*100)/100;
- return <section data-testid="money-spending-discoveries"
+ return <section id="money-spending-discoveries" data-testid="money-spending-discoveries"
   aria-label={t("Spending discoveries","اكتشافات المصاريف","Découvertes de dépenses")}
   className={shell}>
   {heading}
