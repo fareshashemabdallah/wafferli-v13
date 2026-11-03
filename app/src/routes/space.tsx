@@ -226,19 +226,31 @@ function Space() {
 
       <FamilyTasksPanel/>
       <Link to="/occasions" className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#244D3C]">{ar?"خطّط لهدية أو نشاط بمناسبة عائلية":(lang==="fr"?frenchUI("Plan a meaningful gift or family activity"):"Plan a meaningful gift or family activity")} →</Link>
-      {HOUSEHOLD_ACCOUNTS_ENABLED&&<section className="editorial-card mt-5 p-4">
-        <h2 className="font-semibold">{ar?"حسابات الأسرة الموثّقة":(lang==="fr"?frenchUI("Verified household accounts"):"Verified household accounts")}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{ar?"أنشئ عضوية للبالغين بدعوات قابلة للإلغاء. لا تتم مشاركة الميزانية أو بيانات الأطفال مع الأعضاء تلقائياً.":(lang==="fr"?frenchUI("Invite or revoke adult household members. Finances and children's profiles are not automatically shared or synced."):"Invite or revoke adult household members. Finances and children's profiles are not automatically shared or synced.")}</p>
+      <section className="editorial-card mt-5 p-4" aria-label={ar?"حسابات الأسرة المتصلة":(lang==="fr"?frenchUI("Connected family accounts"):"Connected family accounts")}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+         <h2 className="font-semibold">{ar?"مساحة عائلية مشتركة بخصوصية مستقلة":(lang==="fr"?frenchUI("A connected family, with individual privacy"):"A connected family, with individual privacy")}</h2>
+         {!HOUSEHOLD_ACCOUNTS_ENABLED&&<span className="rounded-full bg-[#F6ECDD] px-2 py-1 text-[11px] font-semibold text-[#835B2A]">
+          {ar?"قيد الإعداد":(lang==="fr"?frenchUI("In preparation"):"In preparation")}
+         </span>}
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">{ar?
+         "لكل والد حسابه وبياناته الخاصة. يمكن مشاركة مصاريف مختارة فقط بعد موافقة واضحة، من دون رفع الدخل أو الأرصدة أو بيانات الأطفال.":
+         (lang==="fr"?frenchUI("Each adult keeps a separate account and private records. Only individually approved expenses are shared; income, balances and children's details stay private."):
+         "Each adult keeps a separate account and private records. Only individually approved expenses are shared; income, balances and children's details stay private.")}</p>
         <Link to="/household" className="mt-3 inline-flex min-h-11 items-center rounded-full bg-brand px-4 text-sm font-semibold text-white">
-          {ar?"إدارة حسابات الأسرة":(lang==="fr"?frenchUI("Manage household accounts"):"Manage household accounts")} →
+          {HOUSEHOLD_ACCOUNTS_ENABLED?
+           (ar?"افتح حسابات الأسرة":(lang==="fr"?frenchUI("Open family accounts"):"Open family accounts")):
+           (ar?"اطّلع على حالة الربط الآمن":(lang==="fr"?frenchUI("See secure sharing status"):"See secure sharing status"))} →
         </Link>
-      </section>}
+      </section>
       <details id="family-preferences" className="group editorial-card mt-6 scroll-mt-24 p-4"><summary className="cursor-pointer text-sm font-semibold text-brand">{ar?"التفضيلات والخصوصية":(lang==="fr"?frenchUI("Preferences & privacy"):"Preferences & privacy")} <span className="float-end group-open:hidden">+</span><span className="float-end hidden group-open:inline">−</span></summary>
       <FamilyPreferences/>
       <LocalExpensePrivacyReview/>
       <section className="card-soft mt-6 p-4 text-sm">
         <h2 className="font-semibold">{tr("Shared vs private expenses")}</h2>
-        <p className="mt-1 text-muted-foreground">{tr("In My Money, each expense is marked shared (household) or private. In this pilot everything stays on this one device; multi-user household sharing isn't live yet.")}</p>
+        <p className="mt-1 text-muted-foreground">{ar?"يمكنك تعليم المصروف على أنه للبيت، لكن هذا لا يشاركه تلقائياً. المشاركة عبر الأجهزة تتطلب حسابين موثّقين وموافقة مستقلة لكل مصروف، وهي غير مفعّلة في النسخة العامة.":
+         (lang==="fr"?frenchUI("Marking an expense as household does not upload it. Sharing across devices requires separately authenticated adults and explicit consent for each item; it is disabled in the public pilot."):
+         "Marking an expense as household does not upload it. Sharing across devices requires separately authenticated adults and explicit consent for each item; it is disabled in the public pilot.")}</p>
       </section>
       <Notice>{ar?"أفراد العائلة وأعياد الميلاد محفوظة على هذا الجهاز، ولا تتم مشاركتها مع دوائر الأصدقاء.":(lang==="fr"?frenchUI("Family profiles and birthdays stay on this browser, not shared with friends' circles or synchronized across devices."):"Family profiles and birthdays stay on this browser, not shared with friends' circles or synchronized across devices.")}</Notice>
       </details>
