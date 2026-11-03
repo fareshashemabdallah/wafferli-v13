@@ -59,12 +59,12 @@ describe("Money cycles anchored to salary payday",()=>{
  it("uses the same salary period for legacy spend totals, category breakdowns and projected days",()=>{
   const s=family();
   const before=JSON.stringify(s);
-  const current=computeMoney(s,new Date(2026,10,1,12));
+  const current=computeMoney(s,new Date(2026,10,1,12),"salary-cycle");
   expect(current.spent).toBe(200);
   expect(current.spentBy("living")).toBe(200);
   expect(current.daysLeft).toBe(23);
-  expect(computeMoney(s,new Date(2026,9,24,12)).spent).toBe(90);
-  expect(computeMoney(s,new Date(2026,10,25,12)).spent).toBe(45);
+  expect(computeMoney(s,new Date(2026,9,24,12),"salary-cycle").spent).toBe(90);
+  expect(computeMoney(s,new Date(2026,10,25,12),"salary-cycle").spent).toBe(45);
   expect(JSON.stringify(s)).toBe(before);
  });
  it("uses an explicitly chosen day instead of guessing when household wants one",()=>{
