@@ -19,8 +19,8 @@ import {
 
 export const Route=createFileRoute("/household")({
  head:()=>({meta:[
-  {title:"Household accounts — Dabberna"},
-  {name:"description",content:"Private authenticated household memberships, separate from family and friends circles. Financial synchronization is not active."}
+  {title:"Connected family & private accounts — Dabberna"},
+  {name:"description",content:"Connect two adults to one family space with individual privacy and explicit sharing of selected expenses. Public sharing remains gated."}
  ]}),
  component:HouseholdAccountsPage
 });
@@ -156,7 +156,8 @@ function HouseholdAccountsPage(){
  if(!HOUSEHOLD_ACCOUNTS_ENABLED)return <AppShell title={ar?"حسابات الأسرة":(lang==="fr"?frenchUI("Household accounts"):"Household accounts")}>
    <section className="editorial-card p-5">
     <div className="flex items-center gap-3"><LockKeyhole className="size-7 text-brand"/><h2 className="text-lg font-semibold">{ar?"نحضّر مساحة خاصة وآمنة للأسرة":(lang==="fr"?frenchUI("Secure household access is in preparation"):"Secure household access is in preparation")}</h2></div>
-    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{ar?"المصاريف وخطط الأسرة لا تزال محفوظة على جهازك فقط. حسابات أفراد الأسرة والدعوات والمزامنة غير مفعّلة في هذه النسخة.":(lang==="fr"?frenchUI("Your finances and family plans remain on this device. Shared household accounts, invitations and financial synchronization are not enabled in the public pilot."):"Your finances and family plans remain on this device. Shared household accounts, invitations and financial synchronization are not enabled in the public pilot.")}</p>
+    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{ar?"دبّرنا يجهّز حساباً مستقلاً لكل والد مع مساحة للأسرة المشتركة. في النسخة الحالية، المصاريف وخطط الأسرة محفوظة في المتصفح ولا توجد دعوات أو مزامنة بين الأجهزة.":(lang==="fr"?frenchUI("Dabberna is preparing separate parent accounts linked to one family. In the public pilot, records remain in this browser and cross-device invitations and sharing are disabled."):"Dabberna is preparing separate parent accounts linked to one family. In the public pilot, records remain in this browser and cross-device invitations and sharing are disabled.")}</p>
+    <p className="mt-2 text-xs text-muted-foreground">{ar?"إذا كنتما تختبران على جهاز واحد، استخدما متصفحين أو ملفّي متصفح منفصلين. تسجيل الخروج لا يحذف البيانات المحلية.":(lang==="fr"?frenchUI("On a shared device, use separate browser profiles. Signing out does not erase records stored in that browser."):"On a shared device, use separate browser profiles. Signing out does not erase records stored in that browser.")}</p>
     <Link to="/space" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-brand px-4 text-sm font-semibold text-white">{ar?"رجوع للعائلة":(lang==="fr"?frenchUI("Return to My Family"):"Return to My Family")}</Link>
    </section>
   </AppShell>;
@@ -164,8 +165,9 @@ function HouseholdAccountsPage(){
  return <AppShell title={ar?"حسابات الأسرة":(lang==="fr"?frenchUI("Household accounts"):"Household accounts")}>
   <section className="page-intro p-4 sm:p-6">
    <div className="flex items-start gap-3"><ShieldCheck className="size-7 shrink-0 text-brand"/>
-    <div><h2 className="text-lg font-semibold">{ar?"حسابات موثقة مع خصوصية واضحة":(lang==="fr"?frenchUI("Verified membership, clear privacy"):"Verified membership, clear privacy")}</h2>
-     <p className="mt-2 text-sm leading-relaxed">{ar?"هذه مساحة منفصلة عن مجموعات الأصدقاء. الدخول موثّق، لكن سنّ البلوغ مبني على إقرار المستخدم وليس تحققاً مستقلاً. الميزانية والمصاريف الخاصة تبقى على جهازك ولا تتم مزامنتها.":(lang==="fr"?frenchUI("Household membership is separate from friends' circles. Sign-in is authenticated; adult status is self-declared, not independently verified. Your private expenses, cash and family plans remain on this device; this page does not synchronize them."):"Household membership is separate from friends' circles. Sign-in is authenticated; adult status is self-declared, not independently verified. Your private expenses, cash and family plans remain on this device; this page does not synchronize them.")}</p></div>
+    <div><h2 className="text-lg font-semibold">{ar?"أسرة واحدة، حسابان مستقلّان":(lang==="fr"?frenchUI("One family, separate private accounts"):"One family, separate private accounts")}</h2>
+     <p className="mt-2 text-sm leading-relaxed">{ar?"أنشئوا حسابين منفصلين واتصلوا بدعوة خاصة. العضوية لا تكشف دخلك أو مصاريفك الخاصة أو بيانات الأطفال. فقط المصاريف التي توافق صراحة على مشاركتها يمكن أن تظهر للبالغين، إن كانت خدمة المشاركة مفعّلة.":(lang==="fr"?frenchUI("Sign in independently and connect with a private invitation. Membership does not reveal private income, balances, child details or purchases. Only individually approved expense copies may be shared when that service is enabled."):"Sign in independently and connect with a private invitation. Membership does not reveal private income, balances, child details or purchases. Only individually approved expense copies may be shared when that service is enabled.")}</p>
+     <p className="mt-2 text-xs text-muted-foreground">{ar?"تنبيه: المعلومات الموجودة في متصفح مشترك ليست معزولة حسب تسجيل الدخول. استخدموا ملفات متصفح أو أجهزة منفصلة حتى تكتمل ميزة العزل المحلي.":(lang==="fr"?frenchUI("For privacy, use separate devices or browser profiles. This pilot does not isolate browser-local Money data when switching logins in the same profile."):"For privacy, use separate devices or browser profiles. This pilot does not isolate browser-local Money data when switching logins in the same profile.")}</p></div>
    </div>
   </section>
   {error&&<p role="alert" className="mt-4 rounded-xl border border-[#EDC9C9] bg-[#FFF2F2] p-3 text-sm text-[#92474B]">{error}</p>}
@@ -223,7 +225,7 @@ function HouseholdAccountsPage(){
        </button>)}</div>}
      {chosen&&<div className="mt-4 rounded-xl border border-border bg-white p-4">
       <h4 className="font-semibold">{chosen.household_name}</h4>
-      <p className="mt-1 text-xs text-muted-foreground">{ar?"العضوية موثّقة، لكن لا يتيح ذلك الاطلاع على مصاريف أي شخص. مشاركة المعلومات المالية تحتاج موافقة منفصلة وإعداداً أمنياً إضافياً.":(lang==="fr"?frenchUI("Membership does not grant access to another person's spending. Financial sharing requires a separate consent and security rollout."):"Membership does not grant access to another person's spending. Financial sharing requires a separate consent and security rollout.")}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{ar?"العضوية وحدها لا تكشف مصاريف شخص آخر. المصاريف المشتركة تظهر فقط بعد موافقة مستقلة لكل مصروف، بينما الدخل والأرصدة والملاحظات الخاصة تبقى محلية.":(lang==="fr"?frenchUI("Household membership does not reveal private records. Shared totals include only expenses approved one by one; income, balances and private notes remain local."):"Household membership does not reveal private records. Shared totals include only expenses approved one by one; income, balances and private notes remain local.")}</p>
       {chosen.my_role==="owner"?<>
        <div className="mt-4 flex flex-wrap items-center gap-2">
         <Button type="button" disabled={busy} onClick={issue}><UserPlus className="size-4"/>{ar?"أنشئ دعوة لشخص بالغ":(lang==="fr"?frenchUI("Invite an adult"):"Invite an adult")}</Button>

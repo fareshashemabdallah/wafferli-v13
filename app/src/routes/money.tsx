@@ -4,7 +4,8 @@ import {MoneyMonthlyReport} from "@/components/MoneyMonthlyReport";
 import {FAMILY_PLANS_KEY,type FamilyPlan} from "@/lib/familyPlans";
 import type {FamilyMoment} from "@/lib/familyCalendar";
 import {canonicalPlanViews} from "@/lib/canonicalFamilyFacts";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute,Link } from "@tanstack/react-router";
+import {HOUSEHOLD_EXPENSE_SHARING_ENABLED} from "@/lib/householdExpenseApi";
 import { CashFlowPlanner } from "@/components/CashFlowPlanner";
 import {FamilyMoneyRhythm} from "@/components/FamilyMoneyRhythm";
 import { MoneyGuidance } from "@/components/MoneyGuidance";
@@ -127,6 +128,11 @@ function MoneyPage() {
         onCategories={()=>document.getElementById("money-category-cards")?.scrollIntoView({behavior:"smooth",block:"start"})}
         requestedSetupStep={requestedSetupStep}/>}
       {section==="overview"&&<MoneyMonthlyReport state={s} plans={reportPlans}/>}
+      {section==="overview"&&HOUSEHOLD_EXPENSE_SHARING_ENABLED&&!s.demo&&<Link to="/household"
+       className="mb-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#CFE4D8] bg-white px-4 py-2 text-xs font-semibold text-[#327357]">
+       {ar?"شارك مصروفاً محدداً مع شريكك":(lang==="fr"?frenchUI("Share one selected expense with your partner"):"Share one selected expense with your partner")}
+       <span aria-hidden="true">→</span>
+      </Link>}
             {section==="planning"&&<>
       <div className="mb-4"><h2 className="text-xl font-semibold">{ar?"الفواتير والدفعات":(lang==="fr"?frenchUI("Your bills & payments"):"Your bills & payments")}</h2>
        <p className="mt-1 text-xs text-muted-foreground">{ar?"سجّل الموعد مرة، وأكّد الدفع عند حدوثه.":(lang==="fr"?frenchUI("Add once. Confirm when paid."):"Add once. Confirm when paid.")}</p></div>

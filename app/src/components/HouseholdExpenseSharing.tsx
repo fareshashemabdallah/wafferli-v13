@@ -1,12 +1,13 @@
 import {frenchUI} from "@/lib/french";
 import {useEffect,useMemo,useState,type FormEvent} from "react";
-import {LockKeyhole,ShieldCheck,Share2,Trash2} from "lucide-react";
+import {LockKeyhole,RefreshCw,ShieldCheck,Share2,Trash2,Users} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useI18n} from "@/lib/i18n";
 import {useLocalState} from "@/lib/storage";
 import {sampleMoney,type MoneyState} from "@/lib/money";
 import {prepareExpenseForShare,fingerprintLocalExpense,formatSharedJod,type SharedExpenseRow} from "@/lib/expenseSharing";
 import {fetchSharedHouseholdExpenses,publishOneSharedExpense,withdrawSharedExpense,HOUSEHOLD_EXPENSE_SHARING_ENABLED} from "@/lib/householdExpenseApi";
+import {sharedFamilySnapshot,sharedFamilyMonths} from "@/lib/connectedFamilySnapshot";
 
 /** Parents select ONE locally household-marked paid expense and separately
  * consent to its minimal server-side copy. There is NO automatic sync/import.
@@ -22,15 +23,19 @@ export function HouseholdExpenseSharing({householdId,userId}:{householdId:string
  const [notice,setNotice]=useState("");
  const [selected,setSelected]=useState("");
  const [consent,setConsent]=useState(false);
+ const [sharingChoice,setSharingChoice]=useState<"private"|"amount-category">("private");
+ const [selectedMonth,setSelectedMonth]=useState(()=>sharedFamilyMonths()[0]!);
  const eligible=useMemo(()=>moneyReady?
   money.expenses.map(e=>prepareExpenseForShare(money,e)).filter((v):v is NonNullable<typeof v>=>v!==null)
    .sort((a,b)=>b.occurredOn.localeCompare(a.occurredOn)).slice(0,100):[],
   [money,moneyReady]);
  const chosen=eligible.find(x=>x.localExpenseId===selected);
+ const summary=useMemo(()=>sharedFamilySnapshot(rows,householdId,userId,selectedMonth),
+  [rows,householdId,userId,selectedMonth]);
  useEffect(()=>{
   if(!HOUSEHOLD_EXPENSE_SHARING_ENABLED)return;
   let live=true;
-  setRows([]);setSelected("");setConsent(false);setError("");setNotice("");setLoading(true);
+  setRows([]);setSelected("");setConsent(false);setSharingChoice("private");setError("");setNotice("");setLoading(true);
   void fetchSharedHouseholdExpenses(householdId).then(data=>{
    if(live)setRows(data);
   }).catch(e=>{
@@ -48,7 +53,7 @@ export function HouseholdExpenseSharing({householdId,userId}:{householdId:string
  };
  const publish=(event:FormEvent)=>{
   event.preventDefault();
-  if(!chosen||!consent)return;
+  if(!chosen||!consent||sharingChoice!=="amount-category")return;
   const details=chosen.category+" · "+formatSharedJod(chosen.amountFils)+" · "+chosen.occurredOn;
   if(!window.confirm((ar?"مشاركة هذا المصروف فقط مع البالغين بهذه الأسرة؟":(lang==="fr"?frenchUI("Share only this expense with the adults in this household?"):"Share only this expense with the adults in this household?"))+"\n"+details))return;
   void act(async()=>{
@@ -63,7 +68,7 @@ export function HouseholdExpenseSharing({householdId,userId}:{householdId:string
    if(rows.some(row=>row.created_by===userId&&row.source_fingerprint===fingerprint))
     throw new Error(ar?"هذا المصروف تمت مشاركته سابقاً.":(lang==="fr"?frenchUI("This item is already shared; withdraw it before sharing again."):"This item is already shared; withdraw it before sharing again."));
    await publishOneSharedExpense(householdId,preview,fingerprint,true);
-   setSelected("");setConsent(false);await reload();
+   setSelected("");setConsent(false);setSharingChoice("private");await reload();
    setNotice(ar?"تمت مشاركة هذا المصروف فقط. بقيت باقي البيانات محلية.":(lang==="fr"?frenchUI("Only this item was shared. All other finances remain local."):"Only this item was shared. All other finances remain local."));
   });
  };
@@ -86,10 +91,45 @@ export function HouseholdExpenseSharing({householdId,userId}:{householdId:string
   </div>
   {error&&<p role="alert" className="mt-3 rounded-xl bg-[#FFF0F0] p-3 text-xs text-[#973F44]">{error}</p>}
   {notice&&<p role="status" className="mt-3 rounded-xl bg-[#ECF5EA] p-3 text-xs text-brand">{notice}</p>}
+  <div className="mt-4 rounded-2xl border border-[#CFE5D6] bg-white p-4" data-testid="connected-family-summary">
+   <div className="flex flex-wrap items-center justify-between gap-2">
+    <h4 className="flex items-center gap-2 text-sm font-semibold text-[#27674A]"><Users className="size-4"/>{ar?"مصاريف العائلة المشتركة":(lang==="fr"?frenchUI("Our shared family spending"):"Our shared family spending")}</h4>
+    <div className="flex items-center gap-2">
+     <label className="sr-only" htmlFor="shared-family-month">{ar?"شهر المصاريف المشتركة":(lang==="fr"?frenchUI("Shared spending month"):"Shared spending month")}</label>
+     <select id="shared-family-month" className="min-h-10 rounded-lg border border-[#CFDDD1] bg-white px-2 text-xs" value={selectedMonth}
+      onChange={e=>setSelectedMonth(e.target.value)}>
+      {sharedFamilyMonths().map(m=><option key={m} value={m}>{m}</option>)}
+     </select>
+     <Button type="button" variant="outline" size="sm" disabled={busy||loading} onClick={()=>void act(reload)}
+      aria-label={ar?"تحديث المصاريف المشتركة":(lang==="fr"?frenchUI("Refresh shared spending"):"Refresh shared spending")}><RefreshCw className="size-4"/></Button>
+    </div>
+   </div>
+   <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+    {([
+     {label:ar?"العائلة":(lang==="fr"?frenchUI("Together"):"Together"),amount:summary.totalFils},
+     {label:ar?"مشاركتي":(lang==="fr"?frenchUI("Shared by me"):"Shared by me"),amount:summary.mineFils},
+     {label:ar?"شريكي":(lang==="fr"?frenchUI("Other adults"):"Other adults"),amount:summary.otherAdultsFils}
+    ] as const).map(item=><div key={item.label} className="rounded-xl bg-[#F3F8F1] p-2">
+     <p className="text-[11px] text-[#658070]">{item.label}</p>
+     <strong className="mt-1 block text-sm tabular-nums text-[#235F45]">{formatSharedJod(item.amount)}</strong>
+    </div>)}
+   </div>
+   {summary.categories.length>0&&<div className="mt-3 border-t border-[#E1EAE1] pt-3">
+    <p className="text-xs font-semibold text-[#54715A]">{ar?"حسب الفئة":(lang==="fr"?frenchUI("By category"):"By category")}</p>
+    {summary.categories.slice(0,4).map(group=><p key={group.category} className="mt-2 flex items-center justify-between gap-2 text-xs">
+     <span className="truncate">{group.category}</span><strong className="shrink-0">{formatSharedJod(group.amountFils)}</strong>
+    </p>)}
+   </div>}
+   <p className="mt-3 text-[11px] leading-relaxed text-[#6F8175]">{ar?
+    "هذا مجموع المبالغ التي اختار البالغون مشاركتها فقط، وليس كل مصاريف الأسرة أو رصيداً بنكياً. لا يتم إضافة هذه المبالغ مرة أخرى إلى سجل المال الشخصي.":
+    (lang==="fr"?frenchUI("Only explicitly shared entries are included, not total household spending or a bank balance. Personal Money entries are never imported twice."):
+    "Only explicitly shared entries are included, not total household spending or a bank balance. Personal Money entries are never imported twice.")}</p>
+   {summary.limitedToRecentRecords&&<p role="note" className="mt-2 text-xs text-[#95633C]">{ar?"الملخص قد يكون ناقصاً لأنه يعتمد على أحدث ٢٠٠ عملية فقط.":(lang==="fr"?frenchUI("The total may be incomplete: only the latest 200 records were loaded."):"The total may be incomplete: only the latest 200 records were loaded.")}</p>}
+  </div>
   <form onSubmit={publish} className="mt-4 space-y-3 rounded-xl bg-white p-3">
    <label className="block text-xs font-semibold">{ar?"اختر مصروفاً مدفوعاً ومعلّماً محلياً كمصروف للبيت":(lang==="fr"?frenchUI("Choose one paid expense marked household locally"):"Choose one paid expense marked household locally")}
     <select className="mt-2 min-h-11 w-full rounded-xl border border-input bg-white px-3 text-sm" value={selected}
-     onChange={e=>{setSelected(e.target.value);setConsent(false);}}>
+     onChange={e=>{setSelected(e.target.value);setConsent(false);setSharingChoice("private");}}>
      <option value="">{ar?"لا يوجد مصروف محدد":(lang==="fr"?frenchUI("Nothing selected"):"Nothing selected")}</option>
      {eligible.map(p=><option key={p.localExpenseId} value={p.localExpenseId}>
       {p.occurredOn+" · "+p.category+" · "+formatSharedJod(p.amountFils)}
@@ -98,17 +138,30 @@ export function HouseholdExpenseSharing({householdId,userId}:{householdId:string
    </label>
    {!moneyReady||money.demo||eligible.length===0?
     <p className="text-xs text-muted-foreground">{ar?"أضف مصروفاً فعلياً في «المالية» واختر نوعه «للبيت» لعرضه هنا. لا يتم رفع مصروف تلقائياً.":(lang==="fr"?frenchUI("Add a real, paid household-marked entry in Money first. No expense is uploaded automatically."):"Add a real, paid household-marked entry in Money first. No expense is uploaded automatically.")}</p>:null}
-   {chosen&&<div className="rounded-xl border border-[#DFE8DC] bg-[#F5F9F1] p-3 text-xs">
+   {chosen&&<fieldset className="rounded-xl border border-[#D7E4D9] p-3">
+    <legend className="px-1 text-xs font-semibold">{ar?"من يمكنه رؤية المصروف؟":(lang==="fr"?frenchUI("Who can see this expense?"):"Who can see this expense?")}</legend>
+    <label className="mt-2 flex min-h-10 items-center gap-2 text-sm">
+     <input type="radio" name="share-visibility" value="private" checked={sharingChoice==="private"}
+      onChange={()=>{setSharingChoice("private");setConsent(false);}}/>
+     {ar?"لي فقط — لا ترسل أي معلومات":(lang==="fr"?frenchUI("Only me — do not upload anything"):"Only me — do not upload anything")}
+    </label>
+    <label className="mt-2 flex min-h-10 items-center gap-2 text-sm">
+     <input type="radio" name="share-visibility" value="amount-category" checked={sharingChoice==="amount-category"}
+      onChange={()=>{setSharingChoice("amount-category");setConsent(false);}}/>
+     {ar?"شارك المبلغ والفئة والتاريخ مع البالغين في الأسرة":(lang==="fr"?frenchUI("Share amount, category and date with adult members"):"Share amount, category and date with adult members")}
+    </label>
+   </fieldset>}
+   {chosen&&sharingChoice==="amount-category"&&<div className="rounded-xl border border-[#DFE8DC] bg-[#F5F9F1] p-3 text-xs">
      <p className="font-semibold">{ar?"ستظهر للبالغين بهذه الأسرة البيانات التالية فقط:":(lang==="fr"?frenchUI("Other adults will see ONLY these fields:"):"Other adults will see ONLY these fields:")}</p>
      <p className="mt-2">{chosen.category} · {formatSharedJod(chosen.amountFils)} · {chosen.occurredOn}</p>
      <p className="mt-1 text-muted-foreground">{ar?"مع مرجع معاملة داخلي واسم صاحب المشاركة ضمن العضوية. لا تشارك الملاحظات أو أسماء الأطفال.":(lang==="fr"?frenchUI("Along with a reference to your account membership. Notes, child names and other spending are excluded."):"Along with a reference to your account membership. Notes, child names and other spending are excluded.")}</p>
     </div>}
-   <label className="flex items-start gap-2 text-xs">
+   {chosen&&sharingChoice==="amount-category"&&<label className="flex items-start gap-2 text-xs">
     <input type="checkbox" className="mt-0.5 size-4 accent-[#426958]" checked={consent} disabled={!chosen||busy}
      onChange={e=>setConsent(e.target.checked)}/>
     {ar?"أوافق صراحة على مشاركة هذا المصروف وحده مع البالغين في هذه الأسرة.":(lang==="fr"?frenchUI("I explicitly agree to share this one expense with the adults in this household."):"I explicitly agree to share this one expense with the adults in this household.")}
-   </label>
-   <Button type="submit" disabled={busy||loading||!chosen||!consent}><Share2 className="size-4"/>{ar?"شارك هذا المصروف":(lang==="fr"?frenchUI("Share this one expense"):"Share this one expense")}</Button>
+   </label>}
+   <Button type="submit" disabled={busy||loading||!chosen||!consent||sharingChoice!=="amount-category"}><Share2 className="size-4"/>{ar?"شارك هذا المصروف":(lang==="fr"?frenchUI("Share this one expense"):"Share this one expense")}</Button>
   </form>
   <div className="mt-4">
    <h4 className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="size-4 text-brand"/>{ar?"آخر المصاريف المشتركة":(lang==="fr"?frenchUI("Recently shared expenses"):"Recently shared expenses")}</h4>
