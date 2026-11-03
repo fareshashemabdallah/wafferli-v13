@@ -8,6 +8,7 @@ import {FAMILY_PLANS_KEY,ACTIVE_PLAN_KEY,type FamilyPlan} from "@/lib/familyPlan
 import type {FamilyMoment} from "@/lib/familyCalendar";
 import {defaultFamilyPreferences,type FamilyPreferences} from "@/lib/familyPreferences";
 import {buildTodayActionPolicy,type TodayAction,type TodayWeekItem} from "@/lib/todayActionPolicy";
+import {TODAY_DISCOVERY_FOCUS_KEY} from "@/lib/moneyFocus";
 import {TodayQuickActions} from "./TodayQuickActions";
 import {WeeklyPlay} from "./WeeklyPlay";
 import {FAMILY_HERO_LAYOUT,FAMILY_HERO_TEXT,FamilyHeroIllustration} from "./FamilyHeroIllustration";
@@ -31,6 +32,8 @@ export function AdventureFamilyHome(){
  const current=brief?.action;
  const tr=(en:string,arabic:string)=>ar?arabic:lang==="fr"?frenchUI(en):en;
  function continueAction(action:TodayAction|TodayWeekItem){
+  if("kind" in action&&action.kind==="discovery"&&typeof window!=="undefined")
+   window.sessionStorage.setItem(TODAY_DISCOVERY_FOCUS_KEY,"1");
   if(action.planId)writeLocal(ACTIVE_PLAN_KEY,action.planId);
   if(action.occasionKey)writeLocal("focusedOccasionKey",action.occasionKey);
  }
@@ -69,7 +72,7 @@ export function AdventureFamilyHome(){
     aria-label={t("One next action","الخطوة القادمة")} data-testid="today-one-action">
    <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-[#B2467F]">
     {current.kind==="gift"||current.kind==="occasion"?<Gift className="size-4"/>:
-     current.kind==="financial"||current.kind==="bill"?<Wallet className="size-4"/>:<Heart className="size-4"/>}
+     current.kind==="financial"||current.kind==="bill"||current.kind==="discovery"?<Wallet className="size-4"/>:<Heart className="size-4"/>}
     {t("Next for your family","الخطوة الجاية للعيلة")}
    </div>
    <h2 className="mt-3 text-base font-semibold text-[#564256]">{ar?current.titleAr:lang==="fr"?frenchUI(current.titleEn):current.titleEn}</h2>
@@ -77,6 +80,7 @@ export function AdventureFamilyHome(){
     {current.kind==="gift"?t("Choose a gift","اختار هدية"):
      current.kind==="bill"?t("Check this payment","راجع الدفعة"):
      current.kind==="financial"?t("Review your family's money picture","راجع الوضع المالي للعيلة"):
+     current.kind==="discovery"?t("See what is adding up","شوف وين عم تتجمع المصاريف"):
      current.kind==="occasion"?t("Get ready together","حضّروا سوا"):
      t("Continue your plan","كمل خطتك")}
    </p>

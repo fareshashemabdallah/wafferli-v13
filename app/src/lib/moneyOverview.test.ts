@@ -44,6 +44,22 @@ describe("aligned Money overview",()=>{
   s.cashOnHand=200;
   expect(getMoneyOverview(s,date).billOnlyRemainder).toBe(100);
  });
+ it("reflects cross-month paid bills but never counts planned bill entries as payments",()=>{
+  const s=plain();
+  s.incomeSources=[{id:"pay",name:"Salary",amount:1000,frequency:"monthly",nextDate:"2026-10-25",shared:false}];
+  s.expenses=[
+   {id:"before",date:"2026-10-24",categoryId:"rent",amount:80,shared:false,billId:"before",dueDate:"2026-10-24",status:"paid"},
+   {id:"oct",date:"2026-10-26",categoryId:"rent",amount:100,shared:false,billId:"rent",dueDate:"2026-10-26",status:"paid"},
+   {id:"nov",date:"2026-11-01",categoryId:"food",amount:30,shared:false,billId:"water",dueDate:"2026-11-01",status:"paid"},
+   {id:"planned",date:"2026-11-02",categoryId:"rent",amount:400,shared:false,billId:"future",dueDate:"2026-11-02",status:"planned"}
+  ];
+  const original=JSON.stringify(s);
+  const overview=getMoneyOverview(s,new Date(2026,10,3,12));
+  expect(overview.month.spent).toBe(130);
+  expect(overview.paidBillsThisMonth).toBe(2);
+  expect(overview.billExpensesThisMonth).toBe(130);
+  expect(JSON.stringify(s)).toBe(original);
+ });
  it("exposes a negative cash shortfall instead of presenting it as zero available cash",()=>{
   const s=plain();s.cashOnHand=100;s.cashReserve=50;
   s.commitments=[{id:"rent",name:"Rent",amount:400,frequency:"once",dueDate:"2026-10-20"}];

@@ -1,5 +1,6 @@
 import {computeMoney,type CatType,type MoneyState,type Category} from "./money";
 import {roundJod} from "./cashflow";
+import {inMoneyCycle,moneyCycleFor} from "./moneyCycle";
 
 export type SpendingGroupKind=CatType|"unallocated";
 export type SpendingLine={
@@ -24,7 +25,7 @@ const amount=(value:number)=>Number.isFinite(value)?roundJod(value):0;
  * never be presented as confirmed savings or as freely spendable cash.
  */
 export function spendingBreakdown(state:MoneyState,now=new Date()):SpendingBreakdown{
- const computed=computeMoney(state,now);
+ const computed=computeMoney(state,now,"salary-cycle");
  const lines:SpendingLine[]=state.categories.map(category=>{
   const kind:SpendingGroupKind=starterIds.has(category.id)?"unallocated":category.type;
   const plannedJod=amount(computed.plannedBy(category.id));
@@ -33,9 +34,10 @@ export function spendingBreakdown(state:MoneyState,now=new Date()):SpendingBreak
    remainingJod:amount(plannedJod-recordedJod)};
  });
  const knownIds=new Set(state.categories.map(category=>category.id));
- const ym=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+ const today=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+ const cycle=moneyCycleFor(state,today);
  const uncategorizedRecordedJod=amount(state.expenses.filter(exp=>
-  exp.date.startsWith(ym)&&exp.status!=="planned"&&!knownIds.has(exp.categoryId)
+  inMoneyCycle(exp.date,cycle)&&exp.status!=="planned"&&!knownIds.has(exp.categoryId)
  ).reduce((sum,exp)=>sum+(Number.isFinite(exp.amount)?exp.amount:0),0));
  if(uncategorizedRecordedJod!==0)lines.push({
   id:"uncategorized-recorded",name:"Uncategorized recorded expenses",

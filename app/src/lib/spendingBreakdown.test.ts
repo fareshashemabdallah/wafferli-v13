@@ -58,6 +58,20 @@ describe("parent-visible fixed and variable household costs",()=>{
   expect(view.uncategorizedRecordedJod).toBe(25);
   expect(view.recordedJod).toBe(1005);
  });
+ it("keeps old or uncategorized transactions visible in the correct salary period",()=>{
+  const state={...real(),incomeSources:[{id:"pay",name:"Salary",frequency:"monthly" as const,nextDate:"2026-10-25",amount:2000,shared:false}],
+   expenses:[
+    {id:"before",date:"2026-10-24",categoryId:"legacy-deleted",amount:50,shared:false,status:"paid" as const},
+    {id:"after",date:"2026-10-26",categoryId:"legacy-deleted",amount:75,shared:false,status:"paid" as const},
+    {id:"nov",date:"2026-11-02",categoryId:"other-unknown",amount:25,shared:false,status:"paid" as const},
+    {id:"plan",date:"2026-11-03",categoryId:"legacy-deleted",amount:30,shared:false,status:"planned" as const}
+   ]};
+  const before=JSON.stringify(state.expenses);
+  const view=spendingBreakdown(state,new Date(2026,10,3,12));
+  expect(view.uncategorizedRecordedJod).toBe(100);
+  expect(view.recordedJod).toBe(100);
+  expect(JSON.stringify(state.expenses)).toBe(before);
+ });
  it("does not pretend a single combined starter number represents known fixed costs",()=>{
   const starter=applyStarterBudget(sampleMoney(),{income:1500,spending:1100,savings:200});
   const view=spendingBreakdown(starter,now);

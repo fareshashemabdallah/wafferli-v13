@@ -52,7 +52,7 @@ export function buildMonthlyMoneyReport(
  const [year,m]=month.split("-").map(Number);
  const date=new Date(year!,m!-1,cycle.day,12);
  const first=cycle.start,last=cycle.end;
- const calc=computeMoney(state,date);
+ const calc=computeMoney(state,date,"salary-cycle");
  const classification=categoryGroups(state,month,cycle);
  const bills=state.commitments??[];
  const byBill=new Map(bills.map(b=>[b.id,b]));

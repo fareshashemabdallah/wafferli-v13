@@ -2,6 +2,7 @@ import {buildForecast,futureDate,legacyIncome,roundJod,type Forecast} from "./ca
 import {computeMoney,sampleMoney,type MoneyState} from "./money";
 import type {FamilyPlan} from "./familyPlans";
 import {familyForecastCommitments} from "./familyFinancialCommitments";
+import {inMoneyCycle,moneyCycleFor} from "./moneyCycle";
 
 /**
  * One read-only interpretation of the user's financial records.
@@ -36,10 +37,11 @@ export function getMoneyOverview(state:MoneyState,now=new Date(),familyPlans:rea
     reserve:validMoney(state.cashReserve)?state.cashReserve:0,today,days:30,
     billPayments:state.expenses
   });
-  const month=computeMoney(state,now);
-  const paidExpenses=state.expenses.filter(e=>e.date.startsWith(today.slice(0,7))&&e.billId);
+  const month=computeMoney(state,now,"salary-cycle");
+  const cycle=moneyCycleFor(state,today);
+  const paidExpenses=state.expenses.filter(e=>e.status!=="planned"&&e.billId&&inMoneyCycle(e.date,cycle));
   const paidBillKeys=new Set(paidExpenses.map(e=>e.billId+":"+e.dueDate));
-  const paidMarked=commitments.flatMap(b=>(b.paidDates??[]).filter(d=>d.startsWith(today.slice(0,7))).map(d=>b.id+":"+d));
+  const paidMarked=commitments.flatMap(b=>(b.paidDates??[]).filter(d=>inMoneyCycle(d,cycle)).map(d=>b.id+":"+d));
   const linkedCategories=new Set(commitments.map(b=>b.categoryId).filter((x):x is string=>!!x&&state.categories.some(c=>c.id===x)));
   return {
     forecast,month,demo:state.demo,cashSet:cash!==null,
