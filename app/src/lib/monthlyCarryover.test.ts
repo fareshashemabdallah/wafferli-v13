@@ -36,9 +36,9 @@ describe("Next-month carryover from confirmed payments",()=>{
    {id:"current-cycle",date:"2026-10-26",categoryId:"food",amount:20,plannedAmount:100,status:"paid",shared:false}
   ];
   const original=JSON.stringify(s.expenses);
-  expect(monthCarryover(s,"2026-10")).toMatchObject({from:"2026-09",credit:40,net:40});
-  expect(computeMoney(s,new Date(2026,10,1,12)).carryover.net).toBe(40);
-  expect(monthCarryover(s,"2026-11").net).toBe(80);
+  expect(monthCarryover(s,"2026-10","salary-cycle")).toMatchObject({from:"2026-09",credit:40,net:40});
+  expect(computeMoney(s,new Date(2026,10,1,12),"salary-cycle").carryover.net).toBe(40);
+  expect(monthCarryover(s,"2026-11","salary-cycle").net).toBe(80);
   expect(JSON.stringify(s.expenses)).toBe(original);
  });
  it("does not include planned but unpaid items, unmatched historic receipts, or approved differences",()=>{
