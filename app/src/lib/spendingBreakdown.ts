@@ -24,7 +24,7 @@ const amount=(value:number)=>Number.isFinite(value)?roundJod(value):0;
  * never be presented as confirmed savings or as freely spendable cash.
  */
 export function spendingBreakdown(state:MoneyState,now=new Date()):SpendingBreakdown{
- const computed=computeMoney(state,now);
+ const computed=computeMoney(state,now,"salary-cycle");
  const lines:SpendingLine[]=state.categories.map(category=>{
   const kind:SpendingGroupKind=starterIds.has(category.id)?"unallocated":category.type;
   const plannedJod=amount(computed.plannedBy(category.id));
