@@ -27,6 +27,20 @@ describe("Next-month carryover from confirmed payments",()=>{
   expect(computeMoney(s,new Date(2026,10,15)).carryover.net).toBe(0);
   expect(s.cashOnHand).toBe(1000);
  });
+ it("attributes carryover to the prior salary cycle without duplicating or shifting any receipt",()=>{
+  const s=make();
+  s.incomeSources=[{id:"pay",name:"Salary",amount:1000,frequency:"monthly",nextDate:"2026-10-25",shared:false}];
+  s.expenses=[
+   {id:"before",date:"2026-09-24",categoryId:"food",amount:30,plannedAmount:100,status:"paid",shared:false},
+   {id:"prior-cycle",date:"2026-10-24",categoryId:"food",amount:60,plannedAmount:100,status:"paid",shared:false},
+   {id:"current-cycle",date:"2026-10-26",categoryId:"food",amount:20,plannedAmount:100,status:"paid",shared:false}
+  ];
+  const original=JSON.stringify(s.expenses);
+  expect(monthCarryover(s,"2026-10")).toMatchObject({from:"2026-09",credit:40,net:40});
+  expect(computeMoney(s,new Date(2026,10,1,12)).carryover.net).toBe(40);
+  expect(monthCarryover(s,"2026-11").net).toBe(80);
+  expect(JSON.stringify(s.expenses)).toBe(original);
+ });
  it("does not include planned but unpaid items, unmatched historic receipts, or approved differences",()=>{
   const s=make();s.expenses=[
     {id:"unpaid",date:"2026-09-22",categoryId:"food",amount:100,plannedAmount:50,status:"planned",shared:true},
