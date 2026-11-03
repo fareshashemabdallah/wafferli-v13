@@ -80,19 +80,21 @@ export const sampleMembers = (): Member[] => [
   { id: "m3", name: "Child (sample)", role: "child", ageGroup: "6–12", prefs: "School supplies in September" },
 ];
 
-export function computeMoney(s: MoneyState, now = new Date()) {
+/** The salary view is opt-in so existing calendar-month budget and approval
+ * workflows keep their original month keys and never reinterpret saved plans. */
+export function computeMoney(s: MoneyState, now = new Date(), period:"calendar"|"salary-cycle"="calendar") {
   const todayKey=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
-  const cycle=moneyCycleFor(s,todayKey);
-  // Month-specific allowances are keyed by the month the salary cycle begins.
-  const ym=cycle.key;
-  const month=s.expenses.filter(e=>inMoneyCycle(e.date,cycle)&&e.status!=="planned");
+  const cycle=period==="salary-cycle"?moneyCycleFor(s,todayKey):null;
+  // Salary-cycle allowances are keyed by the month the reporting cycle begins.
+  const ym=cycle?.key??todayKey.slice(0,7);
+  const month=s.expenses.filter(e=>(cycle?inMoneyCycle(e.date,cycle):e.date.startsWith(ym+"-"))&&e.status!=="planned");
   const spentBy = (id: string) => month.filter((e) => e.categoryId === id).reduce((a, e) => a + e.amount, 0);
   const monthlyIncome = s.incomeSources === undefined ? s.income : monthlyTotal(s.incomeSources);
   const baseSavings = typeof s.savingsTargetAmount==="number"&&Number.isFinite(s.savingsTargetAmount)&&s.savingsTargetAmount>=0
     ? s.savingsTargetAmount : Math.round(monthlyIncome*s.savingsPct)/100;
   const monthly=s.monthlyAdjustments?.[ym];
   const savingsTarget=Math.round((baseSavings+(monthly?.savingsDelta??0))*100)/100;
-  const carryover=monthCarryover(s,ym);
+  const carryover=monthCarryover(s,ym,period);
   const spendable = monthlyIncome - savingsTarget + carryover.net;
   const plannedBy=(id:string)=>effectiveCategoryAllowance(s,id,ym);
   const planned = Math.round(s.categories.reduce((a, c) => a + plannedBy(c.id), 0)*100)/100;
