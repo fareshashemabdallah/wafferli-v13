@@ -7,7 +7,7 @@ const parentA="35796b6a-8c32-4c8b-b905-14bf4c58feaa";
 const parentB="6ca9e00a-bd8f-48bd-b7f6-8d01ca637bd7";
 const stranger="12e2c1b2-3418-4593-96bf-1aa2c0e1b22a";
 const row=(id:string,author:string,amount:number,date="2026-11-02",category="Groceries"):SharedExpenseRow=>({
- id,household_id:household,created_by:author,source_fingerprint:(id.slice(0,1)||"a").repeat(64),
+ id,household_id:household,created_by:author,source_fingerprint:id.replaceAll("-","").repeat(2),
  category,amount_fils:amount,occurred_on:date,currency:"JOD",
  consented_at:"2026-11-03T05:00:00Z"
 });
