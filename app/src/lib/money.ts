@@ -100,8 +100,10 @@ export function computeMoney(s: MoneyState, now = new Date(), period:"calendar"|
   const planned = Math.round(s.categories.reduce((a, c) => a + plannedBy(c.id), 0)*100)/100;
   const spent = month.reduce((a, e) => a + e.amount, 0);
   const utcDay=(d:string)=>Date.parse(d+"T12:00:00Z");
-  const days=Math.round((utcDay(cycle.endExclusive)-utcDay(cycle.start))/86400000);
-  const day=Math.min(days,Math.max(1,Math.round((utcDay(todayKey)-utcDay(cycle.start))/86400000)+1));
+  const days=cycle?Math.round((utcDay(cycle.endExclusive)-utcDay(cycle.start))/86400000):
+   new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const day=cycle?Math.min(days,Math.max(1,Math.round((utcDay(todayKey)-utcDay(cycle.start))/86400000)+1)):
+   now.getDate();
   // Projection: fixed/periodic = max(planned, actual); variable = actual pace extrapolated, at least actual
   let projected = 0;
   for (const c of s.categories) {
