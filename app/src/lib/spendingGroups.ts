@@ -48,7 +48,7 @@ export function spendingBreakdown(state:MoneyState,month:string,cycle?:MoneyCycl
  const [year,mm]=month.split("-").map(Number);
  const first=cycle?.start??month+"-01";
  const last=cycle?.end??month+"-"+String(new Date(year!,mm!,0).getDate()).padStart(2,"0");
- const finance=computeMoney(state,new Date(year!,mm!-1,cycle?.day??15,12));
+ const finance=computeMoney(state,new Date(year!,mm!-1,cycle?.day??15,12),cycle?"salary-cycle":"calendar");
  const lines:ClassifiedLine[]=[];
  const unassigned:UnassignedCategory[]=[];
  const due:DueObligation[]=[];
