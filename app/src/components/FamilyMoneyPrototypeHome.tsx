@@ -26,7 +26,7 @@ export function FamilyMoneyPrototypeHome({state,setState,forecast,onIncome,onQui
  const [activeCategory,setActiveCategory]=useState<string|null>(null);
  const [cycleEditor,setCycleEditor]=useState(false);
  const cycle=moneyCycleFor(state,localToday());
- const totals=computeMoney(state,new Date(cycle.start+"T12:00:00"));
+ const totals=computeMoney(state,new Date(cycle.start+"T12:00:00"),"salary-cycle");
  const allCategories=[...state.categories].sort((a,b)=>totals.plannedBy(b.id)-totals.plannedBy(a.id));
  const displayed=showAll?allCategories:allCategories.slice(0,5);
  const month=cycle.key;
