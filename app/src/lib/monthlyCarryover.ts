@@ -1,5 +1,6 @@
 import type {MoneyState,Expense} from "./money";
 import {roundJod} from "./cashflow";
+import {inMoneyCycle,moneyCycleForMonth} from "./moneyCycle";
 
 /**
  * Budget-only, one-month carryover: prior month's confirmed planned-vs-actual
@@ -32,7 +33,8 @@ export function eligibleCarryover(expense:Expense):number {
 }
 export function monthCarryover(state:MoneyState,month:string):MonthlyCarryover {
  const from=previousMonthKey(month);
- const entries:CarryoverEntry[]=from?state.expenses.filter(e=>e.date.slice(0,7)===from)
+ const previousCycle=from?moneyCycleForMonth(state,from):null;
+ const entries:CarryoverEntry[]=previousCycle?state.expenses.filter(e=>inMoneyCycle(e.date,previousCycle))
    .map(e=>({id:e.id,title:e.note??state.commitments?.find(b=>b.id===e.billId)?.name??
       state.categories.find(c=>c.id===e.categoryId)?.name??"Expense",
       planned:e.plannedAmount??0,actual:e.amount,change:eligibleCarryover(e),categoryId:e.categoryId}))
