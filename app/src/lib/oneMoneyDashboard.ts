@@ -9,7 +9,7 @@ export function oneMoneyDashboard(state:MoneyState,forecast:RhythmForecast,today
  const cycle=moneyCycleFor(state,today);
  const year=Number(cycle.start.slice(0,4)),month=Number(cycle.start.slice(5,7));
  const now=new Date(year,month-1,Number(cycle.start.slice(8)),12);
- const c=computeMoney(state,now);
+ const c=computeMoney(state,now,"salary-cycle");
  const sources=state.incomeSources??legacyIncome(state.income);
  const incomeKnown=state.demo?false:state.incomeKnown===true||sources.length>0;
  const hasCategoryPlan=state.categories.length>0;
