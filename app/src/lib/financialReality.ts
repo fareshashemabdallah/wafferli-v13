@@ -27,7 +27,7 @@ export type FinancialReality={
  * from variable/fixed, and includes linked family bills only in dated cash-flow.
  */
 export function assessFinancialReality(money:MoneyState,plans:readonly FamilyPlan[]=[],now=new Date()):FinancialReality{
- const summary=computeMoney(money,now);
+ const summary=computeMoney(money,now,"salary-cycle");
  const budgetKnown=!money.demo&&money.categories.length>0&&
   (summary.monthlyIncome>0||money.incomeKnown===true||!!money.incomeSources?.length);
  const income=budgetKnown?roundJod(summary.monthlyIncome):null;
