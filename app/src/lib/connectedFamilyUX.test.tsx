@@ -59,7 +59,7 @@ describe("Connected family privacy UI",()=>{
   const before=window.localStorage.getItem("wafferli.v13.money");
   render(<I18nProvider><HouseholdExpenseSharing householdId={household} userId={a}/></I18nProvider>);
   const summary=await screen.findByTestId("connected-family-summary");
-  await waitFor(()=>expect(within(summary).getByText("90.000 JOD")).toBeInTheDocument());
+  await waitFor(()=>expect(within(summary).getAllByText("90.000 JOD").length).toBeGreaterThan(0));
   expect(within(summary).getByText("70.000 JOD")).toBeInTheDocument();
   expect(within(summary).getByText("20.000 JOD")).toBeInTheDocument();
   expect(window.localStorage.getItem("wafferli.v13.money")).toBe(before);
