@@ -66,6 +66,20 @@ describe("Today: one contextual next action",()=>{
   expect(b.action?.id).toContain("overdue");
   expect(money.commitments).toEqual([{id:"school",name:"School fee",amount:80,frequency:"once",dueDate:"2026-10-18"}]);
  });
+ it("surfaces repeated optional spending as one read-only, actionable insight",()=>{
+  const money={...emptyRealMoney(),categories:[{id:"out",name:"Eating out",type:"variable" as const,planned:120,priority:"flexible" as const}],
+   expenses:[3,5,7,9].map((day,i)=>({id:"food"+i,date:"2026-10-"+String(day).padStart(2,"0"),categoryId:"out",amount:15,status:"paid" as const,shared:false,purpose:"food-delivery" as const}))};
+  const before=JSON.stringify(money);
+  const b=buildTodayActionPolicy(data(money,[],[]));
+  expect(b.action).toMatchObject({kind:"discovery",route:"/money",id:"discovery:food-delivery"});
+  expect(b.action?.detailEn).toContain("4 paid purchases totaling 60.00 JOD");
+  expect(JSON.stringify(money)).toBe(before);
+  const disabled=buildTodayActionPolicy({...data(money,[],[]),preferences:{...defaultFamilyPreferences,financeTips:false}});
+  expect(disabled.action).toBeNull();
+  const protectedMoney={...money,categories:[{id:"out",name:"School fees",type:"variable" as const,planned:120,priority:"essential" as const}]};
+  expect(buildTodayActionPolicy(data(protectedMoney,[],[])).action).toBeNull();
+  expect(buildTodayActionPolicy(data(money,[],moments)).action?.kind).toBe("occasion");
+ });
  it("respects lifestyle preference without suppressing genuine financial warnings",()=>{
   const prefs={...defaultFamilyPreferences,lifestyle:false};
   const noFamily=buildTodayActionPolicy({...data(),preferences:prefs});
