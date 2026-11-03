@@ -4,6 +4,7 @@ import type {BudgetItem} from "./householdBudgetBuilder";
 import { monthlyTotal } from "./cashflow";
 import { monthCarryover } from "./monthlyCarryover";
 import {effectiveCategoryAllowance} from "./monthAwareMoney";
+import {inMoneyCycle,moneyCycleFor} from "./moneyCycle";
 export type CatType = "fixed" | "variable" | "periodic";
 export type Category = { id: string; name: string; type: CatType; planned: number; /** Applies ONLY to the unbroken part of the monthly category envelope; detailed lines retain their own roles. */ remainderRole?:import("./spendingGroups").SpendingRole; /** Stable image grouping independent of category name. */ visualGroup?:import("./familyCategoryCards").CategoryVisualGroup; visualIcon?:import("./familyCategoryCards").CategoryPicture; /** Optional family-declared priority, independent of fixed/variable schedule. */ priority?:"essential"|"protected"|"flexible"; /** Unreviewed legacy values remain estimates. */ amountConfidence?:"estimate"|"confirmed" };
 export type BudgetAllocation = {kind:"variable"|"savings"; categoryId?:string; delta:number; approvedAt:string};
@@ -80,8 +81,11 @@ export const sampleMembers = (): Member[] => [
 ];
 
 export function computeMoney(s: MoneyState, now = new Date()) {
-  const ym = [now.getFullYear(),String(now.getMonth()+1).padStart(2,"0")].join("-");
-  const month = s.expenses.filter((e) => e.date.startsWith(ym) && e.status!=="planned");
+  const todayKey=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
+  const cycle=moneyCycleFor(s,todayKey);
+  // Month-specific allowances are keyed by the month the salary cycle begins.
+  const ym=cycle.key;
+  const month=s.expenses.filter(e=>inMoneyCycle(e.date,cycle)&&e.status!=="planned");
   const spentBy = (id: string) => month.filter((e) => e.categoryId === id).reduce((a, e) => a + e.amount, 0);
   const monthlyIncome = s.incomeSources === undefined ? s.income : monthlyTotal(s.incomeSources);
   const baseSavings = typeof s.savingsTargetAmount==="number"&&Number.isFinite(s.savingsTargetAmount)&&s.savingsTargetAmount>=0
@@ -93,8 +97,9 @@ export function computeMoney(s: MoneyState, now = new Date()) {
   const plannedBy=(id:string)=>effectiveCategoryAllowance(s,id,ym);
   const planned = Math.round(s.categories.reduce((a, c) => a + plannedBy(c.id), 0)*100)/100;
   const spent = month.reduce((a, e) => a + e.amount, 0);
-  const day = now.getDate();
-  const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const utcDay=(d:string)=>Date.parse(d+"T12:00:00Z");
+  const days=Math.round((utcDay(cycle.endExclusive)-utcDay(cycle.start))/86400000);
+  const day=Math.min(days,Math.max(1,Math.round((utcDay(todayKey)-utcDay(cycle.start))/86400000)+1));
   // Projection: fixed/periodic = max(planned, actual); variable = actual pace extrapolated, at least actual
   let projected = 0;
   for (const c of s.categories) {
