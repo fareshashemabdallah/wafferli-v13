@@ -7,13 +7,14 @@ import {planKey} from "./occasionAdvisor";
 import {canonicalFamilyReadModel,occasionSourceRef} from "./canonicalFamilyFacts";
 import type {MoneyState,Member} from "./money";
 import {moneyCycleFor,cyclePaidTotal} from "./moneyCycle";
+import {buildSpendingDiscoveries} from "./spendingDiscoveries";
 import type {FamilyPlan} from "./familyPlans";
 import type {FamilyPreferences} from "./familyPreferences";
 
 /** Today is one read-only interpretation, not a fifth store or duplicate
  * decision workflow. All specialist pages keep their own existing records. */
 export type TodayAction={
- kind:"bill"|"financial"|"gift"|"occasion"|"plan";
+ kind:"bill"|"financial"|"gift"|"occasion"|"plan"|"discovery";
  id:string;
  titleEn:string;titleAr:string;detailEn:string;detailAr:string;
  actionEn:string;actionAr:string;
@@ -117,6 +118,27 @@ export function buildTodayActionPolicy(input:{
     detailAr:"موعد "+due.name+" المسجل هو "+due.displayDate+". تأكد من الدفع قبل التزامات جديدة.",
     actionEn:"Check this payment",actionAr:"راجع هذه الدفعة",route:"/money",
     whyEn:"Due within three days",whyAr:"تستحق خلال ثلاثة أيام",date:due.displayDate
+   });
+  }
+ }
+ // A recorded discretionary-spending pattern can help a parent without
+ // requesting more setup. Financial warnings, due bills and family occasions
+ // retain higher priority. Never treat this as money already saved.
+ if(!money.demo&&preferences.financeTips){
+  const cycle=moneyCycleFor(money,today);
+  const discovery=buildSpendingDiscoveries(money,cycle.key,cycle).visible[0];
+  if(discovery&&(discovery.signal==="increase"||discovery.signal==="repeated")){
+   const label=discovery.kind==="food-delivery"?"Food delivery":discovery.label;
+   const labelAr=discovery.kind==="food-delivery"?"توصيل الأكل":discovery.label;
+   add(8,today,{
+    kind:"discovery",id:"discovery:"+discovery.key,
+    titleEn:"A spending pattern worth noticing: "+label,
+    titleAr:"مصاريف بتستاهل الانتباه: "+labelAr,
+    detailEn:"You recorded "+discovery.count+" paid purchases totaling "+discovery.amountJod.toFixed(2)+" JOD between "+cycle.start+" and "+cycle.end+". Review them before deciding whether to change anything.",
+    detailAr:"سجّلت "+discovery.count+" مصاريف مدفوعة بمجموع "+discovery.amountJod.toFixed(2)+" دينار بين "+cycle.start+" و"+cycle.end+". راجعها قبل ما تقرر إذا بدك تغيّر شي.",
+    actionEn:"Explore this spending",actionAr:"شوف تفاصيل المصاريف",route:"/money",
+    whyEn:"Based only on paid expenses you recorded, not bank activity or guaranteed savings",
+    whyAr:"حسب المصاريف المدفوعة اللي سجّلتها فقط، مش بيانات البنك أو توفير مضمون"
    });
   }
  }
