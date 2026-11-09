@@ -30,6 +30,24 @@
 .visualCaption{font-size:11px;color:#718887;margin-top:4px}
 @media(min-width:701px){.visualOverlay{align-items:center;padding:18px}.visualSheet{border-radius:22px;max-height:92dvh}}
 
+
+/* Human movement photo gallery */
+.visualBtn .humanThumb{display:block;flex:0 0 102px;width:102px;height:79px;overflow:hidden;border-radius:10px;background:#dbe9e5}
+.visualBtn .humanThumb img{display:block;width:100%;height:100%;object-fit:cover}
+.photoGallery{padding:13px;margin:12px 0;border:1px solid #c9e5da;border-radius:16px;background:#f0f9f5}
+.photoTabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:12px 0}
+.photoTabs button{border:1px solid #add5c8;background:white;border-radius:10px;color:#126454;padding:10px 4px;font-weight:750;font-size:11px;min-height:43px}
+.photoTabs button[aria-pressed="true"]{background:#076c60;color:white}
+.photoImage{display:block;width:100%;aspect-ratio:1.5;object-fit:contain;background:#dfeae7;border-radius:12px}
+.photoCompare{display:grid;grid-template-columns:1fr 1fr;gap:7px}.photoCompare img{width:100%;aspect-ratio:1.5;object-fit:contain;border-radius:9px;background:#dfeae7}
+.photoCompare figure{margin:0;min-width:0}
+.photoCompare figcaption{font-size:11px;color:#356f62;font-weight:700;margin:5px 0}
+.photoDiagram{display:grid;grid-template-columns:1fr 1fr;gap:7px}.photoDiagram svg{width:100%;height:auto}
+.angleTips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.angleTips div{background:#fff;border:1px solid #daeae4;border-radius:10px;padding:10px;font-size:12px;line-height:1.5}
+.angleTips b{display:block;color:#126c5c;margin-bottom:5px}
+.photoCaption{color:#4d7770;font-size:12px;line-height:1.5;margin:8px 0}
+@media(max-width:380px){.photoTabs{grid-template-columns:1fr 1fr}.visualBtn .humanThumb{flex-basis:82px;width:82px}}
 </style></head><body>
 <header><div class="hero"><div><div class="eyebrow">Your personal weekly plan</div><h1>SpineSmart <span style="font-weight:400">Gym</span></h1><p>Train confidently. Progress gradually.</p></div><div class="logo" aria-hidden="true">◈</div></div></header>
 <main><div class="nav"><button id="tabTrain" class="on" onclick="go('train')">Today's workout</button><button id="tabWeek" onclick="go('week')">Weekly progress</button><button id="tabGuide" onclick="go('guide')">Safety guide</button></div>
@@ -45,7 +63,7 @@
 <p class="footer">Your workout records stay on this device in this browser (local storage). No account or connection needed. If you clear browser data or change devices, your saved log may disappear; export CSV periodically. Not a replacement for a clinical assessment.</p><div id="pictureOverlay" class="visualOverlay hidden" onclick="closePictureBackdrop(event)" role="dialog" aria-modal="true" aria-label="Exercise setup and picture guide"><div class="visualSheet" id="pictureBody"></div></div></main>
 <script>
 
-/* Self-contained visual guides: simplified illustrations, not equipment-specific photographs */
+/* Photo demonstrations plus exercise safety/position diagrams */
 var VISUAL_DETAILS={
  bike:{title:'Recumbent bike or treadmill',setting:'Bike: lowest resistance (often level 1–2), 7 minutes',sub:'Treadmill alternative: 3.0 km/h, 0% incline',steps:['Adjust the bike seat so your knee remains slightly bent at the farthest pedal position.','Keep your back comfortably supported and shoulders relaxed.','Pedal at a gentle, conversational effort for 7 minutes.','If using a treadmill instead, start at 3.0 km/h and 0% incline; reduce speed if needed.'],avoid:'Do not force the pedals, round your lower back, or hold your breath.'},
  walk:{title:'Easy treadmill walk',setting:'3.0 km/h · 0% incline · 7 minutes',sub:'Adjust to a slower speed if 3.0 km/h is not comfortable',steps:['Attach the safety clip if available.','Set incline to 0%. Start at 2.0–3.0 km/h and settle at a comfortable pace.','Walk upright, looking forward, with relaxed shoulders and a natural stride.','Finish at 7 minutes, or earlier if discomfort appears.'],avoid:'Avoid steep incline, running, leaning forward, or gripping the rails tightly unless needed for balance.'},
@@ -101,7 +119,45 @@ function visualSvg(id,phase){
  return '<svg viewBox="0 0 280 170" role="img" aria-label="'+(p?'Finish':'Start')+' position schematic"><rect width="280" height="170" rx="14" fill="#eaf5f2"/><path d="M0 152H280" stroke="#c8ded8" stroke-width="3"/>'+g+'<rect x="9" y="9" width="59" height="23" rx="10" fill="'+(p?'#126f60':'#5a8380')+'"/><text x="38" y="25" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="white">'+(p?'FINISH':'START')+'</text></svg>';
 }
 function visualSettingLabel(id){return VISUAL_DETAILS[id]?VISUAL_DETAILS[id].setting:'Open the guide for setup'}
-function pictureCard(e){return '<button type="button" class="visualBtn" onclick="openPicture(\''+e.id+'\')"><span class="thumb">'+visualSvg(e.id,0)+'</span><span><strong>See pictures & machine settings</strong><small>'+visualSettingLabel(e.id)+'</small></span><span class="arrow">›</span></button>'}
+
+/* Two genuine human exercise photos per movement, plus a supplementary position diagram. */
+var HUMAN_PHOTOS={"bike":"Recumbent_Bike","walk":"Walking_Treadmill","cool":"Walking_Treadmill","press":"Leverage_Chest_Press","legpress":"Leg_Press","row":"Leverage_Iso_Row","curl":"Seated_Leg_Curl","pallof":"Pallof_Press","pulldown":"Close-Grip_Front_Lat_Pulldown","extension":"Leg_Extensions","hip":"Thigh_Abductor","triceps":"Triceps_Pushdown"};
+var PHOTO_BASE='https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+var ALIGN={
+ bike:['Side: keep your back supported and avoid rounding toward pedals.','Front: knees move comfortably in line with feet.'],
+ walk:['Side: gaze ahead, neck neutral and strides unforced.','Front: shoulders stay level and steps remain even.'],
+ cool:['Side: walk slowly without leaning forward.','Front: keep an easy symmetrical stride.'],
+ press:['Side: back and head rest on the pad.','Front: press both handles evenly without shrugging.'],
+ legpress:['Side: keep your pelvis and lower back on the pad; avoid deep rounding.','Front: knees track with toes; avoid knees collapsing inward.'],
+ row:['Side: stay supported by the chest pad and keep neck neutral.','Front: elbows travel evenly back without shoulder shrugging.'],
+ curl:['Side: no lower-back arching or hips lifting from the seat.','Front: both legs curl evenly without tilting the pelvis.'],
+ pallof:['Side: keep ribs over pelvis, avoid leaning back.','Front: resist cable pulling your torso sideways; no twist.'],
+ pulldown:['Side: remain mostly upright; pull handles to the front.','Front: shoulders stay level, do not pull behind your head.'],
+ extension:['Side: lower back remains supported by seat.','Front: knees and hips remain aligned.'],
+ hip:['Side: sit back into the support and avoid rocking.','Front: push both legs out evenly; hips centered.'],
+ triceps:['Side: elbows stay near ribs without torso leaning.','Front: shoulders remain level and wrists straight.']
+};
+function humanPhoto(id,n){return PHOTO_BASE+HUMAN_PHOTOS[id]+'/'+n+'.jpg'}
+function humanPanel(id,view){
+ const d=VISUAL_DETAILS[id],title=d?d.title:id;
+ if(view==='diagram')return '<div class="photoDiagram">'+visualSvg(id,0)+visualSvg(id,1)+'</div><p class="photoCaption">Additional simplified start/finish diagrams; not exact machine depictions.</p>';
+ if(view==='compare')return '<div class="photoCompare"><figure><img loading="eager" src="'+humanPhoto(id,0)+'" alt="'+title+' human start position"><figcaption>01 · START</figcaption></figure><figure><img loading="eager" src="'+humanPhoto(id,1)+'" alt="'+title+' human finish position"><figcaption>02 · FINISH</figcaption></figure></div>';
+ return '<img class="photoImage" loading="eager" src="'+humanPhoto(id,view==='finish'?1:0)+'" alt="'+title+' real human '+view+' position"><p class="photoCaption">'+(view==='finish'?'02 · FINISH — return slowly with control':'01 · START — adjust seat, handles and posture')+'</p>';
+}
+function chooseHumanView(id,view){
+ const area=document.getElementById('humanView');if(area)area.innerHTML=humanPanel(id,view);
+ document.querySelectorAll('.photoTabs button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.view===view?'true':'false')});
+}
+function humanGallery(id){
+ const cues=ALIGN[id]||['Keep your neck and lower back comfortable.','Avoid twisting and move evenly.'];
+ const tabs=[['start','Start'],['finish','Finish'],['compare','Compare'],['diagram','Diagram']].map(function(t,i){
+  return '<button type="button" data-view="'+t[0]+'" aria-pressed="'+(i===0?'true':'false')+'" onclick="chooseHumanView(\''+id+'\',\''+t[0]+'\')">'+t[1]+'</button>';
+ }).join('');
+ return '<div class="photoGallery"><div class="visualGuideTitle">HUMAN EXERCISE PHOTOS</div><p class="photoCaption">Study two real photos of the movement and compare them side by side. The fourth view is a diagram — not a separate photographic camera angle.</p><div class="photoTabs" role="group" aria-label="Exercise picture views">'+tabs+'</div><div id="humanView">'+humanPanel(id,'start')+'</div><div class="angleTips"><div><b>Side alignment</b>'+cues[0]+'</div><div><b>Front alignment</b>'+cues[1]+'</div></div><p class="photoCaption">Pictures may show a different machine or deeper movement than appropriate for you. Do not imitate the pictured weight or range of motion. Follow the safety instructions below.</p></div>';
+}
+function pictureCard(e){
+ return '<button type="button" class="visualBtn" onclick="openPicture(\''+e.id+'\')"><span class="humanThumb"><img loading="lazy" src="'+humanPhoto(e.id,0)+'" alt="Human demonstration of '+e.name+'"></span><span><strong>View human movement photos</strong><small>Start · Finish · Compare · Diagram<br>'+visualSettingLabel(e.id)+'</small></span><span class="arrow">›</span></button>';
+}
 function visualAdjust(which,change){if(which==='speed')VISUAL_SETTINGS.speed=Math.min(5,Math.max(1.5,Math.round((VISUAL_SETTINGS.speed+change)*2)/2));if(which==='incline')VISUAL_SETTINGS.incline=Math.min(2,Math.max(0,Math.round((VISUAL_SETTINGS.incline+change)*2)/2));if(which==='bike')VISUAL_SETTINGS.bike=Math.min(3,Math.max(1,VISUAL_SETTINGS.bike+change));visualSave();visualRenderSetting(which)}
 function visualRenderSetting(which){var el=document.getElementById('visual_'+which);if(el)el.textContent=which==='speed'?VISUAL_SETTINGS.speed.toFixed(1)+' km/h':which==='incline'?VISUAL_SETTINGS.incline.toFixed(1)+'%':'Level '+VISUAL_SETTINGS.bike}
 function openPicture(id){
@@ -112,7 +168,7 @@ function openPicture(id){
   if(treadmill){control='<div class="visualSetting"><div class="visualGuideTitle">Adjust your treadmill</div><div class="visualStepper"><span>Speed</span><button onclick="visualAdjust(\'speed\',-0.5)">−</button><output id="visual_speed">'+VISUAL_SETTINGS.speed.toFixed(1)+' km/h</output><button onclick="visualAdjust(\'speed\',0.5)">+</button></div><div class="visualStepper"><span>Incline</span><button onclick="visualAdjust(\'incline\',-0.5)">−</button><output id="visual_incline">'+VISUAL_SETTINGS.incline.toFixed(1)+'%</output><button onclick="visualAdjust(\'incline\',0.5)">+</button></div><small>Start at 0% incline. These controls record settings; they do not control your treadmill.</small></div>'}
   else {control='<div class="visualSetting"><div class="visualGuideTitle">Bike resistance</div><div class="visualStepper"><span>Level</span><button onclick="visualAdjust(\'bike\',-1)">−</button><output id="visual_bike">Level '+VISUAL_SETTINGS.bike+'</output><button onclick="visualAdjust(\'bike\',1)">+</button></div><small>Resistance scales differ by brand. Choose the easiest available level.</small></div>'}
  }
- var body='<div class="headrow"><div><div class="visualGuideTitle">Machine picture guide</div><h2>'+d.title+'</h2></div><button class="close" onclick="closePicture()" aria-label="Close exercise guide">×</button></div><div class="visualPair">'+visualSvg(id,0)+visualSvg(id,1)+'</div><div class="visualCaption">Simplified movement illustrations — machine design and seat adjustments vary.</div><div class="visualSetting"><div class="visualGuideTitle">Suggested first-session settings</div><b>'+d.setting+'</b><small>'+d.sub+'</small></div>'+control+'<h3>How to do it</h3><ol class="steps">'+d.steps.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ol><div class="tip"><b>Protect your back and neck:</b> '+d.avoid+'</div><button class="btn primary" style="width:100%;margin-top:14px" onclick="closePicture()">Back to workout</button>';
+ var body='<div class="headrow"><div><div class="visualGuideTitle">Machine picture guide</div><h2>'+d.title+'</h2></div><button class="close" onclick="closePicture()" aria-label="Close exercise guide">×</button></div>'+humanGallery(id)+'<div class="visualSetting"><div class="visualGuideTitle">Suggested first-session settings</div><b>'+d.setting+'</b><small>'+d.sub+'</small></div>'+control+'<h3>How to do it</h3><ol class="steps">'+d.steps.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ol><div class="tip"><b>Protect your back and neck:</b> '+d.avoid+'</div><button class="btn primary" style="width:100%;margin-top:14px" onclick="closePicture()">Back to workout</button><p class="photoCaption">Source: <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener noreferrer">Free Exercise DB</a> open exercise-photo collection. Internet connection required to load real-person photos; the guidance and diagrams remain available without them.</p>';
  document.getElementById('pictureBody').innerHTML=body;document.getElementById('pictureOverlay').classList.remove('hidden');document.body.style.overflow='hidden';
 }
 function closePicture(){document.getElementById('pictureOverlay').classList.add('hidden');document.body.style.overflow=''}
