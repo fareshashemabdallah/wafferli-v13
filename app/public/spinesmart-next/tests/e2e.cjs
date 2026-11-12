@@ -162,6 +162,85 @@ async function save(page){
   await page.locator('#tabWeek').click();
   assert.equal(await page.locator('#restartSmartCycle').isDisabled(),true);
  });
+
+ await run('45-minute mode adds distinct exercises without reusing set IDs',async page=>{
+  await page.locator('#smartMinutes').selectOption('45');
+  const seq=await page.evaluate(()=>Object.fromEntries(Object.entries(routines).map(([d,r])=>[d,r.items.map(e=>e.id)])));
+  for(const d of ['A','B','C']){
+   assert.equal(seq[d].length,new Set(seq[d]).size,'Duplicate exercise ID in workout '+d);
+   assert.ok(seq[d].length>=6,'45-minute workout '+d+' should be longer than baseline');
+  }
+ });
+ await run('Every goal changes the active workout or visible personalisation',async page=>{
+  await gate(page);
+  const balanced=await page.locator('#exerciseList article.ex h3').allInnerTexts();
+  await page.locator('#smartGoal').selectOption('muscle');
+  const muscle=await page.locator('#exerciseList article.ex h3').allInnerTexts();
+  assert.notDeepEqual(muscle,balanced,'Muscle goal should change Week 1 Workout A');
+  assert.match(await page.locator('#smartToday').innerText(),/More supported strength/);
+  await page.locator('#smartGoal').selectOption('fitness');
+  assert.match(await page.locator('#exerciseList article.ex').first().innerText(),/10 min/);
+  assert.match(await page.locator('#smartToday').innerText(),/Longer low-impact cardio/);
+ });
+ await run('Two-day setting changes target label and switches away from hidden C',async page=>{
+  await page.getByRole('button',{name:/Workout C/}).click();
+  await page.locator('#smartDays').selectOption('2');
+  assert.equal(await page.getByRole('button',{name:/Workout C/}).count(),0);
+  assert.match(await page.locator('#daySelector .day.active').innerText(),/Workout A/);
+  await page.locator('#tabWeek').click();
+  assert.match(await page.locator('#adaptiveTarget').innerText(),/2 sessions/);
+ });
+ await run('Machine visualization stepper changes displayed settings',async page=>{
+  await gate(page);
+  await page.locator('#exerciseList .visualBtn').first().click();
+  const old=await page.locator('#visual_speed').innerText();
+  await page.locator('#visual_speed').locator('..').locator('button').last().click();
+  const next=await page.locator('#visual_speed').innerText();
+  assert.notEqual(next,old,'Speed plus does not work');
+  await page.locator('#visual_speed').locator('..').locator('button').first().click();
+  assert.equal(await page.locator('#visual_speed').innerText(),old);
+  await page.locator('#pictureOverlay .close').click();
+  await page.locator('#smartCardio').selectOption('bike');
+  await page.getByRole('button',{name:/Workout C/}).click();await gate(page);
+  await page.locator('#exerciseList .visualBtn').first().click();
+  const prev=await page.locator('#visual_bike').innerText();
+  await page.locator('#visual_bike').locator('..').locator('button').last().click();
+  assert.notEqual(await page.locator('#visual_bike').innerText(),prev);
+ });
+ await run('Export uses the saved routine even after changing profile',async page=>{
+  await gate(page);
+  await save(page);
+  await page.locator('#smartGoal').selectOption('muscle');
+  await page.locator('#tabWeek').click();
+  const dlPromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:/Export revised-plan log/}).click();
+  const dl=await dlPromise,csv=fs.readFileSync(await dl.path(),'utf8');
+  assert.match(csv,/Supported hip abduction/);
+  assert.doesNotMatch(csv,/Supported seated leg extension/);
+ });
+ await run('Backup downloads historical v1 logs separately',async page=>{
+  await page.locator('#tabWeek').click();
+  const dlPromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:/Backup previous-plan entries/}).click();
+  const dl=await dlPromise,data=JSON.parse(fs.readFileSync(await dl.path(),'utf8'));
+  assert.ok(data.previousRecords['2026-11-09_A'],'Legacy history was not retained');
+ },{oldData:{records:{'2026-11-09_A':{weights:{curl:'10'},finished:true}},startDate:'2026-11-09'}});
+ await run('Worsening symptoms after training redirect to safety guide',async page=>{
+  await gate(page);
+  await page.locator('[data-after="bad"]').click();
+  await page.getByRole('button',{name:'Save this session'}).click();
+  assert.equal(await page.locator('#guide').isVisible(),true);
+  const state=await page.evaluate(()=>JSON.parse(localStorage.getItem('spinesmart-gym-v2')));
+  assert.equal(Object.values(state.records)[0].nextDay,'worse');
+ });
+ await run('Programme stays within mobile and desktop screen widths',async page=>{
+  for(const width of [360,390,768,1280]){
+   await page.setViewportSize({width,height:850});
+   const dims=await page.evaluate(()=>({body:document.documentElement.scrollWidth,view:window.innerWidth}));
+   assert.ok(dims.body<=dims.view+3,'Unexpected horizontal overflow on '+width+'px viewport');
+  }
+ });
+
  }finally{await browser.close()}
  console.log('\nRESULT '+passed+' passed, '+failed+' failed');
  if(failures.length){fs.writeFileSync(out+'/failures.json',JSON.stringify(failures,null,2));console.log(JSON.stringify(failures,null,2));process.exitCode=1}
