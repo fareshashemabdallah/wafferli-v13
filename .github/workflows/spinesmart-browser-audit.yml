@@ -1,0 +1,39 @@
+name: SpineSmart real-browser functional audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/public/spinesmart-next/**'
+      - '.github/workflows/spinesmart-browser-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-spinesmart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Playwright test runner
+        run: |
+          npm install --prefix /tmp/spinesmart-test --no-audit --no-fund --no-save playwright@1.57.0
+          /tmp/spinesmart-test/node_modules/.bin/playwright install --with-deps chromium
+      - name: Serve actual static application
+        run: |
+          python3 -m http.server 8080 --directory app/public >/tmp/spinesmart-http.log 2>&1 &
+          for n in $(seq 1 30); do if curl -fsS http://127.0.0.1:8080/spinesmart-next/ >/dev/null; then break; fi; sleep 1; done
+          curl -fsS -o /dev/null http://127.0.0.1:8080/spinesmart-next/
+      - name: Real-browser click-through and persistence audit
+        env:
+          NODE_PATH: /tmp/spinesmart-test/node_modules
+        run: node app/public/spinesmart-next/tests/e2e.cjs
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spinesmart-e2e-diagnostics
+          path: /tmp/spinesmart-e2e/
+          if-no-files-found: ignore
