@@ -238,12 +238,15 @@ function adaptiveBuild(){
  w<=4?{A:['walk','extension','curl','hip','cool'],B:['walk','row','press','curl','cool'],C:[card,'curl','row','extension','cool']}:
  w===8?{A:['walk','curl','hip','cool'],B:['walk','row','press','cool'],C:[card,'extension','hip','cool']}:
  {A:['walk','curl','extension','hip','cool'],B:['walk','row','press',p.cleared?'triceps':'curl','cool'],C:[card,'hip','curl','row','cool']};
- if(p.goal==='fitness')seq.C=[card,'hip','extension','cool'];if(p.minutes===45&&w!==8){seq.A.splice(seq.A.length-1,0,'row');seq.B.splice(seq.B.length-1,0,'hip');seq.C.splice(seq.C.length-1,0,'press')}
- if(p.goal==='muscle'&&w>=3&&w<=7)seq.A=['walk','curl','extension','hip','cool'];
+ if(p.goal==='fitness')seq.C=[card,'hip','extension','cool'];if(p.minutes===45&&w!==8){
+  const extras={A:['extension','row','press'],B:['hip','extension','row'],C:['press','curl','extension']};
+  for(const day of ['A','B','C']){const id=extras[day].find(x=>!seq[day].includes(x));if(id)seq[day].splice(seq[day].length-1,0,id)}
+ }
+ if(p.goal==='muscle'){seq.A=w<=2?['walk','curl','extension','row','cool']:w<=7?['walk','curl','extension','hip','cool']:seq.A; if(w<=2)seq.B=['walk','extension','press','row','cool']}
  for(const d of ['A','B','C']){
   routines[d].name={A:'A · Lower-body strength',B:'B · Upper-body strength',C:'C · Mixed strength and stamina'}[d];
   routines[d].subtitle=adaptivePhase().label+' · '+p.minutes+'-minute target';
-  routines[d].items=seq[d].map(id=>({...smartExercises[id],amount:smartExercises[id].kind==='time'&&id!=='cool'?(p.minutes===45?'10 min':'7 min')+(id==='walk'?' · 0% incline':' · easy resistance'):smartExercises[id].kind==='time'?smartExercises[id].amount:adaptiveReps()+' reps'}));
+  routines[d].items=seq[d].map(id=>({...smartExercises[id],amount:smartExercises[id].kind==='time'&&id!=='cool'?(p.goal==='fitness'?(p.minutes===45?'15 min':'10 min'):(p.minutes===45?'10 min':'7 min'))+(id==='walk'?' · 0% incline':' · easy resistance'):smartExercises[id].kind==='time'?smartExercises[id].amount:adaptiveReps()+' reps'}));
  }
 }
 function adaptiveProfileChange(el){
@@ -259,7 +262,7 @@ function adaptiveProfileUI(){
  const p=db.smartProfile;
  for(const [id,v] of [['smartGoal',p.goal],['smartMinutes',p.minutes],['smartDays',p.days],['smartCardio',p.cardio]])document.getElementById(id).value=v;
  document.getElementById('smartCleared').checked=!!p.cleared;
- document.getElementById('smartToday').textContent='Week '+adaptiveWeek()+' of 8 · '+adaptivePhase().description;
+ document.getElementById('smartToday').textContent='Week '+adaptiveWeek()+' of 8 · '+({balanced:'Balanced full-body routine',muscle:'More supported strength work',fitness:'Longer low-impact cardio and endurance focus'}[p.goal]||'Balanced routine')+'. '+adaptivePhase().description;
 }
 function smartLast(id){
  const keys=Object.keys(db.records).sort().reverse().filter(k=>k!==recKey(chosenDay)&&db.records[k].finished&&(db.records[k].weights||{})[id]!==undefined&&(db.records[k].weights||{})[id]!=='');
@@ -292,7 +295,7 @@ function adaptiveExerciseExtras(){
 function smartRecordRecovery(k,status){if(!db.records[k])return;db.records[k].nextDay=status;store();renderWeek()}
 function restartSmartCycle(){if(weekKey()>iso(monday(today))||adaptiveWeek()<8){alert('A new cycle is available only after the current eight-week period has actually elapsed.');return}if(!confirm('Begin a new cycle? Continue progressive loading only after reviewing your recovery and restrictions with your clinician. Previous workouts stay saved.'))return;db.startDate=weekKey();store();render()}
 function adaptiveWeekUI(){
- const p=adaptivePhase();document.getElementById('smartPhase').textContent=p.label;document.querySelector('#weekTarget')?.remove();document.getElementById('smartPhaseDetail').textContent='Week '+adaptiveWeek()+' / 8 · '+p.description;
+ const p=adaptivePhase();document.getElementById('smartPhase').textContent=p.label;document.getElementById('adaptiveTarget').textContent='Target: '+db.smartProfile.days+' sessions';document.getElementById('smartPhaseDetail').textContent='Week '+adaptiveWeek()+' / 8 · '+p.description;
  const queue=document.getElementById('smartRecovery');queue.innerHTML='';
  Object.keys(db.records).sort().reverse().filter(k=>db.records[k].smartWeek&&db.records[k].finished&&!db.records[k].nextDay).slice(0,5).forEach(k=>{
   const line=document.createElement('div');line.className='historyrow';
