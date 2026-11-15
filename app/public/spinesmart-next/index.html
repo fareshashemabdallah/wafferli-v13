@@ -48,10 +48,26 @@
 .angleTips b{display:block;color:#126c5c;margin-bottom:5px}
 .photoCaption{color:#4d7770;font-size:12px;line-height:1.5;margin:8px 0}
 @media(max-width:380px){.photoTabs{grid-template-columns:1fr 1fr}.visualBtn .humanThumb{flex-basis:82px;width:82px}}
+
+/* Easy-to-find, optional mobility routine. */
+.nav{grid-template-columns:repeat(4,minmax(0,1fr))}
+.nav button{min-height:44px}
+.mobActions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.mobActions button[aria-pressed="true"]{background:var(--teal);color:#fff;border-color:var(--teal)}
+.mobFigure{width:100%;max-width:330px;margin:8px 0 3px;border-radius:12px;background:#eef5f2;overflow:hidden}
+.mobFigure svg{display:block;width:100%;height:auto}
+.mobStep{font-size:13px;color:#38555a;margin:7px 0;padding-left:19px}
+.mobStep li{padding:3px 0}
+.mobTime{font-weight:700;color:#127063;font-size:12px}
+.mobAlert{margin:11px 0}
+.mobMeta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
+.mobCTABtn{flex:none}
+@media(max-width:620px){.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.mobMeta{align-items:flex-start;flex-wrap:wrap}}
 </style></head><body>
 <header><div class="hero"><div><div class="eyebrow">Your adaptive gym plan</div><h1>SpineSmart <span style="font-weight:400">Gym</span></h1><p>Build strength and track meaningful progress.</p></div><div class="logo" aria-hidden="true">◈</div></div></header>
-<main><div class="nav"><button id="tabTrain" class="on" onclick="go('train')">Today's workout</button><button id="tabWeek" onclick="go('week')">Weekly progress</button><button id="tabGuide" onclick="go('guide')">Safety guide</button></div>
+<main><div class="nav"><button id="tabTrain" class="on" onclick="go('train')">Today's workout</button><button id="tabMobility" onclick="go('mobility')">Mobility &amp; stretches</button><button id="tabWeek" onclick="go('week')">Weekly progress</button><button id="tabGuide" onclick="go('guide')">Safety guide</button></div>
 <section id="train">
+ <div class="card"><div class="mobMeta"><div><h2>Gentle mobility &amp; stretches</h2><p class="muted">Short, optional movements before or after your workout for your lower back, hips and neck.</p></div><button class="btn primary mobCTABtn" onclick="go('mobility')">Open routine</button></div></div>
  <div class="card"><div class="weeknav"><button class="btn mini" onclick="moveWeek(-1)">← Prev</button><div style="text-align:center"><b id="weekLabel"></b><div class="smallnote">Train on non-consecutive days</div></div><button class="btn mini" onclick="moveWeek(1)">Next →</button></div><div class="weekdots" id="daySelector"></div></div>
  <div class="card" id="smartProfile"><div class="row"><h2>Personal training profile</h2><span class="tag">ADAPTIVE</span></div>
 <p class="muted">Your routine, exercise targets and progression cues reflect your goal, logs and next-day recovery.</p>
@@ -63,6 +79,44 @@
 <p class="smallnote">Without individual clearance, the programme will not suggest heavier weights or more than two sets. No automated recommendation is medical clearance.</p><div class="smallnote" id="smartToday"></div></div><div id="gate" class="card"><div class="row"><h2>Before you begin</h2><span class="tag">1-minute check</span></div><p class="muted">Select how you feel <b>today</b>. This check does not provide medical clearance, and spinal cord symptoms require assessment.</p><div class="question">Any new or worsening pain travelling into an arm/leg, tingling, numbness, or weakness?</div><div class="answers"><button class="answer" data-gate="nerve" data-val="no">No</button><button class="answer" data-gate="nerve" data-val="yes">Yes</button></div><div class="question">Any new hand clumsiness, dropping objects, loss of balance or changes in walking?</div><div class="answers"><button class="answer" data-gate="cord" data-val="no">No</button><button class="answer" data-gate="cord" data-val="yes">Yes</button></div><div class="question">Any neck or back pain now?</div><div class="answers"><button class="answer" data-gate="pain" data-val="0">None (0/10)</button><button class="answer" data-gate="pain" data-val="1">Mild (1–2/10)</button><button class="answer" data-gate="pain" data-val="3">More than mild</button></div><div class="question">Are there no relevant medical restrictions, spinal cord compression, severe narrowing, instability or surgery precautions that require a clinician's review?</div><div class="answers"><button class="answer" data-gate="ready" data-val="yes">Yes</button><button class="answer" data-gate="ready" data-val="no">No / unsure</button></div><div id="gateResult" style="margin-top:14px"></div></div>
  <div id="routineWrap" class="hidden"><div class="card"><div class="workoutHead"><div><h2 id="workoutTitle">Workout A</h2><div class="muted" id="workoutSubtitle"></div></div><span class="tag" id="phase">Build base</span></div><div class="progress"><i id="workoutBar"></i></div><div class="row"><span class="smallnote" id="workoutProgress"></span><span class="smallnote">Rest 60–90s · controlled effort · stop for symptoms</span></div></div><div id="exerciseList"></div>
  <div class="card"><h2>Finish & reflect</h2><p class="muted">How did your back and neck feel during this workout?</p><div class="answers" id="postAnswers"><button class="answer" data-after="fine">Comfortable</button><button class="answer" data-after="mild">Mild local discomfort</button><button class="answer" data-after="bad">New/worse or radiating symptoms</button></div><div id="afterWarn" class="smallnote" style="margin-top:8px"></div><div class="formline"><label for="notes">Notes (optional)</label></div><textarea id="notes" placeholder="Machine adjustments, loads, anything you noticed..."></textarea><button class="btn primary" style="margin-top:10px;width:100%" onclick="finishWorkout()">Save this session</button><div id="saveMsg" class="smallnote" style="margin-top:6px"></div></div></div>
+</section>
+
+<section id="mobility" class="hidden">
+ <div class="card">
+  <div class="row"><h2>Mobility &amp; stretches</h2><span class="tag">5–8 MIN</span></div>
+  <p class="muted">A gentle movement option for a history of L5–S1 herniation and cervical disc problems. Before training, choose small controlled movements. After training, use comfortable muscle stretches. This does not reposition or cure a disc herniation.</p>
+  <div class="warning"><b>No forcing a stretch.</b> Movements should feel easy, not sharp or nerve-like. Stop any movement that causes pain to spread into the leg or arm, tingling, numbness, weakness or dizziness. Your physiotherapist can tailor the selection to your examination.</div>
+ </div>
+ <div class="card">
+  <h3>First, how are you feeling today?</h3>
+  <p class="muted">Choose one. This is a safety prompt, not medical clearance.</p>
+  <div class="mobActions" id="mobilityScreenButtons">
+   <button class="btn" data-mobility-screen="clear" onclick="mobilityScreen('clear')">No new or worsening symptoms</button>
+   <button class="btn" data-mobility-screen="nerve" onclick="mobilityScreen('nerve')">New / worse arm or leg symptoms</button>
+   <button class="btn" data-mobility-screen="urgent" onclick="mobilityScreen('urgent')">New balance, hand, or bladder/bowel changes</button>
+  </div>
+  <div id="mobilityAlert" class="mobAlert smallnote">Select how you feel to display the movements.</div>
+ </div>
+ <div id="mobilityPlan" class="hidden">
+  <div class="card">
+   <h3>Choose your session</h3>
+   <div class="mobActions" id="mobilityModeButtons">
+    <button class="btn" data-mobility-mode="all" onclick="mobilityModeChange('all')">All · rest day (5–8 min)</button>
+    <button class="btn" data-mobility-mode="before" onclick="mobilityModeChange('before')">Before workout</button>
+    <button class="btn" data-mobility-mode="after" onclick="mobilityModeChange('after')">After workout</button>
+   </div>
+   <p class="smallnote" id="mobilityModeNote"></p>
+   <div class="progress"><i id="mobilityBar"></i></div>
+   <div class="row"><span class="smallnote" id="mobilityCount"></span><span class="smallnote">Saved on this device for today</span></div>
+  </div>
+  <div id="mobilityExercises"></div>
+  <div class="card">
+   <h3>Optional, only if your physiotherapist prescribed it</h3>
+   <p class="muted"><b>Prone lying on forearms</b> (gentle lumbar extension) is helpful for some, but aggravates others. It is <b>not</b> part of your default routine. Do not try it simply because you have a herniated disc.</p>
+   <label class="formline"><input type="checkbox" id="mobilityExtensionOK" onchange="mobilityExtensionChange(this.checked)"> A clinician has specifically recommended this direction of movement for me.</label>
+   <div id="mobilityExtensionInfo" class="hidden warning"><b>Clinician-prescribed only:</b> Lie on your stomach, then support your chest on your forearms without forcing the lower back. Follow your prescribed duration and repetitions. Stop if leg pain spreads farther down, or any nerve symptoms arise; seek guidance if symptoms change.</div>
+  </div>
+ </div>
 </section>
 <section id="week" class="hidden"><div class="card"><h2>Your revised gentle routine</h2><p>Begin with 2–3 non-consecutive sessions per week depending on tolerance. Take at least one rest day between sessions. You can do A, B, C on any suitable days.</p><div class="weeknav"><button class="btn mini" onclick="moveWeek(-1)">←</button><b id="weekLabel2"></b><button class="btn mini" onclick="moveWeek(1)">→</button></div><div class="progress"><i id="weekBar"></i></div><div class="row"><b id="weekScore"></b><span class="smallnote" id="adaptiveTarget">Target: 3 sessions</span></div><div id="weeklyLogs"></div></div><div class="card"><div class="row"><h2>Eight-week development cycle</h2><span class="tag" id="smartPhase">BASE</span></div>
 <p class="muted" id="smartPhaseDetail"></p>
@@ -197,7 +251,7 @@ const routines={
 };
 const STORE='spinesmart-gym-v2';try{if(!localStorage.getItem(STORE)){const prior=JSON.parse(localStorage.getItem('spinesmart-gym-v1')||'{}');localStorage.setItem(STORE,JSON.stringify({records:{},startDate:null,previousRecords:{...(prior.previousRecords||{}),...(prior.records||{})},programVersion:'spinesmart-adaptive-v2'}))}}catch(e){};let db={records:{},startDate:null};try{db={...db,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch(e){};/* Retain old logs, do not count previous programme sets as completed in a newly revised routine. */if(db.programVersion!=='spine-review-2026-11'){db.previousRecords=Object.assign({},db.previousRecords||{},db.records||{});db.records={};db.programVersion='spine-review-2026-11';try{localStorage.setItem(STORE,JSON.stringify(db))}catch(e){}};const today=new Date();today.setHours(12,0,0,0);function iso(d){const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};function monday(d){const x=new Date(d);x.setDate(x.getDate()-(x.getDay()+6)%7);return x};let displayedWeek=monday(today),chosenDay='A',gate={nerve:null,cord:null,pain:null,ready:null},post=null,tab='train',timerVal=75,running=false,timerRef=null; if(!db.startDate)db.startDate=iso(monday(today));function store(){try{localStorage.setItem(STORE,JSON.stringify(db))}catch(e){alert('Could not save to local storage. Try exporting CSV.')}};
 function weekKey(){return iso(displayedWeek)}function recKey(day){return weekKey()+'_'+day}function rec(day=chosenDay){return db.records[recKey(day)]||{checks:{},weights:{},finished:false}}function ensure(){if(!db.records[recKey(chosenDay)])db.records[recKey(chosenDay)]={checks:{},weights:{},finished:false};return db.records[recKey(chosenDay)]};function weekName(){let e=new Date(displayedWeek);e.setDate(e.getDate()+6);const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});return fmt(displayedWeek)+' – '+fmt(e)}function moveWeek(n){displayedWeek.setDate(displayedWeek.getDate()+n*7);gate={nerve:null,cord:null,pain:null,ready:null};post=null;render()}
-function go(name){tab=name;document.getElementById('train').classList.toggle('hidden',name!=='train');document.getElementById('week').classList.toggle('hidden',name!=='week');document.getElementById('guide').classList.toggle('hidden',name!=='guide');for(const t of ['Train','Week','Guide'])document.getElementById('tab'+t).classList.toggle('on',name===t.toLowerCase());document.getElementById('timerbar').classList.toggle('hidden',name!=='train');render();window.scrollTo({top:0,behavior:'smooth'})}
+function go(name){tab=name;document.getElementById('train').classList.toggle('hidden',name!=='train');document.getElementById('mobility').classList.toggle('hidden',name!=='mobility');document.getElementById('week').classList.toggle('hidden',name!=='week');document.getElementById('guide').classList.toggle('hidden',name!=='guide');for(const t of ['Train','Mobility','Week','Guide'])document.getElementById('tab'+t).classList.toggle('on',name===t.toLowerCase());document.getElementById('timerbar').classList.toggle('hidden',name!=='train');render();if(name==='mobility')renderMobility();window.scrollTo({top:0,behavior:'smooth'})}
 function choose(day){chosenDay=day;gate={nerve:null,cord:null,pain:null,ready:null};post=null;render()}
 function checkGate(k,v){gate[k]=v;renderGate()}
 function allowed(){return weekKey()<=iso(monday(today))&&gate.nerve==='no'&&gate.cord==='no'&&gate.ready==='yes'&&gate.pain==='0'}
@@ -307,5 +361,58 @@ function adaptiveWeekUI(){
  if(!queue.children.length)queue.textContent='No pending check-ins.';
 }
 
-document.querySelectorAll('[data-gate]').forEach(el=>el.addEventListener('click',()=>checkGate(el.dataset.gate,el.dataset.val)));document.querySelectorAll('[data-after]').forEach(el=>el.addEventListener('click',()=>chooseAfter(el.dataset.after)));paintTimer();render();
+
+/* SpineSmart mobility: general gentle activity, not an individualized disc-treatment protocol. */
+const MOBILITY_ITEMS=[
+ {id:'pelvic',group:'before',title:'Small pelvic tilts · lower back',dose:'6–8 slow repetitions',steps:['Lie on your back, knees comfortably bent and feet flat.','Gently tip your pelvis to flatten your lower back a little toward the mat.','Return to neutral; keep the movement small and breathe normally.'],avoid:'Do not pull your knees hard toward your chest or force the lower back into an extreme curve.'},
+ {id:'chin',group:'before',title:'Small chin nods · neck control',dose:'5 repetitions · hold 3–5 seconds',steps:['Sit upright with shoulders loose and eyes facing ahead.','Gently draw your chin straight back, as though making a small double chin.','Hold briefly, then relax without looking up or bending your head forward.'],avoid:'Do not push your head with your hands. Stop if there is arm tingling, dizziness or new symptoms.'},
+ {id:'turn',group:'before',title:'Gentle neck rotations',dose:'3–5 turns each side · 3–5 seconds',steps:['Sit tall with your neck neutral.','Slowly turn your head left only as far as comfortable.','Return to centre; repeat to the right without pushing the range.'],avoid:'Avoid neck circles, forced twisting or movement into pain.'},
+ {id:'hipflex',group:'after',title:'Supported hip-flexor stretch',dose:'15–20 seconds per side · 1 round',steps:['Stand in a short staggered stance holding a stable support.','Gently tuck your pelvis and move your body forward a little while remaining upright.','Feel a mild stretch at the front of the back hip, then switch sides.'],avoid:'Do not arch or sway your lower back, lunge deeply or force a stretch.'},
+ {id:'chest',group:'after',title:'Gentle doorway chest opening',dose:'15–20 seconds · 1–2 rounds',steps:['Stand in a doorway with one forearm supported below shoulder height.','Step forward a small amount with your head neutral and ribs relaxed.','Feel a mild stretch across the chest, then change sides.'],avoid:'Do not raise the arms high or force the shoulders and neck backward.'}
+];
+let mobilityStatus=null,mobilityMode='all',mobilityExtApproved=false;
+function mobilityToday(){const d=new Date();return iso(d)}
+function mobilityChecks(){if(!db.mobilityDone||typeof db.mobilityDone!=='object')db.mobilityDone={};const date=mobilityToday();if(!db.mobilityDone[date]||typeof db.mobilityDone[date]!=='object')db.mobilityDone[date]={};return db.mobilityDone[date]}
+function mobilityScreen(value){mobilityStatus=value;renderMobility()}
+function mobilityModeChange(value){if(!['all','before','after'].includes(value))return;mobilityMode=value;renderMobility()}
+function mobilityExtensionChange(checked){mobilityExtApproved=checked;renderMobility()}
+function mobilityToggle(id){
+ if(mobilityStatus!=='clear'||!MOBILITY_ITEMS.some(x=>x.id===id))return;
+ const marks=mobilityChecks();marks[id]=!marks[id];store();renderMobility();
+}
+function mobilityIllustration(id){
+ const base='<rect width="320" height="155" rx="13" fill="#ecf5f1"/><path d="M15 135H304" stroke="#b5c9c4" stroke-width="4" stroke-linecap="round"/>';
+ const line=(x1,y1,x2,y2)=>'<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#216b65" stroke-width="10" stroke-linecap="round"/>';
+ const thin=(x1,y1,x2,y2)=>'<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#216b65" stroke-width="6" stroke-linecap="round"/>';
+ const head=(x,y)=>'<circle cx="'+x+'" cy="'+y+'" r="15" fill="#d5a083" stroke="#b08067" stroke-width="2"/>';
+ let g='';
+ if(id==='pelvic'){g='<path d="M28 133H289" stroke="#84b7a5" stroke-width="6"/>'+head(52,105)+line(68,108,175,108)+line(175,108,205,74)+line(205,74,239,131)+thin(119,108,147,130)+'<path d="M134 81Q171 48 190 81" fill="none" stroke="#d18644" stroke-width="4" stroke-linecap="round"/><path d="M183 72L190 81L199 71" stroke="#d18644" stroke-width="4" fill="none"/>';}
+ else if(id==='chin'){g='<path d="M112 99H175V107H112Z M120 108V135 M170 108V135" fill="#8facaa"/>'+head(134,43)+line(132,59,132,110)+thin(132,78,164,92)+line(132,110,117,132)+line(132,110,156,131)+'<path d="M184 47H154M165 37L154 47L165 57" stroke="#d18644" stroke-width="4" fill="none" stroke-linecap="round"/>';}
+ else if(id==='turn'){g='<path d="M100 96H168V105H100Z" fill="#aac1bc"/>'+head(134,43)+line(134,59,134,110)+thin(134,77,105,101)+thin(134,77,163,101)+line(134,110,115,132)+line(134,110,154,132)+'<path d="M83 26Q133 -8 182 26" fill="none" stroke="#d18644" stroke-width="4"/><path d="M173 17L182 26L181 13" fill="none" stroke="#d18644" stroke-width="4"/>';}
+ else if(id==='hipflex'){g=head(125,31)+line(125,47,128,90)+line(128,90,175,108)+line(175,108,178,135)+line(128,90,83,108)+line(83,108,68,135)+thin(130,62,202,76)+'<path d="M214 57V137" stroke="#8aadaa" stroke-width="8"/><path d="M111 70Q95 62 87 83" fill="none" stroke="#d18644" stroke-width="4"/>';}
+ else if(id==='chest'){g='<path d="M64 136V20H254V136" stroke="#89a6a0" stroke-width="9" fill="none"/>'+head(157,44)+line(157,59,157,104)+line(157,104,138,134)+line(157,104,176,134)+thin(155,70,109,62)+thin(109,62,78,81)+thin(159,70,205,62)+thin(205,62,239,81)+'<path d="M140 82Q154 69 177 82" fill="none" stroke="#d18644" stroke-width="4"/>';}
+ return '<div class="mobFigure"><svg viewBox="0 0 320 155" role="img" aria-label="Simplified human-position illustration for '+MOBILITY_ITEMS.find(x=>x.id===id).title+'" xmlns="http://www.w3.org/2000/svg">'+base+g+'</svg></div><span class="smallnote">Position guide only · follow the written cues for your comfortable range</span>';
+}
+function renderMobility(){
+ const controls=document.querySelectorAll('[data-mobility-screen]');
+ controls.forEach(b=>{const on=b.dataset.mobilityScreen===mobilityStatus;b.setAttribute('aria-pressed',String(on));b.classList.toggle('primary',on)});
+ const alertBox=document.getElementById('mobilityAlert'),plan=document.getElementById('mobilityPlan');
+ if(!alertBox||!plan)return;
+ if(mobilityStatus==='nerve'){alertBox.innerHTML='<div class="danger"><b>Do not follow this routine today.</b> New or worsening shooting pain, weakness, tingling or numbness needs advice from a clinician or physiotherapist before choosing exercises.</div>';}
+ else if(mobilityStatus==='urgent'){alertBox.innerHTML='<div class="danger"><b>Seek urgent medical assessment.</b> New hand clumsiness, difficulty walking/balance problems or progressive weakness may indicate spinal cord involvement. With back/leg symptoms, new bladder/bowel changes or saddle numbness require emergency assessment.</div>';}
+ else if(mobilityStatus==='clear'){alertBox.innerHTML='<div class="success"><b>Start gently.</b> No screen can guarantee safety. Stop immediately if a movement worsens symptoms or spreads pain into an arm/leg.</div>';}
+ else alertBox.textContent='Select how you feel to display the movements.';
+ plan.classList.toggle('hidden',mobilityStatus!=='clear');
+ if(mobilityStatus!=='clear')return;
+ document.querySelectorAll('[data-mobility-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mobilityMode===mobilityMode)));
+ const visible=MOBILITY_ITEMS.filter(x=>mobilityMode==='all'||x.group===mobilityMode),checks=mobilityChecks(),done=visible.filter(x=>checks[x.id]).length;
+ document.getElementById('mobilityCount').textContent=done+' of '+visible.length+' movements completed today';
+ document.getElementById('mobilityBar').style.width=Math.round(done/visible.length*100)+'%';
+ document.getElementById('mobilityModeNote').textContent=mobilityMode==='before'?'Gentle movement only, not prolonged static stretching. Do these before resistance training if comfortable.':mobilityMode==='after'?'Light muscle stretches after resistance training; no painful holds.':'Suitable as a short standalone mobility session on a comfortable day, even without a gym workout.';
+ document.getElementById('mobilityExercises').innerHTML=visible.map((e,i)=>'<article class="ex '+(checks[e.id]?'done':'')+'"><div class="ex-top"><div class="num">'+(checks[e.id]?'✓':i+1)+'</div><div style="flex:1"><h3>'+e.title+'</h3><p class="mobTime">'+e.dose+'</p><span class="softtag">'+(e.group==='before'?'Gentle control · warm-up':'Stretch · cooldown')+'</span></div></div>'+mobilityIllustration(e.id)+'<ol class="mobStep">'+e.steps.map(st=>'<li>'+st+'</li>').join('')+'</ol><p class="smallnote"><b>Avoid:</b> '+e.avoid+'</p><div class="exControls"><button class="btn '+(checks[e.id]?'primary':'')+'" onclick="mobilityToggle(\''+e.id+'\')" aria-pressed="'+(checks[e.id]?'true':'false')+'">'+(checks[e.id]?'✓ Completed today':'Mark completed')+'</button></div></article>').join('');
+ const ext=document.getElementById('mobilityExtensionOK');ext.checked=mobilityExtApproved;
+ document.getElementById('mobilityExtensionInfo').classList.toggle('hidden',!mobilityExtApproved);
+}
+
+document.querySelectorAll('[data-gate]').forEach(el=>el.addEventListener('click',()=>checkGate(el.dataset.gate,el.dataset.val)));document.querySelectorAll('[data-after]').forEach(el=>el.addEventListener('click',()=>chooseAfter(el.dataset.after)));paintTimer();render();renderMobility();
 </script></body></html>
